@@ -1,5 +1,4 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
 
 export const GlobalFooter = () => {
   return (
@@ -14,22 +13,22 @@ export const GlobalFooter = () => {
             <h3>Search Trending</h3>
             <ul class="list-unstyled">
               <li>
-                <NavLink href="#">Web Design</NavLink>
+                <a href="#">Web Design</a>
               </li>
               <li>
-                <NavLink href="#">Graphic Design</NavLink>
+                <a href="#">Graphic Design</a>
               </li>
               <li>
-                <NavLink href="#">Web Developers</NavLink>
+                <a href="#">Web Developers</a>
               </li>
               <li>
-                <NavLink href="#">Python</NavLink>
+                <a href="#">Python</a>
               </li>
               <li>
-                <NavLink href="#">HTML5</NavLink>
+                <a href="#">HTML5</a>
               </li>
               <li>
-                <NavLink href="#">CSS3</NavLink>
+                <a href="#">CSS3</a>
               </li>
             </ul>
           </div>
@@ -37,16 +36,16 @@ export const GlobalFooter = () => {
             <h3>Company</h3>
             <ul class="list-unstyled">
               <li>
-                <NavLink href="#">About Us</NavLink>
+                <a href="#">About Us</a>
               </li>
               <li>
-                <NavLink href="#">Career</NavLink>
+                <a href="#">Career</a>
               </li>
               <li>
-                <NavLink href="#">Blog</NavLink>
+                <a href="#">Blog</a>
               </li>
               <li>
-                <NavLink href="#">Resources</NavLink>
+                <a href="#">Resources</a>
               </li>
             </ul>
           </div>
@@ -54,53 +53,43 @@ export const GlobalFooter = () => {
             <h3>Support</h3>
             <ul class="list-unstyled">
               <li>
-                <NavLink href="#">Support</NavLink>
+                <a href="#">Support</a>
               </li>
               <li>
-                <NavLink href="#">Privacy</NavLink>
+                <a href="#">Privacy</a>
               </li>
               <li>
-                <NavLink href="#">Terms of Service</NavLink>
+                <a href="#">Terms of Service</a>
               </li>
             </ul>
           </div>
           <div class="col-6 col-md-3 mb-4 mb-md-0">
             <h3>Contact Us</h3>
             <div class="footer-social">
-              <NavLink href="#">
+              <a href="#">
                 <span class="icon-facebook"></span>
-              </NavLink>
-              <NavLink href="#">
+              </a>
+              <a href="#">
                 <span class="icon-twitter"></span>
-              </NavLink>
-              <NavLink href="#">
+              </a>
+              <a href="#">
                 <span class="icon-instagram"></span>
-              </NavLink>
-              <NavLink href="#">
+              </a>
+              <a href="#">
                 <span class="icon-linkedin"></span>
-              </NavLink>
+              </a>
             </div>
           </div>
         </div>
 
-        <div class="row text-center">
-          <div class="col-12">
-            <p class="copyright">
-              <small>
-                Link back to Colorlib can't be removed. Template is licensed
-                under CC BY 3.0. Copyright &copy;
-                <script>document.write(new Date().getFullYear());</script> All
-                rights reserved | This template is made with{" "}
-                <i class="icon-heart text-danger" aria-hidden="true"></i> by{" "}
-                <a href="https://colorlib.com" target="_blank" rel="noreferrer">
-                  Colorlib
-                </a>
-                Link back to Colorlib can't be removed. Template is licensed
-                under CC BY 3.0.{" "}
-              </small>
-            </p>
-          </div>
-        </div>
+        {/* <div class="row text-center">
+    <div class="col-12">
+      <p class="copyright"><small>
+        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+      Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart text-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank" >Colorlib</a>
+      <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></small></p>
+    </div>
+  </div> */}
       </div>
     </footer>
   );

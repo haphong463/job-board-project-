@@ -1,8 +1,7 @@
 import React from "react";
-import "../../../assets/js/jquery.min.js";
 import { NavLink } from "react-router-dom";
 
-export const GlobalNavbar = () => {
+export function GlobalNavbar() {
   return (
     <header className="site-navbar mt-3">
       <div className="container-fluid">
@@ -10,10 +9,11 @@ export const GlobalNavbar = () => {
           <div className="site-logo col-6">
             <a href="index.html">JobBoard</a>
           </div>
+
           <nav className="mx-auto site-navigation">
             <ul className="site-menu js-clone-nav d-none d-xl-block ml-0 pl-0">
               <li>
-                <a href="index.html" className="nav-link active">
+                <a href="index.html" className="nav-link">
                   Home
                 </a>
               </li>
@@ -56,7 +56,9 @@ export const GlobalNavbar = () => {
                     <a href="faq.html">Frequently Ask Questions</a>
                   </li>
                   <li>
-                    <a href="gallery.html">Gallery</a>
+                    <a href="gallery.html" className="active">
+                      Gallery
+                    </a>
                   </li>
                 </ul>
               </li>
@@ -76,30 +78,31 @@ export const GlobalNavbar = () => {
               </li>
             </ul>
           </nav>
+
           <div className="right-cta-menu text-right d-flex aligin-items-center col-6">
             <div className="ml-auto">
               <a
                 href="post-job.html"
                 className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
               >
-                <span className="mr-2 icon-add">Post a Job</span>
+                <span className="mr-2 icon-add"></span>Post a Job
               </a>
               <a
                 href="login.html"
                 className="btn btn-primary border-width-2 d-none d-lg-inline-block"
               >
-                <span className="mr-2 icon-lock_outline">Log In</span>
+                <span className="mr-2 icon-lock_outline"></span>Log In
               </a>
             </div>
-            <NavLink
-              to="/"
+            <a
+              href="#"
               className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"
             >
               <span className="icon-menu h3 m-0 p-0 mt-2"></span>
-            </NavLink>
+            </a>
           </div>
         </div>
       </div>
     </header>
   );
-};
+}
