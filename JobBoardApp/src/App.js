@@ -3,6 +3,7 @@ import "./App.css";
 import { Home } from "./routes/client/home/Home";
 import { Route, Routes } from "react-router-dom";
 import { routes } from "./utils/routes";
+import { BlogSingle } from "./routes/client/blog-single/BlogSingle";
 
 function App() {
   return (

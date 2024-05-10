@@ -5,6 +5,19 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 
+// import "./assets/js/jquery.min.js";
+// import "./assets/js/bootstrap.bundle.min.js";
+// import "./assets/js/isotope.pkgd.min.js";
+// import "./assets/js/stickyfill.min.js";
+// import "./assets/js/jquery.fancybox.min.js";
+// import "./assets/js/jquery.easing.1.3.js";
+// import "./assets/js/jquery.waypoints.min.js";
+// import "./assets/js/jquery.animateNumber.min.js";
+// import "./assets/js/owl.carousel.min.js";
+// import "./assets/js/quill.min.js";
+// import "./assets/js/bootstrap-select.min.js";
+// import "./assets/js/custom.js";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Router>

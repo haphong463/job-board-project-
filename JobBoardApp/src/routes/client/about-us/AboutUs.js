@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GlobalLayoutUser } from "../../../components/clients/global-layout-user/GlobalLayoutUser";
 
 export const AboutUs = () => {
+  console.log("about page!");
+  useEffect(() => {}, []);
   return (
     <GlobalLayoutUser>
       <section
         className="section-hero overlay inner-page bg-image"
-        style={{ backgroundImage: 'url("images/hero_1.jpg")' }}
+        style={{ backgroundImage: 'url("../../../assets/images/hero_1.jpg")' }}
         id="home-section"
       >
         <div className="container">
