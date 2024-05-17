@@ -39,3 +39,4 @@ The Job Board Management Project is a web application designed to facilitate the
    ```bash
    git clone https://github.com/haphong463/job-board-management.git
    cd job-board-management
+git reflog
