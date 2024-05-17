@@ -1,8 +1,8 @@
-package Project4.JobBoard.Service.Impl;
+package com.project4.JobBoardService.Service.Impl;
 
-import Project4.JobBoard.Entity.Category;
-import Project4.JobBoard.Repository.CategoryRepository;
-import Project4.JobBoard.Service.CategoryService;
+import com.project4.JobBoardService.Entity.Category;
+import com.project4.JobBoardService.Repository.CategoryRepository;
+import com.project4.JobBoardService.Service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

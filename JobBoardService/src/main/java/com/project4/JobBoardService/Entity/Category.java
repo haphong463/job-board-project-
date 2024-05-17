@@ -1,4 +1,4 @@
-package Project4.JobBoard.Entity;
+package com.project4.JobBoardService.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

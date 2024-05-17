@@ -1,0 +1,23 @@
+package com.project4.JobBoardService.Entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Table(name = "blog_category")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class BlogCategory extends  AbstractEntity{
+    @Column(name = "name", unique = true, nullable = false)
+    private String name;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Blog> blogs;
+}

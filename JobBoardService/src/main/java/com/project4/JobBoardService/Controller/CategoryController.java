@@ -1,7 +1,7 @@
-package Project4.JobBoard.Controller;
+package com.project4.JobBoardService.Controller;
 
-import Project4.JobBoard.Entity.Category;
-import Project4.JobBoard.Service.CategoryService;
+import com.project4.JobBoardService.Entity.Category;
+import com.project4.JobBoardService.Service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

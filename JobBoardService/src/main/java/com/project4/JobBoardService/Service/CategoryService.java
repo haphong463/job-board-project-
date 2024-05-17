@@ -1,6 +1,6 @@
-package Project4.JobBoard.Service;
+package com.project4.JobBoardService.Service;
 
-import Project4.JobBoard.Entity.Category;
+import com.project4.JobBoardService.Entity.Category;
 
 import java.util.List;
 
