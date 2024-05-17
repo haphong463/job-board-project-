@@ -37,5 +37,5 @@ The Job Board Management Project is a web application designed to facilitate the
 ### Backend Setup
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/job-board-management.git
+   git clone https://github.com/haphong463/job-board-management.git
    cd job-board-management
