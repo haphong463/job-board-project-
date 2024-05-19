@@ -46,7 +46,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/categories/{id}")
-    public Map<String, Boolean> deleteEmployee(@PathVariable(value = "id") Long categoryId)
+    public Map<String, Boolean> deleteCategory(@PathVariable(value = "id") Long categoryId)
             throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
