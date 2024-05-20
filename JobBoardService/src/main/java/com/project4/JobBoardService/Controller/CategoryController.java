@@ -36,7 +36,7 @@ public class CategoryController {
     }
 
     @PutMapping("/categories/{id}")
-    public ResponseEntity<Category> updateEmployee(@PathVariable(value = "id") Long categoryId,
+    public ResponseEntity<Category> updateCategory(@PathVariable(value = "id") Long categoryId,
                                                    @Validated @RequestBody Category categoryDetails) throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
