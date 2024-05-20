@@ -44,6 +44,9 @@ dependencies {
 	implementation("edu.stanford.nlp:stanford-corenlp:$corenlp_version:models")
 	implementation("edu.stanford.nlp:stanford-corenlp:$corenlp_version:models-english")
 	implementation("edu.stanford.nlp:stanford-corenlp:$corenlp_version:models-english-kbp")
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation:3.2.4'
+
 }
 
 tasks.named('test') {

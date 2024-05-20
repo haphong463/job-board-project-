@@ -42,4 +42,8 @@ public class Blog extends AbstractEntity {
 
     @Column(name = "slug", unique = true, nullable = false)
     private String slug;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 }

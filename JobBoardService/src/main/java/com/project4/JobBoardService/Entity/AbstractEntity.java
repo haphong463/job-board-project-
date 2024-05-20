@@ -14,13 +14,13 @@ import java.util.Date;
 public abstract class AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    protected int id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date created_at;
+    protected Date created_at;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updated_at;
+    protected Date updated_at;
 
     @PrePersist
     protected void onCreate(){
