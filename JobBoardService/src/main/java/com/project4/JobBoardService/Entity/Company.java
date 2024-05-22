@@ -45,4 +45,6 @@ public class Company {
 
     @Column(name = "membership_required", nullable = false)
     private Boolean membershipRequired = false;
+    @OneToMany(mappedBy = "company")
+    private List<Review> reviews;
 }
