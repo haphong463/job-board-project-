@@ -9,6 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -28,15 +31,15 @@ public class CompanyService {
 
     private static final Logger logger = Logger.getLogger(CompanyService.class.getName());
 
-    private static final String UPLOAD_DIR = "C:\\APTECH\\IASF\\job-board-project--main\\job-board-project--main\\JobBoardService\\src\\main\\resources\\static\\image";
+    private static final String UPLOAD_DIR = "static/images";
+
 
     public Company saveCompany(CompanyDTO companyDTO) {
         Company company = new Company();
         company.setCompanyName(companyDTO.getCompanyName());
         company.setWebsiteLink(companyDTO.getWebsiteLink());
         company.setDescription(companyDTO.getDescription());
-        company.setRating(companyDTO.getRating());
-        company.setReview(companyDTO.getReview());
+
         company.setLocation(companyDTO.getLocation());
         company.setType(companyDTO.getType());
         company.setMembershipRequired(companyDTO.getMembershipRequired());
@@ -50,8 +53,7 @@ public class CompanyService {
             company.setCompanyName(companyDTO.getCompanyName());
             company.setWebsiteLink(companyDTO.getWebsiteLink());
             company.setDescription(companyDTO.getDescription());
-            company.setRating(companyDTO.getRating());
-            company.setReview(companyDTO.getReview());
+
             company.setLocation(companyDTO.getLocation());
             company.setType(companyDTO.getType());
             company.setMembershipRequired(companyDTO.getMembershipRequired());
@@ -69,22 +71,29 @@ public class CompanyService {
         Optional<Company> existingCompany = companyRepository.findById(id);
         if (existingCompany.isPresent()) {
             Company company = existingCompany.get();
-            String filePath = UPLOAD_DIR + File.separator + file.getOriginalFilename();
-            File destFile = new File(filePath);
+
+            // Lấy đường dẫn tuyệt đối của thư mục resources
+            Path resourceDirectory = Paths.get("src", "main", "resources", UPLOAD_DIR).toAbsolutePath().normalize();
+
+            // Tạo đường dẫn đến file đích
+            String fileName = file.getOriginalFilename();
+            Path filePath = resourceDirectory.resolve(fileName);
 
             // Ensure the directory exists
-            File uploadDirFile = new File(UPLOAD_DIR);
-            if (!uploadDirFile.exists()) {
-                uploadDirFile.mkdirs();
+            if (Files.notExists(resourceDirectory)) {
+                Files.createDirectories(resourceDirectory);
             }
 
-            logger.info("Saving file to: " + filePath);
-            file.transferTo(destFile); // Save the file
+            logger.info("Saving file to: " + filePath.toString());
 
-            company.setLogo(filePath); // Update the company logo path
+            // Save the file
+            Files.copy(file.getInputStream(), filePath);
+
+            // Update the company logo path
+            company.setLogo(filePath.toString());
             companyRepository.save(company); // Save the updated company
 
-            return filePath;
+            return filePath.toString();
         } else {
             logger.warning("Company not found: " + id);
             return null;

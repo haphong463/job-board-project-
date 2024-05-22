@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
@@ -23,17 +22,17 @@ public class CategoryController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @GetMapping("/categories")
+    @GetMapping
     public List<Category> getAllCategory() {
         return categoryRepository.findAll();
     }
 
-    @GetMapping("/categories/{id}")
-    public ResponseEntity<Category> getCategorybyId(@PathVariable(value = "id") Long categoryId)
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable(value = "id") Long categoryId)
             throws ResourceNotFoundException {
-        Category employee = categoryRepository.findById(categoryId)
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
-        return ResponseEntity.ok().body(employee);
+        return ResponseEntity.ok().body(category);
     }
 
     @PostMapping("/categories")

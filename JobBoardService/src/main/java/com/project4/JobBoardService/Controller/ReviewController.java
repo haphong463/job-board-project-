@@ -1,7 +1,7 @@
 package com.project4.JobBoardService.Controller;
 
-import Project4.JobBoard.Entity.Review;
-import Project4.JobBoard.Service.ReviewService;
+import com.project4.JobBoardService.Entity.Review;
+import com.project4.JobBoardService.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

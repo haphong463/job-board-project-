@@ -1,8 +1,8 @@
 package com.project4.JobBoardService.Controller;
 
-import Project4.JobBoard.DTO.CompanyDTO;
-import Project4.JobBoard.Entity.Company;
-import Project4.JobBoard.Service.CompanyService;
+import com.project4.JobBoardService.DTO.CompanyDTO;
+import com.project4.JobBoardService.Entity.Company;
+import com.project4.JobBoardService.Service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,6 @@ public class CompanyController {
     public List<Company> getAllCompanies() {
         return companyService.getAllCompanies();
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
         Optional<Company> company = companyService.getCompanyById(id);

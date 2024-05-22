@@ -32,12 +32,6 @@ public class Company {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(precision = 3, scale = 2)
-    private BigDecimal rating;
-
-    @Column(columnDefinition = "TEXT")
-    private String review;
-
     @Column(length = 100)
     private String location;
 
