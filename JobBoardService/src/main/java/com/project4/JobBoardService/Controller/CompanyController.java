@@ -1,4 +1,4 @@
-package Project4.JobBoard.Controller;
+package com.project4.JobBoardService.Controller;
 
 import Project4.JobBoard.DTO.CompanyDTO;
 import Project4.JobBoard.Entity.Company;

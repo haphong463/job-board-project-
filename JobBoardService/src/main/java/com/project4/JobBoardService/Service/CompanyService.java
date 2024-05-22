@@ -1,8 +1,8 @@
-package Project4.JobBoard.Service;
+package com.project4.JobBoardService.Service;
 
-import Project4.JobBoard.DTO.CompanyDTO;
-import Project4.JobBoard.Entity.Company;
-import Project4.JobBoard.Repository.CompanyRepository;
+import com.project4.JobBoardService.DTO.CompanyDTO;
+import com.project4.JobBoardService.Entity.Company;
+import com.project4.JobBoardService.Repository.CompanyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

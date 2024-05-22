@@ -1,7 +1,7 @@
-package Project4.JobBoard.Service;
+package com.project4.JobBoardService.Service;
 
-import Project4.JobBoard.DTO.ReviewDTO;
-import Project4.JobBoard.Entity.Review;
+
+import com.project4.JobBoardService.Entity.Review;
 
 import java.util.List;
 

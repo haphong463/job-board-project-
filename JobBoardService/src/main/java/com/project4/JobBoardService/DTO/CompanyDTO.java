@@ -1,4 +1,4 @@
-package Project4.JobBoard.DTO;
+package com.project4.JobBoardService.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

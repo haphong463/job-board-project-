@@ -1,4 +1,4 @@
-package Project4.JobBoard.Config;
+package com.project4.JobBoardService.Config;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

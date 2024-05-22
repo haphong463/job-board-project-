@@ -1,10 +1,9 @@
-package Project4.JobBoard.Service.Impl;
-
-import Project4.JobBoard.Entity.Company;
-import Project4.JobBoard.Entity.Review;
-import Project4.JobBoard.Repository.ReviewRepository;
-import Project4.JobBoard.Service.CompanyService;
-import Project4.JobBoard.Service.ReviewService;
+package com.project4.JobBoardService.Service.Impl;
+import com.project4.JobBoardService.Entity.Company;
+import com.project4.JobBoardService.Entity.Review;
+import com.project4.JobBoardService.Repository.ReviewRepository;
+import com.project4.JobBoardService.Service.CompanyService;
+import com.project4.JobBoardService.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
