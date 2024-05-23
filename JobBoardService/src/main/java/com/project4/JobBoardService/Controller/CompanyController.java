@@ -25,9 +25,10 @@ public class CompanyController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
-        Optional<Company> company = companyService.getCompanyById(id);
-        return company.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<Company> companyOptional = companyService.getCompanyById(id);
+        return companyOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
     @PostMapping
     public Company createCompany(@RequestBody CompanyDTO companyDTO) {
