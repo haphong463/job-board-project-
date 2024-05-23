@@ -32,7 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     public boolean addReview(Long companyId, Review review) {
         Optional<Company> companyOptional = companyService.getCompanyById(companyId);
         if (companyOptional.isPresent()) {
-            Company company = companyOptional.get(); // Unwrapping the Optional
+            Company company = companyOptional.get();
             review.setCompany(company);
             reviewRepository.save(review);
             return true;
@@ -51,13 +51,13 @@ public class ReviewServiceImpl implements ReviewService {
     public boolean updateReview(Long companyId, Long reviewId, Review updatedReview) {
         Optional<Company> companyOptional = companyService.getCompanyById(companyId);
         if (companyOptional.isPresent()) {
-            Company company = companyOptional.get(); // Unwrapping the Optional
+            Company company = companyOptional.get();
             updatedReview.setCompany(company);
             updatedReview.setId(reviewId);
             reviewRepository.save(updatedReview);
             return true;
         } else {
-            return false; // Company with given ID not found
+            return false;
         }
     }
 

@@ -78,7 +78,7 @@ public class CompanyService {
             String fileName = file.getOriginalFilename();
             Path filePath = resourceDirectory.resolve(fileName);
 
-            // Ensure the directory exists
+
             if (Files.notExists(resourceDirectory)) {
                 Files.createDirectories(resourceDirectory);
             }
@@ -88,7 +88,7 @@ public class CompanyService {
             // Save the file
             Files.copy(file.getInputStream(), filePath);
 
-            // Update the company logo path
+
             company.setLogo(filePath.toString());
             companyRepository.save(company); // Save the updated company
 

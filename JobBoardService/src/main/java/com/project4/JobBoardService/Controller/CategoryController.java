@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
@@ -58,7 +58,7 @@ public class CategoryController {
 
         categoryRepository.delete(category);
         Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", Boolean.TRUE);
+        response.put("deleted", Boolean.TRUE    );
         return response;
     }
 }

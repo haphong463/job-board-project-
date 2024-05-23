@@ -44,17 +44,17 @@ public class JobServiceImpl   implements JobService {
         Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
 
         if (companyOptional.isPresent() && categoryOptional.isPresent()) {
-            Company company = companyOptional.get(); // Unwrap the Optional
-            Category category = categoryOptional.get(); // Unwrap the Optional
+            Company company = companyOptional.get();
+            Category category = categoryOptional.get();
 
-            // Tạo một đối tượng Job từ DTO
+
             Job job = convertToEntity(jobDTO);
 
-            // Liên kết công ty và danh mục với công việc
+
             job.setCompany(company);
             job.setCategory(category);
 
-            // Lưu công việc vào cơ sở dữ liệu
+
             jobRepository.save(job);
             return true;
         }
@@ -65,7 +65,7 @@ public class JobServiceImpl   implements JobService {
         Optional<Job> optionalJob = jobRepository.findById(jobId);
         if (optionalJob.isPresent()) {
             Job job = optionalJob.get();
-            // Update fields from jobDTO
+
             job.setTitle(jobDTO.getTitle());
             job.setOfferedSalary(jobDTO.getOfferedSalary());
             job.setDescription(jobDTO.getDescription());
@@ -80,12 +80,12 @@ public class JobServiceImpl   implements JobService {
             job.setPosition(jobDTO.getPosition());
             job.setExperience(jobDTO.getExperience());
             job.setQualification(jobDTO.getQualification());
-            // Update other fields as needed
+
 
             job = jobRepository.save(job);
             return convertToDto(job);
         } else {
-            // Handle case when job with given ID is not found
+
             return null;
         }
     }
@@ -120,7 +120,7 @@ public class JobServiceImpl   implements JobService {
         dto.setExperience(job.getExperience());
         dto.setQualification(job.getQualification());
         dto.setCreatedAt(job.getCreatedAt());
-        dto.setCategoryId(job.getCategory().getCategoryId()); // Thiết lập categoryId từ đối tượng Category
+        dto.setCategoryId(job.getCategory().getCategoryId());
         dto.setCompanyId(job.getCompany().getCompanyId());
         return dto;
     }
