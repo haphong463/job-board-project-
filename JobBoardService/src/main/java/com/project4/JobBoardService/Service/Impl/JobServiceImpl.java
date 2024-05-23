@@ -75,7 +75,7 @@ public class JobServiceImpl   implements JobService {
             job.setWorkSchedule(WorkSchedule.FULL_TIME);
             job.setWorkSchedule(WorkSchedule.PART_TIME);
             job.setWorkSchedule(WorkSchedule.FREELANCE);
-            job.setWorkSchedule(WorkSchedule.INTERNSHIP);
+
             job.setKeySkills(jobDTO.getKeySkills());
             job.setPosition(jobDTO.getPosition());
             job.setExperience(jobDTO.getExperience());
@@ -114,7 +114,7 @@ public class JobServiceImpl   implements JobService {
         dto.setWorkSchedule(String.valueOf(WorkSchedule.FULL_TIME));
         dto.setWorkSchedule(String.valueOf(WorkSchedule.PART_TIME));
         dto.setWorkSchedule(String.valueOf(WorkSchedule.FREELANCE));
-        dto.setWorkSchedule(String.valueOf(WorkSchedule.INTERNSHIP));
+
         dto.setKeySkills(job.getKeySkills());
         dto.setPosition(job.getPosition());
         dto.setExperience(job.getExperience());
@@ -137,7 +137,7 @@ public class JobServiceImpl   implements JobService {
         job.setWorkSchedule(WorkSchedule.FULL_TIME);
         job.setWorkSchedule(WorkSchedule.PART_TIME);
         job.setWorkSchedule(WorkSchedule.FREELANCE);
-        job.setWorkSchedule(WorkSchedule.INTERNSHIP);
+
         job.setKeySkills(jobDTO.getKeySkills());
         job.setPosition(jobDTO.getPosition());
         job.setExperience(jobDTO.getExperience());
