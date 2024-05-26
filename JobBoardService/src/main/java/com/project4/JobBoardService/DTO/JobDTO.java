@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +25,7 @@ public class JobDTO {
     private String position;
     private String experience;
     private String qualification;
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
     private Long categoryId;
     private Long companyId;
 
