@@ -35,12 +35,12 @@ public class CategoryController {
         return ResponseEntity.ok().body(category);
     }
 
-    @PostMapping("/categories")
+    @PostMapping("/add")
     public Category createCategory(@Validated @RequestBody Category category) {
         return categoryRepository.save(category);
     }
 
-    @PutMapping("/categories/{id}")
+    @PutMapping("edit/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable(value = "id") Long categoryId,
                                                    @Validated @RequestBody Category categoryDetails) throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)
@@ -50,7 +50,7 @@ public class CategoryController {
         return ResponseEntity.ok(updatedCategory);
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping("/delete/{id}")
     public Map<String, Boolean> deleteCategory(@PathVariable(value = "id") Long categoryId)
             throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)

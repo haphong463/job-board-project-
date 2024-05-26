@@ -2,6 +2,7 @@ package com.project4.JobBoardService.Service;
 
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.Job;
+import com.project4.JobBoardService.Entity.Review;
 
 import java.util.List;
 
@@ -12,5 +13,6 @@ public interface JobService {
     boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO);
     JobDTO updateJob(Long jobId, JobDTO jobDTO);
     void deleteJob(Long jobId);
-    List<JobDTO> findAllJobs(Long companyId);
+
+//    boolean updateJob(Long companyId, Long categoryId, JobDTO jobDTO);
 }

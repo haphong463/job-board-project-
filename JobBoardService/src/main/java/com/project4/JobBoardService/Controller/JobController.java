@@ -21,10 +21,12 @@ public class JobController {
     public JobController(JobService jobService) {
         this.jobService = jobService;
     }
-
     @GetMapping("/{companyId}")
     public ResponseEntity<List<JobDTO>> getAllJobsByCompanyId(@PathVariable Long companyId) {
         List<JobDTO> jobs = jobService.findAllJobsByCompanyId(companyId);
+        if (jobs.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
+        }
         return ResponseEntity.ok(jobs);
     }
 
@@ -35,7 +37,7 @@ public class JobController {
         boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
         return ResponseEntity.ok(createdJob);
     }
-    @PutMapping("/{jobId}")
+    @PutMapping("/edit/{jobId}")
     public ResponseEntity<JobDTO> updateJob(@PathVariable Long jobId, @RequestBody JobDTO jobDTO) {
         JobDTO updatedJob = jobService.updateJob(jobId, jobDTO);
         if (updatedJob != null) {
@@ -51,9 +53,5 @@ public class JobController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    public ResponseEntity<List<JobDTO>> findAllJobs(@PathVariable("companyId") Long companyId) {
-        List<JobDTO> jobs = jobService.findAllJobs(companyId);
-        return new ResponseEntity<>(jobs, HttpStatus.OK);
-    }
+
 }
