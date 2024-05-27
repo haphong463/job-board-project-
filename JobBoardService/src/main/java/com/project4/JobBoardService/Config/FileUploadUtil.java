@@ -1,4 +1,4 @@
-package Project4.JobBoard.Config;
+package com.project4.JobBoardService.Config;
 
 import org.springframework.web.multipart.MultipartFile;
 
