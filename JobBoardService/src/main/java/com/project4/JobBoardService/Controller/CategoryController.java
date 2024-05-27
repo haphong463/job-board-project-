@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
@@ -23,25 +22,25 @@ public class CategoryController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @GetMapping("/categories")
+    @GetMapping
     public List<Category> getAllCategory() {
         return categoryRepository.findAll();
     }
 
-    @GetMapping("/categories/{id}")
-    public ResponseEntity<Category> getCategorybyId(@PathVariable(value = "id") Long categoryId)
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable(value = "id") Long categoryId)
             throws ResourceNotFoundException {
-        Category employee = categoryRepository.findById(categoryId)
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
-        return ResponseEntity.ok().body(employee);
+        return ResponseEntity.ok().body(category);
     }
 
-    @PostMapping("/categories")
+    @PostMapping("/add")
     public Category createCategory(@Validated @RequestBody Category category) {
         return categoryRepository.save(category);
     }
 
-    @PutMapping("/categories/{id}")
+    @PutMapping("edit/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable(value = "id") Long categoryId,
                                                    @Validated @RequestBody Category categoryDetails) throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)
@@ -51,7 +50,7 @@ public class CategoryController {
         return ResponseEntity.ok(updatedCategory);
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping("/delete/{id}")
     public Map<String, Boolean> deleteCategory(@PathVariable(value = "id") Long categoryId)
             throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)
@@ -59,7 +58,7 @@ public class CategoryController {
 
         categoryRepository.delete(category);
         Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", Boolean.TRUE);
+        response.put("deleted", Boolean.TRUE    );
         return response;
     }
 }
