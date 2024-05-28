@@ -8,8 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -18,10 +22,15 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User extends AbstractEntity {
+public class User implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(length = 64, nullable = false, unique = true)
     @Email
     private String email;
+
+    private String username;
 
     @Column(length = 128, nullable = false)
     @NotNull
@@ -38,8 +47,6 @@ public class User extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(length = 1024)
-    private String photo;
 
     @Column(columnDefinition = "tinyint(1) default 1")
     private boolean enabled;
@@ -47,37 +54,51 @@ public class User extends AbstractEntity {
     @Column(columnDefinition = "tinyint(1) default 1")
     private boolean changePassword;
 
+    private Boolean blocked;
+
+
     @Column(name = "reset_password_token", length = 128)
     private String resetPasswordToken;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
-
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @OneToMany(mappedBy = "id")
     private Set<Blog> blogs = new HashSet<>();
 
-    public void addRole(Role role) {
-        this.roles.add(role);
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(role);
     }
 
     @Override
-    public String toString() {
-        return "User{" +
-                "email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", gender=" + gender +
-                ", photo='" + photo + '\'' +
-                ", enabled=" + enabled +
-                ", changePassword=" + changePassword +
-                ", resetPasswordToken='" + resetPasswordToken + '\'' +
-                ", roles=" + roles +
-                '}';
+    public String getPassword() {
+        return password;
     }
 
+    @Override
+    public String getUsername() {
+        return username;
+    }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !blocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 //    @Transient
 //    public String getPhotosImagePath() {
 //        if (id == null || photo == null)
@@ -86,22 +107,5 @@ public class User extends AbstractEntity {
 //        return "/user-photos/" + this.id + "/" + photo;
 //    }
 
-    @Transient
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
-
-    @Transient
-    public boolean hasRole(String roleName) {
-        if (roleName == null) {
-            return false;
-        }
-        for (Role role : roles) {
-            if (roleName.equals(role.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 }
