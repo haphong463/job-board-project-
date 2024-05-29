@@ -13,6 +13,7 @@ build/
 .settings
 .springBeans
 .sts4-cache
+.build.gradle
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
@@ -35,3 +36,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+## Environment variables ##
+.env

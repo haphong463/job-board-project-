@@ -1,5 +1,41 @@
+import DataTable from "react-data-table-component";
 import ProjectTables from "../../components/dashboard/ProjectTable";
 import { Row, Col, Table, Card, CardTitle, CardBody } from "reactstrap";
+
+const columns = [
+  {
+    name: "Title",
+    selector: (row) => row.title,
+    sortable: true,
+    cell: (row) => (
+      <div
+        style={{
+          fontSize: "16px",
+        }}
+      >
+        {row.title}
+      </div>
+    ),
+  },
+  {
+    name: "Year",
+    selector: (row) => row.year,
+    sortable: true,
+  },
+];
+
+const data = [
+  {
+    id: 1,
+    title: "Beetlejuice",
+    year: "1988",
+  },
+  {
+    id: 2,
+    title: "Ghostbusters",
+    year: "1984",
+  },
+];
 
 const Tables = () => {
   return (
@@ -7,9 +43,7 @@ const Tables = () => {
       {/* --------------------------------------------------------------------------------*/}
       {/* table-1*/}
       {/* --------------------------------------------------------------------------------*/}
-      <Col lg="12">
-        <ProjectTables />
-      </Col>
+      <Col lg="12">{/* <ProjectTables /> */}</Col>
       {/* --------------------------------------------------------------------------------*/}
       {/* table-2*/}
       {/* --------------------------------------------------------------------------------*/}
@@ -19,7 +53,7 @@ const Tables = () => {
             <i className="bi bi-card-text me-2"> </i>
             Table with Border
           </CardTitle>
-          <CardBody className="">
+          {/* <CardBody className="">
             <Table bordered>
               <thead>
                 <tr>
@@ -50,13 +84,14 @@ const Tables = () => {
                 </tr>
               </tbody>
             </Table>
-          </CardBody>
+          </CardBody> */}
         </Card>
+        <DataTable columns={columns} data={data} />
       </Col>
       {/* --------------------------------------------------------------------------------*/}
       {/* table-3*/}
       {/* --------------------------------------------------------------------------------*/}
-      <Col lg="12">
+      {/* <Col lg="12">
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-card-text me-2"> </i>
@@ -95,11 +130,11 @@ const Tables = () => {
             </Table>
           </CardBody>
         </Card>
-      </Col>
+      </Col> */}
       {/* --------------------------------------------------------------------------------*/}
       {/* table-3*/}
       {/* --------------------------------------------------------------------------------*/}
-      <Col lg="12">
+      {/* <Col lg="12">
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-card-text me-2"> </i>
@@ -138,7 +173,7 @@ const Tables = () => {
             </Table>
           </CardBody>
         </Card>
-      </Col>
+      </Col> */}
     </Row>
   );
 };

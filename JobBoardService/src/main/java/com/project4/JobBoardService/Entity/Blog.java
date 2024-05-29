@@ -15,6 +15,11 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Blog extends AbstractEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(name = "title", nullable = false, unique = true)
     private String title;
 

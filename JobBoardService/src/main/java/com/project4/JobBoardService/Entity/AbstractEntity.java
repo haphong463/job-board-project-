@@ -12,10 +12,6 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 public abstract class AbstractEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected int id;
-
     @Temporal(TemporalType.TIMESTAMP)
     protected Date created_at;
 

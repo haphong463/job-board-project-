@@ -13,11 +13,15 @@ import {
   Button,
   FormFeedback,
 } from "reactstrap";
+import logo from "../assets/images/logos/logo.png";
 
 // Xác định schema yup cho form
 const schema = yup.object().shape({
-  email: yup.string().email("Email không hợp lệ").required("Email là bắt buộc"),
-  password: yup.string().required("Password là bắt buộc"),
+  email: yup
+    .string()
+    .email("Email is not valid!")
+    .required("Email is required!"),
+  password: yup.string().required("Password is required!"),
 });
 
 const Login = () => {
@@ -45,7 +49,7 @@ const Login = () => {
       <Row className="w-100">
         <Col md={6} lg={4} className="mx-auto">
           <div className="text-center mb-4">
-            <img src="path_to_logo.png" alt="Logo" style={{ width: "150px" }} />
+            <img src={logo} alt="Logo" style={{ width: "150px" }} />
           </div>
           <h2 className="text-center mb-4">Login</h2>
           <Form onSubmit={handleSubmit(onSubmit)}>
@@ -58,7 +62,7 @@ const Login = () => {
                   <Input
                     type="text"
                     id="email"
-                    placeholder="Enter your email"
+                    placeholder="enter your email..."
                     invalid={!!errors.email}
                     {...field}
                   />
@@ -77,7 +81,7 @@ const Login = () => {
                   <Input
                     type="password"
                     id="password"
-                    placeholder="Enter your password"
+                    placeholder="enter your password..."
                     invalid={!!errors.password}
                     {...field}
                   />
