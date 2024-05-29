@@ -74,10 +74,8 @@ public class CompanyServiceImpl implements CompanyService {
         if (existingCompany.isPresent()) {
             Company company = existingCompany.get();
 
-            // Lấy đường dẫn tuyệt đối của thư mục resources
             Path resourceDirectory = Paths.get("src", "main", "resources", UPLOAD_DIR).toAbsolutePath().normalize();
 
-            // Tạo đường dẫn đến file đích
             String fileName = file.getOriginalFilename();
             Path filePath = resourceDirectory.resolve(fileName);
 
@@ -87,7 +85,6 @@ public class CompanyServiceImpl implements CompanyService {
 
             logger.info("Saving file to: " + filePath.toString());
 
-            // Save the file
             Files.copy(file.getInputStream(), filePath);
 
             company.setLogo(filePath.toString());
