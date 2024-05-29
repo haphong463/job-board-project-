@@ -22,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User implements UserDetails {
+public class User implements UserDetails  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
