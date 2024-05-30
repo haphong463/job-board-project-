@@ -13,4 +13,5 @@ public interface BlogService {
     Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) throws IOException;
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
+
 }

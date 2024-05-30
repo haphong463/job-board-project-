@@ -7,14 +7,42 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BlogCategoryServiceImpl implements BlogCategoryService {
     @Autowired
-    BlogCategoryRepository bcr;
+    private BlogCategoryRepository blogCategoryRepository;
 
     @Override
-    public List<BlogCategory> findAll() {
-        return bcr.findAll();
+    public BlogCategory createBlogCategory(BlogCategory blogCategory) {
+        return blogCategoryRepository.save(blogCategory);
+    }
+
+    @Override
+    public Optional<BlogCategory> getBlogCategoryById(Long id) {
+        return blogCategoryRepository.findById(id);
+    }
+
+    @Override
+    public List<BlogCategory> getAllBlogCategories() {
+        return blogCategoryRepository.findAll();
+    }
+
+    @Override
+    public BlogCategory updateBlogCategory(Long id, BlogCategory blogCategory) {
+        Optional<BlogCategory> existingCategoryOpt = blogCategoryRepository.findById(id);
+        if (existingCategoryOpt.isPresent()) {
+            BlogCategory existingCategory = existingCategoryOpt.get();
+            existingCategory.setName(blogCategory.getName());
+            return blogCategoryRepository.save(existingCategory);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void deleteBlogCategory(Long id) {
+        blogCategoryRepository.deleteById(id);
     }
 }
