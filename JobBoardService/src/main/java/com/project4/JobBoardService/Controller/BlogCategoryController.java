@@ -1,0 +1,49 @@
+package com.project4.JobBoardService.Controller;
+
+import com.project4.JobBoardService.Entity.BlogCategory;
+import com.project4.JobBoardService.Service.BlogCategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/blogCategories")
+public class BlogCategoryController {
+
+    @Autowired
+    private BlogCategoryService blogCategoryService;
+
+    @PostMapping
+    public ResponseEntity<BlogCategory> createBlogCategory(@RequestBody BlogCategory blogCategory) {
+        BlogCategory createdCategory = blogCategoryService.createBlogCategory(blogCategory);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BlogCategory> getBlogCategoryById(@PathVariable Long id) {
+        Optional<BlogCategory> categoryOpt = blogCategoryService.getBlogCategoryById(id);
+        return categoryOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<List<BlogCategory>> getAllBlogCategories() {
+        List<BlogCategory> categories = blogCategoryService.getAllBlogCategories();
+        return ResponseEntity.ok(categories);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<BlogCategory> updateBlogCategory(@PathVariable Long id, @RequestBody BlogCategory updatedCategory) {
+        BlogCategory category = blogCategoryService.updateBlogCategory(id, updatedCategory);
+        return category != null ? ResponseEntity.ok(category) : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBlogCategory(@PathVariable Long id) {
+        blogCategoryService.deleteBlogCategory(id);
+        return ResponseEntity.noContent().build();
+    }
+}
