@@ -3,19 +3,41 @@ package com.project4.JobBoardService.Service.Impl;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Repository.BlogRepository;
 import com.project4.JobBoardService.Service.BlogService;
+import com.project4.JobBoardService.Util.FileUtils;
+import com.project4.JobBoardService.Util.Variables.FileVariables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
+import java.nio.file.Path;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 public class BlogServiceImpl implements BlogService {
+    private static final Logger logger = Logger.getLogger(BlogService.class.getName());
+    private static final String UPLOAD_DIR = "upload/blog_images"; // Đường dẫn tới thư mục upload
 
     @Autowired
     private BlogRepository blogRepository;
 
+    @Override
+    public Blog createBlog(Blog blog, MultipartFile imageFile) throws IOException {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                Path filePath = FileUtils.saveFile(UPLOAD_DIR, imageFile);
+                blog.setImageUrl(filePath.toString());
+                logger.info("Image saved to: " + filePath.toString());
+            } catch (IllegalArgumentException e) {
+                logger.warning("Invalid file: " + e.getMessage());
+            }
+        }
+
+        return blogRepository.save(blog);
+    }
 
     @Override
     public List<Blog> getAllBlog() {
@@ -23,31 +45,41 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public Blog createBlog(Blog blog) {
-        return blogRepository.save(blog);
+    public Blog getBlogById(Long id) {
+        Optional<Blog> blog = blogRepository.findById(id);
+        return blog.orElse(null);
     }
 
     @Override
-    public Blog updateBlog(Long id, Blog blog) {
-        Optional<Blog> optionalBlog = blogRepository.findById(id);
-        if (optionalBlog.isPresent()) {
-            Blog existingBlog = optionalBlog.get();
-            existingBlog.setTitle(blog.getTitle());
-            existingBlog.setAuthor(blog.getAuthor());
-            existingBlog.setContent(blog.getContent());
-            existingBlog.setCreated_at(blog.getCreated_at());
+    public Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) throws IOException {
+        Optional<Blog> existingBlogOpt = blogRepository.findById(id);
+        if (existingBlogOpt.isPresent()) {
+            Blog existingBlog = existingBlogOpt.get();
+            existingBlog.setTitle(updatedBlog.getTitle());
+            existingBlog.setContent(updatedBlog.getContent());
+            existingBlog.setAuthor(updatedBlog.getAuthor());
+            existingBlog.setCategory(updatedBlog.getCategory());
+            existingBlog.setPublishedAt(updatedBlog.getPublishedAt());
+            existingBlog.setStatus(updatedBlog.getStatus());
+            existingBlog.setSlug(updatedBlog.getSlug());
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                try {
+                    Path filePath = FileUtils.saveFile(UPLOAD_DIR, imageFile);
+                    existingBlog.setImageUrl(filePath.toString());
+                    logger.info("Image updated and saved to: " + filePath.toString());
+                } catch (IllegalArgumentException e) {
+                    logger.warning("Invalid file: " + e.getMessage());
+                }
+            }
+
             return blogRepository.save(existingBlog);
         } else {
-            throw new RuntimeException("Blog not found with id " + id);
+            logger.warning("Blog not found: " + id);
+            return null;
         }
     }
 
-    @Override
-    public Blog getBlogById(Long id) {
-        return blogRepository.findById(id).orElseThrow(() -> new RuntimeException("Blog not found with id " + id));
-    }
-
-    @Override
     public void deleteBlog(Long id) {
         blogRepository.deleteById(id);
     }
