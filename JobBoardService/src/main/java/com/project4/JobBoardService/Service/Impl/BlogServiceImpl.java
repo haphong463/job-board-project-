@@ -35,7 +35,7 @@ public class BlogServiceImpl implements BlogService {
                 logger.warning("Invalid file: " + e.getMessage());
             }
         }
-
+        
         return blogRepository.save(blog);
     }
 
