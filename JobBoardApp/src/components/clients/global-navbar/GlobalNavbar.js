@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import axios from 'axios';
-
+import React, { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import axiosRequest from "../../../configs/axiosConfig";
 
 export function GlobalNavbar() {
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
-
-
 
   useEffect(() => {
     fetchCategories();
@@ -16,19 +13,16 @@ export function GlobalNavbar() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/categories');
-      setCategories(response.data);
+      const response = await axiosRequest.get("/categories");
+      setCategories(response);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     }
   };
   const handleCategoryClick = (categoryName) => {
     setSelectedCategory(categoryName);
-    console.log('Selected category:', categoryName);
-
-
+    console.log("Selected category:", categoryName);
   };
-
 
   return (
     <header className="site-navbar mt-3">
@@ -48,8 +42,8 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/about">About</NavLink>
               </li>
-              <li 
-                className="has-children" 
+              <li
+                className="has-children"
                 onMouseEnter={() => setHoveredCategory("Job By Skills")}
                 onMouseLeave={() => setHoveredCategory(null)}
               >
@@ -60,12 +54,16 @@ export function GlobalNavbar() {
                     <div>
                       {hoveredCategory === "Job By Skills" && (
                         <ul>
-                          {categories.map(category => (
+                          {categories.map((category) => (
                             <li
                               key={category.categoryId}
-                              onClick={() => handleCategoryClick(category.categoryName)}
+                              onClick={() =>
+                                handleCategoryClick(category.categoryName)
+                              }
                             >
-                              <a href={`/search?category=${category.categoryName}`}>
+                              <a
+                                href={`/search?category=${category.categoryName}`}
+                              >
                                 {category.categoryName}
                               </a>
                             </li>
