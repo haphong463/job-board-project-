@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Service;
 
+import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,4 +14,5 @@ public interface BlogService {
     Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) throws IOException;
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
+    BlogResponseDTO convertToDto(Blog blog);
 }

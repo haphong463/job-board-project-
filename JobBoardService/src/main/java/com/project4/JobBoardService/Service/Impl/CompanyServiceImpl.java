@@ -75,9 +75,18 @@ public class CompanyServiceImpl implements CompanyService {
         if (existingCompany.isPresent()) {
             Company company = existingCompany.get();
 
-            Path filePath = FileUtils.saveFile(FileVariables.UPLOAD_DIR, file);
+            Path resourceDirectory = Paths.get("src", "main", "resources", FileVariables.UPLOAD_DIR).toAbsolutePath().normalize();
+
+            String fileName = file.getOriginalFilename();
+            Path filePath = resourceDirectory.resolve(fileName);
+
+            if (Files.notExists(resourceDirectory)) {
+                Files.createDirectories(resourceDirectory);
+            }
 
             logger.info("Saving file to: " + filePath.toString());
+
+            Files.copy(file.getInputStream(), filePath);
 
             company.setLogo(filePath.toString());
             companyRepository.save(company); // Save the updated company
@@ -88,4 +97,5 @@ public class CompanyServiceImpl implements CompanyService {
             return null;
         }
     }
+
 }
