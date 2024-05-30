@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Entity;
 
+
 import com.project4.JobBoardService.Enum.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -64,7 +65,9 @@ public class User   {
 
     @OneToMany(mappedBy = "id")
     private Set<Blog> blogs = new HashSet<>();
-
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCV> userCVs;
 
 //    @Transient
 //    public String getPhotosImagePath() {
