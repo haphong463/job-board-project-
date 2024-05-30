@@ -3,9 +3,8 @@ package com.project4.JobBoardService.Entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.lang.Nullable;
-import org.springframework.security.core.userdetails.UserDetails;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

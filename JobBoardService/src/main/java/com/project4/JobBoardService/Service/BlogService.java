@@ -5,11 +5,10 @@ import com.project4.JobBoardService.Entity.Blog;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BlogService {
-    List<Blog> getAllBlog();
+    List<BlogResponseDTO> getAllBlog();
     Blog createBlog(Blog blog, MultipartFile imageFile) throws IOException;
     Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) throws IOException;
     Blog getBlogById(Long id);

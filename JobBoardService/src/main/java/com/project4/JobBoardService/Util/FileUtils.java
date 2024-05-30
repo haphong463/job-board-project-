@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,9 +18,9 @@ public class FileUtils {
 
     private static String uploadDir = "src/main/resources/uploads";
 
-    public static Path saveFile(MultipartFile file) throws IOException {
+    public static Path saveFile(MultipartFile file, String folder) throws IOException {
         System.out.println(">>> uploadDir: " + uploadDir);
-        Path resourceDirectory = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path resourceDirectory = Paths.get(uploadDir + File.separator + folder).toAbsolutePath().normalize();
 
         // Get the original filename and add a timestamp to make it unique
         String originalFilename = file.getOriginalFilename();
@@ -44,8 +45,8 @@ public class FileUtils {
         return filePath;
     }
 
-    public static String convertToUrl(Path filePath) {
+    public static String convertToUrl(Path filePath, String folder) {
         String fileName = filePath.getFileName().toString();
-        return "http://localhost:" + serverPort + "/uploads/" + fileName;
+        return "http://localhost:" + serverPort + "/uploads/" + folder + "/" + fileName;
     }
 }

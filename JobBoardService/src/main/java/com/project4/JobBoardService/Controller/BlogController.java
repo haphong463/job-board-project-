@@ -29,6 +29,7 @@ public class BlogController {
     @Autowired
     private BlogCategoryRepository blogCategoryRepository;
 
+
 //    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 //    public ResponseEntity<Blog> createBlog(
 //            @RequestParam("title") String title,
@@ -80,6 +81,9 @@ public class BlogController {
         blog.setStatus(blogDTO.getStatus());
         blog.setSlug(blogDTO.getSlug());
 
+        //
+
+
         // Call a method in your service to handle the blog creation logic, including image processing if necessary
         try {
             Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage());
@@ -94,7 +98,7 @@ public class BlogController {
 
     // Get all blogs
     @GetMapping
-    public List<Blog> getAllBlogs() {
+    public List<BlogResponseDTO> getAllBlogs() {
         return blogService.getAllBlog();
     }
 

@@ -15,7 +15,7 @@ public class BlogResponseDTO {
     private String content;
     private String author;
     private BlogCategoryDTO category;
-
+    private UserDTO user;
     // Getters and setters
 
     // Inner class for category DTO

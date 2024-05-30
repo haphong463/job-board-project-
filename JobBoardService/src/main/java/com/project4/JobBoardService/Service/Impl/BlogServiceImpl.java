@@ -5,7 +5,7 @@ import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Repository.BlogRepository;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Util.FileUtils;
-import com.project4.JobBoardService.Util.Variables.FileVariables;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,21 +16,24 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class BlogServiceImpl implements BlogService {
     private static final Logger logger = Logger.getLogger(BlogService.class.getName());
-    private static final String UPLOAD_DIR = "upload/blog_images"; // Đường dẫn tới thư mục upload
 
     @Autowired
     private BlogRepository blogRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public Blog createBlog(Blog blog, MultipartFile imageFile) throws IOException {
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
-                Path filePath = FileUtils.saveFile(imageFile);
-                String imageUrl = FileUtils.convertToUrl(filePath);
+                Path filePath = FileUtils.saveFile(imageFile, "blog");
+                String imageUrl = FileUtils.convertToUrl(filePath, "blog");
                 blog.setImageUrl(imageUrl);
                 logger.info("Image saved to: " + imageUrl);
             } catch (IllegalArgumentException e) {
@@ -47,8 +50,9 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public List<Blog> getAllBlog() {
-        return blogRepository.findAll();
+    public List<BlogResponseDTO> getAllBlog() {
+        List<Blog> blogs = blogRepository.findAll();
+        return blogs.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
@@ -92,18 +96,6 @@ public class BlogServiceImpl implements BlogService {
     }
 
     public BlogResponseDTO convertToDto(Blog blog) {
-        BlogResponseDTO dto = new BlogResponseDTO();
-        dto.setId(blog.getId());
-        dto.setTitle(blog.getTitle());
-        dto.setContent(blog.getContent());
-        dto.setAuthor(blog.getAuthor());
-
-        BlogResponseDTO.BlogCategoryDTO categoryDTO = new BlogResponseDTO.BlogCategoryDTO();
-        categoryDTO.setId(blog.getCategory().getId());
-        categoryDTO.setName(blog.getCategory().getName());
-
-        dto.setCategory(categoryDTO);
-
-        return dto;
+        return modelMapper.map(blog, BlogResponseDTO.class);
     }
 }
