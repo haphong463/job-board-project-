@@ -3,6 +3,8 @@ package com.project4.JobBoardService.Service;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.Job;
 import com.project4.JobBoardService.Entity.Review;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,4 +17,5 @@ public interface JobService {
     void deleteJob(Long jobId);
 
 //    boolean updateJob(Long companyId, Long categoryId, JobDTO jobDTO);
+    Page<Job> searchJobs(String keyword, String location, Double minSalary, Double maxSalary, String jobType, Pageable pageable);
 }

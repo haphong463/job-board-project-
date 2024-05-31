@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -53,5 +55,13 @@ public class JobController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @GetMapping("/search")
+    public Page<Job> searchJobs(@RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) String location,
+                                @RequestParam(required = false) Double minSalary,
+                                @RequestParam(required = false) Double maxSalary,
+                                @RequestParam(required = false) String jobType,
+                                Pageable pageable) {
+        return jobService.searchJobs(keyword, location, minSalary, maxSalary, jobType, pageable);
+    }
 }
