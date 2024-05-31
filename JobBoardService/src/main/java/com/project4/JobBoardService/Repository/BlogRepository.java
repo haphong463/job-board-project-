@@ -15,4 +15,6 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
     @Query("SELECT COUNT(b) FROM Blog b WHERE b.author = :author")
     long countByAuthor(@Param("author") String author);
+
+    boolean existsBySlug(String slug);
 }

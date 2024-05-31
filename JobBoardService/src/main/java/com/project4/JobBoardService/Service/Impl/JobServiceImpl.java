@@ -146,36 +146,5 @@ public class JobServiceImpl   implements JobService {
         // Set other fields as needed
         return job;
     }
-    
-    @Override
-    public Page<Job> searchJobs(String keyword, String location, Double minSalary, Double maxSalary, String jobType, Pageable pageable) {
-        return jobRepository.findAll((Specification<Job>) (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
 
-            if (keyword != null && !keyword.isEmpty()) {
-                predicates.add(criteriaBuilder.or(
-                    criteriaBuilder.like(root.get("title"), "%" + keyword + "%"),
-                    criteriaBuilder.like(root.get("description"), "%" + keyword + "%")
-                ));
-            }
-
-            if (location != null && !location.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("location"), location));
-            }
-
-            if (minSalary != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("salary"), minSalary));
-            }
-
-            if (maxSalary != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("salary"), maxSalary));
-            }
-
-            if (jobType != null && !jobType.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("jobType"), jobType));
-            }
-
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        }, pageable);
-    }
 }
