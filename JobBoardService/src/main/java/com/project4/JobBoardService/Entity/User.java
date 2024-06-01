@@ -65,6 +65,9 @@ public class User   {
 
     @OneToMany(mappedBy = "id")
     private Set<Blog> blogs = new HashSet<>();
+
+    @OneToMany(mappedBy = "id")
+    private List<Comment> comments;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCV> userCVs;

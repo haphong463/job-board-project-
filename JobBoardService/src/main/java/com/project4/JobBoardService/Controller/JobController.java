@@ -55,13 +55,13 @@ public class JobController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
-    public Page<Job> searchJobs(@RequestParam(required = false) String keyword,
-                                @RequestParam(required = false) String location,
-                                @RequestParam(required = false) Double minSalary,
-                                @RequestParam(required = false) Double maxSalary,
-                                @RequestParam(required = false) String jobType,
-                                Pageable pageable) {
-        return jobService.searchJobs(keyword, location, minSalary, maxSalary, jobType, pageable);
-    }
+//    @GetMapping("/search")
+//    public Page<Job> searchJobs(@RequestParam(required = false) String keyword,
+//                                @RequestParam(required = false) String location,
+//                                @RequestParam(required = false) Double minSalary,
+//                                @RequestParam(required = false) Double maxSalary,
+//                                @RequestParam(required = false) String jobType,
+//                                Pageable pageable) {
+//        return jobService.searchJobs(keyword, location, minSalary, maxSalary, jobType, pageable);
+//    }
 }

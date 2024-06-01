@@ -15,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BlogDTO {
-
+    private Long id;
     private String title;
     private String content;
     private String author;

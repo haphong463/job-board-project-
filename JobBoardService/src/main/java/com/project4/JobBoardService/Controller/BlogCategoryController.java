@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Controller;
 
+import com.project4.JobBoardService.DTO.BlogCategoryDTO;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/blogCategories")
+@RequestMapping("/api/blog-category")
 public class BlogCategoryController {
 
     @Autowired
@@ -30,8 +31,8 @@ public class BlogCategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BlogCategory>> getAllBlogCategories() {
-        List<BlogCategory> categories = blogCategoryService.getAllBlogCategories();
+    public ResponseEntity<List<BlogCategoryDTO>> getAllBlogCategories() {
+        List<BlogCategoryDTO> categories = blogCategoryService.getAllBlogCategories();
         return ResponseEntity.ok(categories);
     }
 

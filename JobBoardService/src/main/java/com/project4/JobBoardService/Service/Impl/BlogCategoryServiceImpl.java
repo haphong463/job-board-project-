@@ -1,18 +1,24 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.DTO.BlogCategoryDTO;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Repository.BlogCategoryRepository;
 import com.project4.JobBoardService.Service.BlogCategoryService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BlogCategoryServiceImpl implements BlogCategoryService {
     @Autowired
     private BlogCategoryRepository blogCategoryRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public BlogCategory createBlogCategory(BlogCategory blogCategory) {
@@ -25,8 +31,11 @@ public class BlogCategoryServiceImpl implements BlogCategoryService {
     }
 
     @Override
-    public List<BlogCategory> getAllBlogCategories() {
-        return blogCategoryRepository.findAll();
+    public List<BlogCategoryDTO> getAllBlogCategories() {
+        List<BlogCategory> categories = blogCategoryRepository.findAll();
+        return categories.stream()
+                .map(category -> modelMapper.map(category, BlogCategoryDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override

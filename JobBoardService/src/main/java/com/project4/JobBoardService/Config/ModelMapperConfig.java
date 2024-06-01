@@ -22,7 +22,7 @@ public class ModelMapperConfig {
                 map().getUser().setEmail(source.getUser().getEmail());
             }
         });
-
+            
         return modelMapper;
     }
 }

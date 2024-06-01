@@ -19,14 +19,5 @@ public class BlogResponseDTO {
     // Getters and setters
 
     // Inner class for category DTO
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class BlogCategoryDTO {
-        private Long id;
-        private String name;
 
-        // Getters and setters
-    }
 }

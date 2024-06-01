@@ -17,5 +17,4 @@ public interface JobService {
     void deleteJob(Long jobId);
 
 //    boolean updateJob(Long companyId, Long categoryId, JobDTO jobDTO);
-    Page<Job> searchJobs(String keyword, String location, Double minSalary, Double maxSalary, String jobType, Pageable pageable);
 }
