@@ -55,6 +55,7 @@ public class JobController {
         return ResponseEntity.noContent().build();
     }
 
+<<<<<<< HEAD
 //    @GetMapping("/search")
 //    public Page<Job> searchJobs(@RequestParam(required = false) String keyword,
 //                                @RequestParam(required = false) String location,
@@ -64,4 +65,6 @@ public class JobController {
 //                                Pageable pageable) {
 //        return jobService.searchJobs(keyword, location, minSalary, maxSalary, jobType, pageable);
 //    }
+=======
+>>>>>>> 2cebc32a05936101dea3b05e278c6078584161cd
 }
