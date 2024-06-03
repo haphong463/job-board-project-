@@ -32,4 +32,19 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(Long id) {
         commentRepository.deleteById(id);
     }
+
+    @Override
+    public Comment getCommentById(Long id) {
+        return commentRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Comment updatedComment(Long id, Comment comment) {
+        Comment commentExisting = commentRepository.findById(id).orElse(null);
+        if(commentExisting != null){
+            commentExisting.setContent(comment.getContent());
+            return commentRepository.save(commentExisting);
+        }
+        return null;
+    }
 }

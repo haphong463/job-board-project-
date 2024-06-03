@@ -4,7 +4,6 @@ import com.project4.JobBoardService.DTO.CommentDTO;
 import com.project4.JobBoardService.DTO.NewCommentDTO;
 import com.project4.JobBoardService.Entity.Comment;
 import com.project4.JobBoardService.Service.CommentService;
-import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,14 +34,41 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<NewCommentDTO> createComment(@RequestBody Comment comment) {
-        Comment createdComment = commentService.createComment(comment);
-        NewCommentDTO commentResponse = modelMapper.map(createdComment, NewCommentDTO.class);
+        try {
+            Comment createdComment = commentService.createComment(comment);
+            NewCommentDTO commentResponse = modelMapper.map(createdComment, NewCommentDTO.class);
 
-        return ResponseEntity.ok(commentResponse);
+            return ResponseEntity.ok(commentResponse);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteComment(@PathVariable Long id) {
-        commentService.deleteComment(id);
+    public ResponseEntity<Comment> deleteComment(@PathVariable Long id) {
+        try{
+            Comment existingComment = commentService.getCommentById(id);
+            if(id != null){
+                commentService.deleteComment(id);
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.notFound().build();
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CommentDTO> updateComment(@PathVariable Long id, @RequestBody  Comment comment){
+        try {
+            Comment commentUpdate = commentService.updatedComment(id, comment);
+            if(commentUpdate != null){
+                CommentDTO commentUpdateDTO = modelMapper.map(commentUpdate, CommentDTO.class);
+                return ResponseEntity.ok(commentUpdateDTO);
+            }
+            return ResponseEntity.notFound().build();
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(null);
+        }
     }
 }
