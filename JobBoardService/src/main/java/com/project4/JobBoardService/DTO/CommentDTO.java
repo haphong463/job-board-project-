@@ -13,7 +13,6 @@ import java.util.List;
 public class CommentDTO {
     private Long id;
     private BlogResponseDTO blog;
-    
     private List<CommentDTO> children;
     private String content;
 }

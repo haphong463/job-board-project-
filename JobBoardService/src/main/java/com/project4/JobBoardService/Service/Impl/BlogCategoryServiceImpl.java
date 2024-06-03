@@ -26,8 +26,8 @@ public class BlogCategoryServiceImpl implements BlogCategoryService {
     }
 
     @Override
-    public Optional<BlogCategory> getBlogCategoryById(Long id) {
-        return blogCategoryRepository.findById(id);
+    public BlogCategory getBlogCategoryById(Long id) {
+        return blogCategoryRepository.findById(id).orElse(null);
     }
 
     @Override

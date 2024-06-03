@@ -23,6 +23,7 @@ public class JobController {
     public JobController(JobService jobService) {
         this.jobService = jobService;
     }
+
     @GetMapping("/{companyId}")
     public ResponseEntity<List<JobDTO>> getAllJobsByCompanyId(@PathVariable Long companyId) {
         List<JobDTO> jobs = jobService.findAllJobsByCompanyId(companyId);
@@ -39,6 +40,7 @@ public class JobController {
         boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
         return ResponseEntity.ok(createdJob);
     }
+
     @PutMapping("/edit/{jobId}")
     public ResponseEntity<JobDTO> updateJob(@PathVariable Long jobId, @RequestBody JobDTO jobDTO) {
         JobDTO updatedJob = jobService.updateJob(jobId, jobDTO);
@@ -55,16 +57,4 @@ public class JobController {
         return ResponseEntity.noContent().build();
     }
 
-<<<<<<< HEAD
-//    @GetMapping("/search")
-//    public Page<Job> searchJobs(@RequestParam(required = false) String keyword,
-//                                @RequestParam(required = false) String location,
-//                                @RequestParam(required = false) Double minSalary,
-//                                @RequestParam(required = false) Double maxSalary,
-//                                @RequestParam(required = false) String jobType,
-//                                Pageable pageable) {
-//        return jobService.searchJobs(keyword, location, minSalary, maxSalary, jobType, pageable);
-//    }
-=======
->>>>>>> 2cebc32a05936101dea3b05e278c6078584161cd
 }

@@ -24,11 +24,11 @@ public class BlogCategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BlogCategory> getBlogCategoryById(@PathVariable Long id) {
-        Optional<BlogCategory> categoryOpt = blogCategoryService.getBlogCategoryById(id);
-        return categoryOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<BlogCategory> getBlogCategoryById(@PathVariable Long id) {
+//        BlogCategory categoryOpt = blogCategoryService.getBlogCategoryById(id);
+//        return categoryOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 
     @GetMapping
     public ResponseEntity<List<BlogCategoryDTO>> getAllBlogCategories() {

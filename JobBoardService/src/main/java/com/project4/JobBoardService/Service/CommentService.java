@@ -6,7 +6,7 @@ import com.project4.JobBoardService.Entity.Comment;
 import java.util.List;
 
 public interface CommentService {
-    List<CommentDTO> getCommentByBlogId(Long blogId);
+    List<Comment> getCommentByBlogId(Long blogId);
     Comment createComment(Comment comment);
     void deleteComment(Long id);
 

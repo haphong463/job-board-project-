@@ -10,8 +10,7 @@ import java.util.List;
 
 public interface BlogRepository extends JpaRepository<Blog, Long> {
 
-<<<<<<< HEAD
-=======
+
     @Query("SELECT b FROM Blog b WHERE b.title = :title AND b.author = :author")
     List<Blog> findByTitleAndAuthor(@Param("title") String title, @Param("author") String author);
 
@@ -19,5 +18,4 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     long countByAuthor(@Param("author") String author);
 
     boolean existsBySlug(String slug);
->>>>>>> 2cebc32a05936101dea3b05e278c6078584161cd
 }

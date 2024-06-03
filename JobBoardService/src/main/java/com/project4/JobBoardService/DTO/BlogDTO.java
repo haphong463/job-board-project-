@@ -20,7 +20,8 @@ public class BlogDTO {
     private String content;
     private String author;
     private Long blogCategoryId;
-
+    private BlogCategoryDTO category;
+    private Date publishedAt;
     private Boolean status;
     private String slug;
     private MultipartFile image;

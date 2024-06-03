@@ -16,14 +16,11 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentRepository commentRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+
 
     @Override
-    public List<CommentDTO> getCommentByBlogId(Long blogId) {
-        return commentRepository.findAllByBlogIdAndParentIdIsNull(blogId).stream()
-                .map(comment -> modelMapper.map(comment, CommentDTO.class))
-                .collect(Collectors.toList());
+    public List<Comment> getCommentByBlogId(Long blogId) {
+        return commentRepository.findAllByBlogIdAndParentIdIsNull(blogId);
     }
 
     @Override

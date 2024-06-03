@@ -1,7 +1,9 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
+import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Repository.BlogRepository;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Util.FileUtils;
@@ -45,57 +47,47 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) throws IOException {
-        return null;
-    }
-
-    @Override
-    public List<BlogResponseDTO> getAllBlog() {
-        List<Blog> blogs = blogRepository.findAll();
-        return blogs.stream().map(this::convertToDto).collect(Collectors.toList());
+    public List<Blog> getAllBlog() {
+        return blogRepository.findAll();
     }
 
     @Override
     public Blog getBlogById(Long id) {
-        Optional<Blog> blog = blogRepository.findById(id);
-        return blog.orElse(null);
+        return blogRepository.findById(id).orElse(null);
     }
 
-//    @Override
-//    public Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) throws IOException {
-//        Optional<Blog> existingBlogOpt = blogRepository.findById(id);
-//        if (existingBlogOpt.isPresent()) {
-//            Blog existingBlog = existingBlogOpt.get();
-//            existingBlog.setTitle(updatedBlog.getTitle());
-//            existingBlog.setContent(updatedBlog.getContent());
-//            existingBlog.setAuthor(updatedBlog.getAuthor());
-//            existingBlog.setCategory(updatedBlog.getCategory());
-//            existingBlog.setPublishedAt(updatedBlog.getPublishedAt());
-//            existingBlog.setStatus(updatedBlog.getStatus());
-//            existingBlog.setSlug(updatedBlog.getSlug());
-//
-//            if (imageFile != null && !imageFile.isEmpty()) {
-//                try {
-//                    Path filePath = FileUtils.saveFile(UPLOAD_DIR, imageFile);
-//                    existingBlog.setImageUrl(filePath.toString());
-//                    logger.info("Image updated and saved to: " + filePath.toString());
-//                } catch (IllegalArgumentException e) {
-//                    logger.warning("Invalid file: " + e.getMessage());
-//                }
-//            }
-//
-//            return blogRepository.save(existingBlog);
-//        } else {
-//            logger.warning("Blog not found: " + id);
-//            return null;
-//        }
-//    }
+
+    @Override
+    public Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) {
+        Blog existingBlog = blogRepository.findById(id).orElse(null);
+        if (existingBlog != null) {
+            existingBlog.setTitle(updatedBlog.getTitle());
+            existingBlog.setContent(updatedBlog.getContent());
+            existingBlog.setAuthor(updatedBlog.getAuthor());
+            existingBlog.setCategory(updatedBlog.getCategory());
+            existingBlog.setPublishedAt(updatedBlog.getPublishedAt());
+            existingBlog.setStatus(updatedBlog.getStatus());
+            existingBlog.setSlug(updatedBlog.getSlug());
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                try {
+                    Path filePath = FileUtils.saveFile(imageFile, "blog");
+                    String imageUrl = FileUtils.convertToUrl(filePath, "blog");
+                    existingBlog.setImageUrl(imageUrl);
+                    logger.info("Image updated and saved to: " + filePath.toString());
+                } catch (IllegalArgumentException | IOException e) {
+                    logger.warning("Invalid file: " + e.getMessage());
+                }
+            }
+
+            return blogRepository.save(existingBlog);
+        } else {
+            logger.warning("Blog not found: " + id);
+            return null;
+        }
+    }
 
     public void deleteBlog(Long id) {
         blogRepository.deleteById(id);
-    }
-
-    public BlogResponseDTO convertToDto(Blog blog) {
-        return modelMapper.map(blog, BlogResponseDTO.class);
     }
 }

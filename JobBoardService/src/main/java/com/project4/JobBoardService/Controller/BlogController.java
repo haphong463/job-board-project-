@@ -1,24 +1,24 @@
 package com.project4.JobBoardService.Controller;
 
+import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Repository.BlogCategoryRepository;
+import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/blogs")
@@ -27,8 +27,10 @@ public class BlogController {
     @Autowired
     private BlogService blogService;
     @Autowired
-    private BlogCategoryRepository blogCategoryRepository;
+    private BlogCategoryService blogCategoryService;
 
+    @Autowired
+    private ModelMapper modelMapper;
 
 //    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 //    public ResponseEntity<Blog> createBlog(
@@ -66,11 +68,10 @@ public class BlogController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
-        Optional<BlogCategory> categoryOpt = blogCategoryRepository.findById(blogDTO.getBlogCategoryId());
-        if (!categoryOpt.isPresent()) {
+        BlogCategory category = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
+        if (category == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
         }
-        BlogCategory category = categoryOpt.get();
 
         Blog blog = new Blog();
 
@@ -87,38 +88,77 @@ public class BlogController {
         // Call a method in your service to handle the blog creation logic, including image processing if necessary
         try {
             Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage());
-            BlogResponseDTO responseDto = blogService.convertToDto(createdBlog);
+            BlogResponseDTO responseDto = modelMapper.map(createdBlog, BlogResponseDTO.class);
             return ResponseEntity.ok(responseDto);
 //            return ResponseEntity.ok(blogDTO);
 
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Get all blogs
     @GetMapping
-    public List<BlogResponseDTO> getAllBlogs() {
-        return blogService.getAllBlog();
+    public ResponseEntity<List<BlogResponseDTO>> getAllBlogs() {
+        try {
+            List<Blog> blogs = blogService.getAllBlog();
+
+            return ResponseEntity.ok(blogs.stream().map(blog -> modelMapper.map(blog, BlogResponseDTO.class)).collect(Collectors.toList()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
     }
 
     // Get a single blog by ID
     @GetMapping("/{id}")
-    public Blog getBlogById(@PathVariable Long id) {
-        return blogService.getBlogById(id);
+    public ResponseEntity<BlogResponseDTO> getBlogById(@PathVariable Long id) throws ResourceNotFoundException {
+        try {
+            Blog blog = blogService.getBlogById(id);
+            if(blog == null){
+                return ResponseEntity.notFound().build();
+            }
+            BlogResponseDTO blogResponseDTO = modelMapper.map(blog, BlogResponseDTO.class);
+            return ResponseEntity.ok(blogResponseDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // Update a blog
     @PutMapping("/{id}")
-    public Blog updateBlog(@PathVariable Long id,
-                           @RequestParam("blog") Blog blog,
-                           @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) throws IOException {
-        return blogService.updateBlog(id, blog, imageFile);
+    public ResponseEntity<BlogResponseDTO> updateBlog(@PathVariable Long id,
+                                                      @ModelAttribute BlogDTO blogDTO) {
+        try {
+            // check exist blog, blog category
+            Blog existingBlogOpt = blogService.getBlogById(id);
+            BlogCategory existingBlogCategory = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
+            if (existingBlogOpt == null || existingBlogCategory == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+
+            Blog editBlog = modelMapper.map(blogDTO, Blog.class);
+            editBlog.setCategory(existingBlogCategory);
+
+
+            // update blog
+            Blog updatedBlog = blogService.updateBlog(id, editBlog, blogDTO.getImage());
+            BlogResponseDTO responseDto = modelMapper.map(updatedBlog, BlogResponseDTO.class);
+            return ResponseEntity.ok(responseDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // Delete a blog
     @DeleteMapping("/{id}")
-    public void deleteBlog(@PathVariable Long id) {
-        blogService.deleteBlog(id);
+    public ResponseEntity<Long> deleteBlog(@PathVariable Long id) {
+        try {
+            blogService.deleteBlog(id);
+            return ResponseEntity.ok().body(id);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
     }
 }
