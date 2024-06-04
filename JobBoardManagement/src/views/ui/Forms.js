@@ -1,35 +1,57 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
-  Card,
   Row,
   Col,
-  CardTitle,
-  CardBody,
   Button,
   Form,
   FormGroup,
   Label,
   Input,
   FormText,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-
+import { Editor } from "@tinymce/tinymce-react";
+import { createBlog, getAllBlogs } from "../../services/BlogService";
+import { slugify } from "../../utils/functions/convertToSlug";
+import { getAllBlogCategories } from "../../services/Blog_CategoryService";
+import { createFormData } from "../../utils/form-data/formDataUtil";
+import { IoMdAdd } from "react-icons/io";
 // Define the validation schema using yup
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
   content: yup.string().required("Content is required"),
-  category: yup.string().required("Category is required"),
+  blogCategoryId: yup.string().required("Category is required"),
   tags: yup.string().required("Tags are required"),
-  image: yup.mixed().required("Image must be at least 1."),
+  image: yup
+    .mixed()
+    .test("required", "You need to provide a file", (file) => {
+      // return file && file.size <-- u can use this if you don't want to allow empty files to be uploaded;
+      if (file) return true;
+      return false;
+    })
+    .test("fileSize", "The file is too large", (file) => {
+      //if u want to allow only certain file sizes
+      return file && file.size <= 2000000;
+    }),
 });
 
-const Forms = () => {
+const Forms = (args) => {
+  const [categoryList, setCategoryList] = useState([]);
+  const [file, setFile] = useState(null);
+  const [modal, setModal] = useState(false);
+
+  const toggle = () => setModal(!modal);
   // Use useForm hook from react-hook-form with yupResolver
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -37,136 +59,183 @@ const Forms = () => {
       title: "",
       tags: "",
       content: "",
-      category: "",
+      blogCategoryId: "",
       image: "",
     },
   });
 
   const onSubmit = (data) => {
-    console.log(data);
+    const newData = {
+      ...data,
+      slug: slugify(data.title),
+      author: "Testttt",
+      status: 1,
+    };
+
+    const formData = createFormData(newData);
+    console.log(newData);
+    createBlog(formData).then((res) => {
+      if (res) {
+        args.onSetBlogData((prevBlog) => [...prevBlog, res]);
+      }
+      console.log(res);
+    });
   };
 
+  useEffect(() => {
+    getAllBlogCategories().then((data) => {
+      setCategoryList(data);
+    });
+  }, []);
+
   return (
-    <Row>
-      <Col>
-        {/* --------------------------------------------------------------------------------*/}
-        {/* Card for Blog Post Form*/}
-        {/* --------------------------------------------------------------------------------*/}
-        <Card>
-          <CardTitle tag="h6" className="border-bottom p-3 mb-0">
+    <>
+      <div className="d-flex justify-content-end mb-2">
+        <Button color="danger" onClick={toggle}>
+          <IoMdAdd className="me-2" />
+          New blog
+        </Button>
+      </div>
+      <Modal isOpen={modal} toggle={toggle} size="lg">
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <ModalHeader
+            toggle={toggle}
+            tag="h6"
+            className="border-bottom p-3 mb-0"
+          >
             <i className="bi bi-pencil me-2"> </i>
             Create Blog Post
-          </CardTitle>
-          <CardBody>
-            <Form onSubmit={handleSubmit(onSubmit)}>
-              <FormGroup>
-                <Label for="postTitle">Title</Label>
-                <Controller
-                  name="title"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="postTitle"
-                      placeholder="Enter the title of the blog post"
-                      type="text"
-                      invalid={!!errors.title}
-                    />
+          </ModalHeader>
+          <ModalBody>
+            <Row>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="postTitle">Title</Label>
+                  <Controller
+                    name="title"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        id="postTitle"
+                        placeholder="Enter the title of the blog post"
+                        type="text"
+                        invalid={!!errors.title}
+                      />
+                    )}
+                  />
+                  {errors.title && (
+                    <FormText color="danger">{errors.title.message}</FormText>
                   )}
-                />
-                {errors.title && (
-                  <FormText color="danger">{errors.title.message}</FormText>
-                )}
-              </FormGroup>
-              <FormGroup>
-                <Label for="postContent">Content</Label>
-                <Controller
-                  name="content"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="postContent"
-                      placeholder="Write your blog content here"
-                      type="textarea"
-                      invalid={!!errors.content}
-                    />
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="postTags">Tags</Label>
+                  <Controller
+                    name="tags"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        id="postTags"
+                        placeholder="Enter tags separated by commas"
+                        type="text"
+                        invalid={!!errors.tags}
+                      />
+                    )}
+                  />
+                  {errors.tags && (
+                    <FormText color="danger">{errors.tags.message}</FormText>
                   )}
-                />
-                {errors.content && (
-                  <FormText color="danger">{errors.content.message}</FormText>
-                )}
-              </FormGroup>
-              <FormGroup>
-                <Label for="postCategory">Category</Label>
-                <Controller
-                  name="category"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="postCategory"
-                      type="select"
-                      invalid={!!errors.category}
-                    >
-                      <option value="">Select a category</option>
-                      <option value="Technology">Technology</option>
-                      <option value="Health">Health</option>
-                      <option value="Lifestyle">Lifestyle</option>
-                      <option value="Business">Business</option>
-                      <option value="Travel">Travel</option>
-                    </Input>
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12}>
+                <FormGroup>
+                  <Editor
+                    apiKey={process.env.REACT_APP_TINYMCE_KEY}
+                    init={{
+                      plugins:
+                        "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount",
+                      toolbar:
+                        "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
+                    }}
+                    initialValue="Welcome to TinyMCE!"
+                    onEditorChange={(newValue, editor) =>
+                      setValue("content", newValue, { shouldValidate: true })
+                    }
+                  />
+                  {errors.content && (
+                    <FormText color="danger">{errors.content.message}</FormText>
                   )}
-                />
-                {errors.category && (
-                  <FormText color="danger">{errors.category.message}</FormText>
-                )}
-              </FormGroup>
-              <FormGroup>
-                <Label for="postTags">Tags</Label>
-                <Controller
-                  name="tags"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="postTags"
-                      placeholder="Enter tags separated by commas"
-                      type="text"
-                      invalid={!!errors.tags}
-                    />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="postCategory">Category</Label>
+                  <Controller
+                    name="blogCategoryId"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        id="postCategory"
+                        type="select"
+                        invalid={!!errors.blogCategoryId}
+                      >
+                        <option disabled value="">
+                          --- Select category ---
+                        </option>
+                        {categoryList.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </Input>
+                    )}
+                  />
+                  {errors.blogCategoryId && (
+                    <FormText color="danger">
+                      {errors.blogCategoryId.message}
+                    </FormText>
                   )}
-                />
-                {errors.tags && (
-                  <FormText color="danger">{errors.tags.message}</FormText>
-                )}
-              </FormGroup>
-              <FormGroup>
-                <Label for="postImage">Upload Image</Label>
-                <Controller
-                  name="image"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="postImage"
-                      type="file"
-                      invalid={!!errors.image}
-                    />
+                </FormGroup>
+              </Col>
+              <Col md={6}>
+                <FormGroup>
+                  <Label for="postImage">Upload Image</Label>
+                  <Input
+                    id="postImage"
+                    type="file"
+                    onChange={(e) => {
+                      setValue("image", e.target.files[0], {
+                        shouldValidate: true,
+                      });
+                    }}
+                    invalid={!!errors.image}
+                  />
+                  {errors.image && (
+                    <FormText color="danger">{errors.image.message}</FormText>
                   )}
-                />
-                {errors.image && (
-                  <FormText color="danger">{errors.image.message}</FormText>
-                )}
-              </FormGroup>
-              <Button className="mt-2" type="submit">
-                Submit
-              </Button>
-            </Form>
-          </CardBody>
-        </Card>
-      </Col>
-    </Row>
+                </FormGroup>
+              </Col>
+            </Row>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" type="submit">
+              Submit
+            </Button>
+            <Button color="secondary" type="button" onClick={toggle}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </Form>
+      </Modal>
+    </>
   );
 };
 
