@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Entity;
 
+import com.project4.JobBoardService.Enum.WorkSchedule;
 import jakarta.persistence.*;
 import lombok.*;
 

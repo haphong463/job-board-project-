@@ -3,14 +3,13 @@ package com.project4.JobBoardService.Service.Impl;
 import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
+import com.project4.JobBoardService.Enum.WorkSchedule;
 import com.project4.JobBoardService.Repository.JobRepository;
 import com.project4.JobBoardService.Service.CategoryService;
 import com.project4.JobBoardService.Service.CompanyService;
 import com.project4.JobBoardService.Service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
