@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
 import com.project4.JobBoardService.Repository.JobRepository;
@@ -43,16 +44,14 @@ public class JobServiceImpl   implements JobService {
     @Override
     public boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO) {
         Optional<Company> companyOptional = companyService.getCompanyById(companyId);
-        Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
+        Optional<CategoryDTO> categoryDTOOptional = Optional.ofNullable(categoryService.getCategoryById(categoryId));
 
-        if (companyOptional.isPresent() && categoryOptional.isPresent()) {
+        if (companyOptional.isPresent() && categoryDTOOptional.isPresent()) {
             Company company = companyOptional.get();
-            Category category = categoryOptional.get();
+            CategoryDTO categoryDTO = categoryDTOOptional.get();
 
-
+            Category category = convertToEntity(categoryDTO);
             Job job = convertToEntity(jobDTO);
-
-
             job.setCompany(company);
             job.setCategory(category);
 
@@ -146,6 +145,8 @@ public class JobServiceImpl   implements JobService {
         // Set other fields as needed
         return job;
     }
-    
+    public Category convertToEntity(CategoryDTO categoryDTO) {
+        return new Category(categoryDTO.getCategoryId(), categoryDTO.getCategoryName());
+    }
 
 }

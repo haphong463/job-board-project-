@@ -1,11 +1,9 @@
 package com.project4.JobBoardService.Controller;
 
-import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
-import com.project4.JobBoardService.Repository.BlogCategoryRepository;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
 import org.modelmapper.ModelMapper;
@@ -13,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -65,7 +63,7 @@ public class BlogController {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 //        }
 //    }
-
+@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
         BlogCategory category = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
@@ -99,6 +97,7 @@ public class BlogController {
 
     // Get all blogs
     @GetMapping
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<List<BlogResponseDTO>> getAllBlogs() {
         try {
             List<Blog> blogs = blogService.getAllBlog();
@@ -110,21 +109,22 @@ public class BlogController {
     }
 
     // Get a single blog by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<BlogResponseDTO> getBlogById(@PathVariable Long id) throws ResourceNotFoundException {
-        try {
-            Blog blog = blogService.getBlogById(id);
-            if(blog == null){
-                return ResponseEntity.notFound().build();
-            }
-            BlogResponseDTO blogResponseDTO = modelMapper.map(blog, BlogResponseDTO.class);
-            return ResponseEntity.ok(blogResponseDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<BlogResponseDTO> getBlogById(@PathVariable Long id) throws ResourceNotFoundException {
+//        try {
+//            Blog blog = blogService.getBlogById(id);
+//            if(blog == null){
+//                return ResponseEntity.notFound().build();
+//            }
+//            BlogResponseDTO blogResponseDTO = modelMapper.map(blog, BlogResponseDTO.class);
+//            return ResponseEntity.ok(blogResponseDTO);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//        }
+//    }
 
     // Update a blog
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<BlogResponseDTO> updateBlog(@PathVariable Long id,
                                                       @ModelAttribute BlogDTO blogDTO) {
@@ -151,6 +151,7 @@ public class BlogController {
     }
 
     // Delete a blog
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> deleteBlog(@PathVariable Long id) {
         try {

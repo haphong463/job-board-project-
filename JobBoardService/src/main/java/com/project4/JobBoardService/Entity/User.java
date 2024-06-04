@@ -4,7 +4,9 @@ package com.project4.JobBoardService.Entity;
 import com.project4.JobBoardService.Enum.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,11 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "email")
+        })
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -26,42 +32,27 @@ public class User   {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(length = 64, nullable = false, unique = true)
+
+    @NotBlank
+    @Size(max = 20)
+    private String username;
+
+    @NotBlank
+    @Size(max = 50)
     @Email
     private String email;
 
-    private String username;
-
-    @Column(length = 128, nullable = false)
-    @NotNull
+    @NotBlank
+    @Size(max = 120)
     private String password;
 
-    @Column(name = "first_name", length = 45, nullable = false)
-    @NotNull
-    private String firstName;
-
-    @Column(name = "last_name", length = 45, nullable = false)
-    @NotNull
-    private String lastName;
-
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(  name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
     @Enumerated(EnumType.STRING)
     private Gender gender;
-
-
-    @Column(columnDefinition = "tinyint(1) default 1")
-    private boolean enabled;
-
-    @Column(columnDefinition = "tinyint(1) default 1")
-    private boolean changePassword;
-
-    private Boolean blocked;
-
-
-    @Column(name = "reset_password_token", length = 128)
-    private String resetPasswordToken;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
 
     @OneToMany(mappedBy = "id")
     private Set<Blog> blogs = new HashSet<>();
@@ -72,13 +63,11 @@ public class User   {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCV> userCVs;
 
-//    @Transient
-//    public String getPhotosImagePath() {
-//        if (id == null || photo == null)
-//            return "/images/default-user.png";
-//
-//        return "/user-photos/" + this.id + "/" + photo;
-//    }
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
 
 
 }

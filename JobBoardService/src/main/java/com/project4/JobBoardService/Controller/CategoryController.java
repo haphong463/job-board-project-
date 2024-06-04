@@ -1,67 +1,45 @@
 package com.project4.JobBoardService.Controller;
 
-import com.project4.JobBoardService.Config.ResourceNotFoundException;
-import com.project4.JobBoardService.Entity.Category;
-import com.project4.JobBoardService.Repository.CategoryRepository;
+import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.Service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
-
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
+    public CategoryDTO createCategory(@RequestBody CategoryDTO categoryDTO) {
+        return categoryService.createCategory(categoryDTO);
+    }
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @GetMapping("/{categoryId}")
+    public CategoryDTO getCategoryById(@PathVariable Long categoryId) {
+        return categoryService.getCategoryById(categoryId);
+    }
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping
-    public List<Category> getAllCategory() {
-        return categoryRepository.findAll();
+    public List<CategoryDTO> getAllCategories() {
+        return categoryService.getAllCategories();
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable(value = "id") Long categoryId)
-            throws ResourceNotFoundException {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
-        return ResponseEntity.ok().body(category);
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{categoryId}")
+    public CategoryDTO updateCategory(@PathVariable Long categoryId, @RequestBody CategoryDTO categoryDTO) {
+        return categoryService.updateCategory(categoryId, categoryDTO);
     }
-
-    @PostMapping("/add")
-    public Category createCategory(@Validated @RequestBody Category category) {
-        return categoryRepository.save(category);
-    }
-
-    @PutMapping("edit/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable(value = "id") Long categoryId,
-                                                   @Validated @RequestBody Category categoryDetails) throws ResourceNotFoundException {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
-        category.setCategoryName(categoryDetails.getCategoryName());
-        final Category updatedCategory = categoryRepository.save(category);
-        return ResponseEntity.ok(updatedCategory);
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public Map<String, Boolean> deleteCategory(@PathVariable(value = "id") Long categoryId)
-            throws ResourceNotFoundException {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
-
-        categoryRepository.delete(category);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", Boolean.TRUE    );
-        return response;
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{categoryId}")
+    public void deleteCategory(@PathVariable Long categoryId) {
+        categoryService.deleteCategory(categoryId);
     }
 }
 
