@@ -1,0 +1,22 @@
+import axiosRequest from "../configs/axiosConfig";
+
+const URL = "/blogs";
+const HEADERS_FORM_DATA = {
+  "Content-Type": "multipart/form-data",
+};
+
+const HEADERS_FORM_JSON_APPLICATION = {
+  "Content-Type": "application/json",
+};
+
+export const getAllBlogs = async () => {
+  return await axiosRequest.get(URL);
+};
+
+export const createBlog = async (data) =>
+  await axiosRequest.post(URL, data, {
+    headers: HEADERS_FORM_DATA,
+  });
+
+export const deleteBlog = async (blogId) =>
+  await axiosRequest.delete(`${URL}/${blogId}`);

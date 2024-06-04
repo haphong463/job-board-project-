@@ -6,7 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 const navigation = [
   {
     title: "Dashboard",
-    href: "/starter",
+    href: "/jobportal/starter",
     icon: "bi bi-speedometer2",
   },
   {
@@ -15,49 +15,49 @@ const navigation = [
     children: [
       {
         title: "Alert",
-        href: "/alerts",
+        href: "/jobportal/alerts",
         icon: "bi bi-bell",
       },
       {
         title: "Badges",
-        href: "/badges",
+        href: "/jobportal/badges",
         icon: "bi bi-patch-check",
       },
       {
         title: "Buttons",
-        href: "/buttons",
+        href: "/jobportal/buttons",
         icon: "bi bi-hdd-stack",
       },
       {
         title: "Cards",
-        href: "/cards",
+        href: "/jobportal/cards",
         icon: "bi bi-card-text",
       },
       {
         title: "Grid",
-        href: "/grid",
+        href: "/jobportal/grid",
         icon: "bi bi-columns",
       },
     ],
   },
   {
     title: "Table",
-    href: "/table",
+    href: "/jobportal/table",
     icon: "bi bi-layout-split",
   },
   {
     title: "Forms",
-    href: "/forms",
+    href: "/jobportal/forms",
     icon: "bi bi-textarea-resize",
   },
   {
     title: "Breadcrumbs",
-    href: "/breadcrumbs",
+    href: "/jobportal/breadcrumbs",
     icon: "bi bi-link",
   },
   {
     title: "About",
-    href: "/about",
+    href: "/jobportal/about",
     icon: "bi bi-people",
   },
 ];

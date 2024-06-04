@@ -1,179 +1,99 @@
 import DataTable from "react-data-table-component";
 import ProjectTables from "../../components/dashboard/ProjectTable";
 import { Row, Col, Table, Card, CardTitle, CardBody } from "reactstrap";
-
-const columns = [
-  {
-    name: "Title",
-    selector: (row) => row.title,
-    sortable: true,
-    cell: (row) => (
-      <div
-        style={{
-          fontSize: "16px",
-        }}
-      >
-        {row.title}
-      </div>
-    ),
-  },
-  {
-    name: "Year",
-    selector: (row) => row.year,
-    sortable: true,
-  },
-];
-
-const data = [
-  {
-    id: 1,
-    title: "Beetlejuice",
-    year: "1988",
-  },
-  {
-    id: 2,
-    title: "Ghostbusters",
-    year: "1984",
-  },
-];
+import Forms from "./Forms";
+import { useEffect, useState } from "react";
+import { getAllBlogs, deleteBlog } from "../../services/BlogService";
 
 const Tables = () => {
+  const [blogData, setBlogData] = useState([]);
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this blog?")) {
+      console.log(">>> blogId: " + id);
+      deleteBlog(id).then((response) => {
+        if (response) {
+          setBlogData(blogData.filter((blog) => blog.id !== id));
+        }
+      });
+    }
+  };
+
+  const handleEdit = (id) => {
+    history.push(`/edit-blog/${id}`);
+  };
+
+  const columns = [
+    {
+      name: "Title",
+      selector: (row) => row.title,
+      sortable: true,
+      cell: (row) => (
+        <div
+          style={{
+            fontSize: "16px",
+          }}
+        >
+          {row.title}
+        </div>
+      ),
+    },
+    {
+      name: "Image",
+      selector: (row) => row.imageUrl,
+      sortable: true,
+      cell: (row) => (
+        <div
+          style={{
+            fontSize: "16px",
+          }}
+        >
+          <img
+            src={row.imageUrl}
+            alt={row.title}
+            style={{ maxWidth: "100px" }}
+          />
+        </div>
+      ),
+    },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div>
+          <button
+            onClick={() => handleEdit(row.id)}
+            style={{ marginRight: "10px" }}
+            className="btn btn-info"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(row.id)}
+            className="btn btn-danger"
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+  useEffect(() => {
+    getAllBlogs().then((data) => data && setBlogData(data));
+  }, []);
   return (
     <Row>
-      {/* --------------------------------------------------------------------------------*/}
-      {/* table-1*/}
-      {/* --------------------------------------------------------------------------------*/}
-      <Col lg="12">{/* <ProjectTables /> */}</Col>
-      {/* --------------------------------------------------------------------------------*/}
-      {/* table-2*/}
-      {/* --------------------------------------------------------------------------------*/}
+      <Col lg="12">
+        <Forms onSetBlogData={setBlogData} />
+      </Col>
       <Col lg="12">
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-card-text me-2"> </i>
-            Table with Border
+            Blog List
           </CardTitle>
-          {/* <CardBody className="">
-            <Table bordered>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Username</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Mark</td>
-                  <td>Otto</td>
-                  <td>@mdo</td>
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  <td>Jacob</td>
-                  <td>Thornton</td>
-                  <td>@fat</td>
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  <td>Larry</td>
-                  <td>the Bird</td>
-                  <td>@twitter</td>
-                </tr>
-              </tbody>
-            </Table>
-          </CardBody> */}
+          <DataTable columns={columns} data={blogData} />
         </Card>
-        <DataTable columns={columns} data={data} />
       </Col>
-      {/* --------------------------------------------------------------------------------*/}
-      {/* table-3*/}
-      {/* --------------------------------------------------------------------------------*/}
-      {/* <Col lg="12">
-        <Card>
-          <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-            <i className="bi bi-card-text me-2"> </i>
-            Table with Striped
-          </CardTitle>
-          <CardBody className="">
-            <Table bordered striped>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Username</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Mark</td>
-                  <td>Otto</td>
-                  <td>@mdo</td>
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  <td>Jacob</td>
-                  <td>Thornton</td>
-                  <td>@fat</td>
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  <td>Larry</td>
-                  <td>the Bird</td>
-                  <td>@twitter</td>
-                </tr>
-              </tbody>
-            </Table>
-          </CardBody>
-        </Card>
-      </Col> */}
-      {/* --------------------------------------------------------------------------------*/}
-      {/* table-3*/}
-      {/* --------------------------------------------------------------------------------*/}
-      {/* <Col lg="12">
-        <Card>
-          <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-            <i className="bi bi-card-text me-2"> </i>
-            Table with Hover
-          </CardTitle>
-          <CardBody className="">
-            <Table bordered hover>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>First Name</th>
-                  <th>Last Name</th>
-                  <th>Username</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Mark</td>
-                  <td>Otto</td>
-                  <td>@mdo</td>
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  <td>Jacob</td>
-                  <td>Thornton</td>
-                  <td>@fat</td>
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  <td>Larry</td>
-                  <td>the Bird</td>
-                  <td>@twitter</td>
-                </tr>
-              </tbody>
-            </Table>
-          </CardBody>
-        </Card>
-      </Col> */}
     </Row>
   );
 };
