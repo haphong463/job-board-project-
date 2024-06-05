@@ -49,4 +49,21 @@ public class FileUtils {
         String fileName = filePath.getFileName().toString();
         return "http://localhost:" + serverPort + "/uploads/" + folder + "/" + fileName;
     }
+
+    public static boolean deleteFile(String folder, String fileName) {
+        try {
+            Path filePath = Paths.get(uploadDir + File.separator + folder, fileName).toAbsolutePath().normalize();
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+                return true;
+            } else {
+                System.out.println("File not found: " + filePath);
+                return false;
+            }
+        } catch (IOException e) {
+            System.out.println("Error deleting file: " + e.getMessage());
+            return false;
+        }
+    }
+
 }

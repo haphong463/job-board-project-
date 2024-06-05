@@ -22,6 +22,7 @@ public class CommentController {
     @Autowired
     private ModelMapper modelMapper;
 
+
     @GetMapping("/blog/{blogId}")
     public ResponseEntity<List<CommentDTO>> getCommentsByBlogId(@PathVariable Long blogId) {
         try {
@@ -48,7 +49,7 @@ public class CommentController {
     public ResponseEntity<Comment> deleteComment(@PathVariable Long id) {
         try{
             Comment existingComment = commentService.getCommentById(id);
-            if(id != null){
+            if(existingComment != null){
                 commentService.deleteComment(id);
                 return ResponseEntity.ok().build();
             }

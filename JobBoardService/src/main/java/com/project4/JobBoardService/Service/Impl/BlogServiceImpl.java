@@ -88,6 +88,28 @@ public class BlogServiceImpl implements BlogService {
     }
 
     public void deleteBlog(Long id) {
-        blogRepository.deleteById(id);
+        Blog existingBlog = blogRepository.findById(id).orElse(null);
+        if (existingBlog != null) {
+            // Assuming the image URL format is something like "http://localhost:8080/uploads/{folder}/{fileName}"
+            String imageUrl = existingBlog.getImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                // Extract the folder and fileName from the URL
+                String[] urlParts = imageUrl.split("/uploads/");
+                if (urlParts.length == 2) {
+                    String[] pathParts = urlParts[1].split("/");
+                    String folder = pathParts[0];
+                    String fileName = pathParts[1];
+
+                    // Delete the file
+                    boolean fileDeleted = FileUtils.deleteFile(folder, fileName);
+                    if (!fileDeleted) {
+                        System.out.println("Failed to delete the image file: " + fileName);
+                    }
+                }
+            }
+            // Delete the blog entry
+            blogRepository.deleteById(id);
+        }
     }
+
 }
