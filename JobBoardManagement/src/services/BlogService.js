@@ -10,7 +10,11 @@ const HEADERS_FORM_JSON_APPLICATION = {
 };
 
 export const getAllBlogs = async () => {
-  return await axiosRequest.get(URL);
+  try {
+    return await axiosRequest.get(URL);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const createBlog = async (data) =>

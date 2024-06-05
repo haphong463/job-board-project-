@@ -5,7 +5,7 @@ const axiosRequest = axios.create({
 
 // Request Interceptor for JWT
 axiosRequest.interceptors.request.use(function (config) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   config.headers.Authorization = token ? `Bearer ${token}` : "";
   return config;
 });

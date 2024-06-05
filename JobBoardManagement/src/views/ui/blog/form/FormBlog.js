@@ -18,12 +18,12 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Editor } from "@tinymce/tinymce-react";
-import { slugify } from "../../utils/functions/convertToSlug";
-import { getAllBlogCategories } from "../../services/Blog_CategoryService";
-import { createFormData } from "../../utils/form-data/formDataUtil";
+import { slugify } from "../../../../utils/functions/convertToSlug";
+import { createFormData } from "../../../../utils/form-data/formDataUtil";
 import { IoMdAdd } from "react-icons/io";
-import { useDispatch } from "react-redux";
-import { addBlog } from "../../features/blogs/blogSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addBlog } from "../../../../features/blogs/blogSlice";
+import { fetchBlogCategory } from "../../../../features/blog-category/blogCategorySlice";
 
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
@@ -41,10 +41,12 @@ const schema = yup.object().shape({
     }),
 });
 
-const Forms = (args) => {
-  const [categoryList, setCategoryList] = useState([]);
-  const [modal, setModal] = useState(false);
+const FormBlog = (args) => {
   const dispatch = useDispatch();
+
+  const categoryList = useSelector((state) => state.blogCategory.blogCategory);
+  const categoryStatus = useSelector((state) => state.blogCategory.status);
+  const [modal, setModal] = useState(false);
 
   const toggle = () => setModal(!modal);
 
@@ -79,10 +81,10 @@ const Forms = (args) => {
   };
 
   useEffect(() => {
-    getAllBlogCategories().then((data) => {
-      setCategoryList(data);
-    });
-  }, []);
+    if (categoryStatus === "idle") {
+      dispatch(fetchBlogCategory());
+    }
+  }, [categoryStatus, dispatch]);
 
   return (
     <>
@@ -235,4 +237,4 @@ const Forms = (args) => {
   );
 };
 
-export default Forms;
+export default FormBlog;

@@ -1,15 +1,24 @@
-// src/components/Tables.js
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import { Row, Col, Card, CardTitle } from "reactstrap";
-import Forms from "./Forms";
+import {
+  Row,
+  Col,
+  Card,
+  CardTitle,
+  InputGroup,
+  InputGroupText,
+  Input,
+} from "reactstrap";
+import Form from "./form/FormBlog";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBlogs, deleteBlog } from "../../features/blogs/blogSlice";
+import { fetchBlogs, deleteBlog } from "../../../features/blogs/blogSlice";
 
-const Tables = () => {
+function Blog(props) {
   const dispatch = useDispatch();
-  const blogData = useSelector((state) => state.blogs.blogs);
+  const blogData = useSelector((state) => state.blogs.blogs) || [];
   const blogStatus = useSelector((state) => state.blogs.status);
+
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (blogStatus === "idle") {
@@ -26,6 +35,10 @@ const Tables = () => {
   const handleEdit = (id) => {
     history.push(`/edit-blog/${id}`);
   };
+
+  const filteredBlogs = blogData.filter((blog) =>
+    blog.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const columns = [
     {
@@ -81,11 +94,11 @@ const Tables = () => {
       ),
     },
   ];
-
+  console.log("re-render");
   return (
     <Row>
       <Col lg="12">
-        <Forms />
+        <Form />
       </Col>
       <Col lg="12">
         <Card>
@@ -93,11 +106,20 @@ const Tables = () => {
             <i className="bi bi-card-text me-2"> </i>
             Blog List
           </CardTitle>
-          <DataTable columns={columns} data={blogData} />
+          <InputGroup className="mb-3">
+            <InputGroupText>Search</InputGroupText>
+            <Input
+              type="text"
+              placeholder="Search by title"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </InputGroup>
+          <DataTable columns={columns} data={filteredBlogs} />
         </Card>
       </Col>
     </Row>
   );
-};
+}
 
-export default Tables;
+export default Blog;

@@ -6,6 +6,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import Loader from "./layouts/loader/Loader";
+import { Provider } from "react-redux";
+import { store } from "./store";
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
@@ -13,7 +15,10 @@ const root = createRoot(rootElement);
 root.render(
   <Suspense fallback={<Loader />}>
     <BrowserRouter>
-      <App />
+      <Provider store={store}>
+        <App />
+      </Provider>
+      ,
     </BrowserRouter>
   </Suspense>
 

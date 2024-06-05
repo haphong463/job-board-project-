@@ -14,17 +14,19 @@ import {
   FormFeedback,
 } from "reactstrap";
 import logo from "../assets/images/logos/logo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../features/auth/authSlice";
 
 // Xác định schema yup cho form
 const schema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Email is not valid!")
-    .required("Email is required!"),
+  username: yup.string().required("Email is required!"),
   password: yup.string().required("Password is required!"),
 });
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const authStatus = useSelector((state) => state.auth.status);
+  const authError = useSelector((state) => state.auth.error);
   // Sử dụng react-hook-form với yup resolver
   const {
     control,
@@ -33,7 +35,7 @@ const Login = () => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
       rememberMe: false,
     },
@@ -42,6 +44,7 @@ const Login = () => {
   // Xử lý khi submit form
   const onSubmit = (data) => {
     console.log(data);
+    dispatch(login(data));
   };
 
   return (
@@ -54,15 +57,15 @@ const Login = () => {
           <h2 className="text-center mb-4">Login</h2>
           <Form onSubmit={handleSubmit(onSubmit)}>
             <FormGroup>
-              <Label for="email">Email</Label>
+              <Label for="username">username</Label>
               <Controller
-                name="email"
+                name="username"
                 control={control}
                 render={({ field }) => (
                   <Input
                     type="text"
-                    id="email"
-                    placeholder="enter your email..."
+                    id="username"
+                    placeholder="enter your username..."
                     invalid={!!errors.email}
                     {...field}
                   />
@@ -102,9 +105,10 @@ const Login = () => {
                 )}
               />
             </FormGroup>
-            <Button color="primary" block>
-              Login
+            <Button color="primary" block disabled={authStatus === "loading"}>
+              {authStatus === "loading" ? "Logging in..." : "Login"}
             </Button>
+            {authStatus === "failed" && <p>{authError}</p>}
           </Form>
         </Col>
       </Row>
