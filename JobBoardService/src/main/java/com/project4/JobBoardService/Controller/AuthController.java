@@ -121,4 +121,9 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOutUser() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok(new MessageResponse("User signed out successfully!"));
+    }
 }
