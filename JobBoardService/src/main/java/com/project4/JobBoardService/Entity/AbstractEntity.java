@@ -13,20 +13,20 @@ import java.util.Date;
 @NoArgsConstructor
 public abstract class AbstractEntity {
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date created_at;
+    protected Date createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date updated_at;
+    protected Date updatedAt;
 
     @PrePersist
     protected void onCreate(){
-        created_at = new Date();
-        updated_at = new Date();
+        createdAt = new Date();
+        updatedAt = new Date();
     }
 
     @PreUpdate
     protected void onUpdate(){
-        updated_at = new Date();
+        updatedAt = new Date();
     }
 
 }
