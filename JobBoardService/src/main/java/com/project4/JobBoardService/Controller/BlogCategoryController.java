@@ -30,19 +30,19 @@ public class BlogCategoryController {
 //        BlogCategory categoryOpt = blogCategoryService.getBlogCategoryById(id);
 //        return categoryOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 //    }
-@PreAuthorize("hasRole('ADMIN')")
+//@PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<BlogCategoryDTO>> getAllBlogCategories() {
         List<BlogCategoryDTO> categories = blogCategoryService.getAllBlogCategories();
         return ResponseEntity.ok(categories);
     }
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<BlogCategory> updateBlogCategory(@PathVariable Long id, @RequestBody BlogCategory updatedCategory) {
         BlogCategory category = blogCategoryService.updateBlogCategory(id, updatedCategory);
         return category != null ? ResponseEntity.ok(category) : ResponseEntity.notFound().build();
     }
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBlogCategory(@PathVariable Long id) {
         blogCategoryService.deleteBlogCategory(id);

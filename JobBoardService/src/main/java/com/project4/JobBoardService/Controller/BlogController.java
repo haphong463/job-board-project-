@@ -63,7 +63,7 @@ public class BlogController {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 //        }
 //    }
-@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
         BlogCategory category = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
@@ -97,7 +97,7 @@ public class BlogController {
 
     // Get all blogs
     @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<List<BlogResponseDTO>> getAllBlogs() {
         try {
             List<Blog> blogs = blogService.getAllBlog();
@@ -124,7 +124,7 @@ public class BlogController {
 //    }
 
     // Update a blog
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<BlogResponseDTO> updateBlog(@PathVariable Long id,
                                                       @ModelAttribute BlogDTO blogDTO) {
@@ -151,7 +151,7 @@ public class BlogController {
     }
 
     // Delete a blog
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> deleteBlog(@PathVariable Long id) {
         try {
