@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.Entity;
+package com.project4.JobBoardService.Enum;
 
 public enum WorkSchedule {
     FREELANCE,

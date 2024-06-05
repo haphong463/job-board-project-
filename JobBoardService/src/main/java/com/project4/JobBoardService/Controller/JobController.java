@@ -7,6 +7,7 @@ import com.project4.JobBoardService.Service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public class JobController {
         }
         return ResponseEntity.ok(jobs);
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping("/companies/{companyId}/categories/{categoryId}/jobs")
     public ResponseEntity<Boolean> createJob(@PathVariable("companyId") Long companyId,
                                              @PathVariable("categoryId") Long categoryId,
@@ -40,7 +41,7 @@ public class JobController {
         boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
         return ResponseEntity.ok(createdJob);
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     @PutMapping("/edit/{jobId}")
     public ResponseEntity<JobDTO> updateJob(@PathVariable Long jobId, @RequestBody JobDTO jobDTO) {
         JobDTO updatedJob = jobService.updateJob(jobId, jobDTO);
@@ -50,7 +51,7 @@ public class JobController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     @DeleteMapping("/{jobId}")
     public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
         jobService.deleteJob(jobId);

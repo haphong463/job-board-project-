@@ -7,6 +7,7 @@ import com.project4.JobBoardService.Service.CommentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +22,7 @@ public class CommentController {
 
     @Autowired
     private ModelMapper modelMapper;
-
-
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/blog/{blogId}")
     public ResponseEntity<List<CommentDTO>> getCommentsByBlogId(@PathVariable Long blogId) {
         try {
@@ -32,7 +32,7 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<NewCommentDTO> createComment(@RequestBody Comment comment) {
         try {
@@ -44,12 +44,12 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Comment> deleteComment(@PathVariable Long id) {
         try{
             Comment existingComment = commentService.getCommentById(id);
-            if(existingComment != null){
+            if(id != null){
                 commentService.deleteComment(id);
                 return ResponseEntity.ok().build();
             }
@@ -58,7 +58,7 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CommentDTO> updateComment(@PathVariable Long id, @RequestBody  Comment comment){
         try {

@@ -1,15 +1,15 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
+import com.project4.JobBoardService.Enum.WorkSchedule;
 import com.project4.JobBoardService.Repository.JobRepository;
 import com.project4.JobBoardService.Service.CategoryService;
 import com.project4.JobBoardService.Service.CompanyService;
 import com.project4.JobBoardService.Service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,16 +43,14 @@ public class JobServiceImpl   implements JobService {
     @Override
     public boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO) {
         Optional<Company> companyOptional = companyService.getCompanyById(companyId);
-        Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
+        Optional<CategoryDTO> categoryDTOOptional = Optional.ofNullable(categoryService.getCategoryById(categoryId));
 
-        if (companyOptional.isPresent() && categoryOptional.isPresent()) {
+        if (companyOptional.isPresent() && categoryDTOOptional.isPresent()) {
             Company company = companyOptional.get();
-            Category category = categoryOptional.get();
+            CategoryDTO categoryDTO = categoryDTOOptional.get();
 
-
+            Category category = convertToEntity(categoryDTO);
             Job job = convertToEntity(jobDTO);
-
-
             job.setCompany(company);
             job.setCategory(category);
 
@@ -146,6 +144,8 @@ public class JobServiceImpl   implements JobService {
         // Set other fields as needed
         return job;
     }
-    
+    public Category convertToEntity(CategoryDTO categoryDTO) {
+        return new Category(categoryDTO.getCategoryId(), categoryDTO.getCategoryName());
+    }
 
 }

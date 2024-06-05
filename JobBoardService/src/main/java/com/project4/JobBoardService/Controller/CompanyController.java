@@ -5,6 +5,7 @@ import com.project4.JobBoardService.Entity.Company;
 import com.project4.JobBoardService.Service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,33 +21,35 @@ public class CompanyController {
     private CompanyService companyService;
 
     @GetMapping
+
     public List<Company> getAllCompanies() {
         return companyService.getAllCompanies();
     }
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
         Optional<Company> companyOptional = companyService.getCompanyById(id);
         return companyOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping("/add")
     public Company createCompany(@RequestBody CompanyDTO companyDTO) {
         return companyService.saveCompany(companyDTO);
     }
-
+    @PreAuthorize(" hasRole('MODERATOR') or hasRole('ADMIN')")
     @PutMapping("/edit/{id}")
     public ResponseEntity<Company> updateCompany(@PathVariable Long id, @RequestBody CompanyDTO companyDTO) {
         Company updatedCompany = companyService.updateCompany(id, companyDTO);
         return updatedCompany != null ? ResponseEntity.ok(updatedCompany) : ResponseEntity.notFound().build();
     }
-
+    @PreAuthorize(" hasRole('MODERATOR') or hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteCompany(@PathVariable Long id) {
         companyService.deleteCompany(id);
         return ResponseEntity.noContent().build();
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping("/add/{id}/upload-logo")
     public ResponseEntity<String> uploadLogo(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {
         try {
