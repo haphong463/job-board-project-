@@ -30,41 +30,7 @@ public class BlogController {
     @Autowired
     private ModelMapper modelMapper;
 
-//    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-//    public ResponseEntity<Blog> createBlog(
-//            @RequestParam("title") String title,
-//            @RequestParam("content") String content,
-//            @RequestParam("author") String author,
-//            @RequestParam("blogCategoryId") Long blogCategoryId,
-//            @RequestParam("publishedAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime publishedAt,
-//            @RequestParam("status") Boolean status,
-//            @RequestParam("image") MultipartFile image,
-//            @RequestParam("slug") String slug) {
-//
-//        try {
-//            Optional<BlogCategory> categoryOpt = blogCategoryRepository.findById(blogCategoryId);
-//            if (!categoryOpt.isPresent()) {
-//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
-//            }
-//            BlogCategory category = categoryOpt.get();
-//
-//            Blog blog = new Blog();
-//            blog.setTitle(title);
-//            blog.setContent(content);
-//            blog.setAuthor(author);
-//            blog.setCategory(category);
-//            blog.setPublishedAt(Date.from(publishedAt.toInstant()));
-//            blog.setStatus(status);
-//            blog.setSlug(slug);
-//
-//            Blog createdBlog = blogService.createBlog(blog, image);
-//            return ResponseEntity.ok(createdBlog);
-//        } catch (IOException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//        }
-//    }
-@PreAuthorize(" hasRole('ADMIN')")
-//@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize(" hasRole('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
         BlogCategory category = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
@@ -98,7 +64,6 @@ public class BlogController {
 
     // Get all blogs
     @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<List<BlogResponseDTO>> getAllBlogs() {
         try {
             List<Blog> blogs = blogService.getAllBlog();
@@ -110,23 +75,22 @@ public class BlogController {
     }
 
     // Get a single blog by ID
-//    @GetMapping("/{id}")
-//    public ResponseEntity<BlogResponseDTO> getBlogById(@PathVariable Long id) throws ResourceNotFoundException {
-//        try {
-//            Blog blog = blogService.getBlogById(id);
-//            if(blog == null){
-//                return ResponseEntity.notFound().build();
-//            }
-//            BlogResponseDTO blogResponseDTO = modelMapper.map(blog, BlogResponseDTO.class);
-//            return ResponseEntity.ok(blogResponseDTO);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//        }
-//    }
+    @GetMapping("/{id}")
+    public ResponseEntity<BlogResponseDTO> getBlogById(@PathVariable Long id) {
+        try {
+            Blog blog = blogService.getBlogById(id);
+            if(blog == null){
+                return ResponseEntity.notFound().build();
+            }
+            BlogResponseDTO blogResponseDTO = modelMapper.map(blog, BlogResponseDTO.class);
+            return ResponseEntity.ok(blogResponseDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     // Update a blog
-    @PreAuthorize("hasRole('ADMIN')")
-//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<BlogResponseDTO> updateBlog(@PathVariable Long id,
                                                       @ModelAttribute BlogDTO blogDTO) {
@@ -153,8 +117,7 @@ public class BlogController {
     }
 
     // Delete a blog
-    @PreAuthorize("hasRole('ADMIN')")
-//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> deleteBlog(@PathVariable Long id) {
         try {

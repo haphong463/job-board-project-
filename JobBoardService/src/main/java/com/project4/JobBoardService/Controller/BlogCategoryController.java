@@ -18,7 +18,7 @@ public class BlogCategoryController {
 
     @Autowired
     private BlogCategoryService blogCategoryService;
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<BlogCategory> createBlogCategory(@RequestBody BlogCategory blogCategory) {
         BlogCategory createdCategory = blogCategoryService.createBlogCategory(blogCategory);
