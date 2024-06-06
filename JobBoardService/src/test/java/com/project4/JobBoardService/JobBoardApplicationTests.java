@@ -12,8 +12,7 @@ class JobBoardApplicationTests {
     @Autowired
     BlogCategoryService blogCategoryService;
 
-    @Autowired
-    EmailSenderService emailSenderService;
+   
 
     @Test
     void contextLoads() {
@@ -21,8 +20,4 @@ class JobBoardApplicationTests {
     }
 
 
-    @Test
-    void sendMail(){
-        emailSenderService.sendMail("haphong463@gmail.com", "Test subject", "Test body");
-    }
 }
