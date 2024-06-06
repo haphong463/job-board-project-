@@ -9,16 +9,16 @@ import {
   InputGroupText,
   Input,
 } from "reactstrap";
-import Form from "./form/FormBlog";
+import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBlogs, deleteBlog } from "../../../features/blogs/blogSlice";
+import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
 
 function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs) || [];
   const blogStatus = useSelector((state) => state.blogs.status);
-
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEdit, setIsEdit] = useState({});
 
   useEffect(() => {
     if (blogStatus === "idle") {
@@ -52,6 +52,20 @@ function Blog(props) {
           }}
         >
           {row.title}
+        </div>
+      ),
+    },
+    {
+      name: "Category",
+      selector: (row) => row.category.name,
+      sortable: true,
+      cell: (row) => (
+        <div
+          style={{
+            fontSize: "16px",
+          }}
+        >
+          {row.category.name}
         </div>
       ),
     },

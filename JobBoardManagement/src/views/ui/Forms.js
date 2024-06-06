@@ -23,7 +23,7 @@ import { getAllBlogCategories } from "../../services/Blog_CategoryService";
 import { createFormData } from "../../utils/form-data/formDataUtil";
 import { IoMdAdd } from "react-icons/io";
 import { useDispatch } from "react-redux";
-import { addBlog } from "../../features/blogs/blogSlice";
+import { addBlog } from "../../features/blogSlice";
 
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),

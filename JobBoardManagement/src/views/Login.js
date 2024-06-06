@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -15,7 +15,8 @@ import {
 } from "reactstrap";
 import logo from "../assets/images/logos/logo.png";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../features/auth/authSlice";
+import { login } from "../features/authSlice";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 // Xác định schema yup cho form
 const schema = yup.object().shape({
@@ -27,6 +28,9 @@ const Login = () => {
   const dispatch = useDispatch();
   const authStatus = useSelector((state) => state.auth.status);
   const authError = useSelector((state) => state.auth.error);
+  const accessToken = useSelector((state) => state.auth.accessToken);
+  const navigate = useNavigate();
+
   // Sử dụng react-hook-form với yup resolver
   const {
     control,
@@ -43,9 +47,22 @@ const Login = () => {
 
   // Xử lý khi submit form
   const onSubmit = (data) => {
-    console.log(data);
     dispatch(login(data));
+    if (!authError) {
+      navigate(-1); // Điều hướng trở lại trang người dùng định truy cập
+    }
   };
+
+  useEffect(() => {
+    if (accessToken) {
+      const from = location.state?.from?.pathname || "/jobportal";
+      navigate(from, { replace: true });
+    }
+  }, [accessToken, navigate, location.state]);
+
+  if (accessToken) {
+    return <Navigate to="/jobportal" />;
+  }
 
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">

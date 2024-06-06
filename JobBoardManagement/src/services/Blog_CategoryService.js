@@ -21,3 +21,19 @@ export const createBlogCategory = async (data) => {
     console.log(error);
   }
 };
+
+export const deleteBlogCategoryAsync = async (id) => {
+  try {
+    return await axiosRequest.delete(`${URL}/${id}`);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const updateBlogCategoryAsync = async (data) => {
+  try {
+    return await axiosRequest.put(`${URL}/${data.id}`, data);
+  } catch (error) {
+    console.log(error);
+  }
+};

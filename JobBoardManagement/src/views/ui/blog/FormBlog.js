@@ -1,4 +1,3 @@
-// src/components/Forms.js
 import React, { useEffect, useState } from "react";
 import {
   Row,
@@ -18,29 +17,22 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Editor } from "@tinymce/tinymce-react";
-import { slugify } from "../../../../utils/functions/convertToSlug";
-import { createFormData } from "../../../../utils/form-data/formDataUtil";
+import { slugify } from "../../../utils/functions/convertToSlug";
+import { createFormData } from "../../../utils/form-data/formDataUtil";
 import { IoMdAdd } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import { addBlog } from "../../../../features/blogs/blogSlice";
-import { fetchBlogCategory } from "../../../../features/blog-category/blogCategorySlice";
-
-const schema = yup.object().shape({
-  title: yup.string().required("Title is required"),
-  content: yup.string().required("Content is required"),
-  blogCategoryId: yup.string().required("Category is required"),
-  tags: yup.string().required("Tags are required"),
-  image: yup
-    .mixed()
-    .test("required", "You need to provide a file", (file) => {
-      if (file) return true;
-      return false;
-    })
-    .test("fileSize", "The file is too large", (file) => {
-      return file && file.size <= 2000000;
-    }),
-});
-
+import { addBlog } from "../../../features/blogSlice";
+import {
+  fetchBlogCategory,
+  addBlogCategory,
+} from "../../../features/blogCategorySlice";
+import { BlogForm } from "./BlogForm";
+import { BlogCategoryForm } from "../blog-category/BlogCategoryForm";
+import {
+  blogCategorySchema,
+  blogSchema,
+} from "../../../utils/variables/schema";
+import Select from "react-select";
 const FormBlog = (args) => {
   const dispatch = useDispatch();
 
@@ -50,13 +42,15 @@ const FormBlog = (args) => {
 
   const toggle = () => setModal(!modal);
 
+
   const {
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(blogSchema),
     defaultValues: {
       title: "",
       tags: "",
@@ -127,27 +121,6 @@ const FormBlog = (args) => {
                   )}
                 </FormGroup>
               </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="postTags">Tags</Label>
-                  <Controller
-                    name="tags"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        id="postTags"
-                        placeholder="Enter tags separated by commas"
-                        type="text"
-                        invalid={!!errors.tags}
-                      />
-                    )}
-                  />
-                  {errors.tags && (
-                    <FormText color="danger">{errors.tags.message}</FormText>
-                  )}
-                </FormGroup>
-              </Col>
             </Row>
             <Row>
               <Col md={12}>
@@ -162,7 +135,9 @@ const FormBlog = (args) => {
                     }}
                     initialValue="Welcome to TinyMCE!"
                     onEditorChange={(newValue, editor) =>
-                      setValue("content", newValue, { shouldValidate: true })
+                      setValue("content", newValue, {
+                        shouldValidate: true,
+                      })
                     }
                   />
                   {errors.content && (
@@ -179,23 +154,48 @@ const FormBlog = (args) => {
                     name="blogCategoryId"
                     control={control}
                     render={({ field }) => (
-                      <Input
+                      <Select
                         {...field}
                         id="postCategory"
-                        type="select"
-                        invalid={!!errors.blogCategoryId}
-                      >
-                        <option disabled value="">
-                          --- Select category ---
-                        </option>
-                        {categoryList.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </Input>
+                        options={categoryList.map((category) => ({
+                          value: category.id,
+                          label: category.name,
+                        }))}
+                        isSearchable={false}
+                        onChange={(selectedOption) =>
+                          field.onChange(selectedOption.value)
+                        }
+                        value={categoryList.find(
+                          (category) => category.id === field
+                        )}
+                      />
                     )}
                   />
+                  {/* <Controller
+                  name="blogCategoryId"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="postCategory"
+                      type="select"
+                      invalid={!!errors.blogCategoryId}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleCategoryChange(e);
+                      }}
+                    >
+                      <option disabled value="">
+                        --- Select category ---
+                      </option>
+                      {categoryList.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </Input>
+                  )}
+                /> */}
                   {errors.blogCategoryId && (
                     <FormText color="danger">
                       {errors.blogCategoryId.message}

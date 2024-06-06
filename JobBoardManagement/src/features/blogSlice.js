@@ -4,7 +4,7 @@ import {
   getAllBlogs,
   createBlog,
   deleteBlog as deleteBlogApi,
-} from "../../services/BlogService";
+} from "../services/BlogService";
 
 // Thunk để fetch blogs
 export const fetchBlogs = createAsyncThunk("blogs/fetchBlogs", async () => {

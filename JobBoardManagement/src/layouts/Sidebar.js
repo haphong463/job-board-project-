@@ -1,13 +1,32 @@
-import React, { useState } from "react";
-import { Button, Nav, NavItem, Collapse } from "reactstrap";
+import React, { useEffect, useState } from "react";
+import { Button, Nav, NavItem, Collapse, Spinner } from "reactstrap";
 import Logo from "./Logo";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { navigation } from "../utils/variables/navigation";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAndUpdateAccessToken, logout } from "../features/authSlice";
 
 const Sidebar = () => {
   const showMobilemenu = () => {
     document.getElementById("sidebarArea").classList.toggle("showSidebar");
+  };
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [countdown, setCountdown] = useState(1);
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    let timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(timer);
+      dispatch(logout());
+      navigate("/jobportal/login");
+    }, 1000);
   };
   const location = useLocation();
   const [collapseStates, setCollapseStates] = useState({});
@@ -91,9 +110,17 @@ const Sidebar = () => {
             tag="a"
             target="_blank"
             className="mt-3"
-            href="https://www.wrappixel.com/templates/xtreme-react-redux-admin/?ref=33"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
           >
-            Upgrade To Pro
+            {isLoggingOut ? (
+              <div className="d-flex align-items-center">
+                <Spinner size="sm" color="light" className="me-2" />
+                Log out in {countdown}s
+              </div>
+            ) : (
+              "Logout"
+            )}
           </Button>
         </Nav>
       </div>

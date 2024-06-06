@@ -19,7 +19,7 @@ export const navigation = [
         children: [
           {
             title: "Category",
-            href: "/jobportal/badges",
+            href: "/jobportal/blog-category",
             icon: "bi bi-patch-check",
           },
           {

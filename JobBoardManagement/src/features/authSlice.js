@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { signIn } from "../../services/AuthService";
+import { signIn } from "../services/AuthService";
+import { jwtDecode } from "jwt-decode";
 
 // Thunk để login và lấy token
 export const login = createAsyncThunk("auth/login", async (credentials) => {
@@ -40,6 +41,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, updateUser } = authSlice.actions;
 
 export default authSlice.reducer;
