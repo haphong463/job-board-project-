@@ -41,10 +41,21 @@ public class User   {
     @Size(max = 50)
     @Email
     private String email;
+    @NotBlank
+    @Size(max = 50)
+    private String firstName;
+
+    @NotBlank
+    @Size(max = 50)
+    private String lastName;
 
     @NotBlank
     @Size(max = 120)
     private String password;
+    private String resetToken;
+    private boolean verified;
+
+    private String verificationCode;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(  name = "user_roles",
@@ -69,5 +80,12 @@ public class User   {
         this.password = password;
     }
 
-
+    public User(String username, String email, String firstName, String lastName, String password,  Gender gender ) {
+        this.username = username;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.password = password;
+        this.gender = gender;
+    }
 }

@@ -1,7 +1,6 @@
 package com.project4.JobBoardService;
 
 import com.project4.JobBoardService.Service.BlogCategoryService;
-import com.project4.JobBoardService.Service.EmailSenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
