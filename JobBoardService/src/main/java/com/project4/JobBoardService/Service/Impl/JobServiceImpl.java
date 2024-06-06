@@ -43,18 +43,20 @@ public class JobServiceImpl   implements JobService {
     @Override
     public boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO) {
         Optional<Company> companyOptional = companyService.getCompanyById(companyId);
-        Optional<CategoryDTO> categoryDTOOptional = Optional.ofNullable(categoryService.getCategoryById(categoryId));
+        Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
 
-        if (companyOptional.isPresent() && categoryDTOOptional.isPresent()) {
-            Company company = companyOptional.get();
-            CategoryDTO categoryDTO = categoryDTOOptional.get();
+        if (companyOptional.isPresent() && categoryOptional.isPresent()) {
+            Company company = companyOptional.get(); // Unwrap the Optional
+            Category category = categoryOptional.get(); // Unwrap the Optional
 
-            Category category = convertToEntity(categoryDTO);
+            // Tạo một đối tượng Job từ DTO
             Job job = convertToEntity(jobDTO);
+
+            // Liên kết công ty và danh mục với công việc
             job.setCompany(company);
             job.setCategory(category);
 
-
+            // Lưu công việc vào cơ sở dữ liệu
             jobRepository.save(job);
             return true;
         }
@@ -65,7 +67,6 @@ public class JobServiceImpl   implements JobService {
         Optional<Job> optionalJob = jobRepository.findById(jobId);
         if (optionalJob.isPresent()) {
             Job job = optionalJob.get();
-
             job.setTitle(jobDTO.getTitle());
             job.setOfferedSalary(jobDTO.getOfferedSalary());
             job.setDescription(jobDTO.getDescription());
@@ -81,11 +82,9 @@ public class JobServiceImpl   implements JobService {
             job.setExperience(jobDTO.getExperience());
             job.setQualification(jobDTO.getQualification());
 
-
             job = jobRepository.save(job);
             return convertToDto(job);
         } else {
-
             return null;
         }
     }

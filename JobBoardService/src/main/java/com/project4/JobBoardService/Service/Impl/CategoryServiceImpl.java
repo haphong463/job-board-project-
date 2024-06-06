@@ -12,40 +12,25 @@ import java.util.List;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
-    private List<CategoryDTO> categories = new ArrayList<>();
-    private Long idCounter = 1L;
-
+    @Autowired
+    private CategoryRepository categoryRepository;
     @Override
-    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
-        categoryDTO.setCategoryId(idCounter++);
-        categories.add(categoryDTO);
-        return categoryDTO;
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 
     @Override
-    public CategoryDTO getCategoryById(Long categoryId) {
-        return categories.stream()
-                .filter(category -> category.getCategoryId().equals(categoryId))
-                .findFirst()
-                .orElse(null);
+    public Category getCategorybyId(Long id) {
+        return categoryRepository.findById(id).orElse(null);
     }
 
     @Override
-    public List<CategoryDTO> getAllCategories() {
-        return new ArrayList<>(categories);
+    public void savedCategory(Category category) {
+        categoryRepository.save(category);
     }
 
     @Override
-    public CategoryDTO updateCategory(Long categoryId, CategoryDTO categoryDTO) {
-        CategoryDTO existingCategory = getCategoryById(categoryId);
-        if (existingCategory != null) {
-            existingCategory.setCategoryName(categoryDTO.getCategoryName());
-        }
-        return existingCategory;
-    }
-
-    @Override
-    public void deleteCategory(Long categoryId) {
-        categories.removeIf(category -> category.getCategoryId().equals(categoryId));
+    public void deleteCategorybyId(Long id) {
+        categoryRepository.deleteById(id);
     }
 }
