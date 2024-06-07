@@ -9,4 +9,5 @@ import lombok.Setter;
 public class BlogCategoryDTO {
     private Long id;
     private String name;
+    private int blogCount;
 }

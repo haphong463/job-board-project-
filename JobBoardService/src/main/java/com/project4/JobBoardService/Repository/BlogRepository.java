@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.Repository;
 
 import com.project4.JobBoardService.Entity.Blog;
+import com.project4.JobBoardService.Entity.BlogCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,8 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
     @Query("SELECT COUNT(b) FROM Blog b WHERE b.author = :author")
     long countByAuthor(@Param("author") String author);
+
+    int countByCategory(BlogCategory blogCategory);
 
     boolean existsBySlug(String slug);
 }

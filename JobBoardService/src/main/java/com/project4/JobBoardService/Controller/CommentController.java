@@ -22,7 +22,7 @@ public class CommentController {
 
     @Autowired
     private ModelMapper modelMapper;
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/blog/{blogId}")
     public ResponseEntity<List<CommentDTO>> getCommentsByBlogId(@PathVariable Long blogId) {
         try {
@@ -32,7 +32,7 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<NewCommentDTO> createComment(@RequestBody Comment comment) {
         try {
@@ -44,7 +44,7 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Comment> deleteComment(@PathVariable Long id) {
         try{
@@ -58,7 +58,7 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CommentDTO> updateComment(@PathVariable Long id, @RequestBody  Comment comment){
         try {
