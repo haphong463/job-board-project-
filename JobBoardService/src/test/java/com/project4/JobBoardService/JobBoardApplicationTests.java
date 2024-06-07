@@ -13,9 +13,5 @@ class JobBoardApplicationTests {
     BlogCategoryService blogCategoryService;
 
 
-    @Test
-    void contextLoads() {
-		System.out.println("bcs size: " + blogCategoryService.getAllBlogCategories().size());
-    }
 
 }
