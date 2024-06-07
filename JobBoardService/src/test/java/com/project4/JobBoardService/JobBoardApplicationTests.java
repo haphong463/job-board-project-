@@ -12,17 +12,10 @@ class JobBoardApplicationTests {
     @Autowired
     BlogCategoryService blogCategoryService;
 
-    @Autowired
-    EmailSenderService emailSenderService;
 
     @Test
     void contextLoads() {
 		System.out.println("bcs size: " + blogCategoryService.getAllBlogCategories().size());
     }
 
-
-    @Test
-    void sendMail(){
-        emailSenderService.sendMail("haphong463@gmail.com", "Test subject", "Test body");
-    }
 }

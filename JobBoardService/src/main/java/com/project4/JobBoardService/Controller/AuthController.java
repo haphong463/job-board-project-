@@ -5,6 +5,7 @@ import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Repository.RoleRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
+import com.project4.JobBoardService.Util.HTMLContentProvider;
 import com.project4.JobBoardService.payload.JwtResponse;
 import com.project4.JobBoardService.payload.LoginRequest;
 import com.project4.JobBoardService.payload.MessageResponse;
@@ -136,7 +137,7 @@ public class AuthController {
         user.setVerificationCode(verificationCode);
 
         userRepository.save(user);
-        emailService.sendVerificationEmail(user.getEmail(),user.getFirstName(), verificationCode);
+        emailService.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationCode, user.getEmail());
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
@@ -152,16 +153,36 @@ public class AuthController {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             String resetToken = generateResetToken();
+
+
+            String resetUrl = "http://localhost:8080/api/auth/reset-password?email=" + email + "&token=" + resetToken;
             user.setResetToken(resetToken);
             userRepository.save(user);
 
-            emailService.sendResetPasswordEmail(user.getEmail(), resetToken);
+            emailService.sendResetPasswordEmail(user.getEmail(), resetUrl);
 
             return ResponseEntity.ok(new MessageResponse("Reset password email sent successfully!"));
         } else {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
+    @GetMapping("/reset-password")
+    public ResponseEntity<?> showResetPasswordForm(@RequestParam("email") String email,
+                                                   @RequestParam("token") String token) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.getResetToken() != null && user.getResetToken().equals(token)) {
+
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid reset token!"));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+        }
+    }
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam("email") String email,
                                            @RequestParam("token") String token,
@@ -171,7 +192,7 @@ public class AuthController {
             User user = optionalUser.get();
             if (user.getResetToken() != null && user.getResetToken().equals(token)) {
                 user.setPassword(encoder.encode(newPassword));
-                user.setResetToken(null);  // Clear the reset token after successful reset
+                user.setResetToken(null);
                 userRepository.save(user);
                 return ResponseEntity.ok(new MessageResponse("Password reset successfully!"));
             } else {
@@ -183,8 +204,12 @@ public class AuthController {
     }
 
 
-    @PostMapping("/verify")
-    public ResponseEntity<?> verifyEmail(@RequestParam("email") String email, @RequestParam("code") String code) {
+    @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<?> verifyEmail(
+            @RequestParam("email") String email,
+            @RequestParam("code") String code,
+            @RequestParam("verifyUrl") String verifyUrl
+    ) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -192,7 +217,9 @@ public class AuthController {
             if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
                 user.setVerified(true);
                 userRepository.save(user);
-                emailService.sendEmailNotification(user.getEmail(), "Email Verified", "Your email has been verified successfully!");
+                String firstName = user.getFirstName();
+                String successMessage = HTMLContentProvider.verifyemailsuccess(firstName, verifyUrl);
+                emailService.sendEmailNotification(user.getEmail(), "Email Verified", successMessage);
                 return ResponseEntity.ok(new MessageResponse("Email verified successfully!"));
             } else {
                 return ResponseEntity.badRequest().body(new MessageResponse("Invalid verification code!"));
@@ -201,6 +228,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
         }
     }
+
     private String generateVerificationCode() {
         return UUID.randomUUID().toString().substring(0, 6);
     }

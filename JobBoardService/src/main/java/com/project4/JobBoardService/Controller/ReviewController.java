@@ -1,19 +1,22 @@
 package com.project4.JobBoardService.Controller;
 
+import com.project4.JobBoardService.DTO.ReviewDTO;
 import com.project4.JobBoardService.Entity.Review;
 import com.project4.JobBoardService.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/companies/{companyId}")
+@RequestMapping("/api/companies/{companyId}/reviews")
 public class ReviewController {
-
     private final ReviewService reviewService;
 
     @Autowired
@@ -22,38 +25,54 @@ public class ReviewController {
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    @GetMapping("/reviews")
+    @GetMapping()
     public ResponseEntity<List<Review>> getAllReviews(@PathVariable("companyId") Long companyId) {
         return new ResponseEntity<>(reviewService.getAllReviews(companyId), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    @PostMapping("/reviews")
-    public ResponseEntity<String> addReview(@PathVariable("companyId") Long companyId, @RequestBody Review review) {
-        boolean isReviewSaved = reviewService.addReview(companyId, review);
-        if (isReviewSaved) {
-            return new ResponseEntity<>("Review Added Successfully", HttpStatus.OK);
+    @PostMapping()
+    public ResponseEntity<?> addReview(@PathVariable Long companyId,
+                                       @RequestBody Review review,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+
+        boolean success = reviewService.addReview(companyId, username, review);
+        if (success) {
+            return ResponseEntity.ok("Review added successfully!");
         } else {
-            return new ResponseEntity<>("Review Not Saved", HttpStatus.NOT_FOUND);
+            return ResponseEntity.badRequest().body("Failed to add review. Company or user not found.");
         }
     }
+
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    @GetMapping("/reviews/{reviewId}")
-    public ResponseEntity<Review> getReview(@PathVariable("companyId") Long companyId, @PathVariable("reviewId") Long reviewId) {
-        Review review = reviewService.getReview(companyId, reviewId);
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<?> getReview(@PathVariable Long companyId,
+                                       @PathVariable Long reviewId,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+
+        Review review = reviewService.getReview(companyId, reviewId, username);
         if (review != null) {
-            return new ResponseEntity<>(review, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    @PutMapping("/reviews/{reviewId}")
-    public ResponseEntity<String> updateReview(@PathVariable("companyId") Long companyId, @PathVariable("reviewId") Long reviewId, @RequestBody Review review) {
-        boolean isReviewUpdated = reviewService.updateReview(companyId, reviewId, review);
-        if (isReviewUpdated) {
-            return new ResponseEntity<>("Review Updated successfully", HttpStatus.OK);
+            return ResponseEntity.ok(review);
         } else {
-            return new ResponseEntity<>("Review not Updated", HttpStatus.NOT_FOUND);
+            return ResponseEntity.badRequest().body("Review not found.");
+        }
+    }
+
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PutMapping("/{reviewId}")
+    public ResponseEntity<?> updateReview(@PathVariable Long companyId,
+                                          @PathVariable Long reviewId,
+                                          @RequestBody Review updatedReview,
+                                          @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+
+        boolean success = reviewService.updateReview( companyId,  reviewId,  username,  updatedReview);
+        if (success) {
+            return ResponseEntity.ok("Review updated successfully!");
+        } else {
+            return ResponseEntity.badRequest().body("Failed to update review. Company or user not found.");
         }
     }
 }

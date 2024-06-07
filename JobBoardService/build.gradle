@@ -31,28 +31,19 @@ dependencies {
 //	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+
 	implementation 'org.modelmapper:modelmapper:3.1.1'
-
-
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
 // https://mvnrepository.com/artifact/com.sun.mail/jakarta.mail
 	implementation group: 'com.sun.mail', name: 'jakarta.mail', version: '2.0.1'
-
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	// https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-tools
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//	testImplementation 'org.springframework.security:spring-security-test'
-	// https://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp
-//	implementation("edu.stanford.nlp:stanford-corenlp:$corenlp_version")
-//	implementation("edu.stanford.nlp:stanford-corenlp:$corenlp_version:models")
-//	implementation("edu.stanford.nlp:stanford-corenlp:$corenlp_version:models-english")
-//	implementation("edu.stanford.nlp:stanford-corenlp:$corenlp_version:models-english-kbp")
+	testImplementation 'org.springframework.security:spring-security-test'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation:3.2.4'
 // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket
