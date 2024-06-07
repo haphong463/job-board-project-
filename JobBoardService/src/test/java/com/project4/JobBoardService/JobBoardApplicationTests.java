@@ -1,7 +1,6 @@
 package com.project4.JobBoardService;
 
 import com.project4.JobBoardService.Service.BlogCategoryService;
-import com.project4.JobBoardService.Service.EmailSenderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,17 +12,6 @@ class JobBoardApplicationTests {
     @Autowired
     BlogCategoryService blogCategoryService;
 
-    @Autowired
-    EmailSenderService emailSenderService;
-
-    @Test
-    void contextLoads() {
-		System.out.println("bcs size: " + blogCategoryService.getAllBlogCategories().size());
-    }
 
 
-    @Test
-    void sendMail(){
-        emailSenderService.sendMail("haphong463@gmail.com", "Test subject", "Test body");
-    }
 }
