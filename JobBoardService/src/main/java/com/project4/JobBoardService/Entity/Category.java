@@ -22,8 +22,5 @@ public class Category {
 
     @Column(name = "category_name")
     private String categoryName;
-    @ManyToMany(mappedBy = "categories")
-    private Set<Job> jobs = new HashSet<>();
-
 
 }
