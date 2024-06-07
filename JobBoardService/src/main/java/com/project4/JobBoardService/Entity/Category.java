@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "category")
 @AllArgsConstructor
@@ -19,5 +22,8 @@ public class Category {
 
     @Column(name = "category_name")
     private String categoryName;
+    @ManyToMany(mappedBy = "categories")
+    private Set<Job> jobs = new HashSet<>();
+
 
 }
