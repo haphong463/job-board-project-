@@ -3,7 +3,6 @@ package com.project4.JobBoardService.Util;
 public class HTMLContentProvider {
 
     public static String readHTMLContent() {
-        // Đọc từ file hoặc trả về chuỗi nội dung HTML cố định
         return "<!DOCTYPE html>" +
                 "<html lang='en'>" +
                 "<head>" +
