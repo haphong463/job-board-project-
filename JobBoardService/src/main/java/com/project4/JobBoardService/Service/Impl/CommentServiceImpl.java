@@ -19,8 +19,8 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public List<Comment> getCommentByBlogId(Long blogId) {
-        return commentRepository.findAllByBlogIdAndParentIdIsNull(blogId);
+    public List<Comment> getCommentByBlogSlug(String slug) {
+        return commentRepository.findAllByBlogSlugAndParentIsNull(slug);
     }
 
     @Override

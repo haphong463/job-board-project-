@@ -3,7 +3,9 @@ package com.project4.JobBoardService.Controller;
 import com.project4.JobBoardService.DTO.CommentDTO;
 import com.project4.JobBoardService.DTO.NewCommentDTO;
 import com.project4.JobBoardService.Entity.Comment;
+import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.CommentService;
+import com.project4.JobBoardService.Service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +23,15 @@ public class CommentController {
     private CommentService commentService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private ModelMapper modelMapper;
 //    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    @GetMapping("/blog/{blogId}")
-    public ResponseEntity<List<CommentDTO>> getCommentsByBlogId(@PathVariable Long blogId) {
+    @GetMapping("/blog/{slug}")
+    public ResponseEntity<List<CommentDTO>> getCommentsByBlogId(@PathVariable String slug) {
         try {
-            List<Comment> comments = commentService.getCommentByBlogId(blogId);
+            List<Comment> comments = commentService.getCommentByBlogSlug(slug);
             return ResponseEntity.ok(comments.stream().map(comment -> modelMapper.map(comment, CommentDTO.class)).collect(Collectors.toList()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
@@ -36,6 +41,8 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<NewCommentDTO> createComment(@RequestBody Comment comment) {
         try {
+            User user = userService.findByUsername(comment.getUser().getUsername()).orElse(null);
+            comment.setUser(user);
             Comment createdComment = commentService.createComment(comment);
             NewCommentDTO commentResponse = modelMapper.map(createdComment, NewCommentDTO.class);
 

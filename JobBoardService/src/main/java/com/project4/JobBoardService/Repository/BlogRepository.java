@@ -20,5 +20,5 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
     int countByCategory(BlogCategory blogCategory);
 
-    boolean existsBySlug(String slug);
+    Blog findBySlug(@Param("slug") String slug);
 }

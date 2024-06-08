@@ -25,7 +25,7 @@ public class CategoryController {
 
     @Autowired
     private CategoryRepository categoryRepository;
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+
     @GetMapping
     public List<Category> getAllCategory() {
         return categoryRepository.findAll();

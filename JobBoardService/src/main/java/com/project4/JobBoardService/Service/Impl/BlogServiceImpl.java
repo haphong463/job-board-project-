@@ -112,4 +112,9 @@ public class BlogServiceImpl implements BlogService {
         }
     }
 
+    @Override
+    public Blog getBlogBySlug(String slug) {
+        return blogRepository.findBySlug(slug);
+    }
+
 }

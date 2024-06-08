@@ -3,6 +3,7 @@ package com.project4.JobBoardService.DTO;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -13,6 +14,9 @@ public class NewCommentDTO {
     private String content;
     private Parent_NewComment parent;
     private List<NewCommentDTO> children;
+    private UserDTO user;
+    private Date createdAt;
+    private Date updatedAt;
 
     @Getter
     @Setter

@@ -6,6 +6,7 @@ import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
+import com.project4.JobBoardService.Service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,8 @@ public class BlogController {
     private BlogService blogService;
     @Autowired
     private BlogCategoryService blogCategoryService;
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -48,6 +51,7 @@ public class BlogController {
         blog.setSlug(blogDTO.getSlug());
 
         //
+
 
 
         // Call a method in your service to handle the blog creation logic, including image processing if necessary
@@ -75,10 +79,10 @@ public class BlogController {
     }
 
     // Get a single blog by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<BlogResponseDTO> getBlogById(@PathVariable Long id) {
+    @GetMapping("/{slug}")
+    public ResponseEntity<BlogResponseDTO> getBlogBySlug(@PathVariable String slug) {
         try {
-            Blog blog = blogService.getBlogById(id);
+            Blog blog = blogService.getBlogBySlug(slug);
             if(blog == null){
                 return ResponseEntity.notFound().build();
             }

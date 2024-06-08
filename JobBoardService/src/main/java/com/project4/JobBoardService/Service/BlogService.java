@@ -15,4 +15,5 @@ public interface BlogService {
     Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile);
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
+    Blog getBlogBySlug(String slug);
 }
