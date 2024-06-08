@@ -105,3 +105,29 @@ ul.dropdown ul li:hover {
     transform: rotate(360deg);
   }
 }
+.password-requirements {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.password-requirements li {
+  display: flex;
+  align-items: center;
+}
+
+.password-requirements .valid {
+  color: green;
+}
+
+.password-requirements .invalid {
+  color: red;
+}
+
+.password-requirements .text-success {
+  margin-right: 5px;
+}
+
+.password-requirements .text-danger {
+  margin-right: 5px;
+}
