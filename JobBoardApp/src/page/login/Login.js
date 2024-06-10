@@ -20,7 +20,6 @@ function SignUp(props) {
   });
   const dispatch = useDispatch();
   const signUpSuccess = useSelector((state) => state.auth.signUpSuccess);
-
   const [password, setPassword] = useState("");
 
   const onSubmit = (data) => {
@@ -28,7 +27,7 @@ function SignUp(props) {
     dispatch(signUp(data));
     if (signUpSuccess) {
       console.log("DANG KY THANH CONG");
-      navigate("/");
+      // navigate("/");
     } else {
       console.log("DANG KY THAT BAI");
     }
@@ -189,6 +188,7 @@ function SignUp(props) {
 
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
+  const isVerified = useSelector((state) => state.auth.isVerified);
 
   return (
     <GlobalLayoutUser>
@@ -220,6 +220,7 @@ export const Login = () => {
               <SignUp />
               <div className="col-lg-6">
                 <h2 className="mb-4">Log In To JobBoard</h2>
+                {!isVerified && <p>Not verified!</p>}
                 <form
                   onSubmit={handleSubmit(onSubmit)}
                   className="p-4 border rounded"

@@ -1,18 +1,22 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { signInAysnc, signUpAsync } from "../services/authService";
 
-export const signIn = createAsyncThunk(
-  "auth/signin",
-  async (data, { rejectWithValue }) => {
-    try {
-      const res = await signInAysnc(data);
-      console.log(">>> res from thunk: ", res);
-      return res;
-    } catch (error) {
-      return rejectWithValue(error.message);
+export const signIn = createAsyncThunk("auth/signin", async (data) => {
+  try {
+    const res = await signInAysnc(data);
+    if (res.status === 400) {
+      return null;
     }
+    if (typeof res === "boolean" && !res) {
+      console.log("Not verified!");
+      throw new Error("Not verified");
+    }
+    console.log(">>> res from thunk: ", res);
+    return res;
+  } catch (error) {
+    throw new Error(error.message); // Trả về lỗi để reject Promise
   }
-);
+});
 export const signUp = createAsyncThunk(
   "auth/signup",
   async (data, { rejectWithValue }) => {
@@ -32,6 +36,7 @@ const initialState = {
   state: "idle",
   signUpSuccess: false, // Add this line
   signInSuccess: false,
+  isVerified: true,
 };
 
 const authSlice = createSlice({
@@ -66,12 +71,15 @@ const authSlice = createSlice({
       .addCase(signIn.fulfilled, (state, action) => {
         state.state = "succeeded";
         state.signInSuccess = true;
+        console.log(action.payload);
+
         state.accessToken = action.payload.accessToken; // Assuming the response includes an access token
         localStorage.setItem("accessToken", action.payload.accessToken); // Save token to localStorage
       })
       .addCase(signIn.rejected, (state, action) => {
         state.state = "failed";
         state.error = action.payload;
+        console.log(action.error.message);
       });
   },
 });
