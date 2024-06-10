@@ -61,9 +61,10 @@ public class AuthController {
 
         User user = optionalUser.get();
         if (!user.isVerified()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email not verified! Please verify your email to login."));
+            return ResponseEntity.ok().body(user.isVerified());
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body(new MessageResponse("Error: Email not verified! Please verify your email to login."));
         }
 
         Authentication authentication = authenticationManager.authenticate(
