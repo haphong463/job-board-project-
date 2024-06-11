@@ -133,34 +133,32 @@ export function GlobalNavbar() {
               <li className="d-lg-none">
                 <NavLink to="/login">Log In</NavLink>
               </li>
+              <li className="d-lg-none">
+                <NavLink to="/signup">Sig Nup</NavLink>
+              </li>
             </ul>
           </nav>
 
           <div className="right-cta-menu text-right d-flex aligin-items-center col-6">
             <div className="ml-auto">
-              {user && roles.includes("ROLE_EMPLOYER") && (
-                <NavLink
-                  to="/post-job"
-                  className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
-                >
-                  <span className="mr-2 icon-add"></span>Post a Job
-                </NavLink>
-              )}
-              {user ? (
-                <>
-                  <span className="text-white text-uppercase font-weight-bold">
-                    {user.sub}
-                  </span>
-                  <button onClick={handleLogout}>Log out</button>
-                </>
-              ) : (
-                <NavLink
-                  to="/login"
-                  className="btn btn-primary border-width-2 d-none d-lg-inline-block"
-                >
-                  <span className="mr-2 icon-lock_outline"></span>Log In
-                </NavLink>
-              )}
+              <NavLink
+                to="/post-job"
+                className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
+              >
+                <span className="mr-2 icon-add"></span>Post a Job
+              </NavLink>
+              <NavLink
+                to="/login"
+                className="btn btn-primary border-width-2 d-none d-lg-inline-block"
+              >
+                <span className="mr-2 icon-lock_outline"></span>Log In
+              </NavLink>
+              <NavLink
+                to="/signup"
+                className="btn btn-primary border-width-2 d-none d-lg-inline-block"
+              >
+                <span className="mr-2 icon-lock_outline"></span>Sign up
+              </NavLink>
             </div>
             <NavLink
               to="#"

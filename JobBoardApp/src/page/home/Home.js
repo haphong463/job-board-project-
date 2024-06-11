@@ -1,13 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
+import { useLocation, useNavigate } from 'react-router-dom';
+
 export const Home = () => {
-  React.useEffect(() => {
+  const location = useLocation();
+  const navigate = useNavigate();  // Correct usage of useNavigate
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
     // Ensure selectpicker is initialized
     $(".selectpicker").selectpicker("refresh");
-  }, []);
+
+    // Extract query parameters
+    const searchParams = new URLSearchParams(location.search);
+    const message = searchParams.get("message");
+
+    if (message) {
+      setMessage(message);
+      setTimeout(() => {
+        setMessage("");
+        // Remove the message parameter from the URL
+        navigate(location.pathname, { replace: true });
+        // Reload the page
+        window.location.reload();
+      }, 2000 ); // Adjust the time (5000 ms = 5 seconds) as needed
+    }
+  }, [location, navigate]);
   return (
     <GlobalLayoutUser>
       <>
+     {message && (
+          <div
+            className="alert alert-success custom-alert"
+            role="alert"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              width: '100%',
+              zIndex: 1000,
+              padding: '10px 20px',
+              fontSize: '14px',
+              textAlign: 'center',
+              marginBottom: '0',
+              backgroundColor: '#d4edda',
+              color: '#155724',
+              borderColor: '#c3e6cb',
+            }}
+          >
+            {message}
+          </div>
+        )}
         <section
           className="home-section section-hero overlay bg-image"
           style={{
@@ -15,9 +59,10 @@ export const Home = () => {
           }}
           id="home-section"
         >
-          <div className="container">
+        <div className="container">
             <div className="row align-items-center justify-content-center">
               <div className="col-md-12">
+              
                 <div className="mb-5 text-center">
                   <h1 className="text-white font-weight-bold">
                     The Easiest Way To Get Your Dream Job

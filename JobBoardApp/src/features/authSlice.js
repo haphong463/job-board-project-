@@ -45,7 +45,17 @@ export const signUp = createAsyncThunk(
     }
   }
 );
-
+export const forgotPassword = createAsyncThunk(
+  "auth/forgotPassword",
+  async (email, { rejectWithValue }) => {
+    try {
+      const res = await axiosRequest.post("/forgot-password", { email });
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 const name = "auth";
 const initialState = {
   error: null,
