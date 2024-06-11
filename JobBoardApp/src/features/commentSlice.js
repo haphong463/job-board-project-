@@ -5,6 +5,7 @@ import {
   updateComment,
   postComment,
 } from "../services/commentService";
+import moment from "moment";
 
 // Thunk để lấy tất cả comments theo blogId
 export const fetchAllCommentByBlogId = createAsyncThunk(
@@ -60,8 +61,39 @@ const commentSlice = createSlice({
     comments: [],
     status: "idle",
     error: null,
+    // New state fields
+    showReplies: {},
+    showReplyForm: {},
+    showEditForm: {},
+    editedContent: {},
+    originalContent: {},
   },
-  reducers: {},
+  reducers: {
+    resetContent(state) {
+      state.content = "";
+    },
+    // Add reducers for toggling form states and managing edited content
+    toggleShowReplies(state, action) {
+      const { commentId } = action.payload;
+      state.showReplies[commentId] = !state.showReplies[commentId];
+    },
+    toggleShowReplyForm(state, action) {
+      const { commentId } = action.payload;
+      state.showReplyForm[commentId] = !state.showReplyForm[commentId];
+    },
+    toggleShowEditForm(state, action) {
+      const { commentId } = action.payload;
+      state.showEditForm[commentId] = !state.showEditForm[commentId];
+    },
+    setEditedContent(state, action) {
+      const { commentId, content } = action.payload;
+      state.editedContent[commentId] = content;
+    },
+    setOriginalContent(state, action) {
+      const { commentId, content } = action.payload;
+      state.originalContent[commentId] = content;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllCommentByBlogId.pending, (state) => {
@@ -170,5 +202,14 @@ const commentSlice = createSlice({
       });
   },
 });
+
+export const {
+  resetContent,
+  toggleShowReplies,
+  toggleShowReplyForm,
+  toggleShowEditForm,
+  setEditedContent,
+  setOriginalContent,
+} = commentSlice.actions;
 
 export default commentSlice.reducer;

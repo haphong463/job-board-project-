@@ -32,6 +32,10 @@ const blogSlice = createSlice({
       title: "",
       content: "",
       imageUrl: "",
+      user: {
+        firstName: "",
+        lastName: "",
+      },
     },
     blogs: [],
     status: "idle",

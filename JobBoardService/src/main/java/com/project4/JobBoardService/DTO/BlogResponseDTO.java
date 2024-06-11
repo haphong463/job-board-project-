@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 
 @Getter
 @Setter
@@ -14,12 +16,13 @@ public class BlogResponseDTO {
     private Long id;
     private String title;
     private String content;
-    private String author;
     private BlogCategoryDTO category;
     private UserDTO user;
     private Boolean status;
     private String slug;
     private String imageUrl;
+    private Date createdAt;
+    private Date updatedAt;
 
     // Getters and setters
 

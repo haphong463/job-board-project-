@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import axiosRequest from "../../configs/axiosConfig";
+import { useDispatch, useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
+import { logout, updateUserAndRoles } from "../../features/authSlice";
 
 export function GlobalNavbar() {
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const user = useSelector((state) => state.auth.user);
+  const roles = useSelector((state) => state.auth.roles);
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   useEffect(() => {
     fetchCategories();
   }, []);
+  useEffect(() => {
+    if (!user) {
+      dispatch(updateUserAndRoles());
+    }
+  }, [user, dispatch]);
 
   const fetchCategories = async () => {
     try {
@@ -143,7 +157,7 @@ export function GlobalNavbar() {
                 to="/signup"
                 className="btn btn-primary border-width-2 d-none d-lg-inline-block"
               >
-                <span className="mr-2 icon-lock_outline"></span>Sig Nup
+                <span className="mr-2 icon-lock_outline"></span>Sign up
               </NavLink>
             </div>
             <NavLink

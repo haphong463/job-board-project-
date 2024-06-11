@@ -52,7 +52,7 @@ public class FileUtils {
 
     public static boolean deleteFile(String folder, String fileName) {
         try {
-            Path filePath = Paths.get(uploadDir + File.separator + folder, fileName).toAbsolutePath().normalize();
+            Path filePath = Paths.get(uploadDir + "/" + folder, fileName).toAbsolutePath().normalize();
             if (Files.exists(filePath)) {
                 Files.delete(filePath);
                 return true;

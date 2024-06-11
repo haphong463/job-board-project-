@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { resetSignUpSuccess, signUp } from "../../features/authSlice";
 import { useLoginForm } from "../../hooks/useLoginForm";
+import { Alert } from "reactstrap";
+import { MdError, MdErrorOutline } from "react-icons/md";
 
 function SignUp(props) {
   const {
@@ -50,54 +52,63 @@ function SignUp(props) {
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
   const isVerified = useSelector((state) => state.auth.isVerified);
+  const verificationEmail = useSelector(
+    (state) => state.auth.verificationEmail
+  );
+  const verificationMessage = useSelector(
+    (state) => state.auth.verificationMessage
+  );
 
   return (
     <GlobalLayoutUser>
-    <>
-      <section
-        className="section-hero overlay inner-page bg-image"
-        style={{
-          backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
-        }}
-        id="home-section"
-      >
-        <div className="container">
-          <div className="row">
-            <div className="col-md-7">
-              <h1 className="text-white font-weight-bold">Sign Up/Login</h1>
-              <div className="custom-breadcrumbs">
-                <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                <span className="text-white">
-                  <strong>Log In</strong>
-                </span>
+      <>
+        <section
+          className="section-hero overlay inner-page bg-image"
+          style={{
+            backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
+          }}
+          id="home-section"
+        >
+          <div className="container">
+            <div className="row">
+              <div className="col-md-7">
+                <h1 className="text-white font-weight-bold">Sign Up/Login</h1>
+                <div className="custom-breadcrumbs">
+                  <a href="#">Home</a> <span className="mx-2 slash">/</span>
+                  <span className="text-white">
+                    <strong>Log In</strong>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-      <section className="site-section">
-        <div className="container">
-          <div className="row">
-            <SignUp />
-            <div className="col-lg-6">
-              <h2 className="mb-4">Log In To JobBoard</h2>
-              {!isVerified && <p>Not verified!</p>}
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="p-4 border rounded"
-              >
-                {/* Form fields */}
-                <div className="form-group">
+        </section>
+        <section className="site-section">
+          <div className="container">
+            <div className="row">
+              <SignUp />
+              <div className="col-lg-6">
+                <h2 className="mb-4">Log In To JobBoard</h2>
+                {!isVerified && (
+                  <Alert color="danger">
+                    <MdErrorOutline size={25} className="mr-2" />
+                    {verificationMessage}
+                  </Alert>
+                )}
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="p-4 border rounded"
+                >
+                  {/* Form fields */}
                   <input
                     type="text"
                     id="loginEmail"
                     {...register("username")}
                     className="form-control"
-                    placeholder="Email address"
+                    placeholder="username..."
                   />
-                  <p className="text-danger">{errors.email?.message}</p>
-                </div>
-                <div className="form-group">
+                  <p className="text-danger">{errors.username?.message}</p>
+                  {/* More fields */}
                   <input
                     type="password"
                     id="loginPassword"

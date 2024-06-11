@@ -34,7 +34,8 @@ public class JwtUtils {
                 .setSubject((userPrincipal.getUsername()))
                 .claim("role", userPrincipal.getAuthorities())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+//                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .setExpiration(new Date((new Date()).getTime() + 10000))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }

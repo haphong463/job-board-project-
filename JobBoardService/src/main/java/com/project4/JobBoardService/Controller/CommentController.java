@@ -39,14 +39,19 @@ public class CommentController {
     }
 //    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<NewCommentDTO> createComment(@RequestBody Comment comment) {
+    public ResponseEntity<?> createComment(@RequestBody Comment comment) {
         try {
             User user = userService.findByUsername(comment.getUser().getUsername()).orElse(null);
-            comment.setUser(user);
-            Comment createdComment = commentService.createComment(comment);
-            NewCommentDTO commentResponse = modelMapper.map(createdComment, NewCommentDTO.class);
+            if(user != null){
+                comment.setUser(user);
+                Comment createdComment = commentService.createComment(comment);
+                NewCommentDTO commentResponse = modelMapper.map(createdComment, NewCommentDTO.class);
+                return ResponseEntity.ok(commentResponse);
 
-            return ResponseEntity.ok(commentResponse);
+            }
+            return ResponseEntity.badRequest().body(null);
+
+
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
         }
