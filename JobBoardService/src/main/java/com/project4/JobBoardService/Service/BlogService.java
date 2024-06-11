@@ -3,6 +3,7 @@ package com.project4.JobBoardService.Service;
 import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
+import com.project4.JobBoardService.Entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -16,4 +17,5 @@ public interface BlogService {
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
     Blog getBlogBySlug(String slug);
+    long countTodayPostsByUser(User user);
 }

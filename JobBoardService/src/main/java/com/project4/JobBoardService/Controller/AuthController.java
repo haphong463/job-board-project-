@@ -1,4 +1,5 @@
 package com.project4.JobBoardService.Controller;
+import com.project4.JobBoardService.Config.ErrorDetails;
 import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
@@ -6,10 +7,7 @@ import com.project4.JobBoardService.Repository.RoleRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Util.HTMLContentProvider;
-import com.project4.JobBoardService.payload.JwtResponse;
-import com.project4.JobBoardService.payload.LoginRequest;
-import com.project4.JobBoardService.payload.MessageResponse;
-import com.project4.JobBoardService.payload.SignupRequest;
+import com.project4.JobBoardService.payload.*;
 import com.project4.JobBoardService.security.UserDetailsImpl;
 import com.project4.JobBoardService.security.jwt.JwtUtils;
 import jakarta.validation.Valid;
@@ -56,12 +54,19 @@ public class AuthController {
         if (!optionalUser.isPresent()) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: User not found!"));
+                    .body(new ErrorDetails(
+                            new Date(),
+                            "Bad credentials",
+                            "The user with username " + loginRequest.getUsername() + " was not found"
+                    ));
         }
 
         User user = optionalUser.get();
         if (!user.isVerified()) {
-            return ResponseEntity.ok().body(user.isVerified());
+            return ResponseEntity.ok().body(new AuthRepsonse(
+                user.getEmail(),
+                    user.isVerified()
+            ));
 //            return ResponseEntity
 //                    .badRequest()
 //                    .body(new MessageResponse("Error: Email not verified! Please verify your email to login."));

@@ -28,9 +28,6 @@ public class Blog extends AbstractEntity {
     @Column(name = "content", columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(name = "author", nullable = false)
-    private String author;
-
 
     @ManyToOne
     @JoinColumn(name = "blog_category_id", nullable = false)

@@ -4,6 +4,7 @@ import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
+import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Service.UserService;
@@ -40,16 +41,23 @@ public class BlogController {
         if (category == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
         }
-
+        User user = userService.findByUsername(blogDTO.getUsername()).orElse(null);
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
+        }
+        long todayPostCount = blogService.countTodayPostsByUser(user);
+        if(todayPostCount >= 3){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         Blog blog = new Blog();
 
         blog.setTitle(blogDTO.getTitle());
         blog.setContent(blogDTO.getContent());
-        blog.setAuthor(blogDTO.getAuthor());
+
         blog.setCategory(category);
         blog.setStatus(blogDTO.getStatus());
         blog.setSlug(blogDTO.getSlug());
-
+        blog.setUser(user);
         //
 
 
@@ -102,6 +110,7 @@ public class BlogController {
             // check exist blog, blog category
             Blog existingBlogOpt = blogService.getBlogById(id);
             BlogCategory existingBlogCategory = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
+
             if (existingBlogOpt == null || existingBlogCategory == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
