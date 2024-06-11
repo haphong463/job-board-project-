@@ -1,62 +1,59 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { CommentForm } from "./CommentForm";
 import { FaEllipsisH, FaPaperPlane } from "react-icons/fa";
 import { Dropdown } from "react-bootstrap";
 import "./Comment.css";
 import Swal from "sweetalert2";
-
+import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  toggleShowReplies,
+  toggleShowReplyForm,
+  toggleShowEditForm,
+  setEditedContent,
+  setOriginalContent,
+  editComment as editCommentAction,
+  deleteComment as deleteCommentAction,
+} from "../../features/commentSlice";
+import { AnimatePresence, motion } from "framer-motion";
 export const Comment = ({
   comment,
   addComment,
-  deleteComment,
-  editComment,
   user,
   level = 0,
-  maxLevel = 3,
+  maxLevel = 2,
 }) => {
-  const [showReplies, setShowReplies] = useState(false);
-  const [showReplyForm, setShowReplyForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [editedContent, setEditedContent] = useState(comment.content);
-  const [originalContent, setOriginalContent] = useState(comment.content); // Lưu nội dung ban đầu
-  const [timeSinceComment, setTimeSinceComment] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const dispatch = useDispatch();
+  const showReplies = useSelector(
+    (state) => state.comments.showReplies[comment.id]
+  );
+  const showReplyForm = useSelector(
+    (state) => state.comments.showReplyForm[comment.id]
+  );
+  const showEditForm = useSelector(
+    (state) => state.comments.showEditForm[comment.id]
+  );
+  const editedContent = useSelector(
+    (state) => state.comments.editedContent[comment.id]
+  );
+  const originalContent = useSelector(
+    (state) => state.comments.originalContent[comment.id]
+  );
 
   useEffect(() => {
-    const calculateTimeSinceComment = () => {
-      const now = new Date();
-      const commentDate = new Date(comment.createdAt);
-      const diffMs = now - commentDate;
-      const diffMins = Math.floor(diffMs / (1000 * 60));
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-
-      if (diffMins < 60) {
-        setTimeSinceComment(`${diffMins} minutes ago`);
-      } else if (diffHours < 24) {
-        setTimeSinceComment(`${diffHours} hours ago`);
-      } else if (diffDays < 7) {
-        setTimeSinceComment(`${diffDays} days ago`);
-      } else {
-        const diffWeeks = Math.floor(diffDays / 7);
-        setTimeSinceComment(`${diffWeeks} weeks ago`);
-      }
-    };
-
-    calculateTimeSinceComment();
-
-    // Set up interval to update time every 1 minute and 30 seconds
-    const interval = setInterval(calculateTimeSinceComment, 90000);
-
-    // Cleanup interval on component unmount
+    const interval = setInterval(() => {}, 90000);
     return () => clearInterval(interval);
   }, []);
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
-    editComment(comment.id, editedContent);
-    setShowEditForm(false);
-    setIsEditing(false); // Đặt biến trạng thái về false khi chỉnh sửa hoàn thành
+    dispatch(
+      editCommentAction({
+        commentId: comment.id,
+        updatedContent: editedContent,
+      })
+    );
+    dispatch(toggleShowEditForm({ commentId: comment.id }));
   };
 
   const confirmDelete = () => {
@@ -70,16 +67,14 @@ export const Comment = ({
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteComment(comment.id);
+        dispatch(deleteCommentAction(comment.id));
       }
     });
   };
 
   const handleFormEditKeyDown = (e) => {
-    // Ngăn chặn hiển thị sweetalert2 khi người dùng đang chỉnh sửa
-    if (e.key === "Escape" && !isEditing) {
+    if (e.key === "Escape") {
       if (editedContent !== originalContent) {
-        // Nếu có sự thay đổi, hiển thị sweetalert2 để xác nhận lưu
         Swal.fire({
           title: "Save changes?",
           text: "Do you want to save changes?",
@@ -91,17 +86,19 @@ export const Comment = ({
           cancelButtonText: "No",
         }).then((result) => {
           if (result.isConfirmed) {
-            // Nếu người dùng chọn lưu, thực hiện submit form chỉnh sửa
             handleEditSubmit(e);
           } else {
-            // Nếu người dùng chọn không lưu, đặt nội dung chỉnh sửa về nội dung ban đầu
-            setEditedContent(originalContent);
-            setShowEditForm(false);
+            dispatch(
+              setEditedContent({
+                commentId: comment.id,
+                content: originalContent,
+              })
+            );
+            dispatch(toggleShowEditForm({ commentId: comment.id }));
           }
         });
       } else {
-        // Nếu không có sự thay đổi, đóng form chỉnh sửa
-        setShowEditForm(false);
+        dispatch(toggleShowEditForm({ commentId: comment.id }));
       }
     }
   };
@@ -117,43 +114,44 @@ export const Comment = ({
       <div className="comment-body">
         <div className="d-flex justify-content-between">
           <h3>{`${comment.user.firstName} ${comment.user.lastName}`}</h3>
-          <div
-            className="comment-actions"
-            style={{
-              cursor: "pointer",
-            }}
-          >
-            <Dropdown>
-              <Dropdown.Toggle as="a" className="options-toggle">
-                <FaEllipsisH />
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu>
-                <Dropdown.Item onClick={() => setShowEditForm(!showEditForm)}>
-                  {showEditForm ? "Cancel" : "Edit"}
-                </Dropdown.Item>
-                <Dropdown.Item onClick={confirmDelete}>Delete</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </div>
+          {user && user.sub === comment.user.username && (
+            <div className="comment-actions" style={{ cursor: "pointer" }}>
+              <Dropdown>
+                <Dropdown.Toggle as="a" className="options-toggle">
+                  <FaEllipsisH />
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    onClick={() =>
+                      dispatch(toggleShowEditForm({ commentId: comment.id }))
+                    }
+                  >
+                    {showEditForm ? "Cancel" : "Edit"}
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={confirmDelete}>Delete</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+          )}
         </div>
-        <div className="meta">{timeSinceComment}</div>
+        <div className="meta">{moment(comment.createdAt).fromNow()}</div>
         {showEditForm ? (
           <form onSubmit={handleEditSubmit} className="comment-form">
-            <div
-              className="form-group"
-              style={{
-                padding: 0,
-                margin: 0,
-              }}
-            >
+            <div className="form-group" style={{ padding: 0, margin: 0 }}>
               <textarea
                 id="message"
                 cols={30}
                 rows={2}
                 className="form-control"
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
+                value={editedContent || ""}
+                onChange={(e) =>
+                  dispatch(
+                    setEditedContent({
+                      commentId: comment.id,
+                      content: e.target.value,
+                    })
+                  )
+                }
                 placeholder="Write a comment..."
                 required
                 autoFocus
@@ -166,31 +164,50 @@ export const Comment = ({
             <small>Press ESC to cancel.</small>
           </form>
         ) : (
-          <p>{comment.content}</p>
+          <p style={{ whiteSpace: "pre-line" }}>{comment.content}</p>
         )}
-
         {level < maxLevel && (
           <p>
-            <a
-              className="reply mr-3"
-              onClick={() => setShowReplyForm(!showReplyForm)}
-            >
-              {showReplyForm ? "Cancel" : "Reply"}
-            </a>
+            {user && (
+              <a
+                className="reply mr-3"
+                onClick={() =>
+                  dispatch(toggleShowReplyForm({ commentId: comment.id }))
+                }
+              >
+                {showReplyForm ? "Cancel" : "Reply"}
+              </a>
+            )}
             {comment.children && comment.children.length > 0 && (
-              <a className="reply" onClick={() => setShowReplies(!showReplies)}>
+              <a
+                className="reply"
+                onClick={() =>
+                  dispatch(toggleShowReplies({ commentId: comment.id }))
+                }
+              >
                 {showReplies ? "Hide" : "Show"} replies
               </a>
             )}
           </p>
         )}
         {showReplyForm && level < maxLevel && (
-          <CommentForm
-            parentId={comment.id}
-            blogId={comment.blog.id}
-            addComment={addComment}
-            user={user}
-          />
+          <AnimatePresence>
+            {showReplyForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <CommentForm
+                  parentId={comment.id}
+                  blogId={comment.blog.id}
+                  addComment={addComment}
+                  user={user}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
         {showReplies && (
           <ul className="children">
@@ -199,8 +216,6 @@ export const Comment = ({
                 key={key}
                 comment={reply}
                 addComment={addComment}
-                deleteComment={deleteComment}
-                editComment={editComment}
                 user={user}
                 level={level + 1}
                 maxLevel={maxLevel}

@@ -32,6 +32,7 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
           onChange={(e) => setContent(e.target.value)}
           placeholder="Write a comment..."
           required
+          {...(parentId && { autoFocus: true })}
         />
         <button type="submit" className="post-button">
           <FaPaperPlane />

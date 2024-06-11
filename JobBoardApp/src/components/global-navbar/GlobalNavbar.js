@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import axiosRequest from "../../configs/axiosConfig";
+import { useDispatch, useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
+import { logout, updateUserAndRoles } from "../../features/authSlice";
 
 export function GlobalNavbar() {
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const user = useSelector((state) => state.auth.user);
+  const roles = useSelector((state) => state.auth.roles);
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   useEffect(() => {
     fetchCategories();
   }, []);
+  useEffect(() => {
+    if (!user) {
+      dispatch(updateUserAndRoles());
+    }
+  }, [user, dispatch]);
 
   const fetchCategories = async () => {
     try {
@@ -124,18 +138,29 @@ export function GlobalNavbar() {
 
           <div className="right-cta-menu text-right d-flex aligin-items-center col-6">
             <div className="ml-auto">
-              <NavLink
-                to="/post-job"
-                className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
-              >
-                <span className="mr-2 icon-add"></span>Post a Job
-              </NavLink>
-              <NavLink
-                to="/login"
-                className="btn btn-primary border-width-2 d-none d-lg-inline-block"
-              >
-                <span className="mr-2 icon-lock_outline"></span>Log In
-              </NavLink>
+              {user && roles.includes("ROLE_EMPLOYER") && (
+                <NavLink
+                  to="/post-job"
+                  className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
+                >
+                  <span className="mr-2 icon-add"></span>Post a Job
+                </NavLink>
+              )}
+              {user ? (
+                <>
+                  <span className="text-white text-uppercase font-weight-bold">
+                    {user.sub}
+                  </span>
+                  <button onClick={handleLogout}>Log out</button>
+                </>
+              ) : (
+                <NavLink
+                  to="/login"
+                  className="btn btn-primary border-width-2 d-none d-lg-inline-block"
+                >
+                  <span className="mr-2 icon-lock_outline"></span>Log In
+                </NavLink>
+              )}
             </div>
             <NavLink
               to="#"
