@@ -23,7 +23,7 @@ function SignUp() {
 
   const onSubmit = async (data) => {
     console.log(data);
-    await dispatch(signUp(data)); // Wait for sign-up action to complete
+    await dispatch(signUp(data)); 
 
     if (signUpSuccess) {
       console.log("DANG KY THANH CONG");
@@ -70,7 +70,7 @@ function SignUp() {
           <div className="row">
             <div className="col-lg-6 mb-5">
               <h2 className="mb-4">Sign Up To JobBoard</h2>
-              {isSignUpSuccess && ( // Kiểm tra nếu đăng ký thành công thì hiển thị thông báo
+              {isSignUpSuccess && ( 
                 <div className="alert alert-success" role="alert">
                   Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.
                 </div>

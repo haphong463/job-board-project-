@@ -11,6 +11,7 @@ import { PostJob } from "../../page/post-job/PostJob";
 import { Login } from "../../page/login/Login";
 import SignUp  from "../../page/signup/SignUp";
 import ForgotPassword from "../../page/login/ForgotPassword";
+import ResetPassword from "../../page/login/ResetPassword";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -23,6 +24,7 @@ export const routes = [
   { path: "/job-listing", component: <JobListing /> },
   { path: "/login", component: <Login /> },
   { path: "/signup", component: <SignUp />},
+  { path: "/ResetPassword", component: <ResetPassword />},
   { path: "/ForgotPassword", component: <ForgotPassword />},
   { path: "/faq", component: <Faq /> },
   { path: "/faq", component: <Faq /> },

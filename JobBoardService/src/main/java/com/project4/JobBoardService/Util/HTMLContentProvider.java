@@ -61,7 +61,7 @@ public class HTMLContentProvider {
                 "</body>" +
                 "</html>";
     }
-    public static String resetPasswordContent(String resetToken) {
+    public static String resetPasswordContent(String resetUrl) {
         return "<!DOCTYPE html>" +
                 "<html lang='en'>" +
                 "<head>" +
@@ -83,7 +83,7 @@ public class HTMLContentProvider {
                 "</div>" +
                 "<div class='content'>" +
                 "<p>To reset your password, please click on the following link:</p>" +
-                "<a href='http://localhost:8080/api/auth/reset-password?token=" + resetToken + "' class='button'>Reset Password</a>" +
+                "<a href='" + resetUrl + "' class='button'>Reset Password</a>" +
                 "<p>If you did not request a password reset, please ignore this email.</p>" +
                 "<p>Thank you!</p>" +
                 "</div>" +
@@ -91,4 +91,5 @@ public class HTMLContentProvider {
                 "</body>" +
                 "</html>";
     }
+
 }

@@ -81,9 +81,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendResetPasswordEmail(String toEmail, String resetToken ) {
-
-        String emailContent = HTMLContentProvider.resetPasswordContent(resetToken);
+    public void sendResetPasswordEmail(String toEmail, String resetUrl) {
+        String emailContent = HTMLContentProvider.resetPasswordContent(resetUrl);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
