@@ -119,6 +119,9 @@ export function GlobalNavbar() {
               <li className="d-lg-none">
                 <NavLink to="/login">Log In</NavLink>
               </li>
+              <li className="d-lg-none">
+                <NavLink to="/signup">Sig Nup</NavLink>
+              </li>
             </ul>
           </nav>
 
@@ -135,6 +138,12 @@ export function GlobalNavbar() {
                 className="btn btn-primary border-width-2 d-none d-lg-inline-block"
               >
                 <span className="mr-2 icon-lock_outline"></span>Log In
+              </NavLink>
+              <NavLink
+                to="/signup"
+                className="btn btn-primary border-width-2 d-none d-lg-inline-block"
+              >
+                <span className="mr-2 icon-lock_outline"></span>Sig Nup
               </NavLink>
             </div>
             <NavLink
