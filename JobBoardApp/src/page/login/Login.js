@@ -86,7 +86,6 @@ export const Login = () => {
         <section className="site-section">
           <div className="container">
             <div className="row">
-              <SignUp />
               <div className="col-lg-6">
                 <h2 className="mb-4">Log In To JobBoard</h2>
                 {!isVerified && (
@@ -117,23 +116,22 @@ export const Login = () => {
                     placeholder="Password"
                   />
                   <p className="text-danger">{errors.password?.message}</p>
-                </div>
-                <div className="form-group d-flex justify-content-between align-items-center">
-                  <input
-                    type="submit"
-                    value="Log In"
-                    className="btn px-4 btn-primary text-white"
-                  />
-                  <a href="/ForgotPassword" className="btn btn-link">
-                    Forgot Password?
-                  </a>
-                </div>
-              </form>
+                  <div className="form-group d-flex justify-content-between align-items-center">
+                    <input
+                      type="submit"
+                      value="Log In"
+                      className="btn px-4 btn-primary text-white"
+                    />
+                    <a href="/ForgotPassword" className="btn btn-link">
+                      Forgot Password?
+                    </a>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-    </>
-  </GlobalLayoutUser>
+        </section>
+      </>
+    </GlobalLayoutUser>
   );
 };
