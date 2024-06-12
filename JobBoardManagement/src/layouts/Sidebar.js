@@ -7,6 +7,7 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAndUpdateAccessToken, logout } from "../features/authSlice";
+import { IoLogOut } from "react-icons/io5";
 
 const Sidebar = () => {
   const showMobilemenu = () => {
@@ -119,7 +120,9 @@ const Sidebar = () => {
                 Log out in {countdown}s
               </div>
             ) : (
-              "Logout"
+              <>
+                <IoLogOut /> Log out
+              </>
             )}
           </Button>
         </Nav>

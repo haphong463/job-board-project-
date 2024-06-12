@@ -15,7 +15,7 @@ import { blogCategorySchema } from "../../../utils/variables/schema";
 import { useEffect, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { IoMdAdd } from "react-icons/io";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addBlogCategory,
   updateBlogCategory,
@@ -24,11 +24,16 @@ import {
 export function BlogCategoryForm({ isEdit, setIsEdit }) {
   const dispatch = useDispatch();
   const [newCategoryModal, setNewCategoryModal] = useState(false);
-
+  const [setUnmountClose, setSetUnmountClose] = useState(false);
+  const blogCategoryData =
+    useSelector((state) => state.blogCategory.blogCategory) || [];
   const toggleNewCategoryModal = () => {
     setNewCategoryModal(!newCategoryModal);
-    if (isEdit) {
-      setIsEdit(null); // Reset isEdit state when modal is toggled
+    if (newCategoryModal) {
+      setSetUnmountClose(true); // Mark that the modal is closing
+    }
+    if (isEdit && !newCategoryModal) {
+      setIsEdit(null); // Reset isEdit state when modal is toggled open
     }
   };
 
@@ -36,6 +41,8 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
     handleSubmit,
     control,
     setValue,
+    setError,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(blogCategorySchema),
@@ -51,7 +58,23 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
     }
   }, [isEdit, setValue]);
 
+  useEffect(() => {
+    if (setUnmountClose) {
+      reset({ name: "" }); // Reset the form values
+      setSetUnmountClose(false); // Reset the state
+    }
+  }, [setUnmountClose, reset]);
+
   const onSubmit = (data) => {
+    const checkExistName = blogCategoryData.some(
+      (item) => item.name === data.name
+    );
+    if (checkExistName) {
+      setError("name", {
+        message: "Name already exists!",
+      });
+      return;
+    }
     if (isEdit) {
       dispatch(updateBlogCategory({ ...data, id: isEdit.id })).then(() => {
         toggleNewCategoryModal();

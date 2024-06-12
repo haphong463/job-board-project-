@@ -19,7 +19,6 @@ const Forms = lazy(() => import("../views/ui/Forms"));
 const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
 
 /*****Routes******/
-const isLogin = false;
 const ThemeRoutes = [
   {
     path: "/",

@@ -3,10 +3,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import blogsReducer from "./features/blogSlice";
 import blogCategoryReducer from "./features/blogCategorySlice";
 import authReducer from "./features/authSlice";
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     blogs: blogsReducer,
     blogCategory: blogCategoryReducer,
     auth: authReducer,
   },
 });
+
+export { store };
+export default store;

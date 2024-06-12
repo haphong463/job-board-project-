@@ -15,42 +15,34 @@ import {
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { Editor } from "@tinymce/tinymce-react";
 import { slugify } from "../../../utils/functions/convertToSlug";
 import { createFormData } from "../../../utils/form-data/formDataUtil";
 import { IoMdAdd } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import { addBlog } from "../../../features/blogSlice";
-import {
-  fetchBlogCategory,
-  addBlogCategory,
-} from "../../../features/blogCategorySlice";
-import { BlogForm } from "./BlogForm";
-import { BlogCategoryForm } from "../blog-category/BlogCategoryForm";
-import {
-  blogCategorySchema,
-  blogSchema,
-} from "../../../utils/variables/schema";
+import { addBlog, editBlog } from "../../../features/blogSlice";
+import { fetchBlogCategory } from "../../../features/blogCategorySlice";
+import { blogSchema } from "../../../utils/variables/schema";
 import Select from "react-select";
-const FormBlog = (args) => {
-  const dispatch = useDispatch();
+import { jwtDecode } from "jwt-decode";
+import "./FormBlog.css";
 
+const FormBlog = ({ isEdit, setIsEdit }) => {
+  const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.accessToken);
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
   const categoryStatus = useSelector((state) => state.blogCategory.status);
+
   const [modal, setModal] = useState(false);
-
-  const toggle = () => setModal(!modal);
-
 
   const {
     handleSubmit,
     control,
     setValue,
-    watch,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm({
-    resolver: yupResolver(blogSchema),
+    resolver: yupResolver(blogSchema(isEdit)),
     defaultValues: {
       title: "",
       tags: "",
@@ -60,18 +52,35 @@ const FormBlog = (args) => {
     },
   });
 
+  const toggle = () => {
+    setModal(!modal);
+    setIsEdit(null);
+    reset();
+  };
+
   const onSubmit = (data) => {
     const newData = {
       ...data,
       slug: slugify(data.title),
-      author: "Testttt",
-      status: 1,
+      status: 0,
+      username: jwtDecode(token).sub,
+      author: "Test",
     };
 
+    if (!newData.image || newData.image.length === 0) {
+      delete newData.image;
+    }
+
     const formData = createFormData(newData);
-    dispatch(addBlog(formData)).then(() => {
-      toggle();
-    });
+    if (!isEdit) {
+      dispatch(addBlog(formData)).then(() => {
+        toggle();
+      });
+    } else {
+      dispatch(editBlog({ newBlog: formData, id: isEdit.id })).then(() => {
+        toggle();
+      });
+    }
   };
 
   useEffect(() => {
@@ -79,6 +88,20 @@ const FormBlog = (args) => {
       dispatch(fetchBlogCategory());
     }
   }, [categoryStatus, dispatch]);
+
+  useEffect(() => {
+    if (isEdit) {
+      setModal(true);
+      setValue("title", isEdit.title); // Set the default value when isEdit changes
+      setValue("content", isEdit.content); // Set the default value when isEdit changes
+      setValue("blogCategoryId", isEdit.category.id); // Set the default value when isEdit changes
+    }
+  }, [isEdit, setValue]);
+
+  const defaultValue = isEdit && {
+    label: isEdit.category.name,
+    value: isEdit.category.id,
+  };
 
   return (
     <>
@@ -133,7 +156,9 @@ const FormBlog = (args) => {
                       toolbar:
                         "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
                     }}
-                    initialValue="Welcome to TinyMCE!"
+                    initialValue={
+                      isEdit ? isEdit.content : "Welcome to TinyMCE!"
+                    }
                     onEditorChange={(newValue, editor) =>
                       setValue("content", newValue, {
                         shouldValidate: true,
@@ -153,6 +178,7 @@ const FormBlog = (args) => {
                   <Controller
                     name="blogCategoryId"
                     control={control}
+                    defaultValue={1}
                     render={({ field }) => (
                       <Select
                         {...field}
@@ -168,34 +194,10 @@ const FormBlog = (args) => {
                         value={categoryList.find(
                           (category) => category.id === field
                         )}
+                        {...(isEdit && { defaultValue })}
                       />
                     )}
                   />
-                  {/* <Controller
-                  name="blogCategoryId"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="postCategory"
-                      type="select"
-                      invalid={!!errors.blogCategoryId}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleCategoryChange(e);
-                      }}
-                    >
-                      <option disabled value="">
-                        --- Select category ---
-                      </option>
-                      {categoryList.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </Input>
-                  )}
-                /> */}
                   {errors.blogCategoryId && (
                     <FormText color="danger">
                       {errors.blogCategoryId.message}
@@ -212,6 +214,7 @@ const FormBlog = (args) => {
                     onChange={(e) => {
                       setValue("image", e.target.files[0], {
                         shouldValidate: true,
+                        shouldDirty: true,
                       });
                     }}
                     invalid={!!errors.image}
@@ -224,7 +227,7 @@ const FormBlog = (args) => {
             </Row>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" type="submit">
+            <Button color="primary" type="submit" disabled={!isDirty}>
               Submit
             </Button>
             <Button color="secondary" type="button" onClick={toggle}>

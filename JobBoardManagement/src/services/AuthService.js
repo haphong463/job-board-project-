@@ -1,6 +1,6 @@
 import axiosRequest from "../configs/axiosConfig";
 
-export const signIn = async (data) => {
+export const signInAsync = async (data) => {
   try {
     return await axiosRequest.post("/auth/signin", data, {
       headers: {

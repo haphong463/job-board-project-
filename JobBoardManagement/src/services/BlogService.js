@@ -24,3 +24,8 @@ export const createBlog = async (data) =>
 
 export const deleteBlog = async (blogId) =>
   await axiosRequest.delete(`${URL}/${blogId}`);
+
+export const updateBlog = async (data, id) =>
+  await axiosRequest.put(`${URL}/${id}`, data, {
+    headers: HEADERS_FORM_DATA,
+  });

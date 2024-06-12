@@ -8,18 +8,19 @@ import {
   InputGroup,
   InputGroupText,
   Input,
+  Alert,
 } from "reactstrap";
 import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
+import { jwtDecode } from "jwt-decode";
 
 function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs) || [];
   const blogStatus = useSelector((state) => state.blogs.status);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isEdit, setIsEdit] = useState({});
-
+  const [isEdit, setIsEdit] = useState(null);
   useEffect(() => {
     if (blogStatus === "idle") {
       dispatch(fetchBlogs());
@@ -33,7 +34,10 @@ function Blog(props) {
   };
 
   const handleEdit = (id) => {
-    history.push(`/edit-blog/${id}`);
+    const existBlog = blogData.find((item) => item.id === id);
+    if (existBlog) {
+      setIsEdit(existBlog);
+    }
   };
 
   const filteredBlogs = blogData.filter((blog) =>
@@ -66,6 +70,18 @@ function Blog(props) {
           }}
         >
           {row.category.name}
+        </div>
+      ),
+    },
+    {
+      name: "Posted By",
+      cell: (row) => (
+        <div
+          style={{
+            fontSize: "16px",
+          }}
+        >
+          {`${row.user.firstName} ${row.user.lastName}`}
         </div>
       ),
     },
@@ -108,11 +124,11 @@ function Blog(props) {
       ),
     },
   ];
-  console.log("re-render");
+
   return (
     <Row>
       <Col lg="12">
-        <Form />
+        <Form isEdit={isEdit} setIsEdit={setIsEdit} />
       </Col>
       <Col lg="12">
         <Card>
