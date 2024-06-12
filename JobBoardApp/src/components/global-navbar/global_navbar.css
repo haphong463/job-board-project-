@@ -1,0 +1,19 @@
+:root {
+  bg-primary: #89ba16;
+}
+
+.custom-dropdown-menu {
+  left: auto !important;
+  right: 0 !important;
+  width: 200px !important;
+  transform: translate3d(
+    0,
+    38px,
+    0
+  ) !important; /* Adjust the vertical alignment as needed */
+}
+
+.active {
+  color: "#fff";
+  background-color: var(--bg-primary);
+}

@@ -94,6 +94,9 @@ const authSlice = createSlice({
         state.roles = [];
       }
     },
+    resetVerificationMessage(state) {
+      state.verificationMessage = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -139,6 +142,7 @@ export const {
   resetSignInSuccess,
   logout,
   updateUserAndRoles,
+  resetVerificationMessage,
 } = authSlice.actions;
 
 export default authSlice.reducer;

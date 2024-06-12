@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GlobalNavbar } from "../global-navbar/GlobalNavbar";
 import { GlobalFooter } from "../global-footer/GlobalFooter";
 import { GlobalSiteMobileMenu } from "../global-site-mobile/GlobalSiteMobile";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
+import { animateScroll as scroll } from "react-scroll";
 
 const pageTransition = {
   initial: { opacity: 0, y: 20 },
@@ -12,6 +14,13 @@ const pageTransition = {
 };
 
 export const GlobalLayoutUser = ({ children }) => {
+  const location = useLocation();
+  useEffect(() => {
+    scroll.scrollToTop({
+      duration: 500,
+      smooth: "easeInOutQuart",
+    });
+  }, [location]);
   return (
     <div id="top">
       {/* <div id="overlayer"></div>

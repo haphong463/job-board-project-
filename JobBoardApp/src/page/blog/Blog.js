@@ -3,6 +3,7 @@ import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayo
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllBlog } from "../../features/blogSlice";
 import { NavLink } from "react-router-dom";
+import moment from "moment";
 
 export const Blog = () => {
   const dispatch = useDispatch();
@@ -44,30 +45,35 @@ export const Blog = () => {
           {blogs && (
             <div className="container">
               <div className="row mb-5">
-                {blogs.map((blog) => (
-                  <div key={blog.id} className="col-md-6 col-lg-4 mb-5">
-                    <NavLink to={`/blog/${blog.slug}`}>
-                      <img
-                        src={blog.imageUrl}
-                        alt="Image"
-                        style={{
-                          height: 300,
-                          width: 300,
-                        }}
-                        className="img-thumbnail rounded mb-4"
-                      />
-                    </NavLink>
-                    <h3>
-                      <a href="blog-single.html" className="text-black">
-                        {blog.title}
-                      </a>
-                    </h3>
-                    <div>
-                      April 15, 2019 <span className="mx-2">|</span>{" "}
-                      {/* <a href="#">{blog.blogCount}</a> */}
+                {blogs.map((blog) => {
+                  console.log(">>>blog: ", blog);
+                  return (
+                    <div key={blog.id} className="col-md-6 col-lg-4 mb-5">
+                      <NavLink to={`/blog/${blog.slug}`}>
+                        <img
+                          src={blog.imageUrl}
+                          alt="Image"
+                          style={{
+                            height: 300,
+                            width: 300,
+                          }}
+                          className="img-thumbnail rounded mb-4"
+                        />
+                      </NavLink>
+                      <h3>
+                        <a href="blog-single.html" className="text-black">
+                          {blog.title}
+                        </a>
+                      </h3>
+                      <div>
+                        {moment(blog.createdAt).format("MMMM Do YYYY")}{" "}
+                        <span className="mx-2">|</span>
+                        {/* Cần lấy ra số lượng comment của bài blog. */}
+                        {/* <a href="#">{blog.blogCount}</a> */}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="row pagination-wrap mt-5">
                 <div className="col-md-12 text-center ">

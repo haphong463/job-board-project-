@@ -1,4 +1,5 @@
 import React from "react";
+import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 
 export const PortfolioSingle = () => {
   return (
@@ -6,7 +7,9 @@ export const PortfolioSingle = () => {
       <>
         <section
           className="section-hero overlay inner-page bg-image"
-          style={{ backgroundImage: 'url("images/hero_1.jpg")' }}
+          style={{
+            backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
+          }}
           id="home-section"
         >
           <div className="container">
@@ -36,36 +39,48 @@ export const PortfolioSingle = () => {
             <div className="row mb-5 mt-5">
               <div className="col-lg-8">
                 <figure>
-                  <a href="images/sq_img_6.jpg" data-fancybox="gallery">
+                  <a
+                    href="../../../../assets/images/sq_img_6.jpg"
+                    data-fancybox="gallery"
+                  >
                     <img
-                      src="images/sq_img_6.jpg"
+                      src="../../../../assets/images/sq_img_6.jpg"
                       alt="Image"
                       className="img-fluid"
                     />
                   </a>
                 </figure>
                 <figure>
-                  <a href="images/sq_img_2.jpg" data-fancybox="gallery">
+                  <a
+                    href="../../../../assets/images/sq_img_2.jpg"
+                    data-fancybox="gallery"
+                  >
                     <img
-                      src="images/sq_img_2.jpg"
+                      src="../../../../assets/images/sq_img_2.jpg"
                       alt="Image"
                       className="img-fluid"
                     />
                   </a>
                 </figure>
                 <figure>
-                  <a href="images/sq_img_7.jpg" data-fancybox="gallery">
+                  <a
+                    href="../../../../assets/images/sq_img_7.jpg"
+                    data-fancybox="gallery"
+                  >
                     <img
-                      src="images/sq_img_7.jpg"
+                      src="../../../../assets/images/sq_img_7.jpg"
                       alt="Image"
                       className="img-fluid"
                     />
                   </a>
                 </figure>
                 <figure className="mb-0">
-                  <a href="images/sq_img_8.jpg" data-fancybox="gallery">
+                  <a
+                    href="../../../../assets/images/sq_img_8.jpg"
+                    data-fancybox="gallery"
+                  >
                     <img
-                      src="images/sq_img_8.jpg"
+                      src="../../../../assets/images/sq_img_8.jpg"
                       alt="Image"
                       className="img-fluid"
                     />
@@ -118,7 +133,7 @@ export const PortfolioSingle = () => {
                   <div className="block__91147 d-flex align-items-center">
                     <figure className="mr-4">
                       <img
-                        src="images/person_2.jpg"
+                        src="../../../../assets/images/person_2.jpg"
                         alt="Image"
                         className="img-fluid"
                       />
@@ -184,7 +199,7 @@ export const PortfolioSingle = () => {
                   <div className="block__91147 d-flex align-items-center">
                     <figure className="mr-4">
                       <img
-                        src="images/person_1.jpg"
+                        src="../../../../assets/images/person_1.jpg"
                         alt="Image"
                         className="img-fluid"
                       />
@@ -209,7 +224,7 @@ export const PortfolioSingle = () => {
                   <div className="block__91147 d-flex align-items-center">
                     <figure className="mr-4">
                       <img
-                        src="images/person_2.jpg"
+                        src="../../../../assets/images/person_2.jpg"
                         alt="Image"
                         className="img-fluid"
                       />

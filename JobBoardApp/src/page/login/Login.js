@@ -1,63 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { FaCheck, FaTimes } from "react-icons/fa";
-import { signUpSchema } from "../../utils/variables/schema";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { resetSignUpSuccess, signUp } from "../../features/authSlice";
+import { Navigate, NavLink } from "react-router-dom";
+import { resetVerificationMessage } from "../../features/authSlice";
 import { useLoginForm } from "../../hooks/useLoginForm";
-import { Alert } from "reactstrap";
-import { MdError, MdErrorOutline } from "react-icons/md";
-
-function SignUp(props) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(signUpSchema),
-  });
-  const dispatch = useDispatch();
-  const signUpSuccess = useSelector((state) => state.auth.signUpSuccess);
-  const [password, setPassword] = useState("");
-
-  const onSubmit = (data) => {
-    console.log(data);
-    dispatch(signUp(data));
-    if (signUpSuccess) {
-      console.log("DANG KY THANH CONG");
-      // navigate("/");
-    } else {
-      console.log("DANG KY THAT BAI");
-    }
-  };
-
-  const passwordValidations = [
-    {
-      test: password.length >= 6,
-      message: "Password must be at least 6 characters",
-    },
-    {
-      test: password.trim() !== "",
-      message: "Password cannot be empty",
-    },
-  ];
-
- 
-}
-
+import { MdErrorOutline } from "react-icons/md";
+import { Alert } from "react-bootstrap";
+import "./login.css";
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
-  const isVerified = useSelector((state) => state.auth.isVerified);
-  const verificationEmail = useSelector(
-    (state) => state.auth.verificationEmail
-  );
   const verificationMessage = useSelector(
     (state) => state.auth.verificationMessage
   );
+  const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
+  console.log(">>> show password: ", showPassword);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  useEffect(() => {
+    dispatch(resetVerificationMessage());
+  }, [dispatch]);
+
+  if (user) <Navigate to="/" replace={true} />;
 
   return (
     <GlobalLayoutUser>
@@ -86,54 +54,94 @@ export const Login = () => {
         <section className="site-section">
           <div className="container">
             <div className="row">
-              <SignUp />
               <div className="col-lg-6">
-                <h2 className="mb-4">Log In To JobBoard</h2>
-                {!isVerified && (
-                  <Alert color="danger">
-                    <MdErrorOutline size={25} className="mr-2" />
-                    {verificationMessage}
-                  </Alert>
+                <h2 className="mb-4 font-weight-bold">Welcome to Job Board</h2>
+                {verificationMessage && (
+                  <>
+                    <Alert variant="danger">
+                      <MdErrorOutline size={25} className="mr-2" />
+                      {verificationMessage}
+                    </Alert>
+                  </>
                 )}
                 <form
                   onSubmit={handleSubmit(onSubmit)}
                   className="p-4 border rounded"
                 >
                   {/* Form fields */}
-                  <input
-                    type="text"
-                    id="loginEmail"
-                    {...register("username")}
-                    className="form-control"
-                    placeholder="username..."
-                  />
-                  <p className="text-danger">{errors.username?.message}</p>
-                  {/* More fields */}
-                  <input
-                    type="password"
-                    id="loginPassword"
-                    {...register("password")}
-                    className="form-control"
-                    placeholder="Password"
-                  />
-                  <p className="text-danger">{errors.password?.message}</p>
+                  <div className="form-group">
+                    <label htmlFor="loginEmail">Username*</label>
+                    <input
+                      type="text"
+                      id="loginEmail"
+                      {...register("username")}
+                      className="form-control"
+                      placeholder="Username"
+                      autoFocus
+                    />
+                    <p className="text-danger">{errors.username?.message}</p>
+                  </div>
+                  <div className="form-group">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <label htmlFor="loginPassword">Password*</label>
+                      <NavLink to="/ForgotPassword" className="btn btn-link">
+                        Forgot Password?
+                      </NavLink>
+                    </div>
+                    <div className="input-group">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        id="loginPassword"
+                        {...register("password")}
+                        className="form-control"
+                        placeholder="Password"
+                      />
+                      <div className="input-group-append">
+                        <span
+                          className="input-group-text"
+                          onClick={togglePasswordVisibility}
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-danger">{errors.password?.message}</p>
+                  </div>
+                  <div className="form-group">
+                    <input
+                      type="submit"
+                      value="Sign in"
+                      className="btn px-4 btn-primary text-white w-100"
+                    />
+                  </div>
+                  <div className="text-center font-weight-bold">
+                    <p>
+                      Do not have an account?{" "}
+                      <NavLink to="/signup">Register now</NavLink>
+                    </p>
+                  </div>
+                </form>
+              </div>
+              <div className="col-lg-6 d-none d-lg-block">
+                <div className="info-box">
+                  <h4>Welcome Back!</h4>
+                  <p>
+                    By logging in, you gain access to all the features and
+                    benefits of JobBoard, including personalized job
+                    recommendations, application tracking, and more.
+                  </p>
+                  <ul>
+                    <li>Personalized job recommendations</li>
+                    <li>Track your applications</li>
+                    <li>Connect with top employers</li>
+                    <li>And much more...</li>
+                  </ul>
                 </div>
-                <div className="form-group d-flex justify-content-between align-items-center">
-                  <input
-                    type="submit"
-                    value="Log In"
-                    className="btn px-4 btn-primary text-white"
-                  />
-                  <a href="/ForgotPassword" className="btn btn-link">
-                    Forgot Password?
-                  </a>
-                </div>
-              </form>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-    </>
-  </GlobalLayoutUser>
+        </section>
+      </>
+    </GlobalLayoutUser>
   );
 };

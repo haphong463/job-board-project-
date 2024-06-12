@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { routes } from "./utils/variables/routes";
 import { useEffect, useState } from "react";
 import axios from "axios";

@@ -1,5 +1,5 @@
 import React from "react";
-import { GlobalLayoutUser } from "../../components/clients/global-layout-user/GlobalLayoutUser";
+import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 
 export const Gallery = () => {
   return (
@@ -7,7 +7,9 @@ export const Gallery = () => {
       <>
         <section
           className="section-hero overlay inner-page bg-image"
-          style={{ backgroundImage: 'url("images/hero_1.jpg")' }}
+          style={{
+            backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
+          }}
           id="home-section"
         >
           <div className="container">
@@ -30,142 +32,184 @@ export const Gallery = () => {
             <div className="row">
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_1.jpg"
+                  href="../../../../assets/images/sq_img_1.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_1.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_1.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_2.jpg"
+                  href="../../../../assets/images/sq_img_2.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_2.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_2.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_3.jpg"
+                  href="../../../../assets/images/sq_img_3.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_3.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_3.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_4.jpg"
+                  href="../../../../assets/images/sq_img_4.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_4.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_4.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_5.jpg"
+                  href="../../../../assets/images/sq_img_5.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_5.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_5.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_6.jpg"
+                  href="../../../../assets/images/sq_img_6.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_6.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_6.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-6 item">
                 <a
-                  href="images/sq_img_11.jpg"
+                  href="../../../../assets/images/sq_img_11.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_11.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_11.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-6 item">
                 <a
-                  href="images/sq_img_2.jpg"
+                  href="../../../../assets/images/sq_img_2.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_2.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_2.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_7.jpg"
+                  href="../../../../assets/images/sq_img_7.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_7.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_7.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_8.jpg"
+                  href="../../../../assets/images/sq_img_8.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_8.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_8.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_9.jpg"
+                  href="../../../../assets/images/sq_img_9.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_9.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_9.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_10.jpg"
+                  href="../../../../assets/images/sq_img_10.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_10.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_10.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_11.jpg"
+                  href="../../../../assets/images/sq_img_11.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_11.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_11.jpg"
+                  />
                 </a>
               </div>
               <div className="col-md-6 col-lg-4 item">
                 <a
-                  href="images/sq_img_12.jpg"
+                  href="../../../../assets/images/sq_img_12.jpg"
                   className="item-wrap fancybox"
                   data-fancybox="gallery2"
                 >
                   <span className="icon-search2" />
-                  <img className="img-fluid" src="images/sq_img_12.jpg" />
+                  <img
+                    className="img-fluid"
+                    src="../../../../assets/images/sq_img_12.jpg"
+                  />
                 </a>
               </div>
             </div>

@@ -9,9 +9,10 @@ import { PortfolioSingle } from "../../page/portfolio-single/PortfolioSingle";
 import { JobListing } from "../../page/job-listing/JobListing";
 import { PostJob } from "../../page/post-job/PostJob";
 import { Login } from "../../page/login/Login";
-import SignUp  from "../../page/signup/SignUp";
+import SignUp from "../../page/signup/SignUp";
 import ForgotPassword from "../../page/login/ForgotPassword";
-import ResetPassword from "../../page/login/ResetPassword";
+import { Gallery } from "../../page/gallery/Gallery";
+// import ResetPassword from "../../page/login/ResetPassword";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -20,12 +21,12 @@ export const routes = [
   { path: "/contact", component: <Contact /> },
   { path: "/post-job", component: <PostJob /> },
   { path: "/portfolio", component: <Portfolio /> },
-  { path: "/portfolio-single", component: <PortfolioSingle /> },
+  { path: "/portfolio/:id", component: <PortfolioSingle /> },
   { path: "/job-listing", component: <JobListing /> },
   { path: "/login", component: <Login /> },
-  { path: "/signup", component: <SignUp />},
-  { path: "/ResetPassword", component: <ResetPassword />},
-  { path: "/ForgotPassword", component: <ForgotPassword />},
-  { path: "/faq", component: <Faq /> },
-  { path: "/faq", component: <Faq /> },
+  { path: "/signup", component: <SignUp /> },
+  // { path: "/ResetPassword", component: <ResetPassword />},
+  { path: "/ForgotPassword", component: <ForgotPassword /> },
+  { path: "/job-listings", component: <JobListing /> },
+  { path: "/gallery", component: <Gallery /> },
 ];

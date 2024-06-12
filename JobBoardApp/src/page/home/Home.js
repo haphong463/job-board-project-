@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import CountUp from "react-countup";
+import { JobBoardStats } from "../../components/job-board-stats/JobBoardStats";
 
 export const Home = () => {
   const location = useLocation();
-  const navigate = useNavigate();  // Correct usage of useNavigate
+  const navigate = useNavigate(); // Correct usage of useNavigate
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -23,30 +25,30 @@ export const Home = () => {
         navigate(location.pathname, { replace: true });
         // Reload the page
         window.location.reload();
-      }, 2000 ); // Adjust the time (5000 ms = 5 seconds) as needed
+      }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
     }
   }, [location, navigate]);
   return (
     <GlobalLayoutUser>
       <>
-     {message && (
+        {message && (
           <div
             className="alert alert-success custom-alert"
             role="alert"
             style={{
-              position: 'fixed',
+              position: "fixed",
               top: 0,
               left: 0,
               right: 0,
-              width: '100%',
+              width: "100%",
               zIndex: 1000,
-              padding: '10px 20px',
-              fontSize: '14px',
-              textAlign: 'center',
-              marginBottom: '0',
-              backgroundColor: '#d4edda',
-              color: '#155724',
-              borderColor: '#c3e6cb',
+              padding: "10px 20px",
+              fontSize: "14px",
+              textAlign: "center",
+              marginBottom: "0",
+              backgroundColor: "#d4edda",
+              color: "#155724",
+              borderColor: "#c3e6cb",
             }}
           >
             {message}
@@ -59,10 +61,9 @@ export const Home = () => {
           }}
           id="home-section"
         >
-        <div className="container">
+          <div className="container">
             <div className="row align-items-center justify-content-center">
               <div className="col-md-12">
-              
                 <div className="mb-5 text-center">
                   <h1 className="text-white font-weight-bold">
                     The Easiest Way To Get Your Dream Job
@@ -152,61 +153,7 @@ export const Home = () => {
             <span className=" icon-keyboard_arrow_down" />
           </a>
         </section>
-        <section
-          className="py-5 bg-image overlay-primary fixed overlay"
-          id="next"
-          style={{
-            backgroundImage: 'url("../../../assets/images/hero_1.jpg")',
-          }}
-        >
-          <div className="container">
-            <div className="row mb-5 justify-content-center">
-              <div className="col-md-7 text-center">
-                <h2 className="section-title mb-2 text-white">
-                  JobBoard Site Stats
-                </h2>
-                <p className="lead text-white">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Expedita unde officiis recusandae sequi excepturi corrupti.
-                </p>
-              </div>
-            </div>
-            <div className="row pb-0 block__19738 section-counter">
-              <div className="col-6 col-md-6 col-lg-3 mb-5 mb-lg-0">
-                <div className="d-flex align-items-center justify-content-center mb-2">
-                  <strong className="number" data-number={1930}>
-                    0
-                  </strong>
-                </div>
-                <span className="caption">Candidates</span>
-              </div>
-              <div className="col-6 col-md-6 col-lg-3 mb-5 mb-lg-0">
-                <div className="d-flex align-items-center justify-content-center mb-2">
-                  <strong className="number" data-number={54}>
-                    0
-                  </strong>
-                </div>
-                <span className="caption">Jobs Posted</span>
-              </div>
-              <div className="col-6 col-md-6 col-lg-3 mb-5 mb-lg-0">
-                <div className="d-flex align-items-center justify-content-center mb-2">
-                  <strong className="number" data-number={120}>
-                    0
-                  </strong>
-                </div>
-                <span className="caption">Jobs Filled</span>
-              </div>
-              <div className="col-6 col-md-6 col-lg-3 mb-5 mb-lg-0">
-                <div className="d-flex align-items-center justify-content-center mb-2">
-                  <strong className="number" data-number={550}>
-                    0
-                  </strong>
-                </div>
-                <span className="caption">Companies</span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <JobBoardStats />
         <section className="site-section">
           <div className="container">
             <div className="row mb-5 justify-content-center">
@@ -411,9 +358,12 @@ export const Home = () => {
                 </p>
               </div>
               <div className="col-md-3 ml-auto">
-                <a href="#" className="btn btn-warning btn-block btn-lg">
+                <NavLink
+                  to="/signup"
+                  className="btn btn-warning btn-block btn-lg"
+                >
                   Sign Up
-                </a>
+                </NavLink>
               </div>
             </div>
           </div>

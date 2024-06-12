@@ -4,10 +4,22 @@ import axiosRequest from "../../configs/axiosConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { logout, updateUserAndRoles } from "../../features/authSlice";
-
+import {
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from "reactstrap";
+import registerImage from "../../";
+import { FaUserCircle } from "react-icons/fa";
+import "./global_navbar.css";
+import { useTranslation } from "react-i18next";
 export function GlobalNavbar() {
   const [categories, setCategories] = useState([]);
+  const { t, i18n } = useTranslation(); // Initialize the useTranslation hook
+
   const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
   const dispatch = useDispatch();
@@ -19,6 +31,7 @@ export function GlobalNavbar() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
   useEffect(() => {
     if (!user) {
       dispatch(updateUserAndRoles());
@@ -33,11 +46,17 @@ export function GlobalNavbar() {
       console.error("Error fetching categories:", error);
     }
   };
+
   const handleCategoryClick = (categoryName) => {
     setSelectedCategory(categoryName);
     console.log("Selected category:", categoryName);
   };
 
+  const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    setDropdownOpen(false); // Close the dropdown after language change
+  };
   return (
     <header className="site-navbar mt-3">
       <div className="container-fluid">
@@ -47,7 +66,7 @@ export function GlobalNavbar() {
           </div>
 
           <nav className="mx-auto site-navigation">
-            <ul className="site-menu js-clone-nav d-none d-xl-block ml-0 pl-0">
+            <ul className="site-menu  d-none d-xl-block ml-0 pl-0">
               <li>
                 <NavLink to="/" className="nav-link">
                   Home
@@ -89,7 +108,7 @@ export function GlobalNavbar() {
                 </ul>
               </li>
               <li className="has-children">
-                <NavLink to="/services">Pages</NavLink>
+                <NavLink to="/blogs">Pages</NavLink>
                 <ul className="dropdown">
                   <li>
                     <NavLink to="/services">Services</NavLink>
@@ -134,38 +153,77 @@ export function GlobalNavbar() {
                 <NavLink to="/login">Log In</NavLink>
               </li>
               <li className="d-lg-none">
-                <NavLink to="/signup">Sig Nup</NavLink>
+                <NavLink to="/signup">Sign Up</NavLink>
               </li>
             </ul>
           </nav>
 
-          <div className="right-cta-menu text-right d-flex aligin-items-center col-6">
-            <div className="ml-auto">
-              <NavLink
-                to="/post-job"
-                className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
+          <div className="right-cta-menu text-right d-flex align-items-center col-6">
+            <div className="ml-auto d-flex align-items-center">
+              {user && roles.includes("ROLE_EMPLOYER") && (
+                <NavLink
+                  to="/post-job"
+                  className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
+                >
+                  <span className="mr-2 icon-add"></span>Post a Job
+                </NavLink>
+              )}
+              <Dropdown
+                isOpen={dropdownOpen}
+                toggle={toggleDropdown}
+                direction="down"
               >
-                <span className="mr-2 icon-add"></span>Post a Job
-              </NavLink>
+                <DropdownToggle nav caret>
+                  <FaUserCircle size={30} color="white" />
+                </DropdownToggle>
+                <DropdownMenu className="custom-dropdown-menu">
+                  {user ? (
+                    <>
+                      <DropdownItem
+                        header
+                        className="text-uppercase font-weight-bold"
+                      >
+                        {user.sub}
+                      </DropdownItem>
+                      <DropdownItem onClick={handleLogout}>
+                        Log out
+                      </DropdownItem>
+                    </>
+                  ) : (
+                    <>
+                      <NavLink to="/login" className="dropdown-item">
+                        <span className="mr-2 icon-lock_outline"></span>Log In
+                      </NavLink>
+                      <NavLink to="/signup" className="dropdown-item">
+                        <span className="mr-2 icon-lock_outline"></span>Sign Up
+                      </NavLink>
+                    </>
+                  )}
+                </DropdownMenu>
+              </Dropdown>
+              <div className="ml-auto d-flex align-items-center">
+                <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
+                  <DropdownToggle nav caret>
+                    {t("Language")}{" "}
+                    {/* Display "Language" based on current language */}
+                  </DropdownToggle>
+                  <DropdownMenu className="custom-dropdown-menu">
+                    <DropdownItem onClick={() => changeLanguage("vi")}>
+                      Tiếng Việt
+                    </DropdownItem>
+                    <DropdownItem onClick={() => changeLanguage("en")}>
+                      English
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
               <NavLink
-                to="/login"
-                className="btn btn-primary border-width-2 d-none d-lg-inline-block"
+                to="#"
+                className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"
               >
-                <span className="mr-2 icon-lock_outline"></span>Log In
-              </NavLink>
-              <NavLink
-                to="/signup"
-                className="btn btn-primary border-width-2 d-none d-lg-inline-block"
-              >
-                <span className="mr-2 icon-lock_outline"></span>Sign up
+                <span className="icon-menu h3 m-0 p-0 mt-2"></span>
               </NavLink>
             </div>
-            <NavLink
-              to="#"
-              className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"
-            >
-              <span className="icon-menu h3 m-0 p-0 mt-2"></span>
-            </NavLink>
           </div>
         </div>
       </div>

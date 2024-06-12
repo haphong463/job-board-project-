@@ -1,12 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
+import { NavLink } from "react-router-dom";
 
 export const JobListing = () => {
+  useEffect(() => {
+    // Ensure selectpicker is initialized
+    $(".selectpicker").selectpicker("refresh");
+
+    // Extract query parameters
+    const searchParams = new URLSearchParams(location.search);
+    const message = searchParams.get("message");
+
+    if (message) {
+      setMessage(message);
+      setTimeout(() => {
+        setMessage("");
+        // Remove the message parameter from the URL
+        navigate(location.pathname, { replace: true });
+        // Reload the page
+        window.location.reload();
+      }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
+    }
+  }, []);
   return (
     <GlobalLayoutUser>
       <section
         class="section-hero home-section overlay inner-page bg-image"
-        style="background-image: url('images/hero_1.jpg')"
+        style={{
+          backgroundImage: " url('../../../../assets/images/hero_1.jpg')",
+        }}
         id="home-section"
       >
         <div class="container">
@@ -115,7 +137,7 @@ export const JobListing = () => {
               <a href="job-single.html"></a>
               <div class="job-listing-logo">
                 <img
-                  src="images/job_logo_1.jpg"
+                  src="../../../../assets/images/job_logo_1.jpg"
                   alt="Image"
                   class="img-fluid"
                 />
@@ -138,7 +160,7 @@ export const JobListing = () => {
               <a href="job-single.html"></a>
               <div class="job-listing-logo">
                 <img
-                  src="images/job_logo_2.jpg"
+                  src="../../../../assets/images/job_logo_2.jpg"
                   alt="Image"
                   class="img-fluid"
                 />
@@ -162,7 +184,7 @@ export const JobListing = () => {
               <a href="job-single.html"></a>
               <div class="job-listing-logo">
                 <img
-                  src="images/job_logo_3.jpg"
+                  src="../../../../assets/images/job_logo_3.jpg"
                   alt="Image"
                   class="img-fluid"
                 />
@@ -186,7 +208,7 @@ export const JobListing = () => {
               <a href="job-single.html"></a>
               <div class="job-listing-logo">
                 <img
-                  src="images/job_logo_4.jpg"
+                  src="../../../../assets/images/job_logo_4.jpg"
                   alt="Image"
                   class="img-fluid"
                 />
@@ -210,7 +232,7 @@ export const JobListing = () => {
               <a href="job-single.html"></a>
               <div class="job-listing-logo">
                 <img
-                  src="images/job_logo_5.jpg"
+                  src="../../../../assets/images/job_logo_5.jpg"
                   alt="Image"
                   class="img-fluid"
                 />
@@ -233,7 +255,7 @@ export const JobListing = () => {
               <a href="job-single.html"></a>
               <div class="job-listing-logo">
                 <img
-                  src="images/job_logo_1.jpg"
+                  src="../../../../assets/images/job_logo_1.jpg"
                   alt="Image"
                   class="img-fluid"
                 />
@@ -256,7 +278,7 @@ export const JobListing = () => {
               <a href="job-single.html"></a>
               <div class="job-listing-logo">
                 <img
-                  src="images/job_logo_2.jpg"
+                  src="../../../../assets/images/job_logo_2.jpg"
                   alt="Image"
                   class="img-fluid"
                 />
@@ -305,7 +327,9 @@ export const JobListing = () => {
 
       <section
         class="py-5 bg-image overlay-primary fixed overlay"
-        style="background-image: url('images/hero_1.jpg')"
+        style={{
+          backgroundImage: "url('../../../../assets/images/hero_1.jpg')",
+        }}
       >
         <div class="container">
           <div class="row align-items-center">
@@ -317,9 +341,9 @@ export const JobListing = () => {
               </p>
             </div>
             <div class="col-md-3 ml-auto">
-              <a href="#" class="btn btn-warning btn-block btn-lg">
+              <NavLink to="/signup" class="btn btn-warning btn-block btn-lg">
                 Sign Up
-              </a>
+              </NavLink>
             </div>
           </div>
         </div>

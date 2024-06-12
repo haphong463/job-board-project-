@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { signIn, resetSignInSuccess } from "../features/authSlice";
 
 export const useLoginForm = () => {
@@ -11,6 +11,7 @@ export const useLoginForm = () => {
   const dispatch = useDispatch();
   const signInSuccess = useSelector((state) => state.auth.signInSuccess);
   const signInError = useSelector((state) => state.auth.error);
+  const location = useLocation();
 
   const {
     register,
@@ -32,7 +33,7 @@ export const useLoginForm = () => {
   useEffect(() => {
     if (signInSuccess) {
       console.log("Login successful");
-      navigate("/");
+      navigate(-1);
       dispatch(resetSignInSuccess()); // Reset signInSuccess to handle future logins
     }
   }, [signInSuccess, navigate, dispatch]);
