@@ -2,6 +2,7 @@ package com.project4.JobBoardService.Repository;
 
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
+import com.project4.JobBoardService.Entity.Comment;
 import com.project4.JobBoardService.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,3 +17,5 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     int countByCategory(BlogCategory blogCategory);
     Blog findBySlug(@Param("slug") String slug);
 }
+
+

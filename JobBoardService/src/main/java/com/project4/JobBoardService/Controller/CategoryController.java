@@ -30,7 +30,7 @@ public class CategoryController {
     public List<Category> getAllCategory() {
         return categoryRepository.findAll();
     }
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable(value = "id") Long categoryId)
             throws ResourceNotFoundException {
@@ -38,8 +38,8 @@ public class CategoryController {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
         return ResponseEntity.ok().body(category);
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/categories")
+    @PreAuthorize(" hasRole('ROLE_ADMIN')")
+    @PostMapping
     public Category createCategory(@Validated @RequestBody Category category) {
         return categoryRepository.save(category);
     }
