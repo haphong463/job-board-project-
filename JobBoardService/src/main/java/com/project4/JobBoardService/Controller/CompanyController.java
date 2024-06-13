@@ -21,14 +21,14 @@ public class CompanyController {
     private CompanyService companyService;
 
     @GetMapping
-
-    public List<Company> getAllCompanies() {
+    public List<CompanyDTO> getAllCompanies() {
         return companyService.getAllCompanies();
     }
+
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
-        Optional<Company> companyOptional = companyService.getCompanyById(id);
+    public ResponseEntity<CompanyDTO> getCompanyById(@PathVariable Long id) {
+        Optional<CompanyDTO> companyOptional = companyService.getCompanyById(id);
         return companyOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

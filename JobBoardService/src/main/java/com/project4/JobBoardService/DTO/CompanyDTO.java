@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
 @Setter
 public class CompanyDTO {
 
-    private Integer companyId;
+    private Long companyId;
 
 
     private String companyName;
@@ -28,15 +29,19 @@ public class CompanyDTO {
     private String description;
 
 
-    private BigDecimal rating;
-
-
-    private String review;
 
 
     private String location;
     private String type;
+    private List<ReviewDTO> reviews;  // List of ReviewDTO
 
 
     private Boolean membershipRequired = false;
+    public void setReviews(List<ReviewDTO> reviews) {
+        this.reviews = reviews;
+    }
+
+    public void setJobs(List<JobDTO> jobDTOs) {
+
+    }
 }
