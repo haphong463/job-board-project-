@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -12,11 +12,13 @@ import {
   Input,
   Button,
   FormFeedback,
+  Alert,
 } from "reactstrap";
 import logo from "../assets/images/logos/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/authSlice";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import showToast from "../utils/functions/showToast";
 
 // Xác định schema yup cho form
 const schema = yup.object().shape({
@@ -28,7 +30,8 @@ const Login = () => {
   const dispatch = useDispatch();
   const authStatus = useSelector((state) => state.auth.status);
   const authError = useSelector((state) => state.auth.error);
-  const accessToken = useSelector((state) => state.auth.accessToken);
+  const user = useSelector((state) => state.auth.user);
+  const locationState = useSelector((state) => state.auth.location);
   const navigate = useNavigate();
 
   // Sử dụng react-hook-form với yup resolver
@@ -48,21 +51,17 @@ const Login = () => {
   // Xử lý khi submit form
   const onSubmit = (data) => {
     dispatch(login(data));
-    if (!authError) {
-      navigate(-1); // Điều hướng trở lại trang người dùng định truy cập
-    }
   };
-
+  console.log(locationState);
   useEffect(() => {
-    if (accessToken) {
-      const from = location.state?.from?.pathname || "/jobportal";
-      navigate(from, { replace: true });
+    if (user) {
+      navigate(locationState, { replace: true });
     }
-  }, [accessToken, navigate, location.state]);
+  }, [user, navigate]);
 
-  if (accessToken) {
-    return <Navigate to="/jobportal" />;
-  }
+  // if (user) {
+  //   return <Navigate to="/jobportal" />;
+  // }
 
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
@@ -72,9 +71,10 @@ const Login = () => {
             <img src={logo} alt="Logo" style={{ width: "150px" }} />
           </div>
           <h2 className="text-center mb-4">Login</h2>
+          {authStatus === "failed" && <Alert color="danger">{authError}</Alert>}
           <Form onSubmit={handleSubmit(onSubmit)}>
             <FormGroup>
-              <Label for="username">username</Label>
+              <Label for="username">Username</Label>
               <Controller
                 name="username"
                 control={control}
@@ -125,7 +125,6 @@ const Login = () => {
             <Button color="primary" block disabled={authStatus === "loading"}>
               {authStatus === "loading" ? "Logging in..." : "Login"}
             </Button>
-            {authStatus === "failed" && <p>{authError}</p>}
           </Form>
         </Col>
       </Row>

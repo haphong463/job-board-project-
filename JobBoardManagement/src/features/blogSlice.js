@@ -4,6 +4,7 @@ import {
   getAllBlogs,
   createBlog,
   deleteBlog as deleteBlogApi,
+  updateBlog,
 } from "../services/BlogService";
 
 // Thunk để fetch blogs
@@ -24,12 +25,21 @@ export const deleteBlog = createAsyncThunk("blogs/deleteBlog", async (id) => {
   return id;
 });
 
+export const editBlog = createAsyncThunk(
+  "blogs/updateBlog",
+  async ({ newBlog, id }) => {
+    const res = await updateBlog(newBlog, id);
+    return res;
+  }
+);
+
 const blogsSlice = createSlice({
   name: "blogs",
   initialState: {
     blogs: [],
     status: "idle",
     error: null,
+    
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -50,6 +60,11 @@ const blogsSlice = createSlice({
       })
       .addCase(deleteBlog.fulfilled, (state, action) => {
         state.blogs = state.blogs.filter((blog) => blog.id !== action.payload);
+      })
+      .addCase(editBlog.fulfilled, (state, action) => {
+        state.blogs = state.blogs.map((item) =>
+          item.id === action.payload.id ? action.payload : item
+        );
       });
   },
 });

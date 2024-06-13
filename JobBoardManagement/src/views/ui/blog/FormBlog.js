@@ -6,72 +6,97 @@ import {
   Form,
   FormGroup,
   Label,
-  Input,
   FormText,
   Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Input,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { Editor } from "@tinymce/tinymce-react";
 import { slugify } from "../../../utils/functions/convertToSlug";
 import { createFormData } from "../../../utils/form-data/formDataUtil";
 import { IoMdAdd } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import { addBlog } from "../../../features/blogSlice";
-import {
-  fetchBlogCategory,
-  addBlogCategory,
-} from "../../../features/blogCategorySlice";
-import { BlogForm } from "./BlogForm";
-import { BlogCategoryForm } from "../blog-category/BlogCategoryForm";
-import {
-  blogCategorySchema,
-  blogSchema,
-} from "../../../utils/variables/schema";
+import { addBlog, editBlog } from "../../../features/blogSlice";
+import { fetchBlogCategory } from "../../../features/blogCategorySlice";
+import { blogSchema } from "../../../utils/variables/schema";
 import Select from "react-select";
-const FormBlog = (args) => {
-  const dispatch = useDispatch();
+import { useDropzone } from "react-dropzone";
+import "./FormBlog.css";
+import showToast from "../../../utils/functions/showToast";
+import { LeftSideBlogForm } from "./LeftSideBlogForm";
+import { RightSideBlogForm } from "./RightSideBlogForm";
 
+const FormBlog = ({ isEdit, setIsEdit }) => {
+  const dispatch = useDispatch();
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
   const categoryStatus = useSelector((state) => state.blogCategory.status);
+  const user = useSelector((state) => state.auth.user);
   const [modal, setModal] = useState(false);
-
-  const toggle = () => setModal(!modal);
-
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const {
     handleSubmit,
     control,
     setValue,
+    reset,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
+    getValues,
   } = useForm({
-    resolver: yupResolver(blogSchema),
+    resolver: yupResolver(blogSchema(isEdit)),
     defaultValues: {
       title: "",
-      tags: "",
       content: "",
       blogCategoryId: "",
       image: "",
+      status: "",
     },
   });
+
+  const toggle = () => {
+    setModal(!modal);
+    setIsEdit(null);
+    reset();
+  };
 
   const onSubmit = (data) => {
     const newData = {
       ...data,
       slug: slugify(data.title),
-      author: "Testttt",
-      status: 1,
+      username: user.sub,
     };
 
+    if (!newData.image || newData.image.length === 0) {
+      delete newData.image;
+    }
+    console.log(">>>newData: ", newData);
+
     const formData = createFormData(newData);
-    dispatch(addBlog(formData)).then(() => {
-      toggle();
-    });
+    if (!isEdit) {
+      dispatch(addBlog(formData)).then((response) => {
+        if (response.meta.requestStatus === "fulfilled") {
+          showToast("Blog added successfully!", "success");
+          toggle();
+        } else {
+          showToast("Failed to add blog", "error");
+        }
+      });
+    } else {
+      dispatch(editBlog({ newBlog: formData, id: isEdit.id })).then(
+        (response) => {
+          if (response.meta.requestStatus === "fulfilled") {
+            showToast("Blog updated successfully!", "success");
+            toggle();
+          } else {
+            showToast("Failed to update blog", "error");
+          }
+        }
+      );
+    }
   };
 
   useEffect(() => {
@@ -79,6 +104,49 @@ const FormBlog = (args) => {
       dispatch(fetchBlogCategory());
     }
   }, [categoryStatus, dispatch]);
+
+  useEffect(() => {
+    if (isEdit) {
+      setModal(true);
+      setValue("title", isEdit.title); // Set the default value when isEdit changes
+      setValue("content", isEdit.content); // Set the default value when isEdit changes
+      setValue("blogCategoryId", isEdit.category.id); // Set the default value when isEdit changes
+      setValue("status", isEdit.status); // Set the default value when isEdit changes
+    }
+  }, [isEdit, setValue]);
+
+  useEffect(() => {
+    const imageFile = watch("image");
+
+    if (imageFile) {
+      const objectUrl = URL.createObjectURL(imageFile);
+      setPreviewUrl(objectUrl);
+
+      // Revoke the old object URL
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+
+    // Reset the preview URL if no image is selected
+    setPreviewUrl(null);
+  }, [watch("image")]);
+
+  const defaultValue = isEdit && {
+    label: isEdit.category.name,
+    value: isEdit.category.id,
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+    },
+    onDrop: (acceptedFiles) => {
+      setValue("image", acceptedFiles[0], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+  });
 
   return (
     <>
@@ -88,7 +156,7 @@ const FormBlog = (args) => {
           New blog
         </Button>
       </div>
-      <Modal isOpen={modal} toggle={toggle} size="lg">
+      <Modal isOpen={modal} toggle={toggle} size="xl">
         <Form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader
             toggle={toggle}
@@ -100,131 +168,28 @@ const FormBlog = (args) => {
           </ModalHeader>
           <ModalBody>
             <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="postTitle">Title</Label>
-                  <Controller
-                    name="title"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        id="postTitle"
-                        placeholder="Enter the title of the blog post"
-                        type="text"
-                        invalid={!!errors.title}
-                      />
-                    )}
-                  />
-                  {errors.title && (
-                    <FormText color="danger">{errors.title.message}</FormText>
-                  )}
-                </FormGroup>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={12}>
-                <FormGroup>
-                  <Editor
-                    apiKey={process.env.REACT_APP_TINYMCE_KEY}
-                    init={{
-                      plugins:
-                        "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount",
-                      toolbar:
-                        "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
-                    }}
-                    initialValue="Welcome to TinyMCE!"
-                    onEditorChange={(newValue, editor) =>
-                      setValue("content", newValue, {
-                        shouldValidate: true,
-                      })
-                    }
-                  />
-                  {errors.content && (
-                    <FormText color="danger">{errors.content.message}</FormText>
-                  )}
-                </FormGroup>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="postCategory">Category</Label>
-                  <Controller
-                    name="blogCategoryId"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        id="postCategory"
-                        options={categoryList.map((category) => ({
-                          value: category.id,
-                          label: category.name,
-                        }))}
-                        isSearchable={false}
-                        onChange={(selectedOption) =>
-                          field.onChange(selectedOption.value)
-                        }
-                        value={categoryList.find(
-                          (category) => category.id === field
-                        )}
-                      />
-                    )}
-                  />
-                  {/* <Controller
-                  name="blogCategoryId"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="postCategory"
-                      type="select"
-                      invalid={!!errors.blogCategoryId}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        handleCategoryChange(e);
-                      }}
-                    >
-                      <option disabled value="">
-                        --- Select category ---
-                      </option>
-                      {categoryList.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </Input>
-                  )}
-                /> */}
-                  {errors.blogCategoryId && (
-                    <FormText color="danger">
-                      {errors.blogCategoryId.message}
-                    </FormText>
-                  )}
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="postImage">Upload Image</Label>
-                  <Input
-                    id="postImage"
-                    type="file"
-                    onChange={(e) => {
-                      setValue("image", e.target.files[0], {
-                        shouldValidate: true,
-                      });
-                    }}
-                    invalid={!!errors.image}
-                  />
-                  {errors.image && (
-                    <FormText color="danger">{errors.image.message}</FormText>
-                  )}
-                </FormGroup>
-              </Col>
+              <LeftSideBlogForm
+                control={control}
+                setValue={setValue}
+                watch={watch}
+                isEdit={isEdit}
+                errors={errors}
+              />
+              <RightSideBlogForm
+                categoryList={categoryList}
+                previewUrl={previewUrl}
+                control={control}
+                defaultValue={defaultValue}
+                getRootProps={getRootProps}
+                getInputProps={getInputProps}
+                isEdit={isEdit}
+                errors={errors}
+                getValues={getValues}
+              />
             </Row>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" type="submit">
+            <Button color="primary" type="submit" disabled={!isDirty}>
               Submit
             </Button>
             <Button color="secondary" type="button" onClick={toggle}>

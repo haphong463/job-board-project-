@@ -17,7 +17,7 @@ import {
   fetchBlogCategory,
 } from "../../../features/blogCategorySlice";
 
-function BlogCategory(props) {
+export function BlogCategory(props) {
   const dispatch = useDispatch();
   const blogCategoryData =
     useSelector((state) => state.blogCategory.blogCategory) || [];
@@ -39,14 +39,11 @@ function BlogCategory(props) {
 
   const handleEdit = (id) => {
     const editBlog = blogCategoryData.find((item) => item.id === id);
+    console.log(editBlog);
     if (editBlog) {
       setIsEdit(editBlog); // Set the state to the selected blog category
     }
   };
-
-  const filteredBlogs = blogCategoryData.filter((blog) =>
-    blog.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const columns = [
     {
@@ -63,16 +60,17 @@ function BlogCategory(props) {
         </div>
       ),
     },
-
+    {
+      name: "Posts",
+      selector: (row) => row.blogCount,
+      sortable: true,
+      cell: (row) => <div>{row.blogCount}</div>,
+    },
     {
       name: "Actions",
       cell: (row) => (
-        <div>
-          <button
-            onClick={() => handleEdit(row.id)}
-            style={{ marginRight: "10px" }}
-            className="btn btn-info"
-          >
+        <div className="d-flex">
+          <button onClick={() => handleEdit(row.id)} className="btn btn-info">
             Edit
           </button>
           <button
@@ -107,7 +105,12 @@ function BlogCategory(props) {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </InputGroup>
-          <DataTable columns={columns} data={filteredBlogs} />
+          <DataTable
+            columns={columns}
+            data={blogCategoryData.filter((blog) =>
+              blog.name.toLowerCase().includes(searchTerm.toLowerCase())
+            )}
+          />
         </Card>
       </Col>
     </Row>
