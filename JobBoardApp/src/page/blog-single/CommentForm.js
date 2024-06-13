@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import "./CommentForm.css"; // Import CSS file
+import { useNavigate } from "react-router-dom";
 
 export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
   const [content, setContent] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
     const comment = {
@@ -34,8 +35,20 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
           required
           {...(parentId && { autoFocus: true })}
         />
-        <button type="submit" className="post-button">
-          <FaPaperPlane />
+        <button
+          type={user ? "submit" : "button"}
+          className="post-button"
+          {...(!user && {
+            onClick: () => {
+              navigate("/login");
+            },
+          })}
+        >
+          {user ? (
+            <FaPaperPlane />
+          ) : (
+            <span className="font-weight-bold">Sign in</span>
+          )}
         </button>
       </div>
     </form>

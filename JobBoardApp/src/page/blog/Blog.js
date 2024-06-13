@@ -51,7 +51,7 @@ export const Blog = () => {
                     <div key={blog.id} className="col-md-6 col-lg-4 mb-5">
                       <NavLink to={`/blog/${blog.slug}`}>
                         <img
-                          src={blog.imageUrl}
+                          src={blog.thumbnailUrl}
                           alt="Image"
                           style={{
                             height: 300,
@@ -67,7 +67,9 @@ export const Blog = () => {
                       </h3>
                       <div>
                         {moment(blog.createdAt).format("MMMM Do YYYY")}{" "}
-                        <span className="mx-2">|</span>
+                        <span className="mx-2">
+                          {blog.commentCount} comments
+                        </span>
                         {/* Cần lấy ra số lượng comment của bài blog. */}
                         {/* <a href="#">{blog.blogCount}</a> */}
                       </div>

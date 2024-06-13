@@ -6,29 +6,16 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store";
-import { I18nextProvider } from "react-i18next";
-import i18n from "./translation/translatetion";
-
-// import "./assets/js/jquery.min.js";
-// import "./assets/js/bootstrap.bundle.min.js";
-// import "./assets/js/isotope.pkgd.min.js";
-// import "./assets/js/stickyfill.min.js";
-// import "./assets/js/jquery.fancybox.min.js";
-// import "./assets/js/jquery.easing.1.3.js";
-// import "./assets/js/jquery.waypoints.min.js";
-// import "./assets/js/jquery.animateNumber.min.js";
-// import "./assets/js/owl.carousel.min.js";
-// import "./assets/js/quill.min.js";
-// import "./assets/js/bootstrap-select.min.js";
-// import "./assets/js/custom.js";
+// import { I18nextProvider } from "react-i18next";
+// import i18n from "./translation/translatetion";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Router>
     <Provider store={store}>
-      <I18nextProvider i18n={i18n}>
-        <App />
-      </I18nextProvider>
+      {/* <I18nextProvider i18n={i18n}> */}
+      <App />
+      {/* </I18nextProvider> */}
     </Provider>
   </Router>
 );

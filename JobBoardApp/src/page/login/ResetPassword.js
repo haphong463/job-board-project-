@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import axiosRequest from '../../configs/axiosConfig';
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import axiosRequest from "../../configs/axiosConfig";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { Navigate } from 'react-router-dom';
+import { Navigate } from "react-router-dom";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -10,36 +10,36 @@ function useQuery() {
 
 function ResetPassword() {
   const query = useQuery();
-  const email = query.get('email');
-  const token = query.get('token');
-  
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [redirect, setRedirect] = useState(false);
+  const email = query.get("email");
+  const token = query.get("token");
 
-  useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        const response = await axiosRequest.post('/auth/verify-reset-token', null, {
-          params: { email, token }
-        });
-        if (response && response.data) {
-          setMessage(response.data.message);
-          if (response.data.message === "Token is valid.") {
-            setRedirect(false); 
-          }
-        }
-      } catch (error) {
-        if (error.response && error.response.data) {
-          setMessage(error.response.data.message);
-        } else {
-          setMessage("An error occurred. Please try again.");
-        }
-      }
-    };
-    verifyToken();
-  }, [email, token]);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [redirect, setRedirect] = useState(false);
+  console.log(">>>> email: ", email);
+  // useEffect(() => {
+  //   const verifyToken = async () => {
+  //     try {
+  //       const response = await axiosRequest.post('/auth/verify-reset-token', null, {
+  //         params: { email, token }
+  //       });
+  //       if (response && response.data) {
+  //         setMessage(response.data.message);
+  //         if (response.data.message === "Token is valid.") {
+  //           setRedirect(false);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       if (error.response && error.response.data) {
+  //         setMessage(error.response.data.message);
+  //       } else {
+  //         setMessage("An error occurred. Please try again.");
+  //       }
+  //     }
+  //   };
+  //   verifyToken();
+  // }, [email, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,18 +48,18 @@ function ResetPassword() {
       return;
     }
     try {
-      const response = await axiosRequest.post('/auth/set-new-password', null, {
+      const response = await axiosRequest.post("/auth/set-new-password", null, {
         params: {
           email,
           token,
           newPassword,
-          confirmPassword
-        }
+          confirmPassword,
+        },
       });
       if (response && response.data) {
         setMessage(response.data.message);
         if (response.data.message === "Password reset successfully!") {
-          setRedirect(true); 
+          setRedirect(true);
           // Hiển thị thông báo thành công
           console.log("Password reset successfully!");
         }
@@ -73,12 +73,18 @@ function ResetPassword() {
     }
   };
   if (redirect) {
-    return <Navigate to="/login" />; 
+    return <Navigate to="/login" />;
   }
 
   return (
     <GlobalLayoutUser>
-      <section className="section-hero overlay inner-page bg-image" style={{backgroundImage: 'url("../../../../assets/images/hero_1.jpg")'}} id="home-section">
+      <section
+        className="section-hero overlay inner-page bg-image"
+        style={{
+          backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
+        }}
+        id="home-section"
+      >
         <div className="container">
           <div className="row">
             <div className="col-md-7">
@@ -98,7 +104,17 @@ function ResetPassword() {
           <div className="row">
             <div className="col-lg-6">
               <h2 className="mb-4">Reset Password</h2>
-              {message && <p className={message.includes("successfully") ? "text-success" : "text-danger"}>{message}</p>}
+              {message && (
+                <p
+                  className={
+                    message.includes("successfully")
+                      ? "text-success"
+                      : "text-danger"
+                  }
+                >
+                  {message}
+                </p>
+              )}
               <form onSubmit={handleSubmit} className="p-4 border rounded">
                 <div className="form-group">
                   <input

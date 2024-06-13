@@ -13,10 +13,8 @@ import {
 import registerImage from "../../";
 import { FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
-import { useTranslation } from "react-i18next";
 export function GlobalNavbar() {
   const [categories, setCategories] = useState([]);
-  const { t, i18n } = useTranslation(); // Initialize the useTranslation hook
 
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -201,11 +199,10 @@ export function GlobalNavbar() {
                   )}
                 </DropdownMenu>
               </Dropdown>
-              <div className="ml-auto d-flex align-items-center">
+              {/* <div className="ml-auto d-flex align-items-center">
                 <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
                   <DropdownToggle nav caret>
                     {t("Language")}{" "}
-                    {/* Display "Language" based on current language */}
                   </DropdownToggle>
                   <DropdownMenu className="custom-dropdown-menu">
                     <DropdownItem onClick={() => changeLanguage("vi")}>
@@ -216,7 +213,7 @@ export function GlobalNavbar() {
                     </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
-              </div>
+              </div> */}
               <NavLink
                 to="#"
                 className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"

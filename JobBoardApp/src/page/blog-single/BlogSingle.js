@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogById } from "../../features/blogSlice";
 import {
@@ -88,43 +88,49 @@ export const BlogSingle = () => {
               <div className="row">
                 <div className="col-lg-8 blog-content">
                   <h3 className="mb-4">{blog.title}</h3>
-                  <p>
+                  <p className="text-center">
                     <img
-                      src={blog.imageUrl}
+                      src={blog.thumbnailUrl}
                       alt="Image"
                       className="img-fluid rounded"
+                      style={{
+                        width: "100%",
+                      }}
                     />
                   </p>
                   <BlogContent content={blog.content} />
                   <div className="pt-5">
-                    <p>
+                    <hr />
+                    <p className="font-weight-bold text-right">
+                      Updated on:{" "}
+                      {moment(blog.updatedAt).format("MMMM Do YYYY")}
+                    </p>
+                    {/* <p>
                       Categories: <a href="#">Design</a>, <a href="#">Events</a>{" "}
                       Tags: <a href="#">#html</a>, <a href="#">#trends</a>
-                    </p>
+                    </p> */}
                   </div>
                   <div className="pt-5">
-                    <h3 className="mb-5">{comments.length} Comments</h3>
-                    <CommentList
-                      comments={comments}
-                      addComment={handleAddComment}
-                      deleteComment={handleDeleteComment}
-                      editComment={handleEditComment}
-                      user={user}
-                    />
-                    <div className="comment-form-wrap pt-5">
-                      {user ? (
-                        <CommentForm
-                          blogId={blog.id}
+                    {comments.length > 0 ? (
+                      <>
+                        <h3 className="mb-5">{comments.length} Comments</h3>
+                        <CommentList
+                          comments={comments}
                           addComment={handleAddComment}
+                          deleteComment={handleDeleteComment}
+                          editComment={handleEditComment}
                           user={user}
                         />
-                      ) : (
-                        <div className="d-flex justify-content-center">
-                          <button className="btn btn-primary btn-lg">
-                            Sign up to comment on our blog
-                          </button>
-                        </div>
-                      )}
+                      </>
+                    ) : (
+                      <p className="font-weight-bold">No comments yet.</p>
+                    )}
+                    <div className="comment-form-wrap pt-5">
+                      <CommentForm
+                        blogId={blog.id}
+                        addComment={handleAddComment}
+                        user={user}
+                      />
                     </div>
                   </div>
                 </div>
