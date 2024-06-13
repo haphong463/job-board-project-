@@ -45,10 +45,7 @@ public class BlogController {
         if(user == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
         }
-        long todayPostCount = blogService.countTodayPostsByUser(user);
-        if(todayPostCount >= 3){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+
         Blog blog = new Blog();
 
         blog.setTitle(blogDTO.getTitle());
@@ -80,7 +77,13 @@ public class BlogController {
         try {
             List<Blog> blogs = blogService.getAllBlog();
 
-            return ResponseEntity.ok(blogs.stream().map(blog -> modelMapper.map(blog, BlogResponseDTO.class)).collect(Collectors.toList()));
+            List<BlogResponseDTO> blogResponseDTOs = blogs.stream().map(blog -> {
+                BlogResponseDTO blogResponseDTO = modelMapper.map(blog, BlogResponseDTO.class);
+                blogResponseDTO.setCommentCount(blog.getComments().size());  // Set the number of comments
+                return blogResponseDTO;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(blogResponseDTOs);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
         }

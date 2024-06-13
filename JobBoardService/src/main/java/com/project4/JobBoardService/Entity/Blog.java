@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Entity;
 
+import com.project4.JobBoardService.Enum.BlogStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -37,11 +38,15 @@ public class Blog extends AbstractEntity {
     @Column(name = "published_at")
     private Date publishedAt;
 
-    @Column(name = "status", nullable = false, columnDefinition = "TINYINT")
-    private Boolean status;
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BlogStatus status;
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
 
     @Column(name = "slug", unique = true, nullable = false)
     private String slug;

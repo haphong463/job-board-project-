@@ -74,12 +74,7 @@ public class BlogServiceImpl implements BlogService {
         return blogRepository.findBySlug(slug);
     }
 
-    @Override
-    public long countTodayPostsByUser(User user) {
-        LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = startOfDay.plusDays(1);
-        return blogRepository.countByUserAndCreatedAtBetween(user, startOfDay, endOfDay);
-    }
+
 
     private void handleImageFile(Blog blog, MultipartFile imageFile, String operationType) {
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -87,15 +82,26 @@ public class BlogServiceImpl implements BlogService {
                 if ("update".equals(operationType)) {
                     deleteImageFile(blog);
                 }
-                Path filePath = FileUtils.saveFile(imageFile, "blog");
-                String imageUrl = FileUtils.convertToUrl(filePath, "blog");
-                blog.setImageUrl(imageUrl);
-                logger.info("Image " + ("update".equals(operationType) ? "updated and saved" : "saved") + " to: " + imageUrl);
+                // Save original image
+                Path originalFilePath = FileUtils.saveFile(imageFile, "blog");
+                String originalImageUrl = FileUtils.convertToUrl(originalFilePath, "blog");
+                blog.setImageUrl(originalImageUrl);
+                logger.info("Original image " + ("update".equals(operationType) ? "updated and saved" : "saved") + " to: " + originalImageUrl);
+
+                // Save thumbnail
+                int thumbnailWidth = 1200;
+                int thumbnailHeight = 800;
+                Path thumbnailFilePath = FileUtils.saveResizedImage(imageFile, "blog", thumbnailWidth, thumbnailHeight);
+                String thumbnailImageUrl = FileUtils.convertToUrl(thumbnailFilePath, "blog/thumbnail");
+                blog.setThumbnailUrl(thumbnailImageUrl);
+                logger.info("Thumbnail " + ("update".equals(operationType) ? "updated and saved" : "saved") + " to: " + thumbnailImageUrl);
             } catch (IllegalArgumentException | IOException e) {
                 logger.warning("Invalid file: " + e.getMessage());
             }
         }
     }
+
+
 
     private void deleteImageFile(Blog blog) {
         String imageUrl = blog.getImageUrl();

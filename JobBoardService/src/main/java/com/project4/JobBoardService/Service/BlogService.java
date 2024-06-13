@@ -17,5 +17,5 @@ public interface BlogService {
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
     Blog getBlogBySlug(String slug);
-    long countTodayPostsByUser(User user);
+//    int getCommentCount();
 }

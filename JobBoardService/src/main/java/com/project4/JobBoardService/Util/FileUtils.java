@@ -1,21 +1,18 @@
 package com.project4.JobBoardService.Util;
 
+import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.web.multipart.MultipartFile;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtils {
 
     private static int serverPort = 8080;
-
     private static String uploadDir = "src/main/resources/uploads";
 
     public static Path saveFile(MultipartFile file, String folder) throws IOException {
@@ -43,6 +40,29 @@ public class FileUtils {
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         return filePath;
+    }
+
+    public static Path saveResizedImage(MultipartFile file, String folder, int targetWidth, int targetHeight) throws IOException {
+        Path originalFilePath = saveFile(file, folder);
+
+        // Create a new file name with timestamp
+        String fileName = originalFilePath.getFileName().toString();
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String uniqueFileName = "resized_" + timestamp + "_" + fileName;
+
+        // Path for the new image
+        Path thumbnailDirectory = originalFilePath.getParent().resolve("thumbnail");
+        if (Files.notExists(thumbnailDirectory)) {
+            Files.createDirectories(thumbnailDirectory);
+        }
+        Path resizedFilePath = thumbnailDirectory.resolve(uniqueFileName);
+
+        // Resize the image using Thumbnailator and save it
+        Thumbnails.of(originalFilePath.toFile())
+                .size(targetWidth, targetHeight)
+                .toFile(resizedFilePath.toFile());
+
+        return resizedFilePath;
     }
 
     public static String convertToUrl(Path filePath, String folder) {

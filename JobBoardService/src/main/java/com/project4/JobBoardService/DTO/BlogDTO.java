@@ -1,6 +1,10 @@
 package com.project4.JobBoardService.DTO;
 
+import com.project4.JobBoardService.Enum.BlogStatus;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +27,8 @@ public class BlogDTO {
     private String username;
     private BlogCategoryDTO category;
     private Date publishedAt;
-    private Boolean status;
+    @Enumerated(EnumType.STRING)
+    private BlogStatus status;
     private String slug;
     @Nullable
     private MultipartFile image;
