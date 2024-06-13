@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.DTO.CategoryDTO;
+import com.project4.JobBoardService.DTO.CompanyDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
 import com.project4.JobBoardService.Enum.WorkSchedule;
@@ -40,53 +41,54 @@ public class JobServiceImpl   implements JobService {
     }
 */
 
-    @Override
     public boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO) {
-        Optional<Company> companyOptional = companyService.getCompanyById(companyId);
+        Optional<CompanyDTO> companyOptional = companyService.getCompanyById(companyId);
         Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
 
         if (companyOptional.isPresent() && categoryOptional.isPresent()) {
-            Company company = companyOptional.get(); // Unwrap the Optional
+            Company company = companyService.convertCompanyToEntity(companyOptional.get()); // Unwrap the Optional
             Category category = categoryOptional.get(); // Unwrap the Optional
 
             // Tạo một đối tượng Job từ DTO
-            Job job = convertToEntity(jobDTO);
+            Job job = convertJobToEntity(jobDTO);
 
             // Liên kết công ty và danh mục với công việc
             job.setCompany(company);
             job.setCategory(category);
 
-            // Lưu công việc vào cơ sở dữ liệu
+            // Save job to the repository
             jobRepository.save(job);
+
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
+
     @Override
     public JobDTO updateJob(Long jobId, JobDTO jobDTO) {
-        Optional<Job> optionalJob = jobRepository.findById(jobId);
-        if (optionalJob.isPresent()) {
-            Job job = optionalJob.get();
-            job.setTitle(jobDTO.getTitle());
-            job.setOfferedSalary(jobDTO.getOfferedSalary());
-            job.setDescription(jobDTO.getDescription());
-            job.setCity(jobDTO.getCity());
-            job.setResponsibilities(jobDTO.getResponsibilities());
-            job.setRequiredSkills(jobDTO.getRequiredSkills());
-            job.setWorkSchedule(WorkSchedule.FULL_TIME);
-            job.setWorkSchedule(WorkSchedule.PART_TIME);
-            job.setWorkSchedule(WorkSchedule.FREELANCE);
-            job.setWorkSchedule(WorkSchedule.INTERNSHIP);
-            job.setKeySkills(jobDTO.getKeySkills());
-            job.setPosition(jobDTO.getPosition());
-            job.setExperience(jobDTO.getExperience());
-            job.setQualification(jobDTO.getQualification());
+        return null;
+    }
 
-            job = jobRepository.save(job);
-            return convertToDto(job);
-        } else {
-            return null;
-        }
+    private Job convertJobToEntity(JobDTO jobDTO) {
+        Job job = new Job();
+        job.setTitle(jobDTO.getTitle());
+        job.setOfferedSalary(jobDTO.getOfferedSalary());
+        job.setDescription(jobDTO.getDescription());
+        job.setCity(jobDTO.getCity());
+        job.setResponsibilities(jobDTO.getResponsibilities());
+        job.setRequiredSkills(jobDTO.getRequiredSkills());
+        job.setWorkSchedule(WorkSchedule.FULL_TIME);
+        job.setWorkSchedule(WorkSchedule.PART_TIME);
+        job.setWorkSchedule(WorkSchedule.FREELANCE);
+        job.setWorkSchedule(WorkSchedule.INTERNSHIP);
+        job.setKeySkills(jobDTO.getKeySkills());
+        job.setPosition(jobDTO.getPosition());
+        job.setExperience(jobDTO.getExperience());
+        job.setQualification(jobDTO.getQualification());
+        job.setCreatedAt(jobDTO.getCreatedAt());
+        // Set other fields if necessary
+        return job;
     }
 
     @Override
@@ -120,7 +122,13 @@ public class JobServiceImpl   implements JobService {
         dto.setCompanyId(job.getCompany().getCompanyId());
         return dto;
     }
-
+    private Category convertCategoryToEntity(CategoryDTO categoryDTO) {
+        Category category = new Category();
+        category.setCategoryId(categoryDTO.getCategoryId());
+        category.setCategoryName(categoryDTO.getCategoryName());
+        // Set other fields if necessary
+        return category;
+    }
     private Job convertToEntity(JobDTO jobDTO) {
         Job job = new Job();
         job.setId(jobDTO.getId());

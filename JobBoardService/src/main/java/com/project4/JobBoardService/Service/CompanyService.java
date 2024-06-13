@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Service;
 
+import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.CompanyDTO;
 import com.project4.JobBoardService.Entity.Company;
 
@@ -12,10 +13,12 @@ import java.util.Optional;
 
 
 public interface CompanyService {
-    List<Company> getAllCompanies();
-    Optional<Company> getCompanyById(Long id);
+    List<CompanyDTO> getAllCompanies();
+    Optional<CompanyDTO> getCompanyById(Long id);
     Company saveCompany(CompanyDTO companyDTO);
     Company updateCompany(Long id, CompanyDTO companyDTO);
     void deleteCompany(Long id);
     String uploadLogo(Long id, MultipartFile file) throws IOException;
+
+    Company convertCompanyToEntity(CompanyDTO companyDTO);
 }

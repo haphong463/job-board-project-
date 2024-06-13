@@ -1,4 +1,5 @@
 package com.project4.JobBoardService.Service.Impl;
+import com.project4.JobBoardService.DTO.CompanyDTO;
 import com.project4.JobBoardService.DTO.ReviewDTO;
 import com.project4.JobBoardService.Entity.Company;
 import com.project4.JobBoardService.Entity.Review;
@@ -36,22 +37,24 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public boolean addReview(Long companyId, String username, Review review) {
-        Optional<Company> companyOptional = companyService.getCompanyById(companyId);
+        Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
         Optional<User> userOptional = userRepository.findByUsername(username);
 
         if (companyOptional.isPresent() && userOptional.isPresent()) {
-            Company company = companyOptional.get();
-            User user = userOptional.get();
+            Company company = companyOptional.get(); // Unwrap the Optional
+            User user = userOptional.get(); // Unwrap the Optional
+
             review.setCompany(company);
             review.setUser(user);
             reviewRepository.save(review);
+
             return true;
         }
         return false;
     }
     @Override
     public Review getReview(Long companyId, Long reviewId, String username) {
-        Optional<Company> companyOptional = companyService.getCompanyById(companyId);
+        Optional<CompanyDTO> companyOptional = companyService.getCompanyById(companyId);
         Optional<User> userOptional = userRepository.findByUsername(username);
 
         if (companyOptional.isPresent() && userOptional.isPresent()) {
@@ -64,22 +67,35 @@ public class ReviewServiceImpl implements ReviewService {
         return null;
     }
 
-
     @Override
     public boolean updateReview(Long companyId, Long reviewId, String username, Review updatedReview) {
-        Optional<Company> companyOptional = companyService.getCompanyById(companyId);
+        Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
         Optional<User> userOptional = userRepository.findByUsername(username);
 
         if (companyOptional.isPresent() && userOptional.isPresent()) {
-            Company company = companyOptional.get();
-            User user = userOptional.get();
+            Company company = companyOptional.get(); // Unwrap the Optional
+            User user = userOptional.get(); // Unwrap the Optional
+
             updatedReview.setCompany(company);
             updatedReview.setUser(user);
             updatedReview.setId(reviewId);
             reviewRepository.save(updatedReview);
+
             return true;
         }
         return false;
     }
 
+    @Override
+    public Company convertCompanyToEntity(CompanyDTO companyDTO) {
+        Company company = new Company();
+        company.setCompanyId(companyDTO.getCompanyId());
+        company.setCompanyName(companyDTO.getCompanyName());
+        company.setLogo(companyDTO.getLogo());
+        company.setWebsiteLink(companyDTO.getWebsiteLink());
+        company.setDescription(companyDTO.getDescription());
+        company.setLocation(companyDTO.getLocation());
+        company.setType(companyDTO.getType());
+        return company;
+    }
 }

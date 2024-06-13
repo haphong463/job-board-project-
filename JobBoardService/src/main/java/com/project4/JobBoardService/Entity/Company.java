@@ -41,8 +41,8 @@ public class Company {
 
     @Column(name = "membership_required", nullable = false)
     private Boolean membershipRequired = false;
-    @OneToMany(mappedBy = "company")
-    private List<Review> reviews;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Review> reviews = new ArrayList<>();
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Job> jobs = new ArrayList<>();
 }
