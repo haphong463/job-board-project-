@@ -9,13 +9,14 @@ import {
   InputGroupText,
   Input,
   Alert,
+  Badge,
 } from "reactstrap";
 import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
-import { jwtDecode } from "jwt-decode";
+import moment from "moment/moment";
 
-function Blog(props) {
+export function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs) || [];
   const blogStatus = useSelector((state) => state.blogs.status);
@@ -53,9 +54,10 @@ function Blog(props) {
         <div
           style={{
             fontSize: "16px",
+            fontWeight: "bold",
           }}
         >
-          {row.title}
+          [{row.id}] {row.title}
         </div>
       ),
     },
@@ -69,7 +71,7 @@ function Blog(props) {
             fontSize: "16px",
           }}
         >
-          {row.category.name}
+          <Badge>{row.category.name}</Badge>
         </div>
       ),
     },
@@ -86,8 +88,8 @@ function Blog(props) {
       ),
     },
     {
-      name: "Image",
-      selector: (row) => row.imageUrl,
+      name: "Status",
+      selector: (row) => row.status,
       sortable: true,
       cell: (row) => (
         <div
@@ -95,18 +97,40 @@ function Blog(props) {
             fontSize: "16px",
           }}
         >
-          <img
-            src={row.imageUrl}
-            alt={row.title}
-            style={{ maxWidth: "100px" }}
-          />
+          <Badge
+            color={
+              {
+                DRAFT: "secondary",
+                PUBLISHED: "success",
+                ARCHIVED: "danger",
+                PENDING_REVIEW: "warning",
+                SCHEDULED: "info",
+              }[row.status]
+            }
+          >
+            {row.status}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      name: "Comments Count",
+      selector: (row) => row.commentCount,
+      sortable: true,
+      cell: (row) => (
+        <div
+          style={{
+            fontSize: "16px",
+          }}
+        >
+          {row.commentCount}
         </div>
       ),
     },
     {
       name: "Actions",
       cell: (row) => (
-        <div>
+        <div className="d-flex">
           <button
             onClick={() => handleEdit(row.id)}
             style={{ marginRight: "10px" }}
@@ -145,7 +169,15 @@ function Blog(props) {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </InputGroup>
-          <DataTable columns={columns} data={filteredBlogs} />
+          <DataTable
+            columns={columns}
+            data={filteredBlogs}
+            selectableRows
+            onSelectedRowsChange={(state) => console.log(state.selectedRows)}
+            pagination
+            paginationPerPage={5}
+            paginationRowsPerPageOptions={[5, 10, 15]}
+          />
         </Card>
       </Col>
     </Row>

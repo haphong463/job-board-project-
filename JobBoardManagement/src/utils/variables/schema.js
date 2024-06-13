@@ -6,8 +6,12 @@ export const blogSchema = (isEdit) => {
       .string()
       .required("Title is required")
       .max(50, "Title must be less than 50 characters."),
-    content: yup.string().required("Content is required"),
+    content: yup
+      .string()
+      .required("Content is required")
+      .max(1000, "Content must be less than 1000 characters."),
     blogCategoryId: yup.string().required("Category is required"),
+    status: yup.string().required("Status is required"),
     image: isEdit
       ? yup.mixed().nullable()
       : yup

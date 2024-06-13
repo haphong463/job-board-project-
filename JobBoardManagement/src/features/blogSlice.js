@@ -39,6 +39,7 @@ const blogsSlice = createSlice({
     blogs: [],
     status: "idle",
     error: null,
+    
   },
   reducers: {},
   extraReducers: (builder) => {

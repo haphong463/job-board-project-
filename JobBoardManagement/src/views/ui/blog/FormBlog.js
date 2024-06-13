@@ -6,12 +6,12 @@ import {
   Form,
   FormGroup,
   Label,
-  Input,
   FormText,
   Modal,
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Input,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -24,31 +24,36 @@ import { addBlog, editBlog } from "../../../features/blogSlice";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import { blogSchema } from "../../../utils/variables/schema";
 import Select from "react-select";
-import { jwtDecode } from "jwt-decode";
+import { useDropzone } from "react-dropzone";
 import "./FormBlog.css";
+import showToast from "../../../utils/functions/showToast";
+import { LeftSideBlogForm } from "./LeftSideBlogForm";
+import { RightSideBlogForm } from "./RightSideBlogForm";
 
 const FormBlog = ({ isEdit, setIsEdit }) => {
   const dispatch = useDispatch();
-  const token = useSelector((state) => state.auth.accessToken);
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
   const categoryStatus = useSelector((state) => state.blogCategory.status);
-
+  const user = useSelector((state) => state.auth.user);
   const [modal, setModal] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const {
     handleSubmit,
     control,
     setValue,
     reset,
+    watch,
     formState: { errors, isDirty },
+    getValues,
   } = useForm({
     resolver: yupResolver(blogSchema(isEdit)),
     defaultValues: {
       title: "",
-      tags: "",
       content: "",
       blogCategoryId: "",
       image: "",
+      status: "",
     },
   });
 
@@ -62,24 +67,35 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     const newData = {
       ...data,
       slug: slugify(data.title),
-      status: 0,
-      username: jwtDecode(token).sub,
-      author: "Test",
+      username: user.sub,
     };
 
     if (!newData.image || newData.image.length === 0) {
       delete newData.image;
     }
+    console.log(">>>newData: ", newData);
 
     const formData = createFormData(newData);
     if (!isEdit) {
-      dispatch(addBlog(formData)).then(() => {
-        toggle();
+      dispatch(addBlog(formData)).then((response) => {
+        if (response.meta.requestStatus === "fulfilled") {
+          showToast("Blog added successfully!", "success");
+          toggle();
+        } else {
+          showToast("Failed to add blog", "error");
+        }
       });
     } else {
-      dispatch(editBlog({ newBlog: formData, id: isEdit.id })).then(() => {
-        toggle();
-      });
+      dispatch(editBlog({ newBlog: formData, id: isEdit.id })).then(
+        (response) => {
+          if (response.meta.requestStatus === "fulfilled") {
+            showToast("Blog updated successfully!", "success");
+            toggle();
+          } else {
+            showToast("Failed to update blog", "error");
+          }
+        }
+      );
     }
   };
 
@@ -95,13 +111,42 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       setValue("title", isEdit.title); // Set the default value when isEdit changes
       setValue("content", isEdit.content); // Set the default value when isEdit changes
       setValue("blogCategoryId", isEdit.category.id); // Set the default value when isEdit changes
+      setValue("status", isEdit.status); // Set the default value when isEdit changes
     }
   }, [isEdit, setValue]);
+
+  useEffect(() => {
+    const imageFile = watch("image");
+
+    if (imageFile) {
+      const objectUrl = URL.createObjectURL(imageFile);
+      setPreviewUrl(objectUrl);
+
+      // Revoke the old object URL
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+
+    // Reset the preview URL if no image is selected
+    setPreviewUrl(null);
+  }, [watch("image")]);
 
   const defaultValue = isEdit && {
     label: isEdit.category.name,
     value: isEdit.category.id,
   };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+    },
+    onDrop: (acceptedFiles) => {
+      setValue("image", acceptedFiles[0], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    },
+  });
 
   return (
     <>
@@ -111,7 +156,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
           New blog
         </Button>
       </div>
-      <Modal isOpen={modal} toggle={toggle} size="lg">
+      <Modal isOpen={modal} toggle={toggle} size="xl">
         <Form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader
             toggle={toggle}
@@ -123,107 +168,24 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
           </ModalHeader>
           <ModalBody>
             <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="postTitle">Title</Label>
-                  <Controller
-                    name="title"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        id="postTitle"
-                        placeholder="Enter the title of the blog post"
-                        type="text"
-                        invalid={!!errors.title}
-                      />
-                    )}
-                  />
-                  {errors.title && (
-                    <FormText color="danger">{errors.title.message}</FormText>
-                  )}
-                </FormGroup>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={12}>
-                <FormGroup>
-                  <Editor
-                    apiKey={process.env.REACT_APP_TINYMCE_KEY}
-                    init={{
-                      plugins:
-                        "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount",
-                      toolbar:
-                        "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
-                    }}
-                    initialValue={
-                      isEdit ? isEdit.content : "Welcome to TinyMCE!"
-                    }
-                    onEditorChange={(newValue, editor) =>
-                      setValue("content", newValue, {
-                        shouldValidate: true,
-                      })
-                    }
-                  />
-                  {errors.content && (
-                    <FormText color="danger">{errors.content.message}</FormText>
-                  )}
-                </FormGroup>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="postCategory">Category</Label>
-                  <Controller
-                    name="blogCategoryId"
-                    control={control}
-                    defaultValue={1}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        id="postCategory"
-                        options={categoryList.map((category) => ({
-                          value: category.id,
-                          label: category.name,
-                        }))}
-                        isSearchable={false}
-                        onChange={(selectedOption) =>
-                          field.onChange(selectedOption.value)
-                        }
-                        value={categoryList.find(
-                          (category) => category.id === field
-                        )}
-                        {...(isEdit && { defaultValue })}
-                      />
-                    )}
-                  />
-                  {errors.blogCategoryId && (
-                    <FormText color="danger">
-                      {errors.blogCategoryId.message}
-                    </FormText>
-                  )}
-                </FormGroup>
-              </Col>
-              <Col md={6}>
-                <FormGroup>
-                  <Label for="postImage">Upload Image</Label>
-                  <Input
-                    id="postImage"
-                    type="file"
-                    onChange={(e) => {
-                      setValue("image", e.target.files[0], {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
-                    }}
-                    invalid={!!errors.image}
-                  />
-                  {errors.image && (
-                    <FormText color="danger">{errors.image.message}</FormText>
-                  )}
-                </FormGroup>
-              </Col>
+              <LeftSideBlogForm
+                control={control}
+                setValue={setValue}
+                watch={watch}
+                isEdit={isEdit}
+                errors={errors}
+              />
+              <RightSideBlogForm
+                categoryList={categoryList}
+                previewUrl={previewUrl}
+                control={control}
+                defaultValue={defaultValue}
+                getRootProps={getRootProps}
+                getInputProps={getInputProps}
+                isEdit={isEdit}
+                errors={errors}
+                getValues={getValues}
+              />
             </Row>
           </ModalBody>
           <ModalFooter>

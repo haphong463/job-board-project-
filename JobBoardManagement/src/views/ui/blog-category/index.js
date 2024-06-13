@@ -17,7 +17,7 @@ import {
   fetchBlogCategory,
 } from "../../../features/blogCategorySlice";
 
-function BlogCategory(props) {
+export function BlogCategory(props) {
   const dispatch = useDispatch();
   const blogCategoryData =
     useSelector((state) => state.blogCategory.blogCategory) || [];

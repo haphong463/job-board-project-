@@ -31,27 +31,22 @@ const FullLayout = () => {
         const refreshTime = Math.max(0, remainingTime - 5);
 
         // Hiển thị số giây còn lại trong console.log
-        let timeLeft = refreshTime;
-        const countDownInterval = setInterval(() => {
-          console.log("Remaining time:", timeLeft);
-          timeLeft -= 1;
-        }, 1000);
 
         const refreshTokenTimeout = setTimeout(() => {
-          clearInterval(countDownInterval); // Dừng đếm ngược khi hết thời gian
           dispatch(logout());
           navigate("/jobportal/login");
           console.log("Token expired");
         }, refreshTime * 1000);
 
         return () => {
-          clearInterval(countDownInterval); // Dừng đếm ngược khi component unmount
           clearTimeout(refreshTokenTimeout);
         };
       };
       const refreshTokenTimeout = refreshAuthToken();
 
       return () => clearTimeout(refreshTokenTimeout);
+    } else {
+      dispatch(updateUserAndRoles());
     }
   }, [user, dispatch]);
 
