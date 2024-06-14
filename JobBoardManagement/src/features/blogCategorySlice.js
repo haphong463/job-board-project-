@@ -4,7 +4,7 @@ import {
   deleteBlogCategoryAsync,
   getAllBlogCategories,
   updateBlogCategoryAsync,
-} from "../services/Blog_CategoryService";
+} from "../services/blog_category_service";
 
 export const fetchBlogCategory = createAsyncThunk(
   "blog-category/fetch",

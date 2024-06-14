@@ -16,7 +16,7 @@ import {
 } from "reactstrap";
 import logo from "../assets/images/logos/logo.png";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../features/authSlice";
+import { login, updateUserAndRoles } from "../features/authSlice";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import showToast from "../utils/functions/showToast";
 
@@ -29,12 +29,10 @@ const schema = yup.object().shape({
 const Login = () => {
   const dispatch = useDispatch();
   const authStatus = useSelector((state) => state.auth.status);
-  const authError = useSelector((state) => state.auth.error);
+  const messageError = useSelector((state) => state.auth.verificationMessage);
   const user = useSelector((state) => state.auth.user);
+  const roles = useSelector((state) => state.auth.roles);
   const locationState = useSelector((state) => state.auth.location);
-  const navigate = useNavigate();
-
-  // Sử dụng react-hook-form với yup resolver
   const {
     control,
     handleSubmit,
@@ -48,20 +46,22 @@ const Login = () => {
     },
   });
 
-  // Xử lý khi submit form
   const onSubmit = (data) => {
     dispatch(login(data));
   };
-  console.log(locationState);
   useEffect(() => {
     if (user) {
-      navigate(locationState, { replace: true });
+      if (!roles.includes("ROLE_ADMIN")) {
+        showToast("You don't have access rights!", "error");
+      } else {
+        showToast(`Welcome back, ${user.sub}`);
+      }
     }
-  }, [user, navigate]);
-
-  // if (user) {
-  //   return <Navigate to="/jobportal" />;
-  // }
+  }, [user, roles]);
+  if (user && roles.includes("ROLE_ADMIN")) {
+    const redirectPath = locationState || "/jobportal";
+    return <Navigate to={redirectPath} />;
+  }
 
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
@@ -71,7 +71,7 @@ const Login = () => {
             <img src={logo} alt="Logo" style={{ width: "150px" }} />
           </div>
           <h2 className="text-center mb-4">Login</h2>
-          {authStatus === "failed" && <Alert color="danger">{authError}</Alert>}
+          {messageError && <Alert color="danger">{messageError}</Alert>}
           <Form onSubmit={handleSubmit(onSubmit)}>
             <FormGroup>
               <Label for="username">Username</Label>

@@ -19,7 +19,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Editor } from "@tinymce/tinymce-react";
 import { slugify } from "../../utils/functions/convertToSlug";
-import { getAllBlogCategories } from "../../services/Blog_CategoryService";
+import { getAllBlogCategories } from "../../services/blog_category_service";
 import { createFormData } from "../../utils/form-data/formDataUtil";
 import { IoMdAdd } from "react-icons/io";
 import { useDispatch } from "react-redux";

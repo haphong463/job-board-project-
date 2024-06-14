@@ -33,7 +33,6 @@ import { RightSideBlogForm } from "./RightSideBlogForm";
 const FormBlog = ({ isEdit, setIsEdit }) => {
   const dispatch = useDispatch();
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
-  const categoryStatus = useSelector((state) => state.blogCategory.status);
   const user = useSelector((state) => state.auth.user);
   const [modal, setModal] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -98,12 +97,6 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       );
     }
   };
-
-  useEffect(() => {
-    if (categoryStatus === "idle") {
-      dispatch(fetchBlogCategory());
-    }
-  }, [categoryStatus, dispatch]);
 
   useEffect(() => {
     if (isEdit) {

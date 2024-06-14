@@ -15,18 +15,15 @@ import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
 import moment from "moment/moment";
+import { fetchBlogCategory } from "../../../features/blogCategorySlice";
+import showToast from "../../../utils/functions/showToast";
 
 export function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs) || [];
-  const blogStatus = useSelector((state) => state.blogs.status);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isEdit, setIsEdit] = useState(null);
-  useEffect(() => {
-    if (blogStatus === "idle") {
-      dispatch(fetchBlogs());
-    }
-  }, [blogStatus, dispatch]);
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this blog?")) {

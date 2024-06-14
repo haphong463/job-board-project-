@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { jwtDecode } from "jwt-decode";
-import { signInAsync } from "../services/AuthService";
+import { signInAsync } from "../services/auth_service";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
 
@@ -47,7 +47,9 @@ const initialState = {
   verificationEmail: null,
   verificationMessage: null,
   roles: [],
-  user: null,
+  user:
+    localStorage.getItem("accessToken") &&
+    jwtDecode(localStorage.getItem("accessToken")),
   location: "",
 };
 
@@ -63,18 +65,13 @@ const authSlice = createSlice({
       state.roles = [];
       localStorage.removeItem("accessToken");
     },
-    updateUserAndRoles(state) {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        state.user = jwtDecode(token);
-        state.roles = state.user.role.map((r) => r.authority);
-      } else {
-        state.user = null;
-        state.roles = [];
-      }
-    },
+
     setLocationState: (state, action) => {
       state.location = action.payload;
+    },
+    updateRoles: (state) => {
+      state.roles = state.user ? state.user.role.map((r) => r.authority) : [];
+      console.log(state.roles);
     },
   },
   extraReducers: (builder) => {
@@ -88,7 +85,6 @@ const authSlice = createSlice({
         state.signInSuccess = true;
         state.isVerified = true;
         state.user = jwtDecode(action.payload.accessToken);
-        console.log(">>>state user: ", state.user);
         state.roles = state.user.role.map((r) => r.authority);
         localStorage.setItem("accessToken", action.payload.accessToken);
       })
@@ -104,11 +100,7 @@ const authSlice = createSlice({
   },
 });
 
-export const {
-  resetSignInSuccess,
-  logout,
-  updateUserAndRoles,
-  setLocationState,
-} = authSlice.actions;
+export const { resetSignInSuccess, logout, setLocationState, updateRoles } =
+  authSlice.actions;
 
 export default authSlice.reducer;
