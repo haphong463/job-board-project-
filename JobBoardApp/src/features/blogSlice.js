@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { findBlogById, getAllBlog } from "../services/blogService";
+import { getAllBlogCategories } from "../services/blogCategoryService";
 
 export const fetchBlogById = createAsyncThunk(
   "blogs/getOne",
@@ -9,6 +10,17 @@ export const fetchBlogById = createAsyncThunk(
       return res;
     } catch (error) {
       return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchAllCategories = createAsyncThunk(
+  "blog-category",
+  async () => {
+    try {
+      return await getAllBlogCategories();
+    } catch (error) {
+      return error;
     }
   }
 );
@@ -40,6 +52,7 @@ const blogSlice = createSlice({
     blogs: [],
     status: "idle",
     error: null,
+    categories: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -63,6 +76,17 @@ const blogSlice = createSlice({
         state.blogs = action.payload;
       })
       .addCase(fetchAllBlog.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(fetchAllCategories.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchAllCategories.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.categories = action.payload.slice(0, 3);
+      })
+      .addCase(fetchAllCategories.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       });

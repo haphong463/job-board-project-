@@ -25,7 +25,7 @@ export const Login = () => {
     dispatch(resetVerificationMessage());
   }, [dispatch]);
 
-  if (user) <Navigate to="/" replace={true} />;
+  if (user) return <Navigate to="/" replace={true} />;
 
   return (
     <GlobalLayoutUser>

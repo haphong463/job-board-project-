@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { NavLink, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBlogById } from "../../features/blogSlice";
+import {
+  fetchAllBlog,
+  fetchAllCategories,
+  fetchBlogById,
+} from "../../features/blogSlice";
 import {
   fetchAllCommentByBlogId,
   deleteComment,
@@ -10,16 +14,13 @@ import {
   addComment,
 } from "../../features/commentSlice";
 import { BlogContent } from "./BlogContent";
-import { jwtDecode } from "jwt-decode";
 import { CommentForm } from "./CommentForm";
 import { CommentList } from "./CommentList";
-import {
-  resetUserAndRoles,
-  updateUserAndRoles,
-} from "../../features/authSlice";
 import moment from "moment";
 import { BlogSideBar } from "./BlogSideBar";
 import { BlogTitle } from "./BlogTitle";
+import ReadingBar from "./ReadingBar";
+import { calculateReadingTime } from "../../utils/function/readingTime";
 
 export const BlogSingle = () => {
   const dispatch = useDispatch();
@@ -27,18 +28,30 @@ export const BlogSingle = () => {
   const comments = useSelector((state) => state.comments.comments);
   const user = useSelector((state) => state.auth.user);
   const { id } = useParams();
+  const [readingTime, setReadingTime] = useState(0);
+
   // const fullName = useSelector((state) => state.blogs.fullName);
   useEffect(() => {
-    dispatch(fetchBlogById(id));
-    dispatch(fetchAllCommentByBlogId(id));
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(fetchBlogById(id)).unwrap(),
+          dispatch(fetchAllCommentByBlogId(id)).unwrap(),
+          dispatch(fetchAllCategories()).unwrap(),
+          dispatch(fetchAllBlog()).unwrap(),
+        ]);
+        console.log("The data has been loaded successfully.");
+      } catch (error) {
+        console.log("Error loading data", "error");
+      }
+    };
+    fetchData();
   }, [dispatch, id]);
-
   useEffect(() => {
-    if (!user) {
-      dispatch(updateUserAndRoles());
+    if (blog && blog.content) {
+      setReadingTime(calculateReadingTime(blog.content));
     }
-  }, [user, dispatch]);
-
+  }, [blog]);
   const handleDeleteComment = (commentId) => {
     dispatch(deleteComment(commentId));
   };
@@ -54,6 +67,8 @@ export const BlogSingle = () => {
 
   return (
     <GlobalLayoutUser>
+      <ReadingBar />
+
       {blog && (
         <>
           <section
@@ -77,6 +92,8 @@ export const BlogSingle = () => {
                         {moment(blog.createdAt).format("MMMM Do YYYY")}
                       </strong>
                     </span>
+                    <span className="mx-2 slash">•</span>
+                    <span className="text-white">{readingTime} min read</span>
                   </div>
                   <BlogTitle title={blog.title} />
                 </div>
@@ -98,6 +115,8 @@ export const BlogSingle = () => {
                       }}
                     />
                   </p>
+                  <i>{blog.citation}</i>
+                  <hr />
                   <BlogContent content={blog.content} />
                   <div className="pt-5">
                     <hr />

@@ -187,7 +187,7 @@ jQuery(function ($) {
       }
     );
   };
-  OnePageNavigation();
+  // OnePageNavigation();
 
   var counterInit = function () {
     if ($(".section-counter").length > 0) {

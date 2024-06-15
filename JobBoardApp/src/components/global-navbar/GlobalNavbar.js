@@ -2,15 +2,13 @@ import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import axiosRequest from "../../configs/axiosConfig";
 import { useDispatch, useSelector } from "react-redux";
-import { jwtDecode } from "jwt-decode";
-import { logout, updateUserAndRoles } from "../../features/authSlice";
+import { logout } from "../../features/authSlice";
 import {
   Dropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import registerImage from "../../";
 import { FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 export function GlobalNavbar() {
@@ -29,12 +27,6 @@ export function GlobalNavbar() {
   useEffect(() => {
     fetchCategories();
   }, []);
-
-  useEffect(() => {
-    if (!user) {
-      dispatch(updateUserAndRoles());
-    }
-  }, [user, dispatch]);
 
   const fetchCategories = async () => {
     try {

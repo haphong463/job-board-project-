@@ -66,7 +66,9 @@ const initialState = {
   verificationEmail: null,
   verificationMessage: null,
   roles: [],
-  user: null,
+  user:
+    localStorage.getItem("accessToken") &&
+    jwtDecode(localStorage.getItem("accessToken")),
 };
 
 const authSlice = createSlice({
@@ -84,16 +86,7 @@ const authSlice = createSlice({
       state.roles = [];
       localStorage.removeItem("accessToken");
     },
-    updateUserAndRoles(state) {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        state.user = jwtDecode(token);
-        state.roles = state.user.role.map((r) => r.authority);
-      } else {
-        state.user = null;
-        state.roles = [];
-      }
-    },
+
     resetVerificationMessage(state) {
       state.verificationMessage = null;
     },
@@ -141,7 +134,6 @@ export const {
   resetSignUpSuccess,
   resetSignInSuccess,
   logout,
-  updateUserAndRoles,
   resetVerificationMessage,
 } = authSlice.actions;
 

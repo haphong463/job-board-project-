@@ -1,4 +1,10 @@
-export function BlogSideBar() {
+import { useSelector } from "react-redux";
+import { NavLink, useLocation } from "react-router-dom";
+
+export function BlogSideBar(props) {
+  const categories = useSelector((state) => state.blogs.categories);
+  const blogs = useSelector((state) => state.blogs.blogs);
+
   return (
     <div className="col-lg-4 sidebar pl-lg-5">
       <div className="sidebar-box">
@@ -35,41 +41,24 @@ export function BlogSideBar() {
       <div className="sidebar-box">
         <div className="categories">
           <h3>Categories</h3>
-          <li>
-            <a href="#">
-              Creatives <span>(12)</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              News <span>(22)</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              Design <span>(37)</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              HTML <span>(42)</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              Web Development <span>(14)</span>
-            </a>
-          </li>
+          {categories.map((category) => (
+            <li key={category.id}>
+              <NavLink to={`/blogs?type=${category.name}`}>
+                {category.name} <span>{category.blogCount}</span>
+              </NavLink>
+            </li>
+          ))}
         </div>
       </div>
       <div className="sidebar-box">
-        <h3>Paragraph</h3>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus
-          itaque, autem necessitatibus voluptate quod mollitia delectus aut,
-          sunt placeat nam vero culpa sapiente consectetur similique, inventore
-          eos fugit cupiditate numquam!
-        </p>
+        <div className="categories">
+          <h3>Related article</h3>
+          {blogs.map((blog) => (
+            <li key={blog.id}>
+              <NavLink href="#">{blog.title}</NavLink>
+            </li>
+          ))}
+        </div>
       </div>
     </div>
   );

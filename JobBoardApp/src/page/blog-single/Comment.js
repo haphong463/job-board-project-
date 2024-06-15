@@ -169,24 +169,31 @@ export const Comment = ({
         {level < maxLevel && (
           <p>
             {user && (
-              <a
-                className="reply mr-3"
+              <span
+                className="mr-3"
+                style={{
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
                 onClick={() =>
                   dispatch(toggleShowReplyForm({ commentId: comment.id }))
                 }
               >
                 {showReplyForm ? "Cancel" : "Reply"}
-              </a>
+              </span>
             )}
             {comment.children && comment.children.length > 0 && (
-              <a
-                className="reply"
+              <span
+                style={{
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
                 onClick={() =>
                   dispatch(toggleShowReplies({ commentId: comment.id }))
                 }
               >
                 {showReplies ? "Hide" : "Show"} replies
-              </a>
+              </span>
             )}
           </p>
         )}
@@ -209,19 +216,29 @@ export const Comment = ({
             )}
           </AnimatePresence>
         )}
+
         {showReplies && (
-          <ul className="children">
-            {comment.children.map((reply, key) => (
-              <Comment
-                key={key}
-                comment={reply}
-                addComment={addComment}
-                user={user}
-                level={level + 1}
-                maxLevel={maxLevel}
-              />
-            ))}
-          </ul>
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <ul className="children">
+                {comment.children.map((reply, key) => (
+                  <Comment
+                    key={key}
+                    comment={reply}
+                    addComment={addComment}
+                    user={user}
+                    level={level + 1}
+                    maxLevel={maxLevel}
+                  />
+                ))}
+              </ul>
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
     </li>

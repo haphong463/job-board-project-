@@ -26,6 +26,7 @@ public class BlogDTO {
     private Long blogCategoryId;
     private String username;
     private BlogCategoryDTO category;
+    private String citation;
     private Date publishedAt;
     @Enumerated(EnumType.STRING)
     private BlogStatus status;
