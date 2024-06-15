@@ -4,8 +4,7 @@ import {
   deleteCommentById,
   updateComment,
   postComment,
-} from "../services/commentService";
-import moment from "moment";
+} from "../services/CommentService";
 
 // Thunk để lấy tất cả comments theo blogId
 export const fetchAllCommentByBlogId = createAsyncThunk(

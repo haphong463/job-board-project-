@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { signInAysnc, signUpAsync } from "../services/authService";
+import { signInAysnc, signUpAsync } from "../services/AuthService";
 import { jwtDecode } from "jwt-decode";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";

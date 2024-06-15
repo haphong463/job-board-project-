@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { findBlogById, getAllBlog } from "../services/blogService";
-import { getAllBlogCategories } from "../services/blogCategoryService";
+import { findBlogById, getAllBlog } from "../services/BlogService";
+import { getAllBlogCategories } from "../services/BlogCategoryService";
 
 export const fetchBlogById = createAsyncThunk(
   "blogs/getOne",
