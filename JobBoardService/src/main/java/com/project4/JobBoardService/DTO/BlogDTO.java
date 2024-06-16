@@ -34,5 +34,6 @@ public class BlogDTO {
     @Nullable
     private MultipartFile image;
 
+
     // Getters and setters
 }

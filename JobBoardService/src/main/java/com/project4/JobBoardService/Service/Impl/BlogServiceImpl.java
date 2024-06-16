@@ -126,5 +126,6 @@ public class BlogServiceImpl implements BlogService {
         existingBlog.setPublishedAt(updatedBlog.getPublishedAt());
         existingBlog.setStatus(updatedBlog.getStatus());
         existingBlog.setSlug(updatedBlog.getSlug());
+        existingBlog.setCitation(updatedBlog.getCitation());
     }
 }

@@ -9,7 +9,8 @@ import java.util.Optional;
 public interface BlogCategoryService {
     BlogCategory createBlogCategory(BlogCategory blogCategory);
     BlogCategory getBlogCategoryById(Long id);
-    List<BlogCategoryDTO> getAllBlogCategories();
+    List<BlogCategory> getAllBlogCategories();
     BlogCategory updateBlogCategory(Long id, BlogCategory blogCategory);
     void deleteBlogCategory(Long id);
+    int getBlogCount(BlogCategory category);
 }

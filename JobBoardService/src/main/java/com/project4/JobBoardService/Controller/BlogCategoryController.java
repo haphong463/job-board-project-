@@ -3,6 +3,7 @@ package com.project4.JobBoardService.Controller;
 import com.project4.JobBoardService.DTO.BlogCategoryDTO;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Service.BlogCategoryService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/blog-category")
@@ -18,34 +19,68 @@ public class BlogCategoryController {
 
     @Autowired
     private BlogCategoryService blogCategoryService;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    // Create a new BlogCategory
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<BlogCategory> createBlogCategory(@RequestBody BlogCategory blogCategory) {
-        BlogCategory createdCategory = blogCategoryService.createBlogCategory(blogCategory);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+    public ResponseEntity<BlogCategoryDTO> createBlogCategory(@RequestBody BlogCategory blogCategory) {
+        try {
+            BlogCategory createdCategory = blogCategoryService.createBlogCategory(blogCategory);
+            BlogCategoryDTO createdCategoryDTO = modelMapper.map(createdCategory, BlogCategoryDTO.class);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdCategoryDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<BlogCategory> getBlogCategoryById(@PathVariable Long id) {
-//        BlogCategory categoryOpt = blogCategoryService.getBlogCategoryById(id);
-//        return categoryOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-//    }
-//@PreAuthorize("hasRole('ADMIN')")
+    // Get all BlogCategories
     @GetMapping
     public ResponseEntity<List<BlogCategoryDTO>> getAllBlogCategories() {
-        List<BlogCategoryDTO> categories = blogCategoryService.getAllBlogCategories();
-        return ResponseEntity.ok(categories);
+        try {
+            List<BlogCategory> categories = blogCategoryService.getAllBlogCategories();
+            List<BlogCategoryDTO> categoryDTOS = categories.stream()
+                    .map(category -> {
+                        BlogCategoryDTO dto = modelMapper.map(category, BlogCategoryDTO.class);
+                        dto.setBlogCount(blogCategoryService.getBlogCount(category));
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(categoryDTOS);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-//    @PreAuthorize("hasRole('ADMIN')")
+
+    // Update BlogCategory by ID
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<BlogCategory> updateBlogCategory(@PathVariable Long id, @RequestBody BlogCategory updatedCategory) {
-        BlogCategory category = blogCategoryService.updateBlogCategory(id, updatedCategory);
-        return category != null ? ResponseEntity.ok(category) : ResponseEntity.notFound().build();
+    public ResponseEntity<BlogCategoryDTO> updateBlogCategory(@PathVariable Long id, @RequestBody BlogCategory updatedCategory) {
+        try {
+            BlogCategory category = blogCategoryService.updateBlogCategory(id, updatedCategory);
+            if (category != null) {
+                BlogCategoryDTO updatedCategoryDTO = modelMapper.map(category, BlogCategoryDTO.class);
+                updatedCategoryDTO.setBlogCount(blogCategoryService.getBlogCount(category));
+                return ResponseEntity.ok(updatedCategoryDTO);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-//    @PreAuthorize("hasRole('ADMIN')")
+
+    // Delete BlogCategory by ID
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBlogCategory(@PathVariable Long id) {
-        blogCategoryService.deleteBlogCategory(id);
-        return ResponseEntity.noContent().build();
+        try {
+            blogCategoryService.deleteBlogCategory(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

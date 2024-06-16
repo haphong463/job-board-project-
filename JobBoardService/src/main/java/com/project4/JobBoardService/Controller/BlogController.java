@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,9 @@ public class BlogController {
     private UserService userService;
 
     @Autowired
+    SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @PreAuthorize(" hasRole('ROLE_ADMIN')")
@@ -45,24 +49,16 @@ public class BlogController {
         if(user == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
         }
-
-        Blog blog = new Blog();
-
-        blog.setTitle(blogDTO.getTitle());
-        blog.setContent(blogDTO.getContent());
-
-        blog.setCategory(category);
-        blog.setStatus(blogDTO.getStatus());
-        blog.setSlug(blogDTO.getSlug());
+        Blog blog = modelMapper.map(blogDTO, Blog.class);
         blog.setUser(user);
-        //
-
-
-
+        blog.setCategory(category);
         // Call a method in your service to handle the blog creation logic, including image processing if necessary
+
         try {
             Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage());
             BlogResponseDTO responseDto = modelMapper.map(createdBlog, BlogResponseDTO.class);
+            simpMessagingTemplate.convertAndSend("/topic/new-blog", responseDto);
+
             return ResponseEntity.ok(responseDto);
 //            return ResponseEntity.ok(blogDTO);
 
@@ -126,6 +122,8 @@ public class BlogController {
             // update blog
             Blog updatedBlog = blogService.updateBlog(id, editBlog, blogDTO.getImage());
             BlogResponseDTO responseDto = modelMapper.map(updatedBlog, BlogResponseDTO.class);
+            simpMessagingTemplate.convertAndSend("/topic/edit-blog", responseDto);
+
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -138,6 +136,7 @@ public class BlogController {
     public ResponseEntity<Long> deleteBlog(@PathVariable Long id) {
         try {
             blogService.deleteBlog(id);
+            simpMessagingTemplate.convertAndSend("/topic/delete-blog", id);
             return ResponseEntity.ok().body(id);
 
         } catch (Exception e) {

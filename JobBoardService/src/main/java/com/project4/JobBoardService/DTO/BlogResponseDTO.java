@@ -25,6 +25,7 @@ public class BlogResponseDTO {
     @Enumerated(EnumType.STRING)
     private BlogStatus status;
     private String slug;
+    private String citation;
     private String imageUrl;
     private String thumbnailUrl;
     private Date createdAt;

@@ -21,8 +21,7 @@ public class BlogCategoryServiceImpl implements BlogCategoryService {
     @Autowired
     private BlogRepository blogRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+
 
     @Override
     public BlogCategory createBlogCategory(BlogCategory blogCategory) {
@@ -35,13 +34,8 @@ public class BlogCategoryServiceImpl implements BlogCategoryService {
     }
 
     @Override
-    public List<BlogCategoryDTO> getAllBlogCategories() {
-        List<BlogCategory> categories = blogCategoryRepository.findAll();
-        return categories.stream().map(category -> {
-            BlogCategoryDTO dto = modelMapper.map(category, BlogCategoryDTO.class);
-            dto.setBlogCount(blogRepository.countByCategory(category));
-            return dto;
-        }).collect(Collectors.toList());
+    public List<BlogCategory> getAllBlogCategories() {
+        return blogCategoryRepository.findAll();
     }
 
     @Override
@@ -59,5 +53,10 @@ public class BlogCategoryServiceImpl implements BlogCategoryService {
     @Override
     public void deleteBlogCategory(Long id) {
         blogCategoryRepository.deleteById(id);
+    }
+
+    @Override
+    public int getBlogCount(BlogCategory category) {
+        return blogRepository.countByCategory(category);
     }
 }
