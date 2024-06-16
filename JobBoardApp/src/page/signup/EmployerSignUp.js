@@ -18,10 +18,12 @@ const employerSignUpSchema = yup.object().shape({
   email: yup.string().email("Email is invalid").required("Email is required"),
   password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
   confirmPassword: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match').required('Confirm password is required'),
-  gender: yup.string().required("Gender is required"),
+  
   companyName: yup.string().required("Company name is required"),
   companyAddress: yup.string().required("Company address is required"),
-  companyWebsite: yup.string().url("Invalid URL format").required("Company website is required")
+  companyWebsite: yup.string().url("Invalid URL format").required("Company website is required"),
+  phone: yup.string().required("Phone number is required"),
+  position: yup.string().required("Position is required"),
 });
 
 function EmployerSignUp() {
@@ -198,24 +200,7 @@ function EmployerSignUp() {
                     </p>
                   </div>
                 </div>
-                <div className="row form-group">
-                  <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="gender">
-                      Gender*
-                    </label>
-                    <select
-                      id="gender"
-                      {...register("gender")}
-                      className="form-control"
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                    <p className="text-danger">{errors.gender?.message}</p>
-                  </div>
-                </div>
+                
                 <div className="row form-group">
                   <div className="col-md-12 mb-3 mb-md-0">
                     <label className="text-black" htmlFor="companyName">
@@ -261,6 +246,54 @@ function EmployerSignUp() {
                     <p className="text-danger">{errors.companyWebsite?.message}</p>
                   </div>
                 </div>
+                <div className="row form-group">
+      <div className="col-md-12 mb-3 mb-md-0">
+        <label className="text-black" htmlFor="position">
+          Position*
+        </label>
+        <input
+          type="text"
+          id="position"
+          {...register("position")}
+          className="form-control"
+          placeholder="enter your position in the company..."
+        />
+        <p className="text-danger">{errors.position?.message}</p>
+      </div>
+    </div>
+    <div className="row form-group">
+      <div className="col-md-12 mb-3 mb-md-0">
+        <label className="text-black" htmlFor="phone">
+          Phone*
+        </label>
+        <input
+          type="text"
+          id="phone"
+          {...register("phone")}
+          className="form-control"
+          placeholder="enter your phone number..."
+        />
+        <p className="text-danger">{errors.phone?.message}</p>
+      </div>
+    </div>
+    <div className="row form-group">
+      <div className="col-md-12">
+        <div className="form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="agreementCheckbox"
+            {...register("agreement", { required: true })}
+          />
+          <label className="form-check-label" htmlFor="agreementCheckbox">
+            I agree to the Terms and Conditions
+          </label>
+          <p className="text-danger">
+            {errors.agreement && "You must agree to the terms and conditions"}
+          </p>
+        </div>
+      </div>
+    </div>
                 <div className="row form-group">
                   <div className="col-md-12">
                     <button
