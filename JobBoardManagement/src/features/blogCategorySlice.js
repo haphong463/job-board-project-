@@ -43,8 +43,7 @@ export const updateBlogCategory = createAsyncThunk(
   "blog-category/update",
   async (data) => {
     try {
-      await updateBlogCategoryAsync(data);
-      return data;
+      return await updateBlogCategoryAsync(data);
     } catch (error) {
       throw new Error("Error to update");
     }
@@ -85,6 +84,8 @@ const blogCategorySlice = createSlice({
         );
       })
       .addCase(updateBlogCategory.fulfilled, (state, action) => {
+        console.log(action.payload);
+
         state.blogCategory = state.blogCategory.map((item) =>
           item.id === action.payload.id ? action.payload : item
         );

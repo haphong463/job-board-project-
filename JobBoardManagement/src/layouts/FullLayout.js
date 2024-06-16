@@ -18,7 +18,6 @@ const FullLayout = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
-  const isSignIn = useSelector((state) => state.auth.signInSuccess);
   const blogStatus = useSelector((state) => state.blogs.status);
   const categoryStatus = useSelector((state) => state.blogCategory.status);
   const navigate = useNavigate();
@@ -26,28 +25,7 @@ const FullLayout = () => {
   useEffect(() => {
     dispatch(setLocationState(location.pathname));
   }, [location, dispatch]);
-  useEffect(() => {
-    if (roles.length === 0) {
-      dispatch(updateRoles());
-    }
-    if (user && roles.includes("ROLE_ADMIN")) {
-      if (blogStatus === "idle" || categoryStatus === "idle") {
-        const fetchData = async () => {
-          try {
-            await Promise.all([
-              dispatch(fetchBlogs()).unwrap(),
-              dispatch(fetchBlogCategory()).unwrap(),
-            ]);
-            showToast("The data has been loaded successfully.");
-          } catch (error) {
-            showToast("Error loading data.", "error");
-          }
-        };
 
-        fetchData();
-      }
-    }
-  }, [dispatch]);
   useEffect(() => {
     if (user) {
       const refreshAuthToken = () => {
@@ -73,8 +51,26 @@ const FullLayout = () => {
       return () => clearTimeout(refreshTokenTimeout);
     }
   }, [user, dispatch, navigate]);
-  console.log("re-render component");
-  if (!isSignIn && !user) {
+
+  useEffect(() => {
+    if (blogStatus === "idle" || categoryStatus === "idle") {
+      const fetchData = async () => {
+        try {
+          await Promise.all([
+            dispatch(fetchBlogs()).unwrap(),
+            dispatch(fetchBlogCategory()).unwrap(),
+          ]);
+          showToast("The data has been loaded successfully.");
+        } catch (error) {
+          showToast("Error loading data.", "error");
+        }
+      };
+
+      fetchData();
+    }
+  }, [dispatch]);
+
+  if (!user) {
     return <Navigate to="/jobportal/login" />;
   }
 

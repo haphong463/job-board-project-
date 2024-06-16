@@ -41,4 +41,9 @@ export const navigation = [
     href: "/jobportal/about",
     icon: "bi bi-people",
   },
+  {
+    title: "Settings",
+    href: "/jobportal/settings",
+    icon: "bi bi-gear",
+  },
 ];

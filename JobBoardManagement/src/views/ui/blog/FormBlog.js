@@ -105,6 +105,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       setValue("content", isEdit.content); // Set the default value when isEdit changes
       setValue("blogCategoryId", isEdit.category.id); // Set the default value when isEdit changes
       setValue("status", isEdit.status); // Set the default value when isEdit changes
+      setValue("citation", isEdit.citation); // Set the default value when isEdit changes
     }
   }, [isEdit, setValue]);
 

@@ -17,6 +17,7 @@ const Grid = lazy(() => import("../views/ui/Grid"));
 const Blog = lazy(() => import("../views/ui/blog/index"));
 const Forms = lazy(() => import("../views/ui/Forms"));
 const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
+const User = lazy(() => import("../views/ui/user/index"));
 
 /*****Routes******/
 const ThemeRoutes = [
@@ -33,6 +34,7 @@ const ThemeRoutes = [
       { path: "/jobportal/buttons", exact: true, element: <Buttons /> },
       { path: "/jobportal/cards", exact: true, element: <Cards /> },
       { path: "/jobportal/grid", exact: true, element: <Grid /> },
+      { path: "/jobportal/settings", exact: true, element: <User /> },
       { path: "/jobportal/table", exact: true, element: <Blog /> },
       { path: "/jobportal/forms", exact: true, element: <Forms /> },
       { path: "/jobportal/breadcrumbs", exact: true, element: <Breadcrumbs /> },

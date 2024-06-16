@@ -80,7 +80,7 @@ export function Blog(props) {
             fontSize: "16px",
           }}
         >
-          {`${row.user.firstName} ${row.user.lastName}`}
+          {`${row.user?.firstName} ${row.user?.lastName}`}
         </div>
       ),
     },

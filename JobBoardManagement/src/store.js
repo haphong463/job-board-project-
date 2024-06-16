@@ -1,15 +1,29 @@
 // src/app/store.js
-import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import blogsReducer from "./features/blogSlice";
 import blogCategoryReducer from "./features/blogCategorySlice";
 import authReducer from "./features/authSlice";
-const store = configureStore({
-  reducer: {
-    blogs: blogsReducer,
-    blogCategory: blogCategoryReducer,
-    auth: authReducer,
-  },
+import storage from "redux-persist/lib/storage";
+import persistReducer from "redux-persist/es/persistReducer";
+const persistConfig = {
+  key: "root",
+  version: 1,
+  storage,
+};
+const reducer = combineReducers({
+  blogs: blogsReducer,
+  blogCategory: blogCategoryReducer,
+  auth: authReducer,
 });
 
-export { store };
+const persistedReducer = persistReducer(persistConfig, reducer);
+
+const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
+});
+
 export default store;

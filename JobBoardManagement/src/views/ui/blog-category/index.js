@@ -73,12 +73,14 @@ export function BlogCategory(props) {
           <button onClick={() => handleEdit(row.id)} className="btn btn-info">
             Edit
           </button>
-          <button
-            onClick={() => handleDelete(row.id)}
-            className="btn btn-danger"
-          >
-            Delete
-          </button>
+          {!row.blogCount > 0 && (
+            <button
+              onClick={() => handleDelete(row.id)}
+              className="btn btn-danger"
+            >
+              Delete
+            </button>
+          )}
         </div>
       ),
     },
