@@ -112,11 +112,7 @@ public class AuthController {
                 signUpRequest.getLastName(),
                 encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getGender());
-        if (signUpRequest.getRole().contains("employer")) {
-            user.setCompanyName(signUpRequest.getCompanyName());
-            user.setCompanyAddress(signUpRequest.getCompanyAddress());
-            user.setCompanyWebsite(signUpRequest.getCompanyWebsite());
-        }
+
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
         if (strRoles == null) {
@@ -137,9 +133,13 @@ public class AuthController {
                         roles.add(modRole);
                         break;
                     case "employer":
-                        Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(employerRole);
+                        user.setCompanyName(signUpRequest.getCompanyName());
+                        user.setCompanyAddress(signUpRequest.getCompanyAddress());
+                        user.setCompanyWebsite(signUpRequest.getCompanyWebsite());
+                        user.setPhone(signUpRequest.getPhone());
+                        user.setPosition(signUpRequest.getPosition());
+                        roles.add(roleRepository.findByName(ERole.ROLE_EMPLOYER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
                         break;
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)

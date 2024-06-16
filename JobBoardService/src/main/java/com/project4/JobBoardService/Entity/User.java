@@ -62,6 +62,8 @@ public class User   {
     private String companyName;
     private String companyAddress;
     private String companyWebsite;
+    private String position;
+    private String phone;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(  name = "user_roles",
