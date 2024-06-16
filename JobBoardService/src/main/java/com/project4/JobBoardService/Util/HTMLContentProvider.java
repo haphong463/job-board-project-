@@ -23,7 +23,7 @@ public class HTMLContentProvider {
                 "<h1>Email Verification</h1>" +
                 "</div>" +
                 "<div class='content'>" +
-                "<p>Hello {{firstName}},</p>" +
+                "<p>Hello {{username}},</p>" +
                 "<p>Please use the following code to verify your email:</p>" +
                 "<a href='{{verifyUrl}}' class='button'>Verify Email</a>" +
                 "<p>Thank you!</p>" +
@@ -32,7 +32,7 @@ public class HTMLContentProvider {
                 "</body>" +
                 "</html>";
     }
-    public static String verifyemailsuccess(String firstName, String verifyUrl) {
+    public static String verifyemailsuccess(String username, String verifyUrl) {
         return "<!DOCTYPE html>" +
                 "<html lang='en'>" +
                 "<head>" +
@@ -53,7 +53,7 @@ public class HTMLContentProvider {
                 "<h1>Email Verification</h1>" +
                 "</div>" +
                 "<div class='content'>" +
-                "<p>Hello " + firstName + ",</p>" +
+                "<p>Hello " + username + ",</p>" +
                 "<p>Your email has been verified successfully!</p>" +
                 "<p>Thank you!</p>" +
                 "</div>" +

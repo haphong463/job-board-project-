@@ -112,6 +112,11 @@ public class AuthController {
                 signUpRequest.getLastName(),
                 encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getGender());
+        if (signUpRequest.getRole().contains("employer")) {
+            user.setCompanyName(signUpRequest.getCompanyName());
+            user.setCompanyAddress(signUpRequest.getCompanyAddress());
+            user.setCompanyWebsite(signUpRequest.getCompanyWebsite());
+        }
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
         if (strRoles == null) {
@@ -131,6 +136,11 @@ public class AuthController {
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(modRole);
                         break;
+                    case "employer":
+                        Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(employerRole);
+                        break;
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -145,7 +155,7 @@ public class AuthController {
         user.setVerificationCode(verificationCode);
 
         userRepository.save(user);
-        emailService.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationCode, user.getEmail());
+        emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
