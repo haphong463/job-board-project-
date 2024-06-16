@@ -1,6 +1,6 @@
 import { AboutUs } from "../../page/about-us/AboutUs";
-import { BlogSingle } from "../../page/blog-single/index";
-import { Blog } from "../../page/blog/index";
+import { BlogSingle } from "../../page/blog-single/BlogSingle";
+import { Blog } from "../../page/blog/Blog";
 import { Contact } from "../../page/contact/Contact";
 import { Faq } from "../../page/faq/Faq";
 import { Home } from "../../page/home/Home";

@@ -11,7 +11,7 @@ export const Home = () => {
 
   useEffect(() => {
     // Ensure selectpicker is initialized
-    $(".selectpicker").selectpicker("refresh");
+    // $(".selectpicker").selectpicker("refresh");
 
     // Extract query parameters
     const searchParams = new URLSearchParams(location.search);

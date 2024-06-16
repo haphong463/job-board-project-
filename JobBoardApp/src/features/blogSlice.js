@@ -53,8 +53,21 @@ const blogSlice = createSlice({
     status: "idle",
     error: null,
     categories: [],
+    author: null,
   },
-  reducers: {},
+  reducers: {
+    addBlogBySocket: (state, action) => {
+      state.blogs.push(action.payload);
+    },
+    updateBlogBySocket: (state, action) => {
+      state.blogs = state.blogs.map((blog) =>
+        blog.id === action.payload.id ? action.payload : blog
+      );
+    },
+    deleteBlogBySocket: (state, action) => {
+      state.blogs = state.blogs.filter((blog) => blog.id !== action.payload);
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchBlogById.pending, (state) => {
@@ -63,6 +76,9 @@ const blogSlice = createSlice({
       .addCase(fetchBlogById.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.blog = action.payload;
+        state.author = action.payload.user;
+
+        console.log(state.author);
       })
       .addCase(fetchBlogById.rejected, (state, action) => {
         state.status = "failed";
@@ -92,5 +108,8 @@ const blogSlice = createSlice({
       });
   },
 });
+
+export const { addBlogBySocket, updateBlogBySocket, deleteBlogBySocket } =
+  blogSlice.actions;
 
 export default blogSlice.reducer;

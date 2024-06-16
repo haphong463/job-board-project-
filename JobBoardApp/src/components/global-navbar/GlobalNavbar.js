@@ -11,42 +11,32 @@ import {
 } from "reactstrap";
 import { FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
+import { fetchCategoryThunk } from "../../features/categorySlice";
 export function GlobalNavbar() {
-  const [categories, setCategories] = useState([]);
-
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
   const dispatch = useDispatch();
+  const categories = useSelector((state) => state.category.categories);
 
   const handleLogout = () => {
     dispatch(logout());
   };
 
   useEffect(() => {
-    fetchCategories();
+    if (!categories) {
+      dispatch(fetchCategoryThunk());
+    }
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await axiosRequest.get("/categories");
-      setCategories(response);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
   const handleCategoryClick = (categoryName) => {
-    setSelectedCategory(categoryName);
+    // setSelectedCategory(categoryName);
     console.log("Selected category:", categoryName);
   };
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-    setDropdownOpen(false); // Close the dropdown after language change
-  };
+
   return (
     <header className="site-navbar mt-3">
       <div className="container-fluid">

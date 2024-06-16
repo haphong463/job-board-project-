@@ -8,7 +8,13 @@ export const CommentList = ({
   user,
 }) => {
   return (
-    <ul className="comment-list">
+    <ul
+      className="comment-list"
+      style={{
+        maxHeight: "40vh",
+        overflow: "auto",
+      }}
+    >
       {comments.map((comment, key) => (
         <Comment
           key={key}

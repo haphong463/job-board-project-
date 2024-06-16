@@ -2,23 +2,45 @@ import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllBlog, fetchAllCategories } from "../../features/blogSlice";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import moment from "moment";
 import { calculateReadingTime } from "../../utils/function/readingTime";
 import "./style.css";
 import { Badge, Input } from "reactstrap";
+import {
+  connectWebSocket,
+  disconnectWebSocket,
+} from "../../services/WebSocketService";
 export const Blog = () => {
   const dispatch = useDispatch();
-  const [searchParams] = useSearchParams();
-  console.log(searchParams.get("type"));
   const blogs = useSelector((state) => state.blogs.blogs);
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 3;
+  const postsPerPage = 9;
 
   useEffect(() => {
-    dispatch(fetchAllBlog());
-    dispatch(fetchAllCategories());
+    connectWebSocket();
+
+    return () => {
+      disconnectWebSocket();
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(fetchAllBlog()).unwrap(),
+          dispatch(fetchAllCategories()).unwrap(),
+        ]);
+        console.log("Fetch blog data ok!");
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (!blogs || blogs.length === 0) {
+      fetchData();
+    }
   }, [dispatch]);
 
   const indexOfLastPost = currentPage * postsPerPage;

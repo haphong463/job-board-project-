@@ -4,28 +4,19 @@ import { NavLink, useLocation } from "react-router-dom";
 export function BlogSideBar(props) {
   const categories = useSelector((state) => state.blogs.categories);
   const blogs = useSelector((state) => state.blogs.blogs);
-
+  const author = useSelector((state) => state.blogs.author);
+  console.log(">>>author: ", author);
   return (
     <div className="col-lg-4 sidebar pl-lg-5">
-      <div className="sidebar-box">
-        <form action="#" className="search-form">
-          <div className="form-group">
-            <span className="icon fa fa-search" />
-            <input
-              type="text"
-              className="form-control form-control-lg"
-              placeholder="Type a keyword and hit enter"
-            />
-          </div>
-        </form>
-      </div>
       <div className="sidebar-box">
         <img
           src="../../../../assets/images/person_1.jpg"
           alt="Image placeholder"
           className="img-fluid mb-4 w-50 rounded-circle"
         />
-        <h3>About The Author</h3>
+        <h3>
+          {author?.firstName} {author?.lastName}
+        </h3>
         <p>
           Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus
           itaque, autem necessitatibus voluptate quod mollitia delectus aut,

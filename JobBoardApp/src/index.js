@@ -6,15 +6,20 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store";
+import persistStore from "redux-persist/es/persistStore";
+import { PersistGate } from "redux-persist/integration/react";
 // import { I18nextProvider } from "react-i18next";
 // import i18n from "./translation/translatetion";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+let persistor = persistStore(store);
 root.render(
   <Router>
     <Provider store={store}>
       {/* <I18nextProvider i18n={i18n}> */}
-      <App />
+      <PersistGate persistor={persistor}>
+        <App />
+      </PersistGate>
       {/* </I18nextProvider> */}
     </Provider>
   </Router>

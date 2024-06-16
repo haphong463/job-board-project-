@@ -64,7 +64,7 @@ const commentSlice = createSlice({
     showReplies: {},
     showReplyForm: {},
     showEditForm: {},
-    editedContent: {},
+    editedContent: "",
     originalContent: {},
   },
   reducers: {
@@ -190,6 +190,7 @@ const commentSlice = createSlice({
           });
         }
       })
+
       .addCase(deleteComment.rejected, (state, action) => {
         state.error = action.payload;
       })

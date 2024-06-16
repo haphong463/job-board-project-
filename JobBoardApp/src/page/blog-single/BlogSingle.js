@@ -40,12 +40,15 @@ export const BlogSingle = () => {
           dispatch(fetchAllCategories()).unwrap(),
           dispatch(fetchAllBlog()).unwrap(),
         ]);
+
         console.log("The data has been loaded successfully.");
       } catch (error) {
         console.log("Error loading data", "error");
       }
     };
-    fetchData();
+    if (!blog) {
+      fetchData();
+    }
   }, [dispatch, id]);
   useEffect(() => {
     if (blog && blog.content) {

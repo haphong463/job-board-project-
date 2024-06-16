@@ -5,22 +5,20 @@ import { NavLink } from "react-router-dom";
 export const JobListing = () => {
   useEffect(() => {
     // Ensure selectpicker is initialized
-    $(".selectpicker").selectpicker("refresh");
-
+    // $(".selectpicker").selectpicker("refresh");
     // Extract query parameters
-    const searchParams = new URLSearchParams(location.search);
-    const message = searchParams.get("message");
-
-    if (message) {
-      setMessage(message);
-      setTimeout(() => {
-        setMessage("");
-        // Remove the message parameter from the URL
-        navigate(location.pathname, { replace: true });
-        // Reload the page
-        window.location.reload();
-      }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
-    }
+    // const searchParams = new URLSearchParams(location.search);
+    // const message = searchParams.get("message");
+    // if (message) {
+    //   setMessage(message);
+    //   setTimeout(() => {
+    //     setMessage("");
+    //     // Remove the message parameter from the URL
+    //     navigate(location.pathname, { replace: true });
+    //     // Reload the page
+    //     window.location.reload();
+    //   }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
+    // }
   }, []);
   return (
     <GlobalLayoutUser>

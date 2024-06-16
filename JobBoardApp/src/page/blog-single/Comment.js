@@ -11,7 +11,6 @@ import {
   toggleShowReplyForm,
   toggleShowEditForm,
   setEditedContent,
-  setOriginalContent,
   editComment as editCommentAction,
   deleteComment as deleteCommentAction,
 } from "../../features/commentSlice";
