@@ -134,7 +134,7 @@ export function GlobalNavbar() {
                 <NavLink to="/post-job">
                   <span className="mr-2">+</span> Post a Job
                 </NavLink>
-                <NavLink to="/post-job">
+                <NavLink to="/post-company">
                   <span className="mr-2">+</span> Post a Company
                 </NavLink>
               </li>
@@ -163,7 +163,7 @@ export function GlobalNavbar() {
               )}
                 {user && roles.includes("ROLE_EMPLOYER") && (
                 <NavLink
-                  to="/post-job"
+                  to="/post-company"
                   className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
                 >
                   <span className="mr-2 icon-add"></span>Post a Company

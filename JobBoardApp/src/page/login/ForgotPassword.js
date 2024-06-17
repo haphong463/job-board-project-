@@ -1,26 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import axiosRequest from '../../configs/axiosConfig';
-
+import { forgotPassword, resetMessages } from '../../features/authSlice';
 
 const ForgotPassword = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const dispatch = useDispatch();
+  const { successMessage, errorMessage } = useSelector((state) => state.auth);
 
-  const onSubmit = async (data) => {
-    try {
-      const response = await axiosRequest.post(`/auth/forgot-password?email=${data.email}`);
-      setSuccessMessage(response.data.message);
-    } catch (error) {
-      if (error.response && error.response.data) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage('Something went wrong. Please try again later.');
-      }
-    }
+  const onSubmit = (data) => {
+    dispatch(forgotPassword(data.email));
   };
+
+  useEffect(() => {
+    dispatch(resetMessages());
+  }, [dispatch]);
 
   return (
     <GlobalLayoutUser>
@@ -57,7 +52,7 @@ const ForgotPassword = () => {
                   <input
                     type="text"
                     id="forgotPasswordEmail"
-                    {...register("email")}
+                    {...register("email", { required: 'Email is required' })}
                     className="form-control"
                     placeholder="Email address"
                   />
@@ -78,6 +73,5 @@ const ForgotPassword = () => {
     </GlobalLayoutUser>
   );
 };
-
 
 export default ForgotPassword;
