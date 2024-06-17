@@ -132,15 +132,7 @@ public class AuthController {
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(modRole);
                         break;
-                    case "employer":
-                        user.setCompanyName(signUpRequest.getCompanyName());
-                        user.setCompanyAddress(signUpRequest.getCompanyAddress());
-                        user.setCompanyWebsite(signUpRequest.getCompanyWebsite());
-                        user.setPhone(signUpRequest.getPhone());
-                        user.setPosition(signUpRequest.getPosition());
-                        roles.add(roleRepository.findByName(ERole.ROLE_EMPLOYER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-                        break;
+
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));

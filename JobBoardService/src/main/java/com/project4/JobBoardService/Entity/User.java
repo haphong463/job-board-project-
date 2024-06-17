@@ -58,13 +58,6 @@ public class User   {
     private String verificationCode;
 
 
-    // Employer-specific fields
-    private String companyName;
-    private String companyAddress;
-    private String companyWebsite;
-    private String position;
-    private String phone;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(  name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
