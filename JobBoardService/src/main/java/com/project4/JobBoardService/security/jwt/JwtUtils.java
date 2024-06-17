@@ -1,15 +1,12 @@
 package com.project4.JobBoardService.security.jwt;
 import java.security.Key;
 import java.util.Date;
-import java.util.Map;
-import java.util.function.Function;
 
 import com.project4.JobBoardService.security.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.*;
@@ -27,12 +24,13 @@ public class JwtUtils {
     private int jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {
-
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject(userPrincipal.getUsername())
                 .claim("role", userPrincipal.getAuthorities())
+                .claim("firstName", userPrincipal.getFirstName())   // Use userPrincipal.getFirstName()
+                .claim("lastName", userPrincipal.getLastName())     // Use userPrincipal.getLastName()
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)

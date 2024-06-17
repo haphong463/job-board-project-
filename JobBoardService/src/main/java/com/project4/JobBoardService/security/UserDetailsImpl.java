@@ -21,8 +21,12 @@ public class UserDetailsImpl implements UserDetails {
 
     @JsonIgnore
     private String password;
+    private String firstName;
+    private String lastName;
+
 
     private Collection<? extends GrantedAuthority> authorities;
+
 
     public UserDetailsImpl(Long id, String username, String email, String password,
                            Collection<? extends GrantedAuthority> authorities) {
@@ -38,12 +42,17 @@ public class UserDetailsImpl implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toList());
 
-        return new UserDetailsImpl(
+        UserDetailsImpl userDetails = new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
                 authorities);
+
+        userDetails.firstName = user.getFirstName();
+        userDetails.lastName = user.getLastName();
+
+        return userDetails;
     }
 
     @Override
@@ -87,6 +96,13 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     @Override
