@@ -124,17 +124,28 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              <li className="d-lg-none">
+           
+              {(!user || (user && !roles.includes("ROLE_EMPLOYER"))) && (
+  <li>
+    <NavLink to="/EmployerSignUp">Employer</NavLink>
+  </li>
+)}
+ <li className="d-lg-none">
                 <NavLink to="/post-job">
                   <span className="mr-2">+</span> Post a Job
                 </NavLink>
+                <NavLink to="/post-company">
+                  <span className="mr-2">+</span> Post a Company
+                </NavLink>
               </li>
+
               <li className="d-lg-none">
                 <NavLink to="/login">Log In</NavLink>
               </li>
               <li className="d-lg-none">
                 <NavLink to="/signup">Sign Up</NavLink>
               </li>
+
             </ul>
           </nav>
 
@@ -147,6 +158,18 @@ export function GlobalNavbar() {
                 >
                   <span className="mr-2 icon-add"></span>Post a Job
                 </NavLink>
+                
+                
+              )}
+                {user && roles.includes("ROLE_EMPLOYER") && (
+                <NavLink
+                  to="/post-company"
+                  className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
+                >
+                  <span className="mr-2 icon-add"></span>Post a Company
+                </NavLink>
+                
+                
               )}
               <Dropdown
                 isOpen={dropdownOpen}

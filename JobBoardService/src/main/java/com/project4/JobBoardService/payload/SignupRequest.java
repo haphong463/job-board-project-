@@ -53,5 +53,9 @@ public class SignupRequest {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-
+    private String companyName;
+    private String companyAddress;
+    private String companyWebsite;
+    private String position;
+    private String phone;
 }

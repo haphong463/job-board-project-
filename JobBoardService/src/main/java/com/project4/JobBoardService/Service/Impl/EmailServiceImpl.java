@@ -27,7 +27,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendVerificationEmail(String toEmail, String firstName, String verificationCode,  String email) {
+    public void sendVerificationEmail(String toEmail, String username,String firstName, String verificationCode,  String email) {
         Properties properties = System.getProperties();
         properties.setProperty("mail.smtp.host", "smtp.gmail.com");
         properties.setProperty("mail.smtp.port", "587");
@@ -51,7 +51,7 @@ public class EmailServiceImpl implements EmailService {
 
             String emailContent = HTMLContentProvider.readHTMLContent();
 
-            emailContent = emailContent.replace("{{firstName}}", firstName);
+            emailContent = emailContent.replace("{{username}}", username);
             emailContent = emailContent.replace("{{verifyUrl}}", verifyUrl);
 
             message.setContent(emailContent, "text/html");

@@ -13,6 +13,8 @@ import SignUp from "../../page/signup/SignUp";
 import ForgotPassword from "../../page/login/ForgotPassword";
 import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
+import EmployerSignUp from "../../page/signup/EmployerSignUp";
+import { PostCompany } from "../../page/post-company/PostCompany";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -27,6 +29,8 @@ export const routes = [
   { path: "/signup", component: <SignUp /> },
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
+  { path: "/EmployerSignUp", component: <EmployerSignUp /> },
+  {path: "/post-company", component: <PostCompany />},
   { path: "/job-listings", component: <JobListing /> },
   { path: "/gallery", component: <Gallery /> },
 ];

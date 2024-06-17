@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { signInAysnc, signUpAsync } from "../services/AuthService";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; // Correct import
 import axiosRequest from "../configs/axiosConfig";
+
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
 
@@ -46,14 +47,15 @@ export const signUp = createAsyncThunk(
     }
   }
 );
+
 export const forgotPassword = createAsyncThunk(
-  "auth/forgotPassword",
+  'auth/forgotPassword',
   async (email, { rejectWithValue }) => {
     try {
-      const res = await axiosRequest.post("/forgot-password", { email });
-      return res.data;
+      const response = await axiosRequest.post(`/auth/forgot-password?email=${email}`);
+      return response.data.message;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response ? error.response.data.message : 'Something went wrong. Please try again later.');
     }
   }
 );
@@ -65,6 +67,8 @@ const initialState = {
   signInSuccess: false,
   isVerified: true,
   verificationEmail: null,
+  successMessage: '',
+    errorMessage: '',
   verificationMessage: null,
   roles: [],
   user:
@@ -87,9 +91,12 @@ const authSlice = createSlice({
       state.roles = [];
       localStorage.removeItem("accessToken");
     },
-
     resetVerificationMessage(state) {
       state.verificationMessage = null;
+    },
+    resetMessages: (state) => {
+      state.successMessage = '';
+      state.errorMessage = '';
     },
   },
   extraReducers: (builder) => {
@@ -98,7 +105,7 @@ const authSlice = createSlice({
         state.state = "loading";
         state.error = null;
       })
-      .addCase(signUp.fulfilled, (state, action) => {
+      .addCase(signUp.fulfilled, (state) => {
         state.state = "succeeded";
         state.signUpSuccess = true;
       })
@@ -117,7 +124,8 @@ const authSlice = createSlice({
         state.user = jwtDecode(action.payload.accessToken);
         console.log(">>>state user: ", state.user);
         state.roles = state.user.role.map((r) => r.authority);
-        localStorage.setItem("accessToken", action.payload.accessToken);
+       localStorage.setItem("accessToken", action.payload.accessToken);
+
       })
       .addCase(signIn.rejected, (state, action) => {
         state.state = "failed";
@@ -127,6 +135,12 @@ const authSlice = createSlice({
           state.verificationEmail = action.payload.email;
           state.verificationMessage = action.payload.message;
         }
+      })
+      .addCase(forgotPassword.fulfilled, (state, action) => {
+        state.successMessage = action.payload;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.errorMessage = action.payload;
       });
   },
 });
@@ -136,6 +150,7 @@ export const {
   resetSignInSuccess,
   logout,
   resetVerificationMessage,
+  resetMessages
 } = authSlice.actions;
 
 export default authSlice.reducer;

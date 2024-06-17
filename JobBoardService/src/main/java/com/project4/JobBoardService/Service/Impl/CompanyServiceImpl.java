@@ -9,6 +9,7 @@ import com.project4.JobBoardService.Entity.Review;
 import com.project4.JobBoardService.Enum.WorkSchedule;
 import com.project4.JobBoardService.Repository.CompanyRepository;
 import com.project4.JobBoardService.Service.CompanyService;
+import com.project4.JobBoardService.Util.FileUtils;
 import com.project4.JobBoardService.Util.Variables.FileVariables;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,23 +85,20 @@ public class CompanyServiceImpl implements CompanyService {
         if (existingCompany.isPresent()) {
             Company company = existingCompany.get();
 
-            Path resourceDirectory = Paths.get("src", "main", "resources", FileVariables.UPLOAD_DIR).toAbsolutePath().normalize();
+            // Save the file using FileUtils
+            Path savedFilePath = FileUtils.saveFile(file, FileVariables.UPLOAD_DIR);
 
-            String fileName = file.getOriginalFilename();
-            Path filePath = resourceDirectory.resolve(fileName);
+            // Convert the saved file path to a URL
+            String fileUrl = FileUtils.convertToUrl(savedFilePath, FileVariables.UPLOAD_DIR);
 
-            if (Files.notExists(resourceDirectory)) {
-                Files.createDirectories(resourceDirectory);
-            }
+            // Log the file saving process
+            logger.info("File saved to: " + savedFilePath.toString());
 
-            logger.info("Saving file to: " + filePath.toString());
-
-            Files.copy(file.getInputStream(), filePath);
-
-            company.setLogo(filePath.toString());
+            // Update the company's logo URL
+            company.setLogo(fileUrl);
             companyRepository.save(company); // Save the updated company
 
-            return filePath.toString();
+            return fileUrl;
         } else {
             logger.warning("Company not found: " + id);
             return null;
