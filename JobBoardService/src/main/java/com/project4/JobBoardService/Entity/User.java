@@ -74,6 +74,8 @@ public class User   {
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCV> userCVs;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Employer employer;
 
     public User(String username, String email, String password) {
         this.username = username;

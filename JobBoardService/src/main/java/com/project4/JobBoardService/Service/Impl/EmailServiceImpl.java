@@ -63,7 +63,21 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    public void sendVerificationEmailEmployer(String toEmail, String name, String verificationCode) {
+        String verificationUrl = "http://localhost:8080/api/employers/verify?code=" + verificationCode;
+        String subject = "Email Verification";
+        String body = "Dear " + name + ",\n\n" +
+                "Thank you for registering. Please click the link below to complete your registration:\n" +
+                verificationUrl + "\n\n" +
+                "Best regards,\nITViec Team";
 
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(body);
+
+        javaMailSender.send(message);
+    }
 
     @Override
     public void sendEmailNotification(String toEmail, String subject, String message) {

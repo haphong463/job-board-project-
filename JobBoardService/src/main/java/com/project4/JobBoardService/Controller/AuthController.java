@@ -1,8 +1,10 @@
 package com.project4.JobBoardService.Controller;
 import com.project4.JobBoardService.Config.ErrorDetails;
+import com.project4.JobBoardService.Entity.Employer;
 import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
+import com.project4.JobBoardService.Repository.EmployerRepository;
 import com.project4.JobBoardService.Repository.RoleRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
@@ -13,6 +15,7 @@ import com.project4.JobBoardService.security.jwt.JwtUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:3000/" )
@@ -36,7 +40,8 @@ public class AuthController {
     private JavaMailSender javaMailSender;
     @Autowired
     AuthenticationManager authenticationManager;
-
+    @Autowired
+    private EmployerRepository employerRepository;
     @Autowired
     UserRepository userRepository;
 
@@ -152,6 +157,35 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+
+    //Employer
+    @PostMapping("/registerEmployer")
+    public ResponseEntity<?> registerEmployer(@Valid @RequestBody EmployerSignupRequest signUpRequest) {
+        if (employerRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        Employer employer = new Employer();
+        employer.setName(signUpRequest.getName());
+        employer.setTitle(signUpRequest.getTitle());
+        employer.setEmail(signUpRequest.getEmail());
+        employer.setPhoneNumber(signUpRequest.getPhoneNumber());
+        employer.setCompanyName(signUpRequest.getCompanyName());
+        employer.setCompanyAddress(signUpRequest.getCompanyAddress());
+        employer.setCompanyWebsite(signUpRequest.getCompanyWebsite());
+
+        String verificationCode = UUID.randomUUID().toString();
+        employer.setVerificationCode(verificationCode);
+        employer.setVerified(false);
+
+        employerRepository.save(employer);
+
+        emailService.sendVerificationEmailEmployer(employer.getEmail(), employer.getName(), verificationCode);
+
+        return ResponseEntity.ok(new MessageResponse("Employer registered successfully! Please check your email for verification instructions."));
+    }
     @PostMapping("/signout")
     public ResponseEntity<?> signOutUser() {
         SecurityContextHolder.clearContext();
@@ -214,7 +248,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
-
+//VerifyUser
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
     public void verifyEmail(
             @RequestParam("email") String email,
@@ -240,6 +274,68 @@ public class AuthController {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "User not found!");
         }
     }
+    //Verify Employer
+    @RequestMapping(value = "/verify-employer", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<?> verifyEmployer(@RequestParam("code") String code) {
+        Employer employer = employerRepository.findByVerificationCode(code);
+        if (employer == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid verification code."));
+        }
+        employer.setVerified(true);
+        employer.setVerificationCode(null);
+        employerRepository.save(employer);
+        return ResponseEntity.ok(new MessageResponse("Employer verified successfully!"));
+    }
+
+//Username password Employer
+    @PostMapping("/setup-credentials")
+    public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupRequest passwordSetupRequest) {
+        Employer employer = employerRepository.findByVerificationCode(passwordSetupRequest.getCode());
+        if (employer == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Invalid verification code."));
+        }
+
+        if (!passwordSetupRequest.getPassword().equals(passwordSetupRequest.getConfirmPassword())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Passwords do not match!"));
+        }
+
+        if (userRepository.existsByUsername(passwordSetupRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        User user = new User();
+        user.setUsername(passwordSetupRequest.getUsername());
+        user.setEmail(employer.getEmail());
+        user.setFirstName(employer.getName());
+        user.setLastName(employer.getTitle());
+        user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
+
+        Set<Role> roles = new HashSet<>();
+        Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        roles.add(employerRole);
+        user.setRoles(roles);
+
+        String verificationCode = employer.getVerificationCode();
+        user.setVerificationCode(verificationCode);
+        user.setVerified(false);
+        userRepository.save(user);
+
+        employer.setUser(user);
+        employer.setVerified(true);
+        employerRepository.save(employer);
+
+        emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
+
+        return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
+    }
+
 
     private String generateVerificationCode() {
         return UUID.randomUUID().toString().substring(0, 6);
