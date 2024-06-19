@@ -128,11 +128,11 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              {!roles.includes('ROLE_EMPLOYER') && (
-          <li>
-            <NavLink to="/EmployerSignUp">For Employer</NavLink>
-          </li>
-        )}
+              {!roles.includes("ROLE_EMPLOYER") && (
+                <li>
+                  <NavLink to="/EmployerSignUp">For Employer</NavLink>
+                </li>
+              )}
 
               <li className="d-lg-none">
                 <NavLink to="/post-job">
@@ -167,7 +167,21 @@ export function GlobalNavbar() {
                     className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
                   />
                   {unreadCount > 0 && (
-                    <span className="badge">{unreadCount}</span>
+                    <span
+                      className="badge"
+                      style={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "-10px",
+                        backgroundColor: "#ff0000",
+                        color: "#fff",
+                        padding: "5px 7px",
+                        borderRadius: "50%",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
                   )}
                 </div>
               )}
@@ -202,7 +216,7 @@ export function GlobalNavbar() {
                             notification.read ? "" : "font-weight-bold"
                           }`}
                         >
-                          eee{notification.message}
+                          {notification.message}
                         </p>
                         {/* <small className="d-block">
                           {moment(notification.createdAt).from()}

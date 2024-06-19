@@ -117,16 +117,7 @@
     transform: translateX(0);
   }
 }
-.badge {
-  position: absolute; /* Position the badge absolutely */
-  top: 10px; /* Adjust top offset to position above the icon */
-  right: -10px; /* Adjust right offset to position on the right side */
-  background-color: #ff0000; /* Red background for unread notifications */
-  color: #fff; /* White text color */
-  padding: 5px 7px; /* Adjust padding as needed */
-  border-radius: 50%; /* Circular badge shape */
-  font-size: 12px; /* Adjust font size for the badge text */
-}
+
 .text-truncate-multiline {
   display: -webkit-box;
   -webkit-box-orient: vertical;

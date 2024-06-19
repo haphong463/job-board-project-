@@ -48,7 +48,9 @@ const notificationSlice = createSlice({
         state.status = "Filled";
         console.log("notifications: ", action.payload);
         state.list = action.payload;
-        state.unreadCount = state.list.map((item) => !item.isRead).length;
+        if (state.list.length > 0) {
+          state.unreadCount = state.list.map((item) => !item.isRead).length;
+        }
         state.error = null;
       })
       .addCase(getNotificationThunk.rejected, (state, action) => {

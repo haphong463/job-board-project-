@@ -85,7 +85,7 @@ export const Blog = () => {
             <div className="container">
               <h1>Latest</h1>
               <div className="row mb-5">
-                {filterPosts.slice(0, 3).map((blog, index) => (
+                {filterPosts.map((blog, index) => (
                   <div key={blog.id} className="mb-5 card-container col-md-4">
                     <div className="card h-100">
                       <NavLink to={`/blog/${blog.slug}`}>
@@ -123,7 +123,6 @@ export const Blog = () => {
                                     ? "10px"
                                     : "0px", // Thêm margin-right ngoại trừ phần tử cuối cùng
                               }}
-                              className=""
                             >
                               {item.name}
                             </Badge>

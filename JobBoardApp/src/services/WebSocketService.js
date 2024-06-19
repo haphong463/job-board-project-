@@ -18,7 +18,9 @@ export const connectWebSocket = (user) => {
     stompClient.subscribe("/topic/notifications", (message) => {
       if (message.body) {
         const res = JSON.parse(message.body);
-        console.log(res);
+        // console.log(res);
+        console.log(">>> user: ", user);
+        console.log(">>> recipient: ", res);
         if (user.id === res.recipient.id) {
           handleReciptMessage(res);
         }
@@ -37,5 +39,6 @@ export const disconnectWebSocket = () => {
 };
 
 const handleReciptMessage = async (reciptMessage) => {
+  
   store.dispatch(updateNotificationBySocket(reciptMessage));
 };
