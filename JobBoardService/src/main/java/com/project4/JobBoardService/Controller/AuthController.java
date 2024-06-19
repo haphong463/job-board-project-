@@ -276,17 +276,18 @@ public class AuthController {
     }
     //Verify Employer
     @RequestMapping(value = "/verify-employer", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<?> verifyEmployer(@RequestParam("code") String code) {
+    public void verifyEmployer(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
         Employer employer = employerRepository.findByVerificationCode(code);
         if (employer == null) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid verification code."));
-        }
-        employer.setVerified(true);
-        employer.setVerificationCode(null);
-        employerRepository.save(employer);
-        return ResponseEntity.ok(new MessageResponse("Employer verified successfully!"));
-    }
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error: Invalid verification code.");
+        } else {
+            employer.setVerified(true);
+            employer.setVerificationCode(null);
+            employerRepository.save(employer);
 
+            response.sendRedirect("http://localhost:3000/SetupCredentials?message=Employer verified successfully!");
+        }
+    }
 //Username password Employer
     @PostMapping("/setup-credentials")
     public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupRequest passwordSetupRequest) {
