@@ -69,10 +69,10 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/employers/**").permitAll()
                                 .requestMatchers("/uploads/**").permitAll()
                                 .requestMatchers(HttpMethod.GET).permitAll()
                                 .requestMatchers("/api/comments/**").permitAll()
-                                .requestMatchers("/send-notification").permitAll()
                                 .anyRequest().authenticated()
 
                 );
