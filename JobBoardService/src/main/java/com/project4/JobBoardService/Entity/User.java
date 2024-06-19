@@ -71,6 +71,9 @@ public class User   {
 
     @OneToMany(mappedBy = "id")
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "id")
+    private List<Notification> notifications;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCV> userCVs;
