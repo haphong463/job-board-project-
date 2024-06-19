@@ -13,6 +13,8 @@ import SignUp from "../../page/signup/SignUp";
 import ForgotPassword from "../../page/login/ForgotPassword";
 import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
+import EmployerSignUp from "../../page/signup/EmployerSignUp";
+import SetupCredentials from "../../page/signup/SetupCredentials";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -29,4 +31,6 @@ export const routes = [
   { path: "/ForgotPassword", component: <ForgotPassword /> },
   { path: "/job-listings", component: <JobListing /> },
   { path: "/gallery", component: <Gallery /> },
+  { path :"/EmployerSignUp", component:<EmployerSignUp/>},
+  { path :"/SetupCredentials", component:<SetupCredentials/>}
 ];

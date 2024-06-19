@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.Properties;
 import java.util.UUID;
 
+import static com.project4.JobBoardService.Util.HTMLContentProvider.generateEmailHTMLContent;
+
 @Service
 public class EmailServiceImpl implements EmailService {
 
@@ -64,19 +66,21 @@ public class EmailServiceImpl implements EmailService {
     }
 
     public void sendVerificationEmailEmployer(String toEmail, String name, String verificationCode) {
-        String verificationUrl = "http://localhost:8080/api/employers/verify?code=" + verificationCode;
+        String verificationUrl = "http://localhost:3000/SetupCredentials";
         String subject = "Email Verification";
-        String body = "Dear " + name + ",\n\n" +
-                "Thank you for registering. Please click the link below to complete your registration:\n" +
-                verificationUrl + "\n\n" +
-                "Best regards,\nITViec Team";
+        String body = generateEmailHTMLContent(name, verificationCode, verificationUrl);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject(subject);
-        message.setText(body);
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(body, true);
 
-        javaMailSender.send(message);
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
