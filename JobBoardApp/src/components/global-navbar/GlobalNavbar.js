@@ -187,43 +187,50 @@ export function GlobalNavbar() {
               )}
               {notificationOpen && (
                 <div className="notifications text-left" id="box">
-                  <h2>
-                    Notifications - <span>{unreadCount}</span>
-                  </h2>
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className="notifications-item"
-                      onClick={
-                        !notification.read
-                          ? () =>
-                              dispatch(markNotificationAsRead(notification.id))
-                          : undefined
-                      }
-                    >
-                      <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
-                      <div className="text">
-                        <h4
-                          className={`${
-                            notification.read ? "" : "font-weight-bold"
-                          }`}
-                        >
-                          {notification.sender.firstName}{" "}
-                          {notification.sender.lastName}
-                        </h4>
-                        <p
-                          className={`${
-                            notification.read ? "" : "font-weight-bold"
-                          }`}
-                        >
-                          {notification.message}
-                        </p>
-                        {/* <small className="d-block">
+                  <h2>Notifications</h2>
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="notifications-item"
+                        onClick={
+                          !notification.read
+                            ? () =>
+                                dispatch(
+                                  markNotificationAsRead(notification.id)
+                                )
+                            : undefined
+                        }
+                      >
+                        <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
+                        <div className="text">
+                          <h4
+                            className={`${
+                              notification.read ? "" : "font-weight-bold"
+                            }`}
+                          >
+                            {notification.sender.firstName}{" "}
+                            {notification.sender.lastName}
+                          </h4>
+                          <p
+                            className={`${
+                              notification.read ? "" : "font-weight-bold"
+                            }`}
+                          >
+                            {notification.message}
+                          </p>
+                          {/* <small className="d-block">
                           {moment(notification.createdAt).from()}
                         </small> */}
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center">
+                      <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
+                      <p>You don't have any notifications yet.</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
               <Dropdown

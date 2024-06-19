@@ -31,7 +31,6 @@ function App() {
     }
   }, []);
   useEffect(() => {
-    // Xóa dữ liệu trong local storage khi khởi động ứng dụng
     if (user) {
       connectWebSocket(user);
       dispatch(getNotificationThunk(user.id));
