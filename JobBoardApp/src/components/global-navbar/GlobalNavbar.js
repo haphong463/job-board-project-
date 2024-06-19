@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import axiosRequest from "../../configs/axiosConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/authSlice";
 import {
@@ -12,23 +11,26 @@ import {
 import { FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
+import { markNotificationAsRead } from "../../features/notificationSlice";
 export function GlobalNavbar() {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
+
+  const notifications = useSelector((state) => state.notification.list);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
   const dispatch = useDispatch();
   const categories = useSelector((state) => state.category.categories);
+  const unreadCount = useSelector((state) => state.notification.unreadCount);
 
   const handleLogout = () => {
     dispatch(logout());
   };
 
   useEffect(() => {
-    if (!categories) {
-      dispatch(fetchCategoryThunk());
-    }
-  }, []);
+    dispatch(fetchCategoryThunk());
+  }, [user]);
 
   const handleCategoryClick = (categoryName) => {
     // setSelectedCategory(categoryName);
@@ -36,6 +38,8 @@ export function GlobalNavbar() {
   };
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
+  const toggleNotification = () =>
+    setNotificationOpen((prevState) => !prevState); // Toggle dropdown thông báo
 
   return (
     <header className="site-navbar mt-3">
@@ -125,11 +129,10 @@ export function GlobalNavbar() {
                 <NavLink to="/contact">Contact</NavLink>
               </li>
 
- <li className="d-lg-none">
+              <li className="d-lg-none">
                 <NavLink to="/post-job">
                   <span className="mr-2">+</span> Post a Job
                 </NavLink>
-
               </li>
 
               <li className="d-lg-none">
@@ -138,7 +141,6 @@ export function GlobalNavbar() {
               <li className="d-lg-none">
                 <NavLink to="/signup">Sign Up</NavLink>
               </li>
-
             </ul>
           </nav>
 
@@ -151,10 +153,60 @@ export function GlobalNavbar() {
                 >
                   <span className="mr-2 icon-add"></span>Post a Job
                 </NavLink>
-                
-                
               )}
-
+              {user && (
+                <div className="icon" onClick={toggleNotification}>
+                  <img
+                    src="https://i.imgur.com/AC7dgLA.png"
+                    alt=""
+                    className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
+                  />
+                  {unreadCount > 0 && (
+                    <span className="badge">{unreadCount}</span>
+                  )}
+                </div>
+              )}
+              {notificationOpen && (
+                <div className="notifications text-left" id="box">
+                  <h2>
+                    Notifications - <span>{unreadCount}</span>
+                  </h2>
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className="notifications-item"
+                      onClick={
+                        !notification.read
+                          ? () =>
+                              dispatch(markNotificationAsRead(notification.id))
+                          : undefined
+                      }
+                    >
+                      <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
+                      <div className="text">
+                        <h4
+                          className={`${
+                            notification.read ? "" : "font-weight-bold"
+                          }`}
+                        >
+                          {notification.sender.firstName}{" "}
+                          {notification.sender.lastName}
+                        </h4>
+                        <p
+                          className={`${
+                            notification.read ? "" : "font-weight-bold"
+                          }`}
+                        >
+                          eee{notification.message}
+                        </p>
+                        {/* <small className="d-block">
+                          {moment(notification.createdAt).from()}
+                        </small> */}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <Dropdown
                 isOpen={dropdownOpen}
                 toggle={toggleDropdown}
@@ -188,21 +240,7 @@ export function GlobalNavbar() {
                   )}
                 </DropdownMenu>
               </Dropdown>
-              {/* <div className="ml-auto d-flex align-items-center">
-                <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-                  <DropdownToggle nav caret>
-                    {t("Language")}{" "}
-                  </DropdownToggle>
-                  <DropdownMenu className="custom-dropdown-menu">
-                    <DropdownItem onClick={() => changeLanguage("vi")}>
-                      Tiếng Việt
-                    </DropdownItem>
-                    <DropdownItem onClick={() => changeLanguage("en")}>
-                      English
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </div> */}
+
               <NavLink
                 to="#"
                 className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"

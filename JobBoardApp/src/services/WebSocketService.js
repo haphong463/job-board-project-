@@ -1,15 +1,12 @@
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { store } from "../store";
-import {
-  addBlogBySocket,
-  deleteBlogBySocket,
-  updateBlogBySocket,
-} from "../features/blogSlice";
+import { updateNotificationBySocket } from "../features/notificationSlice";
+import { sendNotificationAsync } from "./NotificationService";
 
 let stompClient = null;
 
-export const connectWebSocket = () => {
+export const connectWebSocket = (user) => {
   const socket = new SockJS(`http://localhost:8080/ws`);
   stompClient = new Client({
     webSocketFactory: () => socket,
@@ -18,22 +15,13 @@ export const connectWebSocket = () => {
 
   stompClient.onConnect = () => {
     console.log("Connect to WebSocket");
-    stompClient.subscribe("/topic/new-blog", (message) => {
+    stompClient.subscribe("/topic/notifications", (message) => {
       if (message.body) {
         const res = JSON.parse(message.body);
-        handleNewBlog(res); // Handle new blog logic
-      }
-    });
-    stompClient.subscribe("/topic/edit-blog", (message) => {
-      if (message.body) {
-        const res = JSON.parse(message.body);
-        handleEditBlog(res); // Handle new blog logic
-      }
-    });
-    stompClient.subscribe("/topic/delete-blog", (message) => {
-      if (message.body) {
-        const res = JSON.parse(message.body);
-        handleDeleteBlog(res); // Handle new blog logic
+        console.log(res);
+        if (user.id === res.recipient.id) {
+          handleReciptMessage(res);
+        }
       }
     });
   };
@@ -48,15 +36,6 @@ export const disconnectWebSocket = () => {
   console.log("Disconnected from WebSocket");
 };
 
-const handleNewBlog = (newBlog) => {
-  store.dispatch(addBlogBySocket(newBlog));
-  // Handle UI update or other actions when a new blog is received
-};
-
-const handleEditBlog = (editBlog) => {
-  store.dispatch(updateBlogBySocket(editBlog));
-};
-
-const handleDeleteBlog = (id) => {
-  store.dispatch(deleteBlogBySocket(id));
+const handleReciptMessage = async (reciptMessage) => {
+  store.dispatch(updateNotificationBySocket(reciptMessage));
 };

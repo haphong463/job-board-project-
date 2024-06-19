@@ -21,6 +21,10 @@ import { BlogSideBar } from "./BlogSideBar";
 import { BlogTitle } from "./BlogTitle";
 import ReadingBar from "./ReadingBar";
 import { calculateReadingTime } from "../../utils/function/readingTime";
+import {
+  connectWebSocket,
+  disconnectWebSocket,
+} from "../../services/WebSocketService";
 
 export const BlogSingle = () => {
   const dispatch = useDispatch();
@@ -30,7 +34,6 @@ export const BlogSingle = () => {
   const { id } = useParams();
   const [readingTime, setReadingTime] = useState(0);
 
-  // const fullName = useSelector((state) => state.blogs.fullName);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,9 +49,7 @@ export const BlogSingle = () => {
         console.log("Error loading data", "error");
       }
     };
-    if (!blog) {
-      fetchData();
-    }
+    fetchData();
   }, [dispatch, id]);
   useEffect(() => {
     if (blog && blog.content) {
@@ -64,9 +65,9 @@ export const BlogSingle = () => {
   };
 
   const handleAddComment = (newComment) => {
-    dispatch(addComment(newComment));
+    const payload = dispatch(addComment(newComment));
+    return payload;
   };
-  console.log(blog);
 
   return (
     <GlobalLayoutUser>
@@ -110,7 +111,7 @@ export const BlogSingle = () => {
                   <h3 className="mb-4">{blog.title}</h3>
                   <p className="text-center">
                     <img
-                      src={blog.thumbnailUrl}
+                      src={blog.imageUrl}
                       alt="Image"
                       className="img-fluid rounded"
                       style={{

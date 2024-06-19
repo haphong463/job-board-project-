@@ -17,7 +17,7 @@ root.render(
   <Router>
     <Provider store={store}>
       {/* <I18nextProvider i18n={i18n}> */}
-      <PersistGate persistor={persistor}>
+      <PersistGate loading={null} persistor={persistor}>
         <App />
       </PersistGate>
       {/* </I18nextProvider> */}

@@ -2,30 +2,20 @@ import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllBlog, fetchAllCategories } from "../../features/blogSlice";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import { calculateReadingTime } from "../../utils/function/readingTime";
 import "./style.css";
 import { Badge, Input } from "reactstrap";
-import {
-  connectWebSocket,
-  disconnectWebSocket,
-} from "../../services/WebSocketService";
+
 export const Blog = () => {
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blogs.blogs);
   const [searchText, setSearchText] = useState("");
+  const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 9;
-
-  useEffect(() => {
-    connectWebSocket();
-
-    return () => {
-      disconnectWebSocket();
-    };
-  }, []);
-
+  const typeParam = searchParams.get("type")?.toLowerCase() || "";
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -38,7 +28,7 @@ export const Blog = () => {
         console.log(error);
       }
     };
-    if (!blogs || blogs.length === 0) {
+    if (blogs.length === 0) {
       fetchData();
     }
   }, [dispatch]);
@@ -47,11 +37,18 @@ export const Blog = () => {
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = blogs.slice(indexOfFirstPost, indexOfLastPost);
 
-  const filterPosts = currentPosts.filter(
-    (blog) =>
-      blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      blog.category.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filterPosts = currentPosts
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .filter(
+      (blog) =>
+        blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        blog.categories.some((item) =>
+          item.name.toLowerCase().includes(searchText.toLowerCase())
+        ) ||
+        blog.categories.some((item) =>
+          item.name.toLowerCase().includes(typeParam)
+        )
+    );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -69,17 +66,14 @@ export const Blog = () => {
         >
           <div className="container">
             <div className="row">
-              <div className="col-md-7">
-                <h1 className="text-white font-weight-bold">Our Blog</h1>
-                <div className="custom-breadcrumbs">
-                  <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                  <span className="text-white">
-                    <strong>About Us</strong>
-                  </span>
-                </div>
+              <div className="col-md-10">
+                <h1 className="text-white font-weight-bold">
+                  JobBoard Blog - Ideas to develop your IT career
+                </h1>
+
                 <Input
-                  className="form-control form-control-lg"
-                  placeholder="search blog..."
+                  className="form-control form-control-lg sticky-top"
+                  placeholder="Enter search keywords..."
                   onChange={(e) => setSearchText(e.target.value)}
                 />
               </div>
@@ -89,15 +83,16 @@ export const Blog = () => {
         <section className="site-section">
           {filterPosts && filterPosts.length > 0 ? (
             <div className="container">
+              <h1>Latest</h1>
               <div className="row mb-5">
-                {filterPosts.map((blog) => (
-                  <div key={blog.id} className="col-md-4 mb-5 card-container">
+                {filterPosts.slice(0, 3).map((blog, index) => (
+                  <div key={blog.id} className="mb-5 card-container col-md-4">
                     <div className="card h-100">
                       <NavLink to={`/blog/${blog.slug}`}>
                         <img
                           src={blog.imageUrl}
                           alt="Image"
-                          className=" rounded mb-4 card-img-top"
+                          className="rounded mb-4 card-img-top"
                           style={{
                             height: 200,
                             width: "100%",
@@ -105,7 +100,10 @@ export const Blog = () => {
                         />
                       </NavLink>
                       <div className="card-body d-flex flex-column">
-                        <h6 className="card-title text-truncate-two">
+                        <h6
+                          className="card-title 
+                           text-truncate-two"
+                        >
                           <NavLink
                             to={`/blog/${blog.slug}`}
                             className="text-black"
@@ -114,14 +112,22 @@ export const Blog = () => {
                           </NavLink>
                         </h6>
                         <div>
-                          <Badge
-                            color="primary"
-                            style={{
-                              color: "white",
-                            }}
-                          >
-                            {blog.category.name}
-                          </Badge>
+                          {blog.categories.map((item, index) => (
+                            <Badge
+                              key={item.id} // Đảm bảo mỗi phần tử có key duy nhất
+                              color="primary"
+                              style={{
+                                color: "white",
+                                marginRight:
+                                  index !== blog.categories.length - 1
+                                    ? "10px"
+                                    : "0px", // Thêm margin-right ngoại trừ phần tử cuối cùng
+                              }}
+                              className=""
+                            >
+                              {item.name}
+                            </Badge>
+                          ))}
                         </div>
                         <div className="card-text mb-4 flex-grow-1 text-truncate-multiline">
                           {blog.citation}
@@ -197,3 +203,5 @@ export const Blog = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default Blog;

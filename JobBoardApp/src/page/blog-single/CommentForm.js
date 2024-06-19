@@ -2,10 +2,14 @@ import { useState } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import "./CommentForm.css"; // Import CSS file
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { sendNotificationAsync } from "../../services/NotificationService";
 
 export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
   const [content, setContent] = useState("");
   const navigate = useNavigate();
+
+  const blog = useSelector((state) => state.blogs.blog);
   const handleSubmit = (e) => {
     e.preventDefault();
     const comment = {
@@ -18,9 +22,18 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
     };
     console.log(comment);
     addComment(comment);
+    sendNotificationAsync({
+      message: "commented on your post.",
+      sender: {
+        username: user.sub,
+      },
+      recipient: {
+        username: blog.user.username,
+      },
+      isRead: false,
+    });
     setContent("");
   };
-
   return (
     <form onSubmit={handleSubmit} className="comment-form">
       <div className="form-group">

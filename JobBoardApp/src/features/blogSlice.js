@@ -40,20 +40,13 @@ export const fetchAllBlog = createAsyncThunk(
 const blogSlice = createSlice({
   name: "blog",
   initialState: {
-    blog: {
-      title: "",
-      content: "",
-      imageUrl: "",
-      user: {
-        firstName: "",
-        lastName: "",
-      },
-    },
+    blog: null,
     blogs: [],
     status: "idle",
     error: null,
     categories: [],
     author: null,
+    lastUpdated: null, // Thêm trường lastUpdated vào initialState
   },
   reducers: {
     addBlogBySocket: (state, action) => {
@@ -67,6 +60,9 @@ const blogSlice = createSlice({
     deleteBlogBySocket: (state, action) => {
       state.blogs = state.blogs.filter((blog) => blog.id !== action.payload);
     },
+    updateLastUpdated: (state, action) => {
+      state.lastUpdated = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -77,8 +73,7 @@ const blogSlice = createSlice({
         state.status = "succeeded";
         state.blog = action.payload;
         state.author = action.payload.user;
-
-        console.log(state.author);
+        state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
       })
       .addCase(fetchBlogById.rejected, (state, action) => {
         state.status = "failed";
@@ -90,6 +85,7 @@ const blogSlice = createSlice({
       .addCase(fetchAllBlog.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.blogs = action.payload;
+        state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
       })
       .addCase(fetchAllBlog.rejected, (state, action) => {
         state.status = "failed";
@@ -101,6 +97,7 @@ const blogSlice = createSlice({
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.categories = action.payload.slice(0, 3);
+        state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
       })
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.status = "failed";
@@ -109,7 +106,11 @@ const blogSlice = createSlice({
   },
 });
 
-export const { addBlogBySocket, updateBlogBySocket, deleteBlogBySocket } =
-  blogSlice.actions;
+export const {
+  addBlogBySocket,
+  updateBlogBySocket,
+  deleteBlogBySocket,
+  updateLastUpdated,
+} = blogSlice.actions;
 
 export default blogSlice.reducer;

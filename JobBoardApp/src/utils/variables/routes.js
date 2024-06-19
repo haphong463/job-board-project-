@@ -13,6 +13,7 @@ import SignUp from "../../page/signup/SignUp";
 import ForgotPassword from "../../page/login/ForgotPassword";
 import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
+import { JobSingle } from "../../page/job-single/JobSingle";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -28,5 +29,6 @@ export const routes = [
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
   { path: "/job-listings", component: <JobListing /> },
+  { path: "/job/:id", component: <JobSingle /> },
   { path: "/gallery", component: <Gallery /> },
 ];

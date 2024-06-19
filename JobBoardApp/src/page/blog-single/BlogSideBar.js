@@ -32,7 +32,7 @@ export function BlogSideBar(props) {
       <div className="sidebar-box">
         <div className="categories">
           <h3>Categories</h3>
-          {categories.map((category) => (
+          {categories.slice(0, 5).map((category) => (
             <li key={category.id}>
               <NavLink to={`/blogs?type=${category.name}`}>
                 {category.name} <span>{category.blogCount}</span>
