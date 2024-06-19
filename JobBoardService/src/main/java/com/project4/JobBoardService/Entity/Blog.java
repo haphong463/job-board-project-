@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,9 +33,11 @@ public class Blog extends AbstractEntity {
     @Column(name = "citation", columnDefinition = "TEXT", nullable = false)
     private String citation;
 
-    @ManyToOne
-    @JoinColumn(name = "blog_category_id", nullable = false)
-    private BlogCategory category;
+    @ManyToMany
+    @JoinTable(name = "blog_blog_category",
+            joinColumns = @JoinColumn(name = "blog_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "blog_category_id", referencedColumnName = "id"))
+    private List<BlogCategory> categories = new ArrayList<>(); // Initialize as empty list
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "published_at")

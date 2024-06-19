@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface BlogRepository extends JpaRepository<Blog, Long> {
     long countByUserAndCreatedAtBetween(User user, LocalDateTime startDate, LocalDateTime endDate);
-    int countByCategory(BlogCategory blogCategory);
+    int countByCategories(BlogCategory blogCategory);
     Blog findBySlug(@Param("slug") String slug);
     int countByComments(Comment comment);
 }

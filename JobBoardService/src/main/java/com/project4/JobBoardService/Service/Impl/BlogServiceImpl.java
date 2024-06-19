@@ -122,7 +122,7 @@ public class BlogServiceImpl implements BlogService {
     private void updateBlogDetails(Blog existingBlog, Blog updatedBlog) {
         existingBlog.setTitle(updatedBlog.getTitle());
         existingBlog.setContent(updatedBlog.getContent());
-        existingBlog.setCategory(updatedBlog.getCategory());
+        existingBlog.setCategories(updatedBlog.getCategories());
         existingBlog.setPublishedAt(updatedBlog.getPublishedAt());
         existingBlog.setStatus(updatedBlog.getStatus());
         existingBlog.setSlug(updatedBlog.getSlug());

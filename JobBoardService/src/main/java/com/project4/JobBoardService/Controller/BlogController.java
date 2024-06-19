@@ -27,43 +27,55 @@ public class BlogController {
 
     @Autowired
     private BlogService blogService;
+
     @Autowired
     private BlogCategoryService blogCategoryService;
+
     @Autowired
     private UserService userService;
 
     @Autowired
-    SimpMessagingTemplate simpMessagingTemplate;
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @Autowired
     private ModelMapper modelMapper;
 
-    @PreAuthorize(" hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
-        BlogCategory category = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
-        if (category == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
-        }
-        User user = userService.findByUsername(blogDTO.getUsername()).orElse(null);
-        if(user == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Category not found
-        }
-        Blog blog = modelMapper.map(blogDTO, Blog.class);
-        blog.setUser(user);
-        blog.setCategory(category);
-        // Call a method in your service to handle the blog creation logic, including image processing if necessary
-
         try {
+            // Lấy danh sách id của BlogCategory từ BlogDTO
+            List<Long> categoryIds = blogDTO.getCategoryIds();
+            List<BlogCategory> categories = categoryIds.stream()
+                    .map(id -> blogCategoryService.getBlogCategoryById(id))
+                    .collect(Collectors.toList());
+
+            // Kiểm tra xem tất cả các BlogCategory có tồn tại không
+            if (categories.stream().anyMatch(category -> category == null)) {
+                return ResponseEntity.badRequest().build(); // Nếu một trong các BlogCategory không tồn tại, trả về lỗi BadRequest
+            }
+
+            // Tìm User từ username trong BlogDTO
+            User user = userService.findByUsername(blogDTO.getUsername()).orElse(null);
+            if (user == null) {
+                return ResponseEntity.badRequest().build(); // Nếu không tìm thấy User, trả về lỗi BadRequest
+            }
+
+            // Map BlogDTO thành Blog
+            Blog blog = modelMapper.map(blogDTO, Blog.class);
+            blog.setUser(user);
+            blog.setCategories(categories);
+
+            // Gọi phương thức trong service để xử lý logic tạo Blog, bao gồm xử lý hình ảnh nếu cần
             Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage());
+
+            // Map Blog đã tạo thành BlogResponseDTO và gửi thông báo WebSocket
             BlogResponseDTO responseDto = modelMapper.map(createdBlog, BlogResponseDTO.class);
             simpMessagingTemplate.convertAndSend("/topic/new-blog", responseDto);
 
             return ResponseEntity.ok(responseDto);
-//            return ResponseEntity.ok(blogDTO);
-
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -81,22 +93,22 @@ public class BlogController {
 
             return ResponseEntity.ok(blogResponseDTOs);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
+            return ResponseEntity.internalServerError().build();
         }
     }
 
-    // Get a single blog by ID
+    // Get a single blog by slug
     @GetMapping("/{slug}")
     public ResponseEntity<BlogResponseDTO> getBlogBySlug(@PathVariable String slug) {
         try {
             Blog blog = blogService.getBlogBySlug(slug);
-            if(blog == null){
+            if (blog == null) {
                 return ResponseEntity.notFound().build();
             }
             BlogResponseDTO blogResponseDTO = modelMapper.map(blog, BlogResponseDTO.class);
             return ResponseEntity.ok(blogResponseDTO);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -106,27 +118,32 @@ public class BlogController {
     public ResponseEntity<BlogResponseDTO> updateBlog(@PathVariable Long id,
                                                       @ModelAttribute BlogDTO blogDTO) {
         try {
-            // check exist blog, blog category
-            Blog existingBlogOpt = blogService.getBlogById(id);
-            BlogCategory existingBlogCategory = blogCategoryService.getBlogCategoryById(blogDTO.getBlogCategoryId());
+            // Lấy danh sách id của BlogCategory từ BlogDTO
+            List<Long> categoryIds = blogDTO.getCategoryIds();
+            List<BlogCategory> categories = categoryIds.stream()
+                    .map(ids -> blogCategoryService.getBlogCategoryById(ids))
+                    .collect(Collectors.toList());
 
-            if (existingBlogOpt == null || existingBlogCategory == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            // Kiểm tra xem tất cả các BlogCategory có tồn tại không
+            if (categories.stream().anyMatch(category -> category == null)) {
+                return ResponseEntity.badRequest().build(); // Nếu một trong các BlogCategory không tồn tại, trả về lỗi BadRequest
             }
 
 
-            Blog editBlog = modelMapper.map(blogDTO, Blog.class);
-            editBlog.setCategory(existingBlogCategory);
+            Blog blog = modelMapper.map(blogDTO, Blog.class);
+            blog.setCategories(categories);
 
 
-            // update blog
-            Blog updatedBlog = blogService.updateBlog(id, editBlog, blogDTO.getImage());
+            // Update blog
+            Blog updatedBlog = blogService.updateBlog(id, blog, blogDTO.getImage());
+
+            // Map Blog đã cập nhật thành BlogResponseDTO và gửi thông báo WebSocket
             BlogResponseDTO responseDto = modelMapper.map(updatedBlog, BlogResponseDTO.class);
             simpMessagingTemplate.convertAndSend("/topic/edit-blog", responseDto);
 
             return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -138,9 +155,8 @@ public class BlogController {
             blogService.deleteBlog(id);
             simpMessagingTemplate.convertAndSend("/topic/delete-blog", id);
             return ResponseEntity.ok().body(id);
-
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

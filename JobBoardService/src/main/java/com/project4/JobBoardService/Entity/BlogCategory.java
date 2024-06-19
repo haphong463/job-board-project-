@@ -22,6 +22,6 @@ public class BlogCategory extends  AbstractEntity{
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "categories")
     private List<Blog> blogs;
 }

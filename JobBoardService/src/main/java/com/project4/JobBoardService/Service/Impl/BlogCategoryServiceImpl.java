@@ -57,6 +57,6 @@ public class BlogCategoryServiceImpl implements BlogCategoryService {
 
     @Override
     public int getBlogCount(BlogCategory category) {
-        return blogRepository.countByCategory(category);
+        return blogRepository.countByCategories(category);
     }
 }
