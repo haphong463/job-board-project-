@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -29,6 +29,9 @@ function EmployerSignUp() {
   const signUpError = useSelector((state) => state.auth.error);
   const navigate = useNavigate();
 
+  // State to manage the visibility of the success message
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
   const onSubmit = (data) => {
     console.log("Form Submitted", data);
     dispatch(signUpEmployer(data));
@@ -37,8 +40,11 @@ function EmployerSignUp() {
   useEffect(() => {
     if (signUpSuccess) {
       console.log("Employer registration successful!");
+      setShowSuccessMessage(true);  // Show success message
       dispatch(resetSignUpSuccess());
-      navigate('/login');
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);  // Redirect after 3 seconds
     }
   }, [signUpSuccess, dispatch, navigate]);
 
@@ -70,7 +76,7 @@ function EmployerSignUp() {
           <div className="row">
             <div className="col-lg-6 mb-5">
               <h2 className="mb-4">Register as an Employer</h2>
-              {signUpSuccess && (
+              {showSuccessMessage && (
                 <div className="alert alert-success" role="alert">
                   Successfully signed up! Verify your account via email.
                 </div>

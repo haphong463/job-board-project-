@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { FaCheck, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { setupCredentials, resetSetupSuccess } from "../../features/authSlice";
+import { setupCredentials, resetSignUpSuccess } from "../../features/authSlice";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./sign_up.css";
+
 const schema = yup.object().shape({
   username: yup.string().required("Username is required"),
   password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
@@ -24,11 +24,22 @@ function SetupCredentials() {
   const dispatch = useDispatch();
   const setupSuccess = useSelector((state) => state.auth.setupSuccess);
   const error = useSelector((state) => state.auth.error);
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const onSubmit = (data) => {
     dispatch(setupCredentials(data));
   };
+
+  useEffect(() => {
+    if (setupSuccess) {
+      setShowSuccessMessage(true);
+      dispatch(resetSignUpSuccess());
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000); // Redirect after 3 seconds
+    }
+  }, [setupSuccess, dispatch, navigate]);
 
   return (
     <GlobalLayoutUser>
@@ -50,7 +61,7 @@ function SetupCredentials() {
           <div className="row">
             <div className="col-lg-6 mb-5">
               <h2 className="mb-4">Register an account</h2>
-              {setupSuccess && (
+              {showSuccessMessage && (
                 <div className="alert alert-success" role="alert">
                   Successfully set up! Verify your account via email.
                 </div>
@@ -96,8 +107,6 @@ function SetupCredentials() {
                       {...register("password")}
                       className="form-control"
                       placeholder="Enter your password..."
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <p className="text-danger">{errors.password?.message}</p>
                   </div>
