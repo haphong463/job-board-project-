@@ -73,6 +73,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/uploads/**").permitAll()
                                 .requestMatchers(HttpMethod.GET).permitAll()
                                 .requestMatchers("/api/comments/**").permitAll()
+                                .requestMatchers("/api/message/**").permitAll()
                                 .anyRequest().authenticated()
 
                 );

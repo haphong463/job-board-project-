@@ -5,9 +5,11 @@ import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Repository.MessageRepository;
 import com.project4.JobBoardService.Service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class MessageServiceImpl implements MessageService {
     @Autowired
     private MessageRepository messageRepository;
