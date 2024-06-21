@@ -18,7 +18,7 @@ import {
 } from "reactstrap";
 import { updateUserThunk } from "../../../features/authSlice";
 import { createFormData } from "../../../utils/form-data/formDataUtil";
-
+import "./style.css";
 const schema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
@@ -46,7 +46,7 @@ const User = () => {
       firstName: user.firstName,
       lastName: user.lastName,
       bio: user.bio,
-      gender: "",
+      gender: user?.gender,
       imageFile: "",
     },
   });
@@ -55,6 +55,7 @@ const User = () => {
     data = {
       ...data,
       id: user.id,
+      username: user.sub,
     };
 
     console.log(">>> data to update: ", data);
@@ -77,7 +78,7 @@ const User = () => {
             <CardTitle tag="h5" className="mt-3">
               {`${user.firstName} ${user.lastName}`}
             </CardTitle>
-            <CardText>{user?.bio}</CardText>
+            <CardText className="text-truncate-multiline">{user?.bio}</CardText>
           </CardBody>
         </Card>
       </Col>

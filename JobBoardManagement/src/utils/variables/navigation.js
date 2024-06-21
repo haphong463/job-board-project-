@@ -9,9 +9,15 @@ export const navigation = [
     icon: "bi bi-collection",
     children: [
       {
-        title: "Alerts",
-        href: "/jobportal/alerts",
+        title: "Job",
         icon: "bi bi-bell",
+        children: [
+          {
+            title: "Category",
+            href: "/jobportal/job-category",
+            icon: "bi bi-patch-check",
+          },
+        ],
       },
       {
         title: "Blog",
@@ -31,11 +37,7 @@ export const navigation = [
       },
     ],
   },
-  {
-    title: "About",
-    href: "/jobportal/job-category",
-    icon: "bi bi-people",
-  },
+
   {
     title: "Settings",
     href: "/jobportal/settings",
