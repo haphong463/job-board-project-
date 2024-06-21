@@ -40,7 +40,6 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this user");
             }
 
-            // ! Check existing user
             if (userService.findById(id).orElse(null) == null) {
                 return ResponseEntity.notFound().build();
             }
