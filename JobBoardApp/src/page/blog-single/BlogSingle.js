@@ -17,7 +17,6 @@ import { BlogContent } from "./BlogContent";
 import { CommentForm } from "./CommentForm";
 import { CommentList } from "./CommentList";
 import moment from "moment";
-import { BlogSideBar } from "./BlogSideBar";
 import { BlogTitle } from "./BlogTitle";
 import ReadingBar from "./ReadingBar";
 import { calculateReadingTime } from "../../utils/function/readingTime";
@@ -25,6 +24,7 @@ import {
   connectWebSocket,
   disconnectWebSocket,
 } from "../../services/WebSocketService";
+import { BlogSideBar } from "./BlogSideBar";
 
 export const BlogSingle = () => {
   const dispatch = useDispatch();

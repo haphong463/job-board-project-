@@ -1,7 +1,8 @@
+import { memo } from "react";
 import { useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
 
-export function BlogSideBar(props) {
+export const BlogSideBar = memo((props) => {
   const categories = useSelector((state) => state.blogs.categories);
   const blogs = useSelector((state) => state.blogs.blogs);
   const author = useSelector((state) => state.blogs.author);
@@ -48,4 +49,4 @@ export function BlogSideBar(props) {
       </div>
     </div>
   );
-}
+});

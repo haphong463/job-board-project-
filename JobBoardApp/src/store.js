@@ -13,7 +13,7 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  whitelist: ["notification"], // Chỉ lưu trữ notification reducer
+  blacklist: ["notification"],
 };
 
 const rootReducer = combineReducers({
