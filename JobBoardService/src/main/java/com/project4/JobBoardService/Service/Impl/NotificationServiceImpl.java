@@ -24,4 +24,14 @@ public class NotificationServiceImpl implements NotificationService {
     public Notification createNotification(Notification notification) {
         return notificationRepository.save(notification);
     }
+
+    @Override
+    public Notification updateIsRead(Long id) {
+        Notification existingNotification = notificationRepository.findById(id).orElse(null);
+        if(existingNotification != null){
+            existingNotification.setRead(true);
+            notificationRepository.save(existingNotification);
+        }
+        return null;
+    }
 }

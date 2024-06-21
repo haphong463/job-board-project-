@@ -79,4 +79,17 @@ public class NotificationController {
                return ResponseEntity.internalServerError().build();
            }
     }
+
+    @PutMapping("/read/{id}")
+    public ResponseEntity<NotificationDTO> updateIsReadNotification(@PathVariable Long id) {
+        try {
+
+            Notification updated = notificationService.updateIsRead(id);
+            NotificationDTO response = modelMapper.map(updated, NotificationDTO.class);
+            template.convertAndSend("/topic/notifications", response);
+            return ResponseEntity.ok(response);
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
