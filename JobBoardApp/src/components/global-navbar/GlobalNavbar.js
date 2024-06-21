@@ -113,6 +113,9 @@ export function GlobalNavbar() {
                     <NavLink to="/testimonials">Testimonials</NavLink>
                   </li>
                   <li>
+                    <NavLink to="/quiz">JobBoard Skills</NavLink>
+                  </li>
+                  <li>
                     <NavLink to="/faq">Frequently Ask Questions</NavLink>
                   </li>
                   <li>

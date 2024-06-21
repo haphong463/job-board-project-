@@ -1,0 +1,167 @@
+.section-hero {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-hero .container {
+  position: relative;
+  z-index: 2;
+}
+
+.section-hero .text-white {
+  color: #fff !important;
+}
+
+.custom-breadcrumbs a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.custom-breadcrumbs .slash {
+  color: #fff;
+}
+
+.container {
+  max-width: 960px;
+  margin: auto;
+}
+
+.quiz-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.timer {
+  font-size: 18px;
+  color: #dc3545; /* Red color */
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-title {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.list-group-item {
+  border: none;
+  padding: 10px 20px;
+}
+
+.list-group-item label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+}
+
+.list-group-item input {
+  margin-right: 10px;
+}
+
+.quiz-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn-secondary,
+.btn-primary,
+.btn-success {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-secondary:disabled,
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.quiz-header h2 {
+  margin: 0;
+}
+
+.timer {
+  font-size: 1.2em;
+  color: #ff0000;
+}
+
+/* Style for the question card */
+.card-body h5 {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.list-group-item label {
+  display: flex;
+  align-items: center;
+}
+
+.list-group-item input[type="radio"] {
+  margin-right: 10px;
+}
+
+/* Style for the navigation buttons */
+.quiz-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Additional styles for modals if needed */
+.modal-body {
+  font-size: 1.1em;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Add this CSS to ensure equal height and alignment */
+.skill-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+}
+
+.skill-card img {
+  max-height: 100px;
+  object-fit: contain;
+}
+
+.skill-card .card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.skill-card .btn {
+  margin-top: auto;
+}
