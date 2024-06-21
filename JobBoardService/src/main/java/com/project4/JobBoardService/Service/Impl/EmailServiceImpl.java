@@ -1,18 +1,17 @@
 package com.project4.JobBoardService.Service.Impl;
+
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Util.HTMLContentProvider;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Properties;
-import java.util.UUID;
 
 import static com.project4.JobBoardService.Util.HTMLContentProvider.generateEmailHTMLContent;
 
@@ -22,29 +21,33 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${spring.mail.password}")
+    private String fromEmailPassword;
+
     private final JavaMailSender javaMailSender;
 
     public EmailServiceImpl(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 
+    @Async
     @Override
-    public void sendVerificationEmail(String toEmail, String username,String firstName, String verificationCode,  String email) {
-        Properties properties = System.getProperties();
+    public void sendVerificationEmail(String toEmail, String username, String firstName, String verificationCode, String email) {
+        Properties properties = new Properties();
         properties.setProperty("mail.smtp.host", "smtp.gmail.com");
         properties.setProperty("mail.smtp.port", "587");
         properties.setProperty("mail.smtp.auth", "true");
         properties.setProperty("mail.smtp.starttls.enable", "true");
 
-//        String verifyUrl = "http://localhost:8080/api/auth/verify?email=" + email + "&code=" + verificationCode + "&verifyUrl=http://localhost:8080";
-//
         String verifyUrl = "http://localhost:8080/api/auth/verify?email=" + email + "&code=" + verificationCode + "&verifyUrl=http://localhost:3000";
 
         Session session = Session.getInstance(properties, new Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(fromEmail, "lsnxvacsqrprfrbo");
+                return new PasswordAuthentication(fromEmail, fromEmailPassword);
             }
         });
+
         try {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(fromEmail));
@@ -52,7 +55,6 @@ public class EmailServiceImpl implements EmailService {
             message.setSubject("Email Verification");
 
             String emailContent = HTMLContentProvider.readHTMLContent();
-
             emailContent = emailContent.replace("{{username}}", username);
             emailContent = emailContent.replace("{{verifyUrl}}", verifyUrl);
 
@@ -65,6 +67,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Async
     public void sendVerificationEmailEmployer(String toEmail, String name, String verificationCode) {
         String verificationUrl = "http://localhost:3000/SetupCredentials";
         String subject = "Email Verification";
@@ -83,9 +86,9 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Async
     @Override
     public void sendEmailNotification(String toEmail, String subject, String message) {
-
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -98,6 +101,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Async
     @Override
     public void sendResetPasswordEmail(String toEmail, String resetUrl) {
         String emailContent = HTMLContentProvider.resetPasswordContent(resetUrl);
