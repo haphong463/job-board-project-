@@ -23,6 +23,9 @@ public class JwtUtils {
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
+
+
+
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
@@ -31,7 +34,10 @@ public class JwtUtils {
                 .claim("role", userPrincipal.getAuthorities())
                 .claim("firstName", userPrincipal.getFirstName())   // Use userPrincipal.getFirstName()
                 .claim("lastName", userPrincipal.getLastName())
-                .claim("id", userPrincipal.getId())// Use userPrincipal.getLastName()
+                .claim("id", userPrincipal.getId())
+                .claim("imageUrl", userPrincipal.getImageUrl())
+                .claim("bio", userPrincipal.getBio())// Use userPrincipal.getLastName()
+                .claim("gender", userPrincipal.getGender())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)

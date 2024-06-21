@@ -17,5 +17,6 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private Gender gender;
-
+    private String imageUrl;
+    private String bio;
 }

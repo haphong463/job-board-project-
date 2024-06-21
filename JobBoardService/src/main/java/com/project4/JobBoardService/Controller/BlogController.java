@@ -71,10 +71,10 @@ public class BlogController {
 
             // Map Blog đã tạo thành BlogResponseDTO và gửi thông báo WebSocket
             BlogResponseDTO responseDto = modelMapper.map(createdBlog, BlogResponseDTO.class);
-            simpMessagingTemplate.convertAndSend("/topic/new-blog", responseDto);
+//            simpMessagingTemplate.convertAndSend("/topic/new-blog", responseDto);
 
             return ResponseEntity.ok(responseDto);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
