@@ -17,12 +17,7 @@ export function BlogSideBar(props) {
         <h3>
           {author?.firstName} {author?.lastName}
         </h3>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus
-          itaque, autem necessitatibus voluptate quod mollitia delectus aut,
-          sunt placeat nam vero culpa sapiente consectetur similique, inventore
-          eos fugit cupiditate numquam!
-        </p>
+        <p>{author?.bio}</p>
         <p>
           <a href="#" className="btn btn-primary btn-sm">
             Read More

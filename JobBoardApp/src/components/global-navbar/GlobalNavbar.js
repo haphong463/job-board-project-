@@ -160,7 +160,7 @@ export function GlobalNavbar() {
                 </NavLink>
               )}
               {user && (
-                <div className="icon" onClick={toggleNotification}>
+                <div className="icon-notification" onClick={toggleNotification}>
                   <img
                     src="https://i.imgur.com/AC7dgLA.png"
                     alt=""

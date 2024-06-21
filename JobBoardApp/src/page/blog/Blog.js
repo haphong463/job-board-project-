@@ -16,6 +16,8 @@ export const Blog = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 9;
   const typeParam = searchParams.get("type")?.toLowerCase() || "";
+  const [filterPosts, setFilterPosts] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,24 +33,33 @@ export const Blog = () => {
     if (blogs.length === 0) {
       fetchData();
     }
-  }, [dispatch]);
+  }, [dispatch, blogs.length]);
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = blogs.slice(indexOfFirstPost, indexOfLastPost);
 
-  const filterPosts = currentPosts
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .filter(
-      (blog) =>
-        blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        blog.categories.some((item) =>
-          item.name.toLowerCase().includes(searchText.toLowerCase())
-        ) ||
-        blog.categories.some((item) =>
+  useEffect(() => {
+    let filtered = currentPosts
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .filter(
+        (blog) =>
+          blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          blog.categories.some((item) =>
+            item.name.toLowerCase().includes(searchText.toLowerCase())
+          )
+      );
+
+    if (typeParam) {
+      filtered = filtered.filter((item) =>
+        item.categories.some((item) =>
           item.name.toLowerCase().includes(typeParam)
         )
-    );
+      );
+    }
+
+    setFilterPosts(filtered);
+  }, [currentPosts, searchText, typeParam]);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -112,7 +123,7 @@ export const Blog = () => {
                           </NavLink>
                         </h6>
                         <div>
-                          {blog.categories.map((item, index) => (
+                          {blog.categories.slice(0, 3).map((item, index) => (
                             <Badge
                               key={item.id} // Đảm bảo mỗi phần tử có key duy nhất
                               color="primary"
