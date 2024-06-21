@@ -71,7 +71,9 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/uploads/**").permitAll()
                                 .requestMatchers(HttpMethod.GET).permitAll()
+                                .requestMatchers("/api/quizzes/submit").permitAll()
                                 .requestMatchers("/api/comments/**").permitAll()
+
                                 .anyRequest().authenticated()
 
                 );

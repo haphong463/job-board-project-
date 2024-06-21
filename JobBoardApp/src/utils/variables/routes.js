@@ -16,6 +16,9 @@ import { ResetPassword } from "../../page/login/ResetPassword";
 import { JobSingle } from "../../page/job-single/JobSingle";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import SetupCredentials from "../../page/signup/SetupCredentials";
+import { Quiz } from "../../page/quiz/quiz";
+
+import QuizQuestions from "../../page/quiz/QuizQuestions";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -34,5 +37,7 @@ export const routes = [
   { path: "/job/:id", component: <JobSingle /> },
   { path: "/gallery", component: <Gallery /> },
   { path :"/EmployerSignUp", component:<EmployerSignUp/>},
-  { path :"/SetupCredentials", component:<SetupCredentials/>}
+  { path :"/SetupCredentials", component:<SetupCredentials/>},
+  {path:"/quiz", component:<Quiz/>},
+  {path:"/quiz/:quizId", component:<QuizQuestions/>},
 ];

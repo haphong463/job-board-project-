@@ -27,6 +27,7 @@ public class Company {
     @Column(length = 255)
     private String logo;
 
+
     @Column(name = "website_link", length = 255)
     private String websiteLink;
 

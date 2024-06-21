@@ -10,10 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users",
@@ -72,7 +69,8 @@ public class User   {
 
     @OneToMany(mappedBy = "id")
     private List<Comment> comments;
-    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Quiz> quizzes = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCV> userCVs;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
