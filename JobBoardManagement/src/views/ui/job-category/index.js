@@ -10,40 +10,31 @@ import {
   Input,
 } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
-import { BlogCategoryForm } from "./BlogCategoryForm";
 import {
-  deleteBlogCategory,
-  fetchBlogCategory,
-} from "../../../features/blogCategorySlice";
-import nprogress from "nprogress";
+  deleteJobCategory,
+  fetchJobCategory,
+} from "../../../features/jobCategorySlice";
+import { JobCategoryForm } from "./JobCategoryForm";
 
-export function BlogCategory(props) {
+export function JobCategory(props) {
   const dispatch = useDispatch();
-  const blogCategoryData =
-    useSelector((state) => state.blogCategory.blogCategory) || [];
-  const blogCategoryStatus = useSelector((state) => state.blogCategory.status);
+  const list = useSelector((state) => state.jobCategory.list) || [];
+  const blogCategoryStatus = useSelector((state) => state.jobCategory.status);
   const [searchTerm, setSearchTerm] = useState("");
   const [isEdit, setIsEdit] = useState(null); // Changed initial state to null
 
   useEffect(() => {
-    nprogress.start();
-    dispatch(fetchBlogCategory()).then(() => {
-      nprogress.done();
-    });
+    dispatch(fetchJobCategory());
   }, [dispatch]);
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this blog?")) {
-      nprogress.start();
-      dispatch(deleteBlogCategory(id)).then(() => {
-        nprogress.done();
-      });
+      dispatch(deleteJobCategory(id));
     }
   };
 
   const handleEdit = (id) => {
-    const editBlog = blogCategoryData.find((item) => item.id === id);
+    const editBlog = list.find((item) => item.categoryId === id);
     console.log(editBlog);
     if (editBlog) {
       setIsEdit(editBlog); // Set the state to the selected blog category
@@ -61,26 +52,26 @@ export function BlogCategory(props) {
             fontSize: "16px",
           }}
         >
-          {row.name}
+          {row.categoryName}
         </div>
       ),
     },
-    {
-      name: "Posts",
-      selector: (row) => row.blogCount,
-      sortable: true,
-      cell: (row) => <div>{row.blogCount}</div>,
-    },
+    // {
+    //   name: "Posts",
+    //   selector: (row) => row.blogCount,
+    //   sortable: true,
+    //   cell: (row) => <div>{row.blogCount}</div>,
+    // },
     {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
-          <button onClick={() => handleEdit(row.id)} className="btn btn-info">
+          <button onClick={() => handleEdit(row.categoryId)} className="btn btn-info">
             Edit
           </button>
           {!row.blogCount > 0 && (
             <button
-              onClick={() => handleDelete(row.id)}
+              onClick={() => handleDelete(row.categoryId)}
               className="btn btn-danger"
             >
               Delete
@@ -90,11 +81,10 @@ export function BlogCategory(props) {
       ),
     },
   ];
-
   return (
     <Row>
       <Col lg="12">
-        <BlogCategoryForm isEdit={isEdit} setIsEdit={setIsEdit} />{" "}
+        <JobCategoryForm isEdit={isEdit} setIsEdit={setIsEdit} />{" "}
         {/* Pass isEdit and setIsEdit as props */}
       </Col>
       <Col lg="12">
@@ -114,8 +104,10 @@ export function BlogCategory(props) {
           </InputGroup>
           <DataTable
             columns={columns}
-            data={blogCategoryData.filter((blog) =>
-              blog.name.toLowerCase().includes(searchTerm.toLowerCase())
+            data={list.filter((blog) =>
+              blog.categoryName
+                ?.toLowerCase()
+                .includes(searchTerm.toLowerCase())
             )}
           />
         </Card>
@@ -124,4 +116,4 @@ export function BlogCategory(props) {
   );
 }
 
-export default BlogCategory;
+export default JobCategory;

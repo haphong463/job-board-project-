@@ -8,8 +8,7 @@ export const blogSchema = (isEdit) => {
       .max(50, "Title must be less than 50 characters."),
     content: yup.string().required("Content is required"),
     citation: yup.string().required("Citation is required"),
-    blogCategoryId: yup.string().required("Category is required"),
-    status: yup.string().required("Status is required"),
+    // blogCategoryId: yup.string().required("Category is required"),
     image: isEdit
       ? yup.mixed().nullable()
       : yup
@@ -26,4 +25,7 @@ export const blogSchema = (isEdit) => {
 
 export const blogCategorySchema = yup.object().shape({
   name: yup.string().required("Name is required"),
+});
+export const jobCategorySchema = yup.object().shape({
+  categoryName: yup.string().required("Name is required"),
 });

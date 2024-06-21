@@ -50,7 +50,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     defaultValues: {
       title: "",
       content: "",
-      blogCategoryId: "",
+      categoryIds: [],
       image: "",
       status: "",
     },
@@ -103,7 +103,10 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       setModal(true);
       setValue("title", isEdit.title); // Set the default value when isEdit changes
       setValue("content", isEdit.content); // Set the default value when isEdit changes
-      setValue("blogCategoryId", isEdit.category.id); // Set the default value when isEdit changes
+      setValue(
+        "categoryIds",
+        isEdit.categories.map((item) => item.id)
+      ); // Set the default value when isEdit changes
       setValue("status", isEdit.status); // Set the default value when isEdit changes
       setValue("citation", isEdit.citation); // Set the default value when isEdit changes
     }
@@ -124,10 +127,12 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     setPreviewUrl(null);
   }, [watch("image")]);
 
-  const defaultValue = isEdit && {
-    label: isEdit.category.name,
-    value: isEdit.category.id,
-  };
+  const defaultValue = isEdit
+    ? isEdit.categories.map((category) => ({
+        label: category.name,
+        value: category.id,
+      }))
+    : [];
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {

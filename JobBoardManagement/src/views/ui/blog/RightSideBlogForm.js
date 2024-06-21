@@ -11,7 +11,6 @@ export function RightSideBlogForm(props) {
     label: capitalizeFirstLetter(props.isEdit.status.toLowerCase()),
     value: props.isEdit.status,
   };
-  console.log("isEdit: ", props.isEdit?.imageUrl);
   return (
     <Col lg={4}>
       <Row>
@@ -21,32 +20,35 @@ export function RightSideBlogForm(props) {
               Category <span className="text-danger">*</span>
             </Label>
             <Controller
-              name="blogCategoryId"
+              name="categoryIds"
               control={props.control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  id="postCategory"
-                  options={props.categoryList.map((category) => ({
-                    value: category.id,
-                    label: category.name,
-                  }))}
-                  isSearchable={false}
-                  onChange={(selectedOption) =>
-                    field.onChange(selectedOption.value)
-                  }
-                  value={props.categoryList.find(
-                    (category) => category.id === field
-                  )}
-                  {...(props.isEdit && {
-                    defaultValue: props.defaultValue,
-                  })}
-                />
-              )}
+              render={({ field }) => {
+                return (
+                  <Select
+                    {...field}
+                    id="postCategory"
+                    options={props.categoryList.map((category) => ({
+                      value: category.id,
+                      label: category.name,
+                    }))}
+                    isSearchable={false}
+                    onChange={(selectedOption) =>
+                      field.onChange(selectedOption.map((item) => item.value))
+                    }
+                    value={props.categoryList.find(
+                      (category) => category === field
+                    )}
+                    {...(props.isEdit && {
+                      defaultValue: props.defaultValue,
+                    })}
+                    isMulti
+                  />
+                );
+              }}
             />
-            {props.errors.blogCategoryId && (
+            {props.errors.categoryIds && (
               <FormText color="danger">
-                {props.errors.blogCategoryId.message}
+                {props.errors.categoryIds.message}
               </FormText>
             )}
           </FormGroup>

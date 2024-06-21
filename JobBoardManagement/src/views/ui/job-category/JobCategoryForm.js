@@ -11,28 +11,20 @@ import {
   ModalFooter,
   ModalHeader,
 } from "reactstrap";
-import { blogCategorySchema } from "../../../utils/variables/schema";
+import { jobCategorySchema } from "../../../utils/variables/schema";
 import { useEffect, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { IoMdAdd } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addBlogCategory,
-  updateBlogCategory,
-} from "../../../features/blogCategorySlice";
+  addJobCategory,
+  updateJobCategory,
+} from "../../../features/jobCategorySlice";
 
-export function BlogCategoryForm({ isEdit, setIsEdit }) {
+export function JobCategoryForm({ isEdit, setIsEdit }) {
   const dispatch = useDispatch();
   const [newCategoryModal, setNewCategoryModal] = useState(false);
-  const blogCategoryData =
-    useSelector((state) => state.blogCategory.blogCategory) || [];
-  const toggleNewCategoryModal = () => {
-    setNewCategoryModal(!newCategoryModal);
-    if (newCategoryModal) {
-      reset({ name: "" });
-      setIsEdit(null);
-    }
-  };
+  const list = useSelector((state) => state.jobCategory.list) || [];
 
   const {
     handleSubmit,
@@ -42,35 +34,45 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
     reset,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(blogCategorySchema),
+    resolver: yupResolver(jobCategorySchema),
     defaultValues: {
-      name: "",
+      categoryName: "",
     },
   });
 
+  const toggleNewCategoryModal = () => {
+    if (newCategoryModal) {
+      reset({ categoryName: "" });
+      setIsEdit(null); // Reset isEdit state when modal is closing
+    }
+    setNewCategoryModal(!newCategoryModal);
+  };
+
   useEffect(() => {
     if (isEdit) {
-      setNewCategoryModal(true);
-      setValue("name", isEdit.name); // Set the default value when isEdit changes
+      setValue("categoryName", isEdit.categoryName); // Set the default value when isEdit changes
+      setNewCategoryModal(true); // Open the modal if isEdit is set
     }
   }, [isEdit, setValue]);
 
   const onSubmit = (data) => {
-    const checkExistName = blogCategoryData.some(
-      (item) => item.name === data.name
+    const checkExistName = list.some(
+      (item) => item.categoryName === data.categoryName
     );
     if (checkExistName) {
-      setError("name", {
+      setError("categoryName", {
         message: "Name already exists!",
       });
       return;
     }
     if (isEdit) {
-      dispatch(updateBlogCategory({ ...data, id: isEdit.id })).then(() => {
-        toggleNewCategoryModal();
-      });
+      dispatch(updateJobCategory({ data, categoryId: isEdit.categoryId })).then(
+        () => {
+          toggleNewCategoryModal();
+        }
+      );
     } else {
-      dispatch(addBlogCategory(data)).then(() => {
+      dispatch(addJobCategory(data)).then(() => {
         toggleNewCategoryModal();
       });
     }
@@ -93,7 +95,7 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
             <FormGroup>
               <Label for="categoryName">Category Name</Label>
               <Controller
-                name="name"
+                name="categoryName"
                 control={control}
                 render={({ field }) => (
                   <Input
@@ -101,12 +103,14 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
                     id="categoryName"
                     placeholder="Enter category name"
                     type="text"
-                    invalid={!!errors.name}
+                    invalid={!!errors.categoryName}
                   />
                 )}
               />
-              {errors.name && (
-                <FormText color="danger">{errors.name.message}</FormText>
+              {errors.categoryName && (
+                <FormText color="danger">
+                  {errors.categoryName.message}
+                </FormText>
               )}
             </FormGroup>
           </ModalBody>

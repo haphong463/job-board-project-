@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, updateUserAndRoles } from "../features/authSlice";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import showToast from "../utils/functions/showToast";
+import nprogress from "nprogress";
 
 // Xác định schema yup cho form
 const schema = yup.object().shape({
@@ -33,6 +34,7 @@ const Login = () => {
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
   const locationState = useSelector((state) => state.auth.location);
+  const navigate = useNavigate();
   const {
     control,
     handleSubmit,
@@ -47,7 +49,23 @@ const Login = () => {
   });
 
   const onSubmit = (data) => {
-    dispatch(login(data));
+    nprogress.start();
+    dispatch(login(data))
+      .then((res) => {
+        // Handle successful login
+        if (res.meta.requestStatus === "fulfilled") {
+          // Navigate to the desired route
+          console.log("dang nhap ok!");
+          navigate("/jobportal");
+        }
+      })
+      .catch((err) => {
+        // Handle error
+        console.error("Login failed:", err);
+      })
+      .finally(() => {
+        nprogress.done();
+      });
   };
   useEffect(() => {
     if (user) {
@@ -55,6 +73,7 @@ const Login = () => {
         showToast("You don't have access rights!", "error");
       } else {
         showToast(`Welcome back, ${user.sub}`);
+        // navigate("/jobportal", { replace: true });
       }
     }
   }, [user, roles]);

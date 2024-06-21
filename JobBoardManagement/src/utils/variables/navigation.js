@@ -32,13 +32,8 @@ export const navigation = [
     ],
   },
   {
-    title: "Breadcrumbs",
-    href: "/jobportal/breadcrumbs",
-    icon: "bi bi-link",
-  },
-  {
     title: "About",
-    href: "/jobportal/about",
+    href: "/jobportal/job-category",
     icon: "bi bi-people",
   },
   {

@@ -62,16 +62,25 @@ export function Blog(props) {
       name: "Category",
       selector: (row) => row.category.name,
       sortable: true,
-      cell: (row) => (
-        <div
-          style={{
-            fontSize: "16px",
-          }}
-        >
-          <Badge>{row.category.name}</Badge>
-        </div>
-      ),
+      cell: (row) => {
+        const displayCategories = row.categories.slice(0, 2);
+        const hasMore = row.categories.length > 2;
+
+        return (
+          <div
+            style={{
+              fontSize: "16px",
+            }}
+          >
+            {displayCategories.map((item) => (
+              <Badge key={item.id}>{item.name}</Badge>
+            ))}
+            {hasMore && <span>...</span>}
+          </div>
+        );
+      },
     },
+
     {
       name: "Posted By",
       cell: (row) => (
@@ -80,7 +89,7 @@ export function Blog(props) {
             fontSize: "16px",
           }}
         >
-          {`${row.user?.firstName} ${row.user?.lastName}`}
+          {row.user.email}
         </div>
       ),
     },
@@ -145,6 +154,8 @@ export function Blog(props) {
       ),
     },
   ];
+
+  console.log(blogData);
 
   return (
     <Row>

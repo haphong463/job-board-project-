@@ -11,6 +11,7 @@ import {
   updateRoles,
   updateUserAndRoles,
 } from "../features/authSlice";
+import "nprogress/nprogress.css"; // Import the CSS file
 import { fetchBlogs } from "../features/blogSlice";
 import { fetchBlogCategory } from "../features/blogCategorySlice";
 import showToast from "../utils/functions/showToast";
@@ -53,21 +54,21 @@ const FullLayout = () => {
   }, [user, dispatch, navigate]);
 
   useEffect(() => {
-    if (blogStatus === "idle" || categoryStatus === "idle") {
-      const fetchData = async () => {
-        try {
-          await Promise.all([
-            dispatch(fetchBlogs()).unwrap(),
-            dispatch(fetchBlogCategory()).unwrap(),
-          ]);
-          showToast("The data has been loaded successfully.");
-        } catch (error) {
-          showToast("Error loading data.", "error");
-        }
-      };
+    // if (blogStatus === "idle" || categoryStatus === "idle") {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(fetchBlogs()).unwrap(),
+          dispatch(fetchBlogCategory()).unwrap(),
+        ]);
+        showToast("The data has been loaded successfully.");
+      } catch (error) {
+        showToast("Error loading data.", "error");
+      }
+    };
 
-      fetchData();
-    }
+    fetchData();
+    // }
   }, [dispatch]);
 
   if (!user) {

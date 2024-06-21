@@ -39,7 +39,6 @@ const blogsSlice = createSlice({
     blogs: [],
     status: "idle",
     error: null,
-    
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -56,6 +55,7 @@ const blogsSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(addBlog.fulfilled, (state, action) => {
+        console.log(action.payload);
         state.blogs.push(action.payload);
       })
       .addCase(deleteBlog.fulfilled, (state, action) => {

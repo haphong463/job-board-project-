@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { jwtDecode } from "jwt-decode";
 import { signInAsync } from "../services/auth_service";
+import { updateUserAsync } from "../services/user_service";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
 
@@ -30,6 +31,20 @@ export const login = createAsyncThunk(
           email: res.email,
           message: "Please check your email to verify your account.",
         });
+      }
+      return res;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+export const updateUserThunk = createAsyncThunk(
+  "user/update",
+  async ({ formData, userId }, { rejectWithValue }) => {
+    try {
+      const res = await updateUserAsync(formData, userId);
+      if (res.error) {
+        return rejectWithValue(res.error);
       }
       return res;
     } catch (error) {
@@ -96,6 +111,13 @@ const authSlice = createSlice({
           state.verificationEmail = action.payload.email;
           state.verificationMessage = action.payload.message;
         }
+      })
+      .addCase(updateUserThunk.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload }; // Update the user information
+        // If the roles have changed, update them as well
+      })
+      .addCase(updateUserThunk.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });
