@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/authSlice";
 import {
@@ -15,7 +15,9 @@ import {
   markNotificationAsRead,
   readNotificationThunk,
 } from "../../features/notificationSlice";
+import { fetchAllCategories } from "../../features/blogSlice";
 export function GlobalNavbar() {
+  const [searchParams] = useSearchParams();
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
@@ -25,6 +27,7 @@ export function GlobalNavbar() {
   const roles = useSelector((state) => state.auth.roles);
   const dispatch = useDispatch();
   const categories = useSelector((state) => state.category.categories);
+  const blogCategory = useSelector((state) => state.blogs.categories);
   const unreadCount = useSelector((state) => state.notification.unreadCount);
 
   const handleLogout = () => {
@@ -34,6 +37,7 @@ export function GlobalNavbar() {
   useEffect(() => {
     if (categories.length === 0) {
       dispatch(fetchCategoryThunk());
+      dispatch(fetchAllCategories());
     }
   }, [dispatch]);
 
@@ -96,42 +100,25 @@ export function GlobalNavbar() {
                   </li>
                 </ul>
               </li>
+
               <li className="has-children">
-                <NavLink to="/blogs">Pages</NavLink>
-                <ul className="dropdown">
-                  <li>
-                    <NavLink to="/services">Services</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/service-single">Service Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/blog-single">Blog Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/portfolio">Portfolio</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/portfolio-single">Portfolio Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/testimonials">Testimonials</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/quiz">JobBoard Skills</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/faq">Frequently Ask Questions</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/gallery" className="active">
-                      Gallery
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
-              <li>
                 <NavLink to="/blogs">Blog</NavLink>
+                <ul className="dropdown">
+                  {blogCategory.map((item) => (
+                    <li key={item.id}>
+                      <NavLink
+                        to={`/blogs?type=${item.name}`}
+                        className={({ isActive }) =>
+                          isActive && searchParams.get("type") === item.name
+                            ? "active"
+                            : ""
+                        }
+                      >
+                        {item.name}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
               </li>
               <li>
                 <NavLink to="/contact">Contact</NavLink>

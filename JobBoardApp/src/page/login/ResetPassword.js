@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import axiosRequest from "../../configs/axiosConfig";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -12,6 +13,7 @@ function ResetPassword() {
   const query = useQuery();
   const email = query.get("email");
   const token = query.get("token");
+  const user = useSelector((state) => state.auth.user);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -75,6 +77,7 @@ function ResetPassword() {
   if (redirect) {
     return <Navigate to="/login" />;
   }
+  if (user) return <Navigate to="/" replace={true} />;
 
   return (
     <GlobalLayoutUser>
