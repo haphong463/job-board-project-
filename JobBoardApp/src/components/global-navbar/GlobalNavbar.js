@@ -8,10 +8,13 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import { FaUserCircle } from "react-icons/fa";
+import { FaBell, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
-import { markNotificationAsRead } from "../../features/notificationSlice";
+import {
+  markNotificationAsRead,
+  readNotificationThunk,
+} from "../../features/notificationSlice";
 export function GlobalNavbar() {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -29,8 +32,10 @@ export function GlobalNavbar() {
   };
 
   useEffect(() => {
-    dispatch(fetchCategoryThunk());
-  }, [user]);
+    if (categories.length === 0) {
+      dispatch(fetchCategoryThunk());
+    }
+  }, [dispatch]);
 
   const handleCategoryClick = (categoryName) => {
     // setSelectedCategory(categoryName);
@@ -164,17 +169,22 @@ export function GlobalNavbar() {
               )}
               {user && (
                 <div className="icon-notification" onClick={toggleNotification}>
-                  <img
+                  {/* <img
                     src="https://i.imgur.com/AC7dgLA.png"
                     alt=""
                     className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
+                  /> */}
+                  <FaBell
+                    size={30}
+                    color="white"
+                    className={unreadCount > 0 ? "shake" : ""}
                   />
                   {unreadCount > 0 && (
                     <span
                       className="badge"
                       style={{
                         position: "absolute",
-                        top: "10px",
+                        top: "0",
                         right: "-10px",
                         backgroundColor: "#ff0000",
                         color: "#fff",
@@ -199,9 +209,7 @@ export function GlobalNavbar() {
                         onClick={
                           !notification.read
                             ? () =>
-                                dispatch(
-                                  markNotificationAsRead(notification.id)
-                                )
+                                dispatch(readNotificationThunk(notification.id))
                             : undefined
                         }
                       >

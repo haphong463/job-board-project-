@@ -5,8 +5,9 @@ import { fetchAllBlog, fetchAllCategories } from "../../features/blogSlice";
 import { NavLink, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import { calculateReadingTime } from "../../utils/function/readingTime";
-import "./style.css";
 import { Badge, Input } from "reactstrap";
+import { motion } from "framer-motion";
+import "./style.css";
 
 export const Blog = () => {
   const dispatch = useDispatch();
@@ -96,8 +97,12 @@ export const Blog = () => {
             <div className="container">
               <h1>Latest</h1>
               <div className="row mb-5">
-                {filterPosts.map((blog, index) => (
-                  <div key={blog.id} className="mb-5 card-container col-md-4">
+                {filterPosts.map((blog) => (
+                  <motion.div
+                    key={blog.id}
+                    className="mb-5 card-container col-md-4"
+                    whileHover={{ y: -10 }} // This will make the item bounce up on hover
+                  >
                     <div className="card h-100">
                       <NavLink to={`/blog/${blog.slug}`}>
                         <img
@@ -111,10 +116,7 @@ export const Blog = () => {
                         />
                       </NavLink>
                       <div className="card-body d-flex flex-column">
-                        <h6
-                          className="card-title 
-                           text-truncate-two"
-                        >
+                        <h6 className="card-title text-truncate-two">
                           <NavLink
                             to={`/blog/${blog.slug}`}
                             className="text-black"
@@ -125,14 +127,14 @@ export const Blog = () => {
                         <div>
                           {blog.categories.slice(0, 3).map((item, index) => (
                             <Badge
-                              key={item.id} // Đảm bảo mỗi phần tử có key duy nhất
+                              key={item.id}
                               color="primary"
                               style={{
                                 color: "white",
                                 marginRight:
                                   index !== blog.categories.length - 1
                                     ? "10px"
-                                    : "0px", // Thêm margin-right ngoại trừ phần tử cuối cùng
+                                    : "0px",
                               }}
                             >
                               {item.name}
@@ -148,12 +150,10 @@ export const Blog = () => {
                           <span className="mx-2">
                             {`${calculateReadingTime(blog.content)} min`}
                           </span>
-                          {/* Cần lấy ra số lượng comment của bài blog. */}
-                          {/* <a href="#">{blog.blogCount}</a> */}
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 

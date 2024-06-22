@@ -29,7 +29,9 @@ import { BlogSideBar } from "./BlogSideBar";
 export const BlogSingle = () => {
   const dispatch = useDispatch();
   const blog = useSelector((state) => state.blogs.blog);
+  const blogs = useSelector((state) => state.blogs.blogs);
   const comments = useSelector((state) => state.comments.comments);
+  const categories = useSelector((state) => state.blogs.categories);
   const user = useSelector((state) => state.auth.user);
   const { id } = useParams();
   const [readingTime, setReadingTime] = useState(0);
@@ -40,8 +42,8 @@ export const BlogSingle = () => {
         await Promise.all([
           dispatch(fetchBlogById(id)).unwrap(),
           dispatch(fetchAllCommentByBlogId(id)).unwrap(),
-          dispatch(fetchAllCategories()).unwrap(),
-          dispatch(fetchAllBlog()).unwrap(),
+          categories.length === 0 && dispatch(fetchAllCategories()).unwrap(),
+          blogs.length === 0 && dispatch(fetchAllBlog()).unwrap(),
         ]);
 
         console.log("The data has been loaded successfully.");
@@ -71,8 +73,6 @@ export const BlogSingle = () => {
 
   return (
     <GlobalLayoutUser>
-      <ReadingBar />
-
       {blog && (
         <>
           <section
@@ -105,6 +105,7 @@ export const BlogSingle = () => {
             </div>
           </section>
           <section className="site-section" id="next-section">
+            <ReadingBar />
             <div className="container">
               <div className="row">
                 <div className="col-lg-8 blog-content">

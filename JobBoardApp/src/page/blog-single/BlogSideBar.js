@@ -6,7 +6,6 @@ export const BlogSideBar = memo((props) => {
   const categories = useSelector((state) => state.blogs.categories);
   const blogs = useSelector((state) => state.blogs.blogs);
   const author = useSelector((state) => state.blogs.author);
-  console.log(">>>author: ", author);
   return (
     <div className="col-lg-4 sidebar pl-lg-5">
       <div className="sidebar-box">

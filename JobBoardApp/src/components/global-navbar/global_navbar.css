@@ -21,8 +21,6 @@
 .icon-notification {
   position: relative;
   cursor: pointer;
-  margin-right: 50px;
-  line-height: 60px;
 }
 .icon-notification span {
   background: #f00;
@@ -32,7 +30,7 @@
   vertical-align: top;
   margin-left: -25px;
 }
-.icon-notification img {
+.icon-notification svg {
   display: inline-block;
   width: 26px;
   margin-top: 4px;
@@ -96,7 +94,7 @@
   color: #aaa;
   font-size: 12px;
 }
-.icon .shake {
+.icon-notification .shake {
   animation: shake 0.5s linear infinite;
 }
 
