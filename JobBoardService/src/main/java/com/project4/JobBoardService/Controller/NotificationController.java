@@ -86,7 +86,6 @@ public class NotificationController {
 
             Notification updated = notificationService.updateIsRead(id);
             NotificationDTO response = modelMapper.map(updated, NotificationDTO.class);
-            template.convertAndSend("/topic/notifications", response);
             return ResponseEntity.ok(response);
         }catch(Exception e){
             return ResponseEntity.internalServerError().build();
