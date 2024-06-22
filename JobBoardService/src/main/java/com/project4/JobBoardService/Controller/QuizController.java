@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuizDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Quiz;
@@ -94,8 +95,8 @@ public class QuizController {
 
     @PreAuthorize("permitAll()")
     @PostMapping("/submit")
-    public ResponseEntity<Integer> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
-        int score = quizService.calculateScore(quizSubmission);
-        return ResponseEntity.ok(score);
+    public ResponseEntity<List<QuestionResultDTO>> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+        List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
+        return ResponseEntity.ok(results);
     }
 }

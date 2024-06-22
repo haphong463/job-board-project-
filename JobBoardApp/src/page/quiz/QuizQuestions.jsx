@@ -13,12 +13,14 @@ const QuizQuestions = () => {
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(10 * 60); 
   const [showModal, setShowModal] = useState(false);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
   const [score, setScore] = useState(null);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+
   const REACT_APP_API_ENDPOINT =
     process.env.REACT_APP_API_ENDPOINT || "http://localhost:8080/api";
 
@@ -34,12 +36,24 @@ const QuizQuestions = () => {
           `${REACT_APP_API_ENDPOINT}/quizzes/${quizId}/questions`
         );
         setQuestions(questionsResponse.data);
+        setTotalQuestions(questionsResponse.data.length); 
+        
       } catch (error) {
         console.error("Error fetching quiz details:", error);
       }
     };
 
     fetchQuizDetails();
+
+    const savedTimeLeft = localStorage.getItem(`timeLeft_${quizId}`);
+    if (savedTimeLeft) {
+      setTimeLeft(parseInt(savedTimeLeft, 10));
+    }
+
+    const savedAnswers = localStorage.getItem(`selectedAnswers_${quizId}`);
+    if (savedAnswers) {
+      setSelectedAnswers(JSON.parse(savedAnswers));
+    }
 
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
@@ -86,30 +100,38 @@ const QuizQuestions = () => {
 
   const handleSubmitQuiz = async () => {
     const submission = {
-        quizId: parseInt(quizId, 10),
-        userId: 12, // Replace with actual userId logic
-        questions: Object.keys(selectedAnswers).map((questionId) => ({
-            questionId: parseInt(questionId, 10),
-            selectedAnswer: selectedAnswers[questionId].split(".")[0].trim(),
-        })),
+      quizId: parseInt(quizId),
+      questions: Object.keys(selectedAnswers).map((questionId) => ({
+        questionId: parseInt(questionId),
+        selectedAnswer: selectedAnswers[questionId].split(".")[0].trim(),
+      })),
     };
- // Debug log the submission object
- console.log("Submission Data:", submission);
 
     try {
-        const response = await axios.post(
-            `${REACT_APP_API_ENDPOINT}/quizzes/submit`,
-            submission
-        );
-        setScore(response.data);
+      const response = await axios.post(`${REACT_APP_API_ENDPOINT}/quizzes/submit`, submission);
+
+      if (response.data && Array.isArray(response.data)) {
+        const results = response.data;
         setShowModal(false);
         setShowScoreModal(true);
+        setScore(calculateScore(results));
         localStorage.removeItem(`timeLeft_${quizId}`);
         localStorage.removeItem(`selectedAnswers_${quizId}`);
+        navigate(`/quiz/${quizId}/result`, {
+          state: {
+            results: results,
+            totalQuestions: questions.length,
+            quizId: quizId 
+          },
+        });
+      } else {
+        console.error("Unexpected response data:", response.data);
+      }
     } catch (error) {
-        console.error("Error submitting quiz:", error);
+      console.error("Error submitting quiz:", error);
     }
-};
+  };
+
   const handleExitQuiz = () => {
     setShowExitConfirmModal(true);
   };
@@ -149,8 +171,18 @@ const QuizQuestions = () => {
   };
 
   const getUnansweredQuestionsCount = () => {
-    return questions.filter((question) => !selectedAnswers[question.id])
-      .length;
+    const unansweredCount = questions.filter(
+      (question) => !selectedAnswers[question.id]
+    ).length;
+    return unansweredCount;
+  };
+
+  const calculateScore = (results) => {
+    const correctAnswersCount = results.filter(
+      (result) => result.selectedAnswer === result.correctAnswer
+    ).length;
+    const percentage = (correctAnswersCount / totalQuestions) * 100;
+    return percentage.toFixed(2);
   };
 
   return (
@@ -249,73 +281,76 @@ const QuizQuestions = () => {
               </button>
               <button className="btn btn-danger mt-3" onClick={handleExitQuiz}>
                 Thoát Bài Thi
-              </button>
-            </div>
-          </div>
+              </button>          </div>
         </div>
+      </div>
 
-        <Modal show={showModal} onHide={handleCloseModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Nộp bài</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {`Đề thi còn ${getUnansweredQuestionsCount()} câu chưa hoàn thành, bạn có chắc chắn muốn nộp bài không?`}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Hủy
-            </Button>
-            <Button variant="primary" onClick={handleSubmitQuiz}>
-              Đồng ý
-            </Button>
-          </Modal.Footer>
-        </Modal>
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Nộp bài</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {getUnansweredQuestionsCount() > 0 ? (
+            `Đề thi còn ${getUnansweredQuestionsCount()} câu chưa hoàn thành, bạn có chắc chắn muốn nộp bài không?`
+          ) : (
+            "Bạn đã trả lời hết các câu hỏi, bạn có muốn nộp bài không?"
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Hủy
+          </Button>
+          <Button variant="primary" onClick={handleSubmitQuiz}>
+            Đồng ý
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-        <Modal show={showTimeUpModal} onHide={handleCloseTimeUpModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Hết thời gian!</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Thời gian làm bài đã hết.</Modal.Body>
-          <Modal.Footer>
-            <Button variant="primary" onClick={handleCloseTimeUpModal}>
-              Đóng
-            </Button>
-          </Modal.Footer>
-        </Modal>
+      <Modal show={showTimeUpModal} onHide={handleCloseTimeUpModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Hết thời gian!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Thời gian làm bài đã hết.</Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleCloseTimeUpModal}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-        <Modal show={showScoreModal} onHide={handleCloseScoreModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Kết quả bài thi</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {score && <p>Điểm số của bạn là: {score}</p>}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="primary" onClick={handleCloseScoreModal}>
-              Đóng
-            </Button>
-          </Modal.Footer>
-        </Modal>
+      <Modal show={showScoreModal} onHide={handleCloseScoreModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Kết quả bài thi</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {score && <p>Điểm số của bạn là: {score}</p>}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleCloseScoreModal}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-        <Modal show={showExitConfirmModal} onHide={handleCancelExit}>
-          <Modal.Header closeButton>
-            <Modal.Title>Xác nhận thoát</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Bạn có chắc chắn muốn thoát khỏi bài thi giữa chừng không?
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCancelExit}>
-              Hủy
-            </Button>
-            <Button variant="danger" onClick={handleConfirmExit}>
-              Thoát
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </>
-    </GlobalLayoutUser>
-  );
-};
+      <Modal show={showExitConfirmModal} onHide={handleCancelExit}>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác nhận thoát</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Bạn có chắc chắn muốn thoát khỏi bài thi giữa chừng không?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCancelExit}>
+            Hủy
+          </Button>
+          <Button variant="danger" onClick={handleConfirmExit}>
+            Thoát
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  </GlobalLayoutUser>
+);
+}
 
 export default QuizQuestions;

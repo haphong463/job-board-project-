@@ -107,11 +107,7 @@ export const Quiz = () => {
                   <h2>{selectedQuiz.title}</h2>
                   <div>
                     <p>Trình độ: Trung bình</p>
-                    <p>15 câu hỏi nhiều đáp án</p>
-                  </div>
-                  <div>
-                    <p>15 phút làm bài</p>
-                    <p>1800+ ứng viên đã làm bài đánh giá này</p>
+                    <p>10 câu hỏi nhiều đáp án</p>
                   </div>
                   <div className="custom-dialog-description">
                     <p>Mô tả bài đánh giá</p>
