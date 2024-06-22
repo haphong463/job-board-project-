@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface NotificationService {
     List<Notification> getNotificationByRecipient(User user);
     Notification createNotification(Notification notification);
+    Notification updateIsRead(Long id);
 }

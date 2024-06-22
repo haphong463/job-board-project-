@@ -3,10 +3,7 @@ package com.project4.JobBoardService.Entity;
 
 import com.project4.JobBoardService.Enum.Gender;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,6 +50,10 @@ public class User   {
     private boolean verified;
 
     private String verificationCode;
+
+    private String imageUrl;
+    private String thumbnailUrl;
+    private String bio;
 
 
     @ManyToMany(fetch = FetchType.LAZY)

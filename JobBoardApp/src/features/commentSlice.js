@@ -64,7 +64,7 @@ const commentSlice = createSlice({
     showReplies: {},
     showReplyForm: {},
     showEditForm: {},
-    editedContent: "",
+    editedContent: {},
     originalContent: {},
   },
   reducers: {
@@ -81,8 +81,10 @@ const commentSlice = createSlice({
       state.showReplyForm[commentId] = !state.showReplyForm[commentId];
     },
     toggleShowEditForm(state, action) {
-      const { commentId } = action.payload;
+      const { commentId, content } = action.payload;
       state.showEditForm[commentId] = !state.showEditForm[commentId];
+      state.editedContent[commentId] = content;
+      state.originalContent[commentId] = content;
     },
     setEditedContent(state, action) {
       const { commentId, content } = action.payload;

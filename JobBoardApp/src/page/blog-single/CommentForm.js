@@ -22,16 +22,18 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
     };
     console.log(comment);
     addComment(comment);
-    sendNotificationAsync({
-      message: "commented on your post.",
-      sender: {
-        username: user.sub,
-      },
-      recipient: {
-        username: blog.user.username,
-      },
-      isRead: false,
-    });
+    if (user.sub !== blog.user.username) {
+      sendNotificationAsync({
+        message: "commented on your post.",
+        sender: {
+          username: user.sub,
+        },
+        recipient: {
+          username: blog.user.username,
+        },
+        isRead: false,
+      });
+    }
     setContent("");
   };
   return (

@@ -15,3 +15,11 @@ export const sendNotificationAsync = async (data) => {
     return error;
   }
 };
+
+export const readNotificationAsync = async (id) => {
+  try {
+    return await axiosRequest.put(`/notifications/read/${id}`);
+  } catch (error) {
+    return error;
+  }
+};

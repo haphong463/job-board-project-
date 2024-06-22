@@ -18,13 +18,11 @@
   background-color: var(--bg-primary);
 }
 
-.icon {
-  position: relative; /* Enable absolute positioning for the badge */
+.icon-notification {
+  position: relative;
   cursor: pointer;
-  margin-right: 50px;
-  line-height: 60px;
 }
-.icon span {
+.icon-notification span {
   background: #f00;
   padding: 7px;
   border-radius: 50%;
@@ -32,12 +30,12 @@
   vertical-align: top;
   margin-left: -25px;
 }
-.icon img {
+.icon-notification svg {
   display: inline-block;
   width: 26px;
   margin-top: 4px;
 }
-.icon:hover {
+.icon-notification:hover {
   opacity: 0.7;
 }
 .logo {
@@ -96,7 +94,7 @@
   color: #aaa;
   font-size: 12px;
 }
-.icon .shake {
+.icon-notification .shake {
   animation: shake 0.5s linear infinite;
 }
 

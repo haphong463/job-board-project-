@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   getNotificationAsync,
+  readNotificationAsync,
   sendNotificationAsync,
 } from "../services/NotificationService";
 
@@ -13,6 +14,14 @@ export const getNotificationThunk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
+  }
+);
+
+export const readNotificationThunk = createAsyncThunk(
+  "notification/read",
+  async (id) => {
+    const res = await readNotificationAsync(id);
+    return res;
   }
 );
 
@@ -29,15 +38,6 @@ const notificationSlice = createSlice({
       state.list.push(action.payload); // Mark new notification as unread
       state.unreadCount++;
     },
-    markNotificationAsRead: (state, action) => {
-      const notificationIndex = state.list.findIndex(
-        (notification) => notification.id === action.payload
-      );
-      if (notificationIndex !== -1) {
-        state.list[notificationIndex].read = true;
-        state.unreadCount--;
-      }
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -46,16 +46,23 @@ const notificationSlice = createSlice({
       })
       .addCase(getNotificationThunk.fulfilled, (state, action) => {
         state.status = "Filled";
-        console.log("notifications: ", action.payload);
         state.list = action.payload;
-        if (state.list.length > 0) {
-          state.unreadCount = state.list.map((item) => !item.isRead).length;
-        }
+        state.unreadCount = state.list.filter((item) => !item.read).length;
+
         state.error = null;
       })
       .addCase(getNotificationThunk.rejected, (state, action) => {
         state.status = "Rejected";
         state.error = action.payload;
+      })
+      .addCase(readNotificationThunk.fulfilled, (state, action) => {
+        const notificationIndex = state.list.findIndex(
+          (notification) => notification.id === action.payload.id
+        );
+        if (notificationIndex !== -1) {
+          state.list[notificationIndex].read = true;
+          state.unreadCount--;
+        }
       });
   },
 });

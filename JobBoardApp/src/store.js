@@ -9,28 +9,33 @@ import { persistReducer } from "redux-persist";
 import { combineReducers } from "@reduxjs/toolkit";
 
 // Cấu hình persist với whitelist
-const persistConfig = {
-  key: "root",
-  version: 1,
-  storage,
-  whitelist: ["notification"], // Chỉ lưu trữ notification reducer
-};
+// const persistConfig = {
+//   key: "root",
+//   version: 1,
+//   storage,
+// };
 
-const rootReducer = combineReducers({
-  blogs: blogsReducer,
-  comments: commentReducer,
-  auth: authReducer,
-  category: categoryReducer,
-  notification: notificationReducer,
-});
+// const rootReducer = combineReducers({
+//   blogs: blogsReducer,
+//   comments: commentReducer,
+//   auth: authReducer,
+//   category: categoryReducer,
+//   notification: notificationReducer,
+// });
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+// const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // Cấu hình store với persistedReducer
 export const store = configureStore({
-  reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-    }),
+  reducer: {
+    blogs: blogsReducer,
+    comments: commentReducer,
+    auth: authReducer,
+    category: categoryReducer,
+    notification: notificationReducer,
+  },
+  // middleware: (getDefaultMiddleware) =>
+  //   getDefaultMiddleware({
+  //     serializableCheck: false,
+  //   }),
 });

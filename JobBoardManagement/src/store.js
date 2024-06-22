@@ -10,7 +10,7 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  blacklist: ["jobCategory"],
+  blacklist: ["jobCategory", "auth"],
 };
 const reducer = combineReducers({
   blogs: blogsReducer,

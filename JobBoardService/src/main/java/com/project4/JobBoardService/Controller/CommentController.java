@@ -1,13 +1,14 @@
 package com.project4.JobBoardService.Controller;
-
 import com.project4.JobBoardService.DTO.CommentDTO;
 import com.project4.JobBoardService.DTO.NewCommentDTO;
 import com.project4.JobBoardService.Entity.Comment;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.CommentService;
 import com.project4.JobBoardService.Service.UserService;
+import com.project4.JobBoardService.Util.AuthorizationUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,9 @@ public class CommentController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private AuthorizationUtils authorizationUtils;
 //    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/blog/{slug}")
     public ResponseEntity<List<CommentDTO>> getCommentsByBlogId(@PathVariable String slug) {
@@ -37,10 +41,17 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
     @PostMapping
-    public ResponseEntity<?> createComment(@RequestBody Comment comment) {
+    public ResponseEntity<?> createComment(@RequestBody Comment comment, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+
+        ResponseEntity<?> authorizationResponse = authorizationUtils.authorize(token, comment.getUser().getUsername());
+        if (authorizationResponse != null) {
+            return authorizationResponse;
+        }
+
         try {
+
             User user = userService.findByUsername(comment.getUser().getUsername()).orElse(null);
             if(user != null){
                 comment.setUser(user);
@@ -56,11 +67,16 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Comment> deleteComment(@PathVariable Long id) {
+    public ResponseEntity<?> deleteComment(@PathVariable Long id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try{
+
             Comment existingComment = commentService.getCommentById(id);
+            ResponseEntity<?> authorizationResponse = authorizationUtils.authorize(token, existingComment.getUser().getUsername());
+            if (authorizationResponse != null) {
+                return authorizationResponse;
+            }
             if(id != null){
                 commentService.deleteComment(id);
                 return ResponseEntity.ok().build();
@@ -70,17 +86,23 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-//    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<CommentDTO> updateComment(@PathVariable Long id, @RequestBody  Comment comment){
+    public ResponseEntity<?> updateComment(@PathVariable Long id, @RequestBody Comment comment, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
+            Comment existingComment = commentService.getCommentById(id);
+            ResponseEntity<?> authorizationResponse = authorizationUtils.authorize(token, existingComment.getUser().getUsername());
+            if (authorizationResponse != null) {
+                return authorizationResponse;
+            }
+
             Comment commentUpdate = commentService.updatedComment(id, comment);
-            if(commentUpdate != null){
+            if (commentUpdate != null) {
                 CommentDTO commentUpdateDTO = modelMapper.map(commentUpdate, CommentDTO.class);
                 return ResponseEntity.ok(commentUpdateDTO);
             }
             return ResponseEntity.notFound().build();
-        }catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
         }
     }

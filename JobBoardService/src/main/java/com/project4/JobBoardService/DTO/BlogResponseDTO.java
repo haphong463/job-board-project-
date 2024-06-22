@@ -52,6 +52,8 @@ public class BlogResponseDTO {
         private String email;
         private String firstName;
         private String lastName;
+        private String bio;
+        private String imageUrl;
         // Getters and setters
     }
 }

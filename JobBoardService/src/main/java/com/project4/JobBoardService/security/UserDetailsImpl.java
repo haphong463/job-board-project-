@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Enum.Gender;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +27,14 @@ public class UserDetailsImpl implements UserDetails {
     private String firstName;
     private String lastName;
 
+    @Getter
+    private String imageUrl;
+
+    @Getter
+    private String bio;
+
+    @Getter
+    private Gender gender;
 
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -51,6 +62,9 @@ public class UserDetailsImpl implements UserDetails {
 
         userDetails.firstName = user.getFirstName();
         userDetails.lastName = user.getLastName();
+        userDetails.bio = user.getBio();
+        userDetails.imageUrl = user.getImageUrl();
+        userDetails.gender = user.getGender();
 
         return userDetails;
     }
@@ -104,6 +118,8 @@ public class UserDetailsImpl implements UserDetails {
     public String getLastName() {
         return lastName;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

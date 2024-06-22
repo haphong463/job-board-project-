@@ -32,7 +32,7 @@ public class BlogServiceImpl implements BlogService {
     private ModelMapper modelMapper;
 
     @Override
-    public Blog createBlog(Blog blog, MultipartFile imageFile) throws IOException {
+    public Blog createBlog(Blog blog, MultipartFile imageFile) {
         handleImageFile(blog, imageFile, "create");
         return blogRepository.save(blog);
     }

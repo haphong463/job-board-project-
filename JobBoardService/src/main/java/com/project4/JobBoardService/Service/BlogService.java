@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface BlogService {
     List<Blog> getAllBlog();
-    Blog createBlog(Blog blog, MultipartFile imageFile) throws IOException;
+    Blog createBlog(Blog blog, MultipartFile imageFile);
     Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile);
     Blog getBlogById(Long id);
     void deleteBlog(Long id);

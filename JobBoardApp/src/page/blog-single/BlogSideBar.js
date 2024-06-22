@@ -1,11 +1,11 @@
+import { memo } from "react";
 import { useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
 
-export function BlogSideBar(props) {
+export const BlogSideBar = memo((props) => {
   const categories = useSelector((state) => state.blogs.categories);
   const blogs = useSelector((state) => state.blogs.blogs);
   const author = useSelector((state) => state.blogs.author);
-  console.log(">>>author: ", author);
   return (
     <div className="col-lg-4 sidebar pl-lg-5">
       <div className="sidebar-box">
@@ -17,12 +17,7 @@ export function BlogSideBar(props) {
         <h3>
           {author?.firstName} {author?.lastName}
         </h3>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus
-          itaque, autem necessitatibus voluptate quod mollitia delectus aut,
-          sunt placeat nam vero culpa sapiente consectetur similique, inventore
-          eos fugit cupiditate numquam!
-        </p>
+        <p>{author?.bio}</p>
         <p>
           <a href="#" className="btn btn-primary btn-sm">
             Read More
@@ -53,4 +48,4 @@ export function BlogSideBar(props) {
       </div>
     </div>
   );
-}
+});

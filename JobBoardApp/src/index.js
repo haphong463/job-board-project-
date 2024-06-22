@@ -12,14 +12,14 @@ import { PersistGate } from "redux-persist/integration/react";
 // import i18n from "./translation/translatetion";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-let persistor = persistStore(store);
+// let persistor = persistStore(store);
 root.render(
   <Router>
     <Provider store={store}>
       {/* <I18nextProvider i18n={i18n}> */}
-      <PersistGate loading={null} persistor={persistor}>
-        <App />
-      </PersistGate>
+      {/* <PersistGate loading={null} persistor={persistor}> */}
+      <App />
+      {/* </PersistGate> */}
       {/* </I18nextProvider> */}
     </Provider>
   </Router>

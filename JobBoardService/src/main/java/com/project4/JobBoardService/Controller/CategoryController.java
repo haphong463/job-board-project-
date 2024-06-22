@@ -43,8 +43,8 @@ public class CategoryController {
     public Category createCategory(@Validated @RequestBody Category category) {
         return categoryRepository.save(category);
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable(value = "id") Long categoryId,
                                                    @Validated @RequestBody Category categoryDetails) throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)
@@ -53,8 +53,8 @@ public class CategoryController {
         final Category updatedCategory = categoryRepository.save(category);
         return ResponseEntity.ok(updatedCategory);
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/{id}")
     public Map<String, Boolean> deleteCategory(@PathVariable(value = "id") Long categoryId)
             throws ResourceNotFoundException {
         Category category = categoryRepository.findById(categoryId)
