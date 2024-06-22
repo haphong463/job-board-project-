@@ -17,7 +17,7 @@ import { JobSingle } from "../../page/job-single/JobSingle";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import SetupCredentials from "../../page/signup/SetupCredentials";
 import { Quiz } from "../../page/quiz/quiz";
-
+import QuizResult from "../../page/quiz/QuizResult";
 import QuizQuestions from "../../page/quiz/QuizQuestions";
 export const routes = [
   { path: "/", component: <Home /> },
@@ -40,4 +40,5 @@ export const routes = [
   { path :"/SetupCredentials", component:<SetupCredentials/>},
   {path:"/quiz", component:<Quiz/>},
   {path:"/quiz/:quizId", component:<QuizQuestions/>},
+  {path:"/quiz/:quizId/result", component:<QuizResult/>},
 ];

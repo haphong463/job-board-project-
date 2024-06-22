@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Service;
 
+import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Quiz;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,4 +17,5 @@ public interface QuizService {
     int calculateScore(QuizSubmissionDTO quizSubmission);
 
 
+    List<QuestionResultDTO> calculateDetailedScore(QuizSubmissionDTO quizSubmission);
 }

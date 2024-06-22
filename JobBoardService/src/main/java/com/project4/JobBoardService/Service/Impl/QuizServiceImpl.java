@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuestionSubmissionDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Question;
@@ -17,8 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -135,5 +139,25 @@ public class QuizServiceImpl implements QuizService {
         return score;
     }
 
+    @Override
+    public List<QuestionResultDTO> calculateDetailedScore(QuizSubmissionDTO quizSubmission) {
+        List<QuestionResultDTO> results = new ArrayList<>();
+        Map<Long, String> correctAnswers = getCorrectAnswersForQuiz(quizSubmission.getQuizId());
+
+        for (QuestionSubmissionDTO questionSubmission : quizSubmission.getQuestions()) {
+            String correctAnswer = correctAnswers.get(questionSubmission.getQuestionId());
+            results.add(new QuestionResultDTO(
+                    questionSubmission.getQuestionId(),
+                    questionSubmission.getSelectedAnswer(),
+                    correctAnswer
+            ));
+        }
+
+        return results;
+    }
+    private Map<Long, String> getCorrectAnswersForQuiz(Long quizId) {
+        List<Question> questions = questionRepository.findByQuizId(quizId);
+        return questions.stream().collect(Collectors.toMap(Question::getId, Question::getCorrectAnswer));
+    }
 
 }
