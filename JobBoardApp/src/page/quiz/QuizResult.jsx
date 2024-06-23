@@ -7,8 +7,8 @@ const QuizResult = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Ensure the state is properly logged for debugging
   console.log("Location state:", location.state);
+
 
   const { results, totalQuestions, quizId } = location.state || {};
   const correctAnswersCount = results
@@ -31,6 +31,8 @@ const QuizResult = () => {
   return (
     <GlobalLayoutUser>
       <>
+      <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=YOUR_APP_ID&autoLogAppEvents=1" nonce="YOUR_NONCE"></script>
+
         <section
           className="section-hero overlay inner-page bg-image"
           style={{ backgroundImage: 'url("../../../../assets/images/hero_1.jpg")' }}
@@ -56,9 +58,10 @@ const QuizResult = () => {
             <p>{percentage < 50 ? "Bạn cần học thêm nhiều hơn!" : "Tốt lắm, tiếp tục phát huy!"}</p>
           </div>
           <div className="result-actions">
-            <button className="btn btn-primary" onClick={handleRetry}>Làm lại bài đánh giá</button>
-            <button className="btn btn-secondary" onClick={handleGoBack}>Quay lại trang danh sách kỹ năng</button>
-          </div>
+  <button className="btn btn-primary" onClick={handleRetry}>Làm lại bài đánh giá</button>
+  <button className="btn btn-secondary" onClick={handleGoBack}>Quay lại trang danh sách kỹ năng</button>
+ 
+</div>
         </div>
       </>
     </GlobalLayoutUser>

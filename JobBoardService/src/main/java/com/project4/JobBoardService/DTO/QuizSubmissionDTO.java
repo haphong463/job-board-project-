@@ -16,6 +16,8 @@ public class QuizSubmissionDTO {
     private Long userId;
     private Long quizId;
     private List<QuestionSubmissionDTO> questions = new ArrayList<>();
+    private String userName;  // Thêm trường này nếu chưa có
+    private String userEmail; // Thêm trường này
 
 
 }
