@@ -1,11 +1,18 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { forgotPassword, resetMessages } from '../../features/authSlice';
+import { forgotPassword, resetMessages } from "../../features/authSlice";
+import { Navigate } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const user = useSelector((state) => state.auth.user);
+
   const dispatch = useDispatch();
   const { successMessage, errorMessage } = useSelector((state) => state.auth);
 
@@ -16,6 +23,7 @@ const ForgotPassword = () => {
   useEffect(() => {
     dispatch(resetMessages());
   }, [dispatch]);
+  if (user) return <Navigate to="/" replace={true} />;
 
   return (
     <GlobalLayoutUser>
@@ -45,14 +53,19 @@ const ForgotPassword = () => {
           <div className="row">
             <div className="col-lg-6">
               <h2 className="mb-4">Forgot Password</h2>
-              {successMessage && <p className="text-success">{successMessage}</p>}
+              {successMessage && (
+                <p className="text-success">{successMessage}</p>
+              )}
               {errorMessage && <p className="text-danger">{errorMessage}</p>}
-              <form onSubmit={handleSubmit(onSubmit)} className="p-4 border rounded">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="p-4 border rounded"
+              >
                 <div className="form-group">
                   <input
                     type="text"
                     id="forgotPasswordEmail"
-                    {...register("email", { required: 'Email is required' })}
+                    {...register("email", { required: "Email is required" })}
                     className="form-control"
                     placeholder="Email address"
                   />

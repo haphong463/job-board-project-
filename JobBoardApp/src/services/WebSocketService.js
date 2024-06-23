@@ -8,7 +8,7 @@ let stompClient = null;
 
 export const connectWebSocket = (user) => {
   if (user) {
-    const socket = new SockJS(`http://localhost:8080/ws`);
+    const socket = new SockJS(process.env.REACT_APP_WEBSOCKET_ENDPOINT);
     stompClient = new Client({
       webSocketFactory: () => socket,
     });
