@@ -1,86 +1,122 @@
+// quizSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  getAllQuizzes,
-  createQuiz as createQuizAsync,
-  deleteQuiz as deleteQuizAsync,
-  updateQuiz as updateQuizAsync,
-} from "../services/quiz_service";
+import { fetchQuizzes, createQuiz, deleteQuiz, updateQuiz } from "../services/quiz_service";
+import { createQuestionAsync, updateQuestionAsync, deleteQuestionAsync } from "../services/questionService";
 
-// Async thunk to fetch all quizzes
+const initialState = {
+  quizzes: [],
+  status: 'idle',
+  error: null,
+};
 
-export const fetchQuizzes = createAsyncThunk("quizzes/fetchQuizzes", async () => {
-  try {
-    const response = await getAllQuizzes();
+export const fetchQuizzesAsync = createAsyncThunk(
+  "quizzes/fetchQuizzes",
+  async () => {
+    const response = await fetchQuizzes();
     return response;
-  } catch (error) {
-    throw new Error("Error fetching quizzes");
   }
+);
+
+export const createNewQuiz = createAsyncThunk('quizzes/createQuiz', async (formData) => {
+  const { title, description, imageFile } = formData;
+  const response = await createQuiz(title, description, imageFile);
+  return response.data;
 });
 
-// Async thunk to add a new quiz
-export const addQuiz = createAsyncThunk("quizzes/addQuiz", async (data) => {
-  try {
-    const { title, description, imageFile } = data;
-    const response = await createQuizAsync(title, description, imageFile);
-    return response;
-  } catch (error) {
-    throw new Error("Error creating quiz");
-  }
+export const removeQuiz = createAsyncThunk('quizzes/deleteQuiz', async (quizId) => {
+  await deleteQuiz(quizId);
+  return quizId;
 });
 
-// Async thunk to delete a quiz by ID
-export const deleteQuiz = createAsyncThunk("quizzes/deleteQuiz", async (id) => {
-  try {
-    await deleteQuizAsync(id);
-    return id;
-  } catch (error) {
-    throw new Error(`Error deleting quiz with id ${id}`);
-  }
+export const modifyQuiz = createAsyncThunk('quizzes/updateQuiz', async ({ id, data, imageFile }) => {
+  const response = await updateQuiz(id, data, imageFile);
+  return response.data;
 });
 
-// Async thunk to update a quiz by ID
-export const updateQuiz = createAsyncThunk("quizzes/updateQuiz", async ({ id, data }) => {
-  try {
-    const response = await updateQuizAsync(id, data);
-    return response;
-  } catch (error) {
-    throw new Error(`Error updating quiz with id ${id}`);
-  }
+export const deleteQuestion = createAsyncThunk('quizzes/deleteQuestion', async ({ quizId, questionId }) => {
+  await deleteQuestionAsync(quizId, questionId);
+  return { quizId, questionId };
 });
 
 const quizSlice = createSlice({
-  name: "quizzes",
-  initialState: {
-    list: [],
-    status: "idle",
-    error: null,
+  name: 'quizzes',
+  initialState,
+  reducers: {
+    createQuestion(state, action) {
+      const { quizId, ...newQuestion } = action.payload;
+      const quizIndex = state.quizzes.findIndex((quiz) => quiz.id === quizId);
+      if (quizIndex !== -1) {
+        state.quizzes[quizIndex].questions.push(newQuestion);
+      }
+    },
+    updateQuestion(state, action) {
+      const { quizId, questionId, ...updatedData } = action.payload;
+      const quizIndex = state.quizzes.findIndex((quiz) => quiz.id === quizId);
+      if (quizIndex !== -1) {
+        const questionIndex = state.quizzes[quizIndex].questions.findIndex((q) => q.id === questionId);
+        if (questionIndex !== -1) {
+          state.quizzes[quizIndex].questions[questionIndex] = {
+            ...state.quizzes[quizIndex].questions[questionIndex],
+            ...updatedData,
+          };
+        }
+      }
+    },
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchQuizzes.pending, (state) => {
+      .addCase(fetchQuizzesAsync.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchQuizzes.fulfilled, (state, action) => {
+      .addCase(fetchQuizzesAsync.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.list = action.payload;
+        state.quizzes = action.payload;
       })
-      .addCase(fetchQuizzes.rejected, (state, action) => {
+      .addCase(fetchQuizzesAsync.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
-      .addCase(addQuiz.fulfilled, (state, action) => {
-        state.list.push(action.payload);
+      .addCase(createNewQuiz.fulfilled, (state, action) => {
+        state.quizzes.push(action.payload);
       })
-      .addCase(deleteQuiz.fulfilled, (state, action) => {
-        state.list = state.list.filter((quiz) => quiz.id !== action.payload);
+      .addCase(createNewQuiz.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
       })
-      .addCase(updateQuiz.fulfilled, (state, action) => {
-        state.list = state.list.map((quiz) =>
+      .addCase(removeQuiz.fulfilled, (state, action) => {
+        state.quizzes = state.quizzes.filter((quiz) => quiz.id !== action.payload);
+      })
+      .addCase(removeQuiz.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(modifyQuiz.fulfilled, (state, action) => {
+        state.quizzes = state.quizzes.map((quiz) =>
           quiz.id === action.payload.id ? action.payload : quiz
         );
-      });
+      })
+      .addCase(modifyQuiz.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      })
+      .addCase(deleteQuestion.fulfilled, (state, action) => {
+        const { quizId, questionId } = action.payload;
+        const quizIndex = state.quizzes.findIndex((quiz) => quiz.id === quizId);
+        if (quizIndex !== -1) {
+          state.quizzes[quizIndex].questions = state.quizzes[quizIndex].questions.filter((q) => q.id !== questionId);
+        }
+      })
+      .addMatcher(
+        (action) =>
+          action.type.endsWith('/pending') || action.type.endsWith('/rejected'),
+        (state) => {
+          state.status = 'loading';
+        }
+      );
   },
 });
+
+export const { createQuestion, updateQuestion } = quizSlice.actions;
 
 export default quizSlice.reducer;

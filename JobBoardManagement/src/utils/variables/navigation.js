@@ -33,6 +33,19 @@ export const navigation = [
             href: "/jobportal/table",
             icon: "bi bi-hdd-stack",
           },
+     
+        ],
+      },
+      {
+        title: "Quiz and Questions",
+        icon: "bi bi-question-circle",
+        children: [
+          {
+            title: "Quiz",
+            href: "/jobportal/quiz",
+            icon: "bi bi-question-circle",
+          },
+      
         ],
       },
     ],
