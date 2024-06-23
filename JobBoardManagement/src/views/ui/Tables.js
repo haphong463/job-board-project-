@@ -92,7 +92,7 @@ const Tables = () => {
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-card-text me-2"> </i>
             Blog List
-          </CardTitle>
+          </CardTitle>  
           <DataTable columns={columns} data={blogData} />
         </Card>
       </Col>
