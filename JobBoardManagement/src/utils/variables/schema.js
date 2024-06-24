@@ -2,13 +2,14 @@ import * as yup from "yup";
 
 export const blogSchema = (isEdit) => {
   return yup.object().shape({
-    title: yup
-      .string()
-      .required("Title is required")
-      .max(50, "Title must be less than 50 characters."),
+    title: yup.string().required("Title is required"),
     content: yup.string().required("Content is required"),
     citation: yup.string().required("Citation is required"),
-    // blogCategoryId: yup.string().required("Category is required"),
+    categoryIds: yup
+      .array()
+      .of(yup.string().required("Category ID is required"))
+      .min(1, "At least one category is required")
+      .required("Category is required"),
     image: isEdit
       ? yup.mixed().nullable()
       : yup
@@ -22,7 +23,6 @@ export const blogSchema = (isEdit) => {
           }),
   });
 };
-
 export const blogCategorySchema = yup.object().shape({
   name: yup.string().required("Name is required"),
 });

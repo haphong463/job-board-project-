@@ -67,9 +67,11 @@ const FullLayout = () => {
       }
     };
 
-    fetchData();
+    if (user) {
+      fetchData();
+    }
     // }
-  }, [dispatch]);
+  }, [dispatch, user]);
 
   if (!user) {
     return <Navigate to="/jobportal/login" />;

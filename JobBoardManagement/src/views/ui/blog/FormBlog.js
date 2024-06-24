@@ -15,7 +15,8 @@ import {
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Editor } from "@tinymce/tinymce-react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { slugify } from "../../../utils/functions/convertToSlug";
 import { createFormData } from "../../../utils/form-data/formDataUtil";
 import { IoMdAdd } from "react-icons/io";
@@ -44,7 +45,6 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     reset,
     watch,
     formState: { errors, isDirty },
-    getValues,
   } = useForm({
     resolver: yupResolver(blogSchema(isEdit)),
     defaultValues: {
@@ -52,7 +52,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       content: "",
       categoryIds: [],
       image: "",
-      status: "",
+      visibility: true,
     },
   });
 
@@ -72,8 +72,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     if (!newData.image || newData.image.length === 0) {
       delete newData.image;
     }
-    console.log(">>>newData: ", newData);
-
+    console.log(">>> new data: ", newData);
     const formData = createFormData(newData);
     if (!isEdit) {
       dispatch(addBlog(formData)).then((response) => {
@@ -101,14 +100,14 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
   useEffect(() => {
     if (isEdit) {
       setModal(true);
-      setValue("title", isEdit.title); // Set the default value when isEdit changes
-      setValue("content", isEdit.content); // Set the default value when isEdit changes
+      setValue("title", isEdit.title);
+      setValue("content", isEdit.content);
       setValue(
         "categoryIds",
         isEdit.categories.map((item) => item.id)
-      ); // Set the default value when isEdit changes
-      setValue("status", isEdit.status); // Set the default value when isEdit changes
-      setValue("citation", isEdit.citation); // Set the default value when isEdit changes
+      );
+      setValue("visibility", isEdit.visibility);
+      setValue("citation", isEdit.citation);
     }
   }, [isEdit, setValue]);
 
@@ -169,30 +168,29 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
             <Row>
               <LeftSideBlogForm
                 control={control}
+                errors={errors}
+                isEdit={isEdit}
                 setValue={setValue}
                 watch={watch}
-                isEdit={isEdit}
-                errors={errors}
               />
               <RightSideBlogForm
-                categoryList={categoryList}
-                previewUrl={previewUrl}
                 control={control}
-                defaultValue={defaultValue}
+                errors={errors}
+                isEdit={isEdit}
+                previewUrl={previewUrl}
                 getRootProps={getRootProps}
                 getInputProps={getInputProps}
-                isEdit={isEdit}
-                errors={errors}
-                getValues={getValues}
+                categoryList={categoryList}
+                defaultValue={defaultValue}
               />
             </Row>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" type="submit" disabled={!isDirty}>
-              Submit
-            </Button>
-            <Button color="secondary" type="button" onClick={toggle}>
+            <Button color="secondary" onClick={toggle}>
               Cancel
+            </Button>
+            <Button color="primary" type="submit" disabled={!isDirty}>
+              {isEdit ? "Update" : "Submit"}
             </Button>
           </ModalFooter>
         </Form>

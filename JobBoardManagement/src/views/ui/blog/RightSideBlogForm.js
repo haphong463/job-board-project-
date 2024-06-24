@@ -1,16 +1,8 @@
 import { Controller } from "react-hook-form";
-import { Col, FormGroup, FormText, Label, Row } from "reactstrap";
+import { Col, FormGroup, FormText, Input, Label, Row } from "reactstrap";
 import Select from "react-select";
-import { capitalizeFirstLetter } from "../../../utils/functions/capitalizeFirstLetter";
-const statusList = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "PUBLISHED", label: "Published" },
-];
+
 export function RightSideBlogForm(props) {
-  const defaultValueStatus = props.isEdit && {
-    label: capitalizeFirstLetter(props.isEdit.status.toLowerCase()),
-    value: props.isEdit.status,
-  };
   return (
     <Col lg={4}>
       <Row>
@@ -42,6 +34,7 @@ export function RightSideBlogForm(props) {
                       defaultValue: props.defaultValue,
                     })}
                     isMulti
+                    closeMenuOnSelect={false}
                   />
                 );
               }}
@@ -55,33 +48,25 @@ export function RightSideBlogForm(props) {
         </Col>
         <Col md={12}>
           <FormGroup>
-            <Label for="status">
-              Status <span className="text-danger">*</span>
+            <Label for="visibility">
+              Visibility <span className="text-danger">*</span>
             </Label>
             <Controller
-              name="status"
+              name="visibility"
               control={props.control}
               render={({ field }) => (
-                <Select
+                <Input
                   {...field}
-                  id="status"
-                  options={statusList.map((item) => ({
-                    value: item.value,
-                    label: item.label,
-                  }))}
-                  isSearchable={false}
-                  onChange={(selectedOption) =>
-                    field.onChange(selectedOption.value)
-                  }
-                  value={statusList.find((item) => item.value === field)}
-                  {...(props.isEdit && {
-                    defaultValue: defaultValueStatus,
-                  })}
+                  type="checkbox"
+                  id="visibility"
+                  defaultChecked={field.value}
                 />
               )}
             />
-            {props.errors.status && (
-              <FormText color="danger">{props.errors.status.message}</FormText>
+            {props.errors.visibility && (
+              <FormText color="danger">
+                {props.errors.visibility.message}
+              </FormText>
             )}
           </FormGroup>
         </Col>
