@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { signInAysnc, signUpAsync } from "../services/AuthService";
-import {jwtDecode} from "jwt-decode"; // Correct import
+import { jwtDecode } from "jwt-decode"; // Correct import
 import axios from "axios";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
@@ -51,7 +51,10 @@ export const signUpEmployer = createAsyncThunk(
   "auth/signUpEmployer",
   async (employerData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/registerEmployer", employerData);
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/registerEmployer",
+        employerData
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -62,7 +65,9 @@ export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`http://localhost:8080/api/auth/forgot-password?email=${email}`);
+      const response = await axios.post(
+        `http://localhost:8080/api/auth/forgot-password?email=${email}`
+      );
       return response.data.message;
     } catch (error) {
       return rejectWithValue(
@@ -92,7 +97,7 @@ export const setupCredentials = createAsyncThunk(
 const name = "auth";
 const initialState = {
   error: null,
-  state: "idle",
+  status: "idle",
   signUpSuccess: false,
   signInSuccess: false,
   isVerified: true,
@@ -119,6 +124,7 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.roles = [];
+      state.status = "idle";
       localStorage.removeItem("accessToken");
     },
     resetVerificationMessage(state) {
@@ -132,33 +138,32 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(signUp.pending, (state) => {
-        state.state = "loading";
+        state.status = "loading";
         state.error = null;
       })
       .addCase(signUp.fulfilled, (state) => {
-        state.state = "succeeded";
+        state.status = "succeeded";
         state.signUpSuccess = true;
       })
       .addCase(signUp.rejected, (state, action) => {
-        state.state = "failed";
+        state.status = "failed";
         state.error = action.payload;
       })
       .addCase(signIn.pending, (state) => {
-        state.state = "loading";
+        state.status = "loading";
         state.error = null;
       })
       .addCase(signIn.fulfilled, (state, action) => {
-        state.state = "succeeded";
+        state.status = "succeeded";
         state.signInSuccess = true;
         state.isVerified = true;
         state.user = jwtDecode(action.payload.accessToken);
         console.log(">>>state user: ", state.user);
         state.roles = state.user.role.map((r) => r.authority);
-       localStorage.setItem("accessToken", action.payload.accessToken);
-
+        localStorage.setItem("accessToken", action.payload.accessToken);
       })
       .addCase(signIn.rejected, (state, action) => {
-        state.state = "failed";
+        state.status = "failed";
         state.error = action.payload;
         if (action.payload && typeof action.payload === "object") {
           state.isVerified = false;
@@ -173,28 +178,28 @@ const authSlice = createSlice({
         state.errorMessage = action.payload;
       })
       .addCase(signUpEmployer.pending, (state) => {
-        state.state = "loading";
+        state.status = "loading";
         state.error = null;
       })
       .addCase(signUpEmployer.fulfilled, (state) => {
-        state.state = "succeeded";
+        state.status = "succeeded";
         state.signUpSuccess = true;
       })
       .addCase(signUpEmployer.rejected, (state, action) => {
-        state.state = "failed";
+        state.status = "failed";
         state.error = action.payload;
       })
       .addCase(setupCredentials.pending, (state) => {
-        state.state = "loading";
+        state.status = "loading";
         state.error = null;
       })
       .addCase(setupCredentials.fulfilled, (state, action) => {
-        state.state = "succeeded";
+        state.status = "succeeded";
         state.setupSuccess = true;
         state.successMessage = action.payload.message;
       })
       .addCase(setupCredentials.rejected, (state, action) => {
-        state.state = "failed";
+        state.status = "failed";
         state.error = action.payload;
       });
   },

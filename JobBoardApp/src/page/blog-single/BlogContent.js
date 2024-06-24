@@ -8,8 +8,8 @@ export function BlogContent(props) {
       const images = blockquoteRef.current.querySelectorAll("img");
       images.forEach((img) => {
         img.classList.add("fixed-size-img");
-        img.setAttribute("width", "300");
-        img.setAttribute("height", "300");
+        img.setAttribute("width", "100%");
+        img.setAttribute("height", "auto");
       });
     }
   }, [props.content]); // Chạy lại hiệu ứng khi blog.content thay đổi

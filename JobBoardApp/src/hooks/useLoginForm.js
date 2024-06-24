@@ -9,9 +9,6 @@ import { signIn, resetSignInSuccess } from "../features/authSlice";
 export const useLoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const signInSuccess = useSelector((state) => state.auth.signInSuccess);
-  const signInError = useSelector((state) => state.auth.error);
-  const location = useLocation();
 
   const {
     register,
@@ -31,6 +28,7 @@ export const useLoginForm = () => {
       .then((res) => {
         if (res.meta.requestStatus === "fulfilled") {
           navigate(-1, { replace: true });
+          dispatch(resetSignInSuccess());
         }
       })
       .catch((err) => {

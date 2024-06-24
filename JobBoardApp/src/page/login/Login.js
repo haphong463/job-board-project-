@@ -13,6 +13,7 @@ export const Login = () => {
   const verificationMessage = useSelector(
     (state) => state.auth.verificationMessage
   );
+  const status = useSelector((state) => state.auth.status);
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +25,8 @@ export const Login = () => {
   useEffect(() => {
     dispatch(resetVerificationMessage());
   }, [dispatch]);
+
+  console.log(">>> status: ", status);
 
   if (user) return <Navigate to="/" replace={true} />;
 
@@ -108,11 +111,13 @@ export const Login = () => {
                     <p className="text-danger">{errors.password?.message}</p>
                   </div>
                   <div className="form-group">
-                    <input
+                    <button
                       type="submit"
-                      value="Sign in"
                       className="btn px-4 btn-primary text-white w-100"
-                    />
+                      disabled={status === "loading" ? true : false}
+                    >
+                      Sign in
+                    </button>
                   </div>
                   <div className="text-center font-weight-bold">
                     <p>

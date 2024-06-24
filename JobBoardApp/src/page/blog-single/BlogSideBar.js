@@ -6,6 +6,19 @@ export const BlogSideBar = memo((props) => {
   const categories = useSelector((state) => state.blogs.categories);
   const blogs = useSelector((state) => state.blogs.blogs);
   const author = useSelector((state) => state.blogs.author);
+  const blog = useSelector((state) => state.blogs.blog);
+
+  const currentBlogCategories = blog?.categories.map(
+    (category) => category.name
+  );
+
+  // Lọc ra các bài blog có ít nhất một category giống với blog hiện tại
+  const relatedBlogs = blogs
+    .filter((item) =>
+      item.categories.some((cat) => currentBlogCategories.includes(cat.name))
+    )
+    .slice(0, 5);
+
   return (
     <div className="col-lg-4 sidebar pl-lg-5">
       <div className="sidebar-box">
@@ -17,7 +30,7 @@ export const BlogSideBar = memo((props) => {
         <h3>
           {author?.firstName} {author?.lastName}
         </h3>
-        <p>{author?.bio}</p>
+        <p className="text-truncate-multiline">{author?.bio}</p>
         <p>
           <a href="#" className="btn btn-primary btn-sm">
             Read More
@@ -39,7 +52,7 @@ export const BlogSideBar = memo((props) => {
       <div className="sidebar-box">
         <div className="categories">
           <h3>Related article</h3>
-          {blogs.map((blog) => (
+          {relatedBlogs.map((blog) => (
             <li key={blog.id}>
               <NavLink href="#">{blog.title}</NavLink>
             </li>
