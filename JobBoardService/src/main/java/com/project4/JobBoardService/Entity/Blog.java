@@ -39,13 +39,9 @@ public class Blog extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "blog_category_id", referencedColumnName = "id"))
     private List<BlogCategory> categories = new ArrayList<>(); // Initialize as empty list
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "published_at")
-    private Date publishedAt;
 
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private BlogStatus status;
+    @Column(name = "visibility", nullable = false)
+    private boolean visibility;
 
     @Column(name = "image_url")
     private String imageUrl;

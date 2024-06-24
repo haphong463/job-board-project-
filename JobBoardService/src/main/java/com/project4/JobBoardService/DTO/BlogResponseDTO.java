@@ -21,8 +21,7 @@ public class BlogResponseDTO {
     private String content;
     private List<BlogCategoryDTO> categories; // Change to List<BlogCategoryDTO>
     private UserDTO user;
-    @Enumerated(EnumType.STRING)
-    private BlogStatus status;
+    private boolean visibility;
     private String slug;
     private String citation;
     private String imageUrl;

@@ -8,8 +8,12 @@ import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Service.UserService;
+import jakarta.annotation.Nullable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +22,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,6 +45,21 @@ public class BlogController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+
+    @GetMapping("/search")
+    public ResponseEntity<List<BlogResponseDTO>> searchBlogs(
+            @RequestParam String query,
+            @RequestParam @Nullable String type
+    ) {
+        List<Blog> blogsPage = blogService.searchBlogs(query, type);
+        List<BlogResponseDTO> blogResponseDTOs = blogsPage.stream()
+                .map(blog -> modelMapper.map(blog, BlogResponseDTO.class))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(blogResponseDTOs);
+    }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

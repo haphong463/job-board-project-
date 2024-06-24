@@ -10,6 +10,8 @@ import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Util.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -102,7 +104,10 @@ public class BlogServiceImpl implements BlogService {
     }
 
 
-
+    @Override
+    public List<Blog> searchBlogs(String query, String type) {
+        return blogRepository.searchByTypeAndQuery(type, query);
+    }
     private void deleteImageFile(Blog blog) {
         String imageUrl = blog.getImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -123,8 +128,7 @@ public class BlogServiceImpl implements BlogService {
         existingBlog.setTitle(updatedBlog.getTitle());
         existingBlog.setContent(updatedBlog.getContent());
         existingBlog.setCategories(updatedBlog.getCategories());
-        existingBlog.setPublishedAt(updatedBlog.getPublishedAt());
-        existingBlog.setStatus(updatedBlog.getStatus());
+        existingBlog.setVisibility(updatedBlog.isVisibility());
         existingBlog.setSlug(updatedBlog.getSlug());
         existingBlog.setCitation(updatedBlog.getCitation());
     }

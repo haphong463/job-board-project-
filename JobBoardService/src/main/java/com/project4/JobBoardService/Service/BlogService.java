@@ -4,6 +4,8 @@ import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,5 +19,5 @@ public interface BlogService {
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
     Blog getBlogBySlug(String slug);
-//    int getCommentCount();
+    List<Blog> searchBlogs(String query, String type);//    int getCommentCount();
 }
