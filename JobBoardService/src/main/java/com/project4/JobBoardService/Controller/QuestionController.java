@@ -53,13 +53,11 @@ public class QuestionController {
             @RequestParam String options,
             @RequestParam String correctAnswer) {
 
-        // Create a new QuestionDTO instance
         QuestionDTO questionDTO = new QuestionDTO();
         questionDTO.setQuizId(quizId);
         questionDTO.setQuestionText(questionText);
         questionDTO.setOptions(options);
         questionDTO.setCorrectAnswer(correctAnswer);
-        // Assuming you have a service method to save the question
         QuestionDTO createdQuestion = questionService.createQuestion(quizId, questionDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdQuestion);
