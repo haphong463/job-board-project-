@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import { fetchQuizzesThunk } from '../../features/quizSlice';
+
 import './Quiz.css'; 
 
 export const Quiz = () => {

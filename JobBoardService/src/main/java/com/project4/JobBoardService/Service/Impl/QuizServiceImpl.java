@@ -9,6 +9,7 @@ import com.project4.JobBoardService.Entity.Quiz;
 import com.project4.JobBoardService.Repository.QuestionRepository;
 import com.project4.JobBoardService.Repository.QuizRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
+import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuizService;
 import com.project4.JobBoardService.Util.FileUtils;
 import org.modelmapper.ModelMapper;
@@ -39,7 +40,8 @@ public class QuizServiceImpl implements QuizService {
     @Autowired
 
     private ObjectMapper objectMapper;
-
+    @Autowired
+    private EmailService emailService;
     @Override
     public Quiz createQuiz(Quiz quiz, MultipartFile imageFile) throws IOException {
         handleImageFile(quiz, imageFile, "create");
@@ -138,7 +140,6 @@ public class QuizServiceImpl implements QuizService {
 
         return score;
     }
-
     @Override
     public List<QuestionResultDTO> calculateDetailedScore(QuizSubmissionDTO quizSubmission) {
         List<QuestionResultDTO> results = new ArrayList<>();
@@ -155,6 +156,8 @@ public class QuizServiceImpl implements QuizService {
 
         return results;
     }
+
+
     private Map<Long, String> getCorrectAnswersForQuiz(Long quizId) {
         List<Question> questions = questionRepository.findByQuizId(quizId);
         return questions.stream().collect(Collectors.toMap(Question::getId, Question::getCorrectAnswer));

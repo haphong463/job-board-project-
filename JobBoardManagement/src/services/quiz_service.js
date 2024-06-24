@@ -1,23 +1,13 @@
-// api/quizzes.js
+// src/api/quizzes.js
 import axiosRequest from "../configs/axiosConfig";
 
-const URL = "/quizzes"; // Adjust endpoint as per your QuizController mapping
+const URL = "/quizzes"; 
 const HEADERS_FORM_DATA = {
   "Content-Type": "multipart/form-data",
 };
 
-// Fetch all quizzes
-export const getAllQuizzes = async () => {
-  try {
-    const response = await axiosRequest.get(URL);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching quizzes:", error);
-    throw error;
-  }
-};
+export const fetchQuizzes = async () => await axiosRequest.get(URL);
 
-// Create a new quiz
 export const createQuiz = async (title, description, imageFile) => {
   try {
     const formData = new FormData();
@@ -36,7 +26,6 @@ export const createQuiz = async (title, description, imageFile) => {
   }
 };
 
-// Delete a quiz by ID
 export const deleteQuiz = async (quizId) => {
   try {
     await axiosRequest.delete(`${URL}/${quizId}`);
@@ -46,11 +35,11 @@ export const deleteQuiz = async (quizId) => {
   }
 };
 
-// Update a quiz by ID
-export const updateQuiz = async (id, data) => {
+export const updateQuiz = async (id, data, imageFile) => {
   try {
     const formData = new FormData();
     formData.append("quiz", JSON.stringify(data));
+    formData.append("imageFile", imageFile);
 
     const response = await axiosRequest.put(`${URL}/${id}`, formData, {
       headers: HEADERS_FORM_DATA,

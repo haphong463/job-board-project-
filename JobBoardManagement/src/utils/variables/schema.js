@@ -29,3 +29,24 @@ export const blogCategorySchema = yup.object().shape({
 export const jobCategorySchema = yup.object().shape({
   categoryName: yup.string().required("Name is required"),
 });
+
+export const quizSchema = (isEdit) => {
+  return yup.object().shape({
+    title: yup
+      .string()
+      .required('Title is required')
+      .max(50, 'Title must be less than 50 characters.'),
+    description: yup.string().required('Description is required'),
+    imageFile: isEdit
+      ? yup.mixed().nullable()
+      : yup
+          .mixed()
+          .test('required', 'You need to provide a file', (file) => {
+            if (file) return true;
+            return false;
+          })
+          .test('fileSize', 'The file is too large', (file) => {
+            return file && file.size <= 2000000; // 2MB limit
+          }),
+  });
+};

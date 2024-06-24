@@ -109,6 +109,7 @@ const initialState = {
   user:
     localStorage.getItem("accessToken") &&
     jwtDecode(localStorage.getItem("accessToken")),
+    currentUser: null,
 };
 
 const authSlice = createSlice({
@@ -134,6 +135,9 @@ const authSlice = createSlice({
       state.successMessage = "";
       state.errorMessage = "";
     },
+    setCurrentUser(state, action) {
+      state.currentUser = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -157,10 +161,12 @@ const authSlice = createSlice({
         state.status = "succeeded";
         state.signInSuccess = true;
         state.isVerified = true;
+        state.currentUser = action.payload.user;
         state.user = jwtDecode(action.payload.accessToken);
         console.log(">>>state user: ", state.user);
         state.roles = state.user.role.map((r) => r.authority);
-        localStorage.setItem("accessToken", action.payload.accessToken);
+       localStorage.setItem("accessToken", action.payload.accessToken);
+
       })
       .addCase(signIn.rejected, (state, action) => {
         state.status = "failed";
@@ -212,5 +218,5 @@ export const {
   resetVerificationMessage,
   resetMessages,
 } = authSlice.actions;
-
+export const { setCurrentUser } = authSlice.actions;
 export default authSlice.reducer;

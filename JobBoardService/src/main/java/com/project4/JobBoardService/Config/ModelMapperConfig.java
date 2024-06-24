@@ -15,22 +15,6 @@ public class ModelMapperConfig {
 
     @Bean
     public ModelMapper modelMapper() {
-        ModelMapper modelMapper = new ModelMapper();
-
-        // Define the mapping from Blog to BlogResponseDTO
-//        TypeMap<Blog, BlogResponseDTO> typeMap = modelMapper.createTypeMap(Blog.class, BlogResponseDTO.class);
-//        typeMap.addMapping(
-//                source -> source.getCategories().stream().map(category -> {
-//                    BlogCategoryDTO categoryDTO = new BlogCategoryDTO();
-//                    categoryDTO.setId(category.getId());
-//                    categoryDTO.setName(category.getName());
-//                    return categoryDTO;
-//                }).collect(Collectors.toList()),
-//                BlogResponseDTO::setCategories
-//        );
-//
-//        typeMap.addMapping(Blog::getUser, BlogResponseDTO::setUser);
-
-        return modelMapper;
+        return new ModelMapper();
     }
 }

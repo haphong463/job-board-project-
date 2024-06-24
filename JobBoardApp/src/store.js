@@ -7,6 +7,7 @@ import notificationReducer from "./features/notificationSlice";
 import storage from "redux-persist/lib/storage";
 import { persistReducer } from "redux-persist";
 import { combineReducers } from "@reduxjs/toolkit";
+import quizReducer from "./features/quizSlice";
 
 // Cấu hình persist với whitelist
 // const persistConfig = {
@@ -33,6 +34,7 @@ export const store = configureStore({
     auth: authReducer,
     category: categoryReducer,
     notification: notificationReducer,
+    quiz: quizReducer,
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({
