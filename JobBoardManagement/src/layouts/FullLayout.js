@@ -6,17 +6,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import {
+  getUserByIDThunk,
   logout,
   setLocationState,
   updateRoles,
   updateUserAndRoles,
 } from "../features/authSlice";
+import "nprogress/nprogress.css"; // Import the CSS file
 import { fetchBlogs } from "../features/blogSlice";
 import { fetchBlogCategory } from "../features/blogCategorySlice";
 import showToast from "../utils/functions/showToast";
 const FullLayout = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
+  const accessToken = useSelector((state) => state.auth.accessToken);
   const roles = useSelector((state) => state.auth.roles);
   const blogStatus = useSelector((state) => state.blogs.status);
   const categoryStatus = useSelector((state) => state.blogCategory.status);
@@ -27,9 +30,9 @@ const FullLayout = () => {
   }, [location, dispatch]);
 
   useEffect(() => {
-    if (user) {
+    if (accessToken) {
       const refreshAuthToken = () => {
-        const expiresIn = user?.exp || 0;
+        const expiresIn = accessToken?.exp || 0;
         const nowInSeconds = Math.floor(Date.now() / 1000);
         const remainingTime = expiresIn - nowInSeconds;
         const refreshTime = Math.max(0, remainingTime - 5);
@@ -53,24 +56,26 @@ const FullLayout = () => {
   }, [user, dispatch, navigate]);
 
   useEffect(() => {
-    if (blogStatus === "idle" || categoryStatus === "idle") {
-      const fetchData = async () => {
-        try {
-          await Promise.all([
-            dispatch(fetchBlogs()).unwrap(),
-            dispatch(fetchBlogCategory()).unwrap(),
-          ]);
-          showToast("The data has been loaded successfully.");
-        } catch (error) {
-          showToast("Error loading data.", "error");
-        }
-      };
+    // if (blogStatus === "idle" || categoryStatus === "idle") {
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(fetchBlogs()).unwrap(),
+          dispatch(fetchBlogCategory()).unwrap(),
+          dispatch(getUserByIDThunk(accessToken.id)),
+        ]);
+        showToast("The data has been loaded successfully.");
+      } catch (error) {
+        showToast("Error loading data.", "error");
+      }
+    };
 
-      fetchData();
-    }
+    fetchData();
+
+    // }
   }, [dispatch]);
 
-  if (!user) {
+  if (!accessToken) {
     return <Navigate to="/jobportal/login" />;
   }
 

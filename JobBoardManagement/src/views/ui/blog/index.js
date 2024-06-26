@@ -10,6 +10,10 @@ import {
   Input,
   Alert,
   Badge,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,11 +21,18 @@ import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
 import moment from "moment/moment";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import showToast from "../../../utils/functions/showToast";
-
+import "./style.css";
 export function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs) || [];
+  const [dropdownOpen, setDropdownOpen] = useState({});
 
+  const toggleDropdown = (id) => {
+    setDropdownOpen((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
+  };
   const [searchTerm, setSearchTerm] = useState("");
   const [isEdit, setIsEdit] = useState(null);
 
@@ -53,6 +64,7 @@ export function Blog(props) {
             fontSize: "16px",
             fontWeight: "bold",
           }}
+          className="text-truncate-multiline"
         >
           [{row.id}] {row.title}
         </div>
@@ -60,18 +72,43 @@ export function Blog(props) {
     },
     {
       name: "Category",
-      selector: (row) => row.category.name,
+      selector: (row) => row.categories.length,
       sortable: true,
-      cell: (row) => (
-        <div
-          style={{
-            fontSize: "16px",
-          }}
-        >
-          <Badge>{row.category.name}</Badge>
-        </div>
-      ),
+      cell: (row) => {
+        const displayCategories = row.categories.slice(0, 2);
+        const hasMore = row.categories.length > 2;
+
+        return (
+          <div
+            style={{
+              fontSize: "16px",
+            }}
+          >
+            {displayCategories.map((item) => (
+              <Badge key={item.id}>{item.name}</Badge>
+            ))}
+            {hasMore && <span>...</span>}
+          </div>
+        );
+      },
     },
+    {
+      name: "Visibility",
+      selector: (row) => row.visibility,
+      sortable: true,
+      cell: (row) => {
+        return (
+          <div
+            style={{
+              fontSize: "16px",
+            }}
+          >
+            {row.visibility ? "Show" : "Hide"}
+          </div>
+        );
+      },
+    },
+
     {
       name: "Posted By",
       cell: (row) => (
@@ -80,36 +117,11 @@ export function Blog(props) {
             fontSize: "16px",
           }}
         >
-          {`${row.user?.firstName} ${row.user?.lastName}`}
+          {row.user.email}
         </div>
       ),
     },
-    {
-      name: "Status",
-      selector: (row) => row.status,
-      sortable: true,
-      cell: (row) => (
-        <div
-          style={{
-            fontSize: "16px",
-          }}
-        >
-          <Badge
-            color={
-              {
-                DRAFT: "secondary",
-                PUBLISHED: "success",
-                ARCHIVED: "danger",
-                PENDING_REVIEW: "warning",
-                SCHEDULED: "info",
-              }[row.status]
-            }
-          >
-            {row.status}
-          </Badge>
-        </div>
-      ),
-    },
+
     {
       name: "Comments Count",
       selector: (row) => row.commentCount,
@@ -127,24 +139,28 @@ export function Blog(props) {
     {
       name: "Actions",
       cell: (row) => (
-        <div className="d-flex">
-          <button
-            onClick={() => handleEdit(row.id)}
-            style={{ marginRight: "10px" }}
-            className="btn btn-info"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => handleDelete(row.id)}
-            className="btn btn-danger"
-          >
-            Delete
-          </button>
-        </div>
+        <Dropdown
+          isOpen={dropdownOpen[row.id]}
+          toggle={() => toggleDropdown(row.id)}
+        >
+          <DropdownToggle caret>Actions</DropdownToggle>
+          <DropdownMenu>
+            <DropdownItem onClick={() => handleEdit(row.id)}>Edit</DropdownItem>
+            <DropdownItem onClick={() => handleDelete(row.id)}>
+              Delete
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       ),
     },
   ];
+  const customStyles = {
+    rows: {
+      style: {
+        margin: "15px 0", // Adjust the margin to create spacing between rows
+      },
+    },
+  };
 
   return (
     <Row>
@@ -169,10 +185,13 @@ export function Blog(props) {
           <DataTable
             columns={columns}
             data={filteredBlogs}
+            customStyles={customStyles}
             selectableRows
-            onSelectedRowsChange={(state) => console.log(state.selectedRows)}
+            onSelectedRowsChange={(state) =>
+              console.log(state.selectedRows.map((item) => item.id))
+            }
             pagination
-            paginationPerPage={5}
+            paginationPerPage={15}
             paginationRowsPerPageOptions={[5, 10, 15]}
           />
         </Card>

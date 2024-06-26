@@ -226,7 +226,10 @@ function SignUp() {
                 height: "auto",
               }}
             >
-              <img src="https://itviec.com/assets/robby-login-df4a56395486b5cea97ba1754d226059626e6e124b3ea3db0789ba3c39f644f1.png" />
+              <img
+                src="https://itviec.com/assets/robby-login-df4a56395486b5cea97ba1754d226059626e6e124b3ea3db0789ba3c39f644f1.png"
+                className="d-none d-lg-block"
+              />
             </div>
           </div>
         </div>

@@ -1,199 +1,257 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchAllBlog, fetchAllCategories } from "../../features/blogSlice";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import { calculateReadingTime } from "../../utils/function/readingTime";
-import "./style.css";
 import { Badge, Input } from "reactstrap";
-import {
-  connectWebSocket,
-  disconnectWebSocket,
-} from "../../services/WebSocketService";
-export const Blog = () => {
+import { motion } from "framer-motion";
+import debounce from "lodash/debounce";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBlogs } from "../../features/blogSlice";
+import "./style.css";
+import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
+import { FaHome } from "react-icons/fa";
+
+const Blog = () => {
   const dispatch = useDispatch();
-  const blogs = useSelector((state) => state.blogs.blogs);
+  const blogs = useSelector((state) => state.blogs.blogsFilter);
+  const status = useSelector((state) => state.blogs.status);
+  const error = useSelector((state) => state.blogs.error);
   const [searchText, setSearchText] = useState("");
+  const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 9;
+  const postsPerPage = 15;
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    connectWebSocket();
-
-    return () => {
-      disconnectWebSocket();
-    };
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await Promise.all([
-          dispatch(fetchAllBlog()).unwrap(),
-          dispatch(fetchAllCategories()).unwrap(),
-        ]);
-        console.log("Fetch blog data ok!");
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    if (!blogs || blogs.length === 0) {
-      fetchData();
-    }
-  }, [dispatch]);
-
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = blogs.slice(indexOfFirstPost, indexOfLastPost);
-
-  const filterPosts = currentPosts.filter(
-    (blog) =>
-      blog.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      blog.category.name.toLowerCase().includes(searchText.toLowerCase())
+  const handleSearch = useCallback(
+    debounce((text) => {
+      setCurrentPage(1);
+      dispatch(fetchBlogs({ query: text, type: searchParams.get("type") }));
+    }, 500),
+    [dispatch, searchParams]
   );
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  useEffect(() => {
+    handleSearch(searchText);
+  }, [searchText, handleSearch]);
 
-  const totalPages = Math.ceil(blogs.length / postsPerPage);
+  const paginate = (pageNumber) => {
+    if (
+      pageNumber > 0 &&
+      pageNumber <= Math.ceil(blogs.length / postsPerPage)
+    ) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   return (
     <GlobalLayoutUser>
       <>
-        <section
+        <motion.section
           className="section-hero overlay inner-page bg-image"
           style={{
             backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
           }}
           id="home-section"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
           <div className="container">
             <div className="row">
-              <div className="col-md-7">
-                <h1 className="text-white font-weight-bold">Our Blog</h1>
-                <div className="custom-breadcrumbs">
-                  <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                  <span className="text-white">
-                    <strong>About Us</strong>
-                  </span>
-                </div>
-                <Input
-                  className="form-control form-control-lg"
-                  placeholder="search blog..."
-                  onChange={(e) => setSearchText(e.target.value)}
-                />
+              <div className="col-md-10">
+                <motion.h1
+                  className="text-white font-weight-bold"
+                  initial={{ x: -100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  JobBoard Blog - Ideas to develop your IT career
+                </motion.h1>
+
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Input
+                    className="form-control form-control-lg sticky-top"
+                    placeholder="Enter search keywords..."
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                </motion.div>
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
         <section className="site-section">
-          {filterPosts && filterPosts.length > 0 ? (
+          {status === "loading" && <LoadingSpinner />}
+          {status === "failed" && (
+            <h1 className="text-center">Error: {error}</h1>
+          )}
+          {status === "succeeded" && blogs.length > 0 && (
             <div className="container">
+              {searchText && <h1>Search results for: "{searchText}"</h1>}
               <div className="row mb-5">
-                {filterPosts.map((blog) => (
-                  <div key={blog.id} className="col-md-4 mb-5 card-container">
-                    <div className="card h-100">
-                      <NavLink to={`/blog/${blog.slug}`}>
-                        <img
-                          src={blog.imageUrl}
-                          alt="Image"
-                          className=" rounded mb-4 card-img-top"
-                          style={{
-                            height: 200,
-                            width: "100%",
-                          }}
-                        />
-                      </NavLink>
-                      <div className="card-body d-flex flex-column">
-                        <h6 className="card-title text-truncate-two">
-                          <NavLink
-                            to={`/blog/${blog.slug}`}
-                            className="text-black"
-                          >
-                            {blog.title}
-                          </NavLink>
-                        </h6>
-                        <div>
-                          <Badge
-                            color="primary"
+                {blogs
+                  .slice(
+                    (currentPage - 1) * postsPerPage,
+                    currentPage * postsPerPage
+                  )
+                  .map((blog) => (
+                    <motion.div
+                      key={blog.id}
+                      className="mb-5 card-container col-lg-4 col-md-6 col-sm-12"
+                      whileHover={{ y: -10 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div className="card h-100">
+                        <NavLink to={`/blog/${blog.slug}`}>
+                          <img
+                            src={blog.imageUrl}
+                            alt="Image"
+                            className="rounded mb-4 card-img-top"
                             style={{
-                              color: "white",
+                              height: "auto",
+                              width: "100%",
                             }}
-                          >
-                            {blog.category.name}
-                          </Badge>
-                        </div>
-                        <div className="card-text mb-4 flex-grow-1 text-truncate-multiline">
-                          {blog.citation}
-                        </div>
-                        <div>
-                          {moment(blog.createdAt).format("MMMM DD, YYYY")}{" "}
-                          <span className="mx-2 slash">•</span>
-                          <span className="mx-2">
-                            {`${calculateReadingTime(blog.content)} min`}
-                          </span>
-                          {/* Cần lấy ra số lượng comment của bài blog. */}
-                          {/* <a href="#">{blog.blogCount}</a> */}
+                          />
+                        </NavLink>
+                        <div className="card-body d-flex flex-column">
+                          <h6 className="card-title text-truncate-two">
+                            <NavLink
+                              to={`/blog/${blog.slug}`}
+                              className="text-black"
+                            >
+                              {blog.title}
+                            </NavLink>
+                          </h6>
+                          <div>
+                            {blog.categories.slice(0, 3).map((item, index) => (
+                              <Badge
+                                key={item.id}
+                                color="primary"
+                                style={{
+                                  color: "white",
+                                  marginRight:
+                                    index !== blog.categories.length - 1
+                                      ? "10px"
+                                      : "0px",
+                                }}
+                              >
+                                {item.name}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="card-text mb-4 flex-grow-1 text-truncate-multiline">
+                            {blog.citation}
+                          </div>
+                          <div>
+                            {moment(blog.createdAt).format("MMMM DD, YYYY")}{" "}
+                            <span className="mx-2 slash">•</span>
+                            <span className="mx-2">
+                              {`${calculateReadingTime(blog.content)} min`}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    </motion.div>
+                  ))}
               </div>
 
-              {totalPages > 1 && (
-                <div className="row pagination-wrap mt-5">
-                  <div className="col-md-12 text-center ">
-                    <div className="custom-pagination ml-auto">
-                      <a
-                        href="#"
-                        className={`prev ${
-                          currentPage === 1 ? "disabled" : ""
-                        }`}
-                        onClick={() => paginate(currentPage - 1)}
-                      >
-                        Prev
-                      </a>
-                      <div className="d-inline-block">
-                        {Array.from({ length: totalPages }, (_, i) => (
-                          <a
+              <div className="row pagination-wrap mt-5">
+                <div className="col-md-12 text-center ">
+                  <div className="custom-pagination ml-auto">
+                    <motion.a
+                      href="#top"
+                      className={`prev ${currentPage === 1 ? "disabled" : ""}`}
+                      onClick={() => paginate(currentPage - 1)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      Prev
+                    </motion.a>
+                    <div className="d-inline-block">
+                      {Array.from(
+                        { length: Math.ceil(blogs.length / postsPerPage) },
+                        (_, i) => (
+                          <motion.a
                             key={i}
                             href={`#${i + 1}`}
                             className={`${
                               currentPage === i + 1 ? "active" : ""
                             }`}
                             onClick={() => paginate(i + 1)}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                           >
                             {i + 1}
-                          </a>
-                        ))}
-                      </div>
-                      <a
-                        href="#"
-                        className={`next ${
-                          currentPage === totalPages ? "disabled" : ""
-                        }`}
-                        onClick={() => paginate(currentPage + 1)}
-                      >
-                        Next
-                      </a>
+                          </motion.a>
+                        )
+                      )}
                     </div>
+                    <motion.a
+                      href="#top"
+                      className={`next ${
+                        currentPage === Math.ceil(blogs.length / postsPerPage)
+                          ? "disabled"
+                          : ""
+                      }`}
+                      onClick={() => paginate(currentPage + 1)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      Next
+                    </motion.a>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
-          ) : (
-            <h1
-              className="text-center"
+          )}
+          {status === "succeeded" && blogs.length === 0 && (
+            <motion.div
+              className="text-center text-primary"
               style={{
                 height: 250,
               }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
             >
-              No data found
-            </h1>
+              <motion.h1
+                className="text-primary"
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                Something's wrong here...
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                We can't find any result for your search term.
+              </motion.p>
+              <motion.button
+                className="btn btn-primary mt-3 "
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1 }}
+                onClick={() => navigate("/")} // Or useHistory() for react-router
+              >
+                <div className="d-flex justify-content-center align-items-center">
+                  <FaHome className="mr-2" /> Go back to home
+                </div>
+              </motion.button>
+            </motion.div>
           )}
         </section>
       </>
     </GlobalLayoutUser>
   );
 };
+
+export default Blog;

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
-import axiosRequest from "../../configs/axiosConfig";
+import React, { useState, useEffect, useCallback } from "react";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/authSlice";
 import {
@@ -9,33 +8,55 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import { FaUserCircle } from "react-icons/fa";
+import { FaBell, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
+import {
+  markNotificationAsRead,
+  readNotificationThunk,
+} from "../../features/notificationSlice";
+import { fetchAllCategories } from "../../features/blogSlice";
+import { debounce } from "@mui/material";
 export function GlobalNavbar() {
+  const [searchParams] = useSearchParams();
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
+
+  const notifications = useSelector((state) => state.notification.list);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
   const dispatch = useDispatch();
   const categories = useSelector((state) => state.category.categories);
+  const blogCategory = useSelector((state) => state.blogs.categories);
+  const unreadCount = useSelector((state) => state.notification.unreadCount);
 
   const handleLogout = () => {
     dispatch(logout());
   };
 
   useEffect(() => {
-    if (!categories) {
+    if (categories.length === 0) {
       dispatch(fetchCategoryThunk());
+      dispatch(fetchAllCategories());
     }
-  }, []);
+  }, [dispatch]);
 
   const handleCategoryClick = (categoryName) => {
     // setSelectedCategory(categoryName);
     console.log("Selected category:", categoryName);
   };
 
+  const handleMarkNotification = useCallback(
+    debounce((id) => {
+      dispatch(readNotificationThunk(id));
+    }, 500),
+    [dispatch]
+  );
+
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
+  const toggleNotification = () =>
+    setNotificationOpen((prevState) => !prevState); // Toggle dropdown thông báo
 
   return (
     <header className="site-navbar mt-3">
@@ -87,58 +108,44 @@ export function GlobalNavbar() {
                   </li>
                 </ul>
               </li>
+
               <li className="has-children">
-                <NavLink to="/blogs">Pages</NavLink>
-                <ul className="dropdown">
-                  <li>
-                    <NavLink to="/services">Services</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/service-single">Service Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/blog-single">Blog Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/create-cv">Create CV</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/portfolio">Portfolio</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/portfolio-single">Portfolio Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/testimonials">Testimonials</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/faq">Frequently Ask Questions</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/gallery" className="active">
-                      Gallery
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
-              <li>
                 <NavLink to="/blogs">Blog</NavLink>
+                <ul className="dropdown">
+                  {blogCategory.map((item) => (
+                    <li key={item.id}>
+                      <NavLink
+                        to={`/blogs?type=${item.name}`}
+                        className={({ isActive }) =>
+                          isActive && searchParams.get("type") === item.name
+                            ? "active"
+                            : ""
+                        }
+                      >
+                        {item.name}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
               </li>
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-           
-              {(!user || (user && !roles.includes("ROLE_EMPLOYER"))) && (
-  <li>
-    <NavLink to="/EmployerSignUp">Employer</NavLink>
-  </li>
-)}
- <li className="d-lg-none">
+              <li>
+                    <NavLink to="/create-cv">Create CV</NavLink>
+                  </li>
+              <li>
+                <NavLink to="/quiz">Quiz</NavLink>
+              </li>
+              {!roles.includes("ROLE_EMPLOYER") && (
+                <li>
+                  <NavLink to="/EmployerSignUp">For Employer</NavLink>
+                </li>
+              )}
+
+              <li className="d-lg-none">
                 <NavLink to="/post-job">
                   <span className="mr-2">+</span> Post a Job
-                </NavLink>
-                <NavLink to="/post-company">
-                  <span className="mr-2">+</span> Post a Company
                 </NavLink>
               </li>
 
@@ -148,7 +155,6 @@ export function GlobalNavbar() {
               <li className="d-lg-none">
                 <NavLink to="/signup">Sign Up</NavLink>
               </li>
-
             </ul>
           </nav>
 
@@ -161,18 +167,82 @@ export function GlobalNavbar() {
                 >
                   <span className="mr-2 icon-add"></span>Post a Job
                 </NavLink>
-                
-                
               )}
-                {user && roles.includes("ROLE_EMPLOYER") && (
-                <NavLink
-                  to="/post-company"
-                  className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
-                >
-                  <span className="mr-2 icon-add"></span>Post a Company
-                </NavLink>
-                
-                
+              {user && (
+                <div className="icon-notification" onClick={toggleNotification}>
+                  {/* <img
+                    src="https://i.imgur.com/AC7dgLA.png"
+                    alt=""
+                    className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
+                  /> */}
+                  <FaBell
+                    size={30}
+                    color="white"
+                    className={unreadCount > 0 ? "shake" : ""}
+                  />
+                  {unreadCount > 0 && (
+                    <span
+                      className="badge"
+                      style={{
+                        position: "absolute",
+                        top: "0",
+                        right: "-10px",
+                        backgroundColor: "#ff0000",
+                        color: "#fff",
+                        padding: "5px 7px",
+                        borderRadius: "50%",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+              )}
+              {notificationOpen && (
+                <div className="notifications text-left" id="box">
+                  <h2>Notifications</h2>
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="notifications-item"
+                        onClick={
+                          !notification.read
+                            ? () => handleMarkNotification(notification.id)
+                            : undefined
+                        }
+                      >
+                        <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
+                        <div className="text">
+                          <h4
+                            className={`${
+                              notification.read ? "" : "font-weight-bold"
+                            }`}
+                          >
+                            {notification.sender.firstName}{" "}
+                            {notification.sender.lastName}
+                          </h4>
+                          <p
+                            className={`${
+                              notification.read ? "" : "font-weight-bold"
+                            }`}
+                          >
+                            {notification.message}
+                          </p>
+                          {/* <small className="d-block">
+                          {moment(notification.createdAt).from()}
+                        </small> */}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center">
+                      <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
+                      <p>You don't have any notifications yet.</p>
+                    </div>
+                  )}
+                </div>
               )}
               <Dropdown
                 isOpen={dropdownOpen}
@@ -207,21 +277,7 @@ export function GlobalNavbar() {
                   )}
                 </DropdownMenu>
               </Dropdown>
-              {/* <div className="ml-auto d-flex align-items-center">
-                <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-                  <DropdownToggle nav caret>
-                    {t("Language")}{" "}
-                  </DropdownToggle>
-                  <DropdownMenu className="custom-dropdown-menu">
-                    <DropdownItem onClick={() => changeLanguage("vi")}>
-                      Tiếng Việt
-                    </DropdownItem>
-                    <DropdownItem onClick={() => changeLanguage("en")}>
-                      English
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </div> */}
+
               <NavLink
                 to="#"
                 className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"

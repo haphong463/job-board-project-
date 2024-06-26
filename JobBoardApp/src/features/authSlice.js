@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { signInAysnc, signUpAsync } from "../services/AuthService";
-import {jwtDecode} from "jwt-decode"; // Correct import
-import axiosRequest from "../configs/axiosConfig";
-
+import { jwtDecode } from "jwt-decode"; // Correct import
+import axios from "axios";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
 
@@ -48,36 +47,73 @@ export const signUp = createAsyncThunk(
   }
 );
 
+export const signUpEmployer = createAsyncThunk(
+  "auth/signUpEmployer",
+  async (employerData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/registerEmployer",
+        employerData
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 export const forgotPassword = createAsyncThunk(
-  'auth/forgotPassword',
+  "auth/forgotPassword",
   async (email, { rejectWithValue }) => {
     try {
-      const response = await axiosRequest.post(`/auth/forgot-password?email=${email}`);
+      const response = await axios.post(
+        `http://localhost:8080/api/auth/forgot-password?email=${email}`
+      );
       return response.data.message;
     } catch (error) {
-      return rejectWithValue(error.response ? error.response.data.message : 'Something went wrong. Please try again later.');
+      return rejectWithValue(
+        error.response
+          ? error.response.data.message
+          : "Something went wrong. Please try again later."
+      );
+    }
+  }
+);
+export const setupCredentials = createAsyncThunk(
+  "auth/setupCredentials",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/setup-credentials",
+        data
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Something went wrong"
+      );
     }
   }
 );
 const name = "auth";
 const initialState = {
   error: null,
-  state: "idle",
+  status: "idle",
   signUpSuccess: false,
   signInSuccess: false,
   isVerified: true,
   verificationEmail: null,
-  successMessage: '',
-    errorMessage: '',
+  successMessage: "",
+  errorMessage: "",
   verificationMessage: null,
   roles: [],
   user:
     localStorage.getItem("accessToken") &&
     jwtDecode(localStorage.getItem("accessToken")),
+    currentUser: null,
 };
 
 const authSlice = createSlice({
-  name,
+  name: "auth",
   initialState,
   reducers: {
     resetSignUpSuccess(state) {
@@ -89,38 +125,43 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.roles = [];
+      state.status = "idle";
       localStorage.removeItem("accessToken");
     },
     resetVerificationMessage(state) {
       state.verificationMessage = null;
     },
-    resetMessages: (state) => {
-      state.successMessage = '';
-      state.errorMessage = '';
+    resetMessages(state) {
+      state.successMessage = "";
+      state.errorMessage = "";
+    },
+    setCurrentUser(state, action) {
+      state.currentUser = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(signUp.pending, (state) => {
-        state.state = "loading";
+        state.status = "loading";
         state.error = null;
       })
       .addCase(signUp.fulfilled, (state) => {
-        state.state = "succeeded";
+        state.status = "succeeded";
         state.signUpSuccess = true;
       })
       .addCase(signUp.rejected, (state, action) => {
-        state.state = "failed";
+        state.status = "failed";
         state.error = action.payload;
       })
       .addCase(signIn.pending, (state) => {
-        state.state = "loading";
+        state.status = "loading";
         state.error = null;
       })
       .addCase(signIn.fulfilled, (state, action) => {
-        state.state = "succeeded";
+        state.status = "succeeded";
         state.signInSuccess = true;
         state.isVerified = true;
+        state.currentUser = action.payload.user;
         state.user = jwtDecode(action.payload.accessToken);
         console.log(">>>state user: ", state.user);
         state.roles = state.user.role.map((r) => r.authority);
@@ -128,7 +169,7 @@ const authSlice = createSlice({
 
       })
       .addCase(signIn.rejected, (state, action) => {
-        state.state = "failed";
+        state.status = "failed";
         state.error = action.payload;
         if (action.payload && typeof action.payload === "object") {
           state.isVerified = false;
@@ -141,6 +182,31 @@ const authSlice = createSlice({
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.errorMessage = action.payload;
+      })
+      .addCase(signUpEmployer.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(signUpEmployer.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.signUpSuccess = true;
+      })
+      .addCase(signUpEmployer.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(setupCredentials.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(setupCredentials.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.setupSuccess = true;
+        state.successMessage = action.payload.message;
+      })
+      .addCase(setupCredentials.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       });
   },
 });
@@ -150,7 +216,7 @@ export const {
   resetSignInSuccess,
   logout,
   resetVerificationMessage,
-  resetMessages
+  resetMessages,
 } = authSlice.actions;
-
+export const { setCurrentUser } = authSlice.actions;
 export default authSlice.reducer;

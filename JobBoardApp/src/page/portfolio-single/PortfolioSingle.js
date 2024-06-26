@@ -243,3 +243,4 @@ export const PortfolioSingle = () => {
     </GlobalLayoutUser>
   );
 };
+export default PortfolioSingle;

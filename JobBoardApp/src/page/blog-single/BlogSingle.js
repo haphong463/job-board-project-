@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllBlog,
@@ -17,28 +17,30 @@ import { BlogContent } from "./BlogContent";
 import { CommentForm } from "./CommentForm";
 import { CommentList } from "./CommentList";
 import moment from "moment";
-import { BlogSideBar } from "./BlogSideBar";
 import { BlogTitle } from "./BlogTitle";
 import ReadingBar from "./ReadingBar";
 import { calculateReadingTime } from "../../utils/function/readingTime";
-
+import { BlogSideBar } from "./BlogSideBar";
+import { motion } from "framer-motion";
+import "./style.css";
 export const BlogSingle = () => {
   const dispatch = useDispatch();
   const blog = useSelector((state) => state.blogs.blog);
+  const blogs = useSelector((state) => state.blogs.blogs);
   const comments = useSelector((state) => state.comments.comments);
+  const categories = useSelector((state) => state.blogs.categories);
   const user = useSelector((state) => state.auth.user);
   const { id } = useParams();
   const [readingTime, setReadingTime] = useState(0);
 
-  // const fullName = useSelector((state) => state.blogs.fullName);
   useEffect(() => {
     const fetchData = async () => {
       try {
         await Promise.all([
           dispatch(fetchBlogById(id)).unwrap(),
           dispatch(fetchAllCommentByBlogId(id)).unwrap(),
-          dispatch(fetchAllCategories()).unwrap(),
-          dispatch(fetchAllBlog()).unwrap(),
+          categories.length === 0 && dispatch(fetchAllCategories()).unwrap(),
+          blogs.length === 0 && dispatch(fetchAllBlog()).unwrap(),
         ]);
 
         console.log("The data has been loaded successfully.");
@@ -46,15 +48,15 @@ export const BlogSingle = () => {
         console.log("Error loading data", "error");
       }
     };
-    if (!blog) {
-      fetchData();
-    }
+    fetchData();
   }, [dispatch, id]);
+
   useEffect(() => {
     if (blog && blog.content) {
       setReadingTime(calculateReadingTime(blog.content));
     }
   }, [blog]);
+
   const handleDeleteComment = (commentId) => {
     dispatch(deleteComment(commentId));
   };
@@ -64,27 +66,33 @@ export const BlogSingle = () => {
   };
 
   const handleAddComment = (newComment) => {
-    dispatch(addComment(newComment));
+    const payload = dispatch(addComment(newComment));
+    return payload;
   };
-  console.log(blog);
 
   return (
     <GlobalLayoutUser>
-      <ReadingBar />
-
       {blog && (
         <>
-          <section
+          <motion.section
             className="section-hero overlay inner-page bg-image"
             style={{
               backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
             }}
             id="home-section"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
           >
             <div className="container">
               <div className="row">
                 <div className="col-md-12">
-                  <div className="custom-breadcrumbs mb-0">
+                  <motion.div
+                    className="custom-breadcrumbs mb-0"
+                    initial={{ x: -100, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <span className="slash">Posted by</span>{" "}
                     <span className="text-white">
                       {blog.user.firstName} {blog.user.lastName}
@@ -97,27 +105,40 @@ export const BlogSingle = () => {
                     </span>
                     <span className="mx-2 slash">•</span>
                     <span className="text-white">{readingTime} min read</span>
-                  </div>
+                  </motion.div>
                   <BlogTitle title={blog.title} />
                 </div>
               </div>
             </div>
-          </section>
+          </motion.section>
           <section className="site-section" id="next-section">
+            <ReadingBar />
             <div className="container">
               <div className="row">
                 <div className="col-lg-8 blog-content">
-                  <h3 className="mb-4">{blog.title}</h3>
-                  <p className="text-center">
+                  <motion.h3
+                    className="mb-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {blog.title}
+                  </motion.h3>
+                  <motion.p
+                    className="text-center"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <img
-                      src={blog.thumbnailUrl}
+                      src={blog.imageUrl}
                       alt="Image"
                       className="img-fluid rounded"
                       style={{
                         width: "100%",
                       }}
                     />
-                  </p>
+                  </motion.p>
                   <i>{blog.citation}</i>
                   <hr />
                   <BlogContent content={blog.content} />
@@ -127,15 +148,22 @@ export const BlogSingle = () => {
                       Updated on:{" "}
                       {moment(blog.updatedAt).format("MMMM Do YYYY")}
                     </p>
-                    {/* <p>
-                      Categories: <a href="#">Design</a>, <a href="#">Events</a>{" "}
-                      Tags: <a href="#">#html</a>, <a href="#">#trends</a>
-                    </p> */}
                   </div>
+                </div>
+
+                <BlogSideBar />
+                <div className="col-md-12">
                   <div className="pt-5">
                     {comments.length > 0 ? (
                       <>
-                        <h3 className="mb-5">{comments.length} Comments</h3>
+                        <motion.h3
+                          className="mb-5"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {comments.length} Comments
+                        </motion.h3>
                         <CommentList
                           comments={comments}
                           addComment={handleAddComment}
@@ -147,17 +175,20 @@ export const BlogSingle = () => {
                     ) : (
                       <p className="font-weight-bold">No comments yet.</p>
                     )}
-                    <div className="comment-form-wrap pt-5">
+                    <motion.div
+                      className="comment-form-wrap pt-5"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                    >
                       <CommentForm
                         blogId={blog.id}
                         addComment={handleAddComment}
                         user={user}
                       />
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
-
-                <BlogSideBar />
               </div>
             </div>
           </section>
@@ -166,3 +197,5 @@ export const BlogSingle = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default BlogSingle;

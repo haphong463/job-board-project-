@@ -9,10 +9,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { refreshAuthToken } from "../../utils/authUtils";
 
 const pageTransition = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 20 },
-  transition: { duration: 0.5 },
+  exit: { opacity: 0, y: 10 },
+  transition: {
+    duration: 0.4,
+    ease: "easeInOutQuart",
+  },
 };
 
 export const GlobalLayoutUser = ({ children }) => {
@@ -33,37 +36,15 @@ export const GlobalLayoutUser = ({ children }) => {
       return () => clearTimeout(refreshTokenTimeout);
     }
   }, []);
-  // useEffect(() => {
-  //   (function (d, m) {
-  //     var kommunicateSettings = {
-  //       appId: "4ad31fa80e50f3c68e389cbfeffad7ac",
-  //       popupWidget: true,
-  //       automaticChatOpenOnNavigation: true,
-  //     };
-  //     var s = document.createElement("script");
-  //     s.type = "text/javascript";
-  //     s.async = true;
-  //     s.src = "https://widget.kommunicate.io/v2/kommunicate.app";
-  //     var h = document.getElementsByTagName("head")[0];
-  //     h.appendChild(s);
-  //     window.kommunicate = m;
-  //     m._globals = kommunicateSettings;
-  //   })(document, window.kommunicate || {});
-  // }, []);
+
   return (
     <div id="top">
-      {/* <div id="overlayer"></div>
-      <div className="loader">
-        <div className="spinner-border text-primary" role="status">
-          <span className="sr-only">Loading...</span>
-        </div>
-      </div> */}
       <div className="site-wrap">
         <GlobalSiteMobileMenu />
         <GlobalNavbar />
         <AnimatePresence>
           <motion.div
-            key={location.pathname} // Ensure unique key for each route
+            key={location.pathname}
             initial="initial"
             animate="animate"
             exit="exit"
@@ -77,3 +58,5 @@ export const GlobalLayoutUser = ({ children }) => {
     </div>
   );
 };
+
+export default GlobalLayoutUser;

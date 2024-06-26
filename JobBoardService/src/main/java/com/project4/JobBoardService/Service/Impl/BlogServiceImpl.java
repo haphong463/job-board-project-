@@ -10,6 +10,8 @@ import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Util.FileUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +34,7 @@ public class BlogServiceImpl implements BlogService {
     private ModelMapper modelMapper;
 
     @Override
-    public Blog createBlog(Blog blog, MultipartFile imageFile) throws IOException {
+    public Blog createBlog(Blog blog, MultipartFile imageFile) {
         handleImageFile(blog, imageFile, "create");
         return blogRepository.save(blog);
     }
@@ -102,7 +104,10 @@ public class BlogServiceImpl implements BlogService {
     }
 
 
-
+    @Override
+    public List<Blog> searchBlogs(String query, String type) {
+        return blogRepository.searchByTypeAndQuery(type, query);
+    }
     private void deleteImageFile(Blog blog) {
         String imageUrl = blog.getImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -122,9 +127,8 @@ public class BlogServiceImpl implements BlogService {
     private void updateBlogDetails(Blog existingBlog, Blog updatedBlog) {
         existingBlog.setTitle(updatedBlog.getTitle());
         existingBlog.setContent(updatedBlog.getContent());
-        existingBlog.setCategory(updatedBlog.getCategory());
-        existingBlog.setPublishedAt(updatedBlog.getPublishedAt());
-        existingBlog.setStatus(updatedBlog.getStatus());
+        existingBlog.setCategories(updatedBlog.getCategories());
+        existingBlog.setVisibility(updatedBlog.isVisibility());
         existingBlog.setSlug(updatedBlog.getSlug());
         existingBlog.setCitation(updatedBlog.getCitation());
     }

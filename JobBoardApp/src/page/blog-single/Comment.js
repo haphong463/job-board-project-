@@ -39,11 +39,6 @@ export const Comment = ({
     (state) => state.comments.originalContent[comment.id]
   );
 
-  useEffect(() => {
-    const interval = setInterval(() => {}, 90000);
-    return () => clearInterval(interval);
-  }, []);
-
   const handleEditSubmit = (e) => {
     e.preventDefault();
     dispatch(
@@ -73,6 +68,7 @@ export const Comment = ({
 
   const handleFormEditKeyDown = (e) => {
     if (e.key === "Escape") {
+      console.log(editedContent, originalContent);
       if (editedContent !== originalContent) {
         Swal.fire({
           title: "Save changes?",
@@ -122,7 +118,12 @@ export const Comment = ({
                 <Dropdown.Menu>
                   <Dropdown.Item
                     onClick={() =>
-                      dispatch(toggleShowEditForm({ commentId: comment.id }))
+                      dispatch(
+                        toggleShowEditForm({
+                          commentId: comment.id,
+                          content: comment.content,
+                        })
+                      )
                     }
                   >
                     {showEditForm ? "Cancel" : "Edit"}

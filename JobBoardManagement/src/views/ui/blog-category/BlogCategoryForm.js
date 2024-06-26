@@ -24,16 +24,13 @@ import {
 export function BlogCategoryForm({ isEdit, setIsEdit }) {
   const dispatch = useDispatch();
   const [newCategoryModal, setNewCategoryModal] = useState(false);
-  const [setUnmountClose, setSetUnmountClose] = useState(false);
   const blogCategoryData =
     useSelector((state) => state.blogCategory.blogCategory) || [];
   const toggleNewCategoryModal = () => {
     setNewCategoryModal(!newCategoryModal);
     if (newCategoryModal) {
-      setSetUnmountClose(true); // Mark that the modal is closing
-    }
-    if (isEdit && !newCategoryModal) {
-      setIsEdit(null); // Reset isEdit state when modal is toggled open
+      reset({ name: "" });
+      setIsEdit(null);
     }
   };
 
@@ -57,13 +54,6 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
       setValue("name", isEdit.name); // Set the default value when isEdit changes
     }
   }, [isEdit, setValue]);
-
-  useEffect(() => {
-    if (setUnmountClose) {
-      reset({ name: "" }); // Reset the form values
-      setSetUnmountClose(false); // Reset the state
-    }
-  }, [setUnmountClose, reset]);
 
   const onSubmit = (data) => {
     const checkExistName = blogCategoryData.some(

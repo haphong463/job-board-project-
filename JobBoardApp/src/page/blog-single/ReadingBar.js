@@ -1,16 +1,15 @@
+import { motion, useScroll, useSpring } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import "./readingBar.css";
 const Bar = styled.div`
+  background: #89ba16 !important;
   position: fixed;
-  height: 6px;
-  border-radius: 0px 2px 0px 0px;
-  background: linear-gradient(
-    90deg,
-    rgba(109, 227, 219, 1) 0%,
-    rgba(132, 115, 177, 1) 100%,
-    rgba(3, 9, 112, 1) 100%
-  );
-  z-index: 9999;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  transform-origin: 0%;
 `;
 
 const ReadingBar = () => {
@@ -22,17 +21,18 @@ const ReadingBar = () => {
     var percent = (ScrollTop / (ScrollHeight - el.clientHeight)) * 100;
     setWidth(percent);
   };
-  useEffect(() => {
-    window.addEventListener("scroll", scrollHeight);
-    return () => window.removeEventListener("scroll", scrollHeight);
-  }, []);
-  return (
-    <Bar
-      style={{
-        width: width + "%",
-      }}
-    ></Bar>
-  );
+
+  // useEffect(() => {
+  //   window.addEventListener("scroll", scrollHeight);
+  //   return () => window.removeEventListener("scroll", scrollHeight);
+  // }, []);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
+  return <motion.div className="progress-bar" style={{ scaleX }} />;
 };
 
 export default ReadingBar;

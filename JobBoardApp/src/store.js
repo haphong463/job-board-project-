@@ -3,29 +3,41 @@ import blogsReducer from "./features/blogSlice";
 import commentReducer from "./features/commentSlice";
 import authReducer from "./features/authSlice";
 import categoryReducer from "./features/categorySlice";
+import notificationReducer from "./features/notificationSlice";
 import storage from "redux-persist/lib/storage";
 import { persistReducer } from "redux-persist";
 import { combineReducers } from "@reduxjs/toolkit";
-const persistConfig = {
-  key: "root",
-  version: 1,
-  storage,
-};
+import quizReducer from "./features/quizSlice";
 
-const reducer = combineReducers({
-  blogs: blogsReducer,
-  comments: commentReducer,
-  auth: authReducer,
-  category: categoryReducer,
-});
+// Cấu hình persist với whitelist
+// const persistConfig = {
+//   key: "root",
+//   version: 1,
+//   storage,
+// };
 
-const persistedReducer = persistReducer(persistConfig, reducer);
+// const rootReducer = combineReducers({
+//   blogs: blogsReducer,
+//   comments: commentReducer,
+//   auth: authReducer,
+//   category: categoryReducer,
+//   notification: notificationReducer,
+// });
 
+// const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+// Cấu hình store với persistedReducer
 export const store = configureStore({
-  reducer: persistedReducer,
-
-  middleware: (getDefaultMiddleWare) =>
-    getDefaultMiddleWare({
-      serializableCheck: false,
-    }),
+  reducer: {
+    blogs: blogsReducer,
+    comments: commentReducer,
+    auth: authReducer,
+    category: categoryReducer,
+    notification: notificationReducer,
+    quiz: quizReducer,
+  },
+  // middleware: (getDefaultMiddleware) =>
+  //   getDefaultMiddleware({
+  //     serializableCheck: false,
+  //   }),
 });

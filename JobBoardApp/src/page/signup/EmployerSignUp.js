@@ -1,29 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { FaCheck, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { signUpSchema } from "../../utils/variables/schema";
-import { signUp } from "../../features/authSlice";
+import { NavLink, useNavigate } from "react-router-dom";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
+import { signUpEmployer, resetSignUpSuccess } from "../../features/authSlice";
 import registerImage from "../../assets/images/register.png";
 import "./sign_up.css";
-import { NavLink } from "react-router-dom";
 
 const employerSignUpSchema = yup.object().shape({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-  username: yup.string().required("Username is required"),
-  email: yup.string().email("Email is invalid").required("Email is required"),
-  password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
-  confirmPassword: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match').required('Confirm password is required'),
-  
+  name: yup.string().required("Name is required"),
+  title: yup.string().required("Title is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  phoneNumber: yup.string().required("Phone number is required"),
   companyName: yup.string().required("Company name is required"),
   companyAddress: yup.string().required("Company address is required"),
-  companyWebsite: yup.string().url("Invalid URL format").required("Company website is required"),
-  phone: yup.string().required("Phone number is required"),
-  position: yup.string().required("Position is required"),
+  companyWebsite: yup
+    .string()
+    .url("Invalid URL")
+    .required("Company website is required"),
 });
 
 function EmployerSignUp() {
@@ -34,28 +30,30 @@ function EmployerSignUp() {
   } = useForm({
     resolver: yupResolver(employerSignUpSchema),
   });
+
   const dispatch = useDispatch();
   const signUpSuccess = useSelector((state) => state.auth.signUpSuccess);
-  const [password, setPassword] = useState("");
-  const onSubmit = async (data) => {
-    data.role = ["employer"];
-    dispatch(signUp(data));
-    console.log("check sign up state: ", signUpSuccess);
-    if (signUpSuccess) {
-      console.log("DANG KY THANH CONG");
-    }
+  const signUpError = useSelector((state) => state.auth.error);
+  const navigate = useNavigate();
+
+  // State to manage the visibility of the success message
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  const onSubmit = (data) => {
+    console.log("Form Submitted", data);
+    dispatch(signUpEmployer(data));
   };
 
-  const passwordValidations = [
-    {
-      test: password.length >= 6,
-      message: "Password must be at least 6 characters",
-    },
-    {
-      test: password.trim() !== "",
-      message: "Password cannot be empty",
-    },
-  ];
+  useEffect(() => {
+    if (signUpSuccess) {
+      console.log("Employer registration successful!");
+      setShowSuccessMessage(true); // Show success message
+      dispatch(resetSignUpSuccess());
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000); // Redirect after 3 seconds
+    }
+  }, [signUpSuccess, dispatch, navigate]);
 
   return (
     <GlobalLayoutUser>
@@ -69,7 +67,7 @@ function EmployerSignUp() {
         <div className="container">
           <div className="row">
             <div className="col-md-7">
-              <h1 className="text-white font-weight-bold">Sign Up/Login</h1>
+              <h1 className="text-white font-weight-bold">Employer Sign Up</h1>
               <div className="custom-breadcrumbs">
                 <a href="#">Home</a> <span className="mx-2 slash">/</span>
                 <span className="text-white">
@@ -84,10 +82,17 @@ function EmployerSignUp() {
         <div className="container">
           <div className="row">
             <div className="col-lg-6 mb-5">
-              <h2 className="mb-4">Register an employer account</h2>
-              {signUpSuccess && (
+              <h2 className="mb-4">Register as an Employer</h2>
+              {showSuccessMessage && (
                 <div className="alert alert-success" role="alert">
                   Successfully signed up! Verify your account via email.
+                </div>
+              )}
+              {signUpError && (
+                <div className="alert alert-danger" role="alert">
+                  {typeof signUpError === "object"
+                    ? signUpError.message
+                    : signUpError}
                 </div>
               )}
               <form
@@ -95,227 +100,157 @@ function EmployerSignUp() {
                 className="p-4 border rounded"
               >
                 <div className="row form-group">
-                  <div className="col-md-6 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="firstName">
-                      First Name*
+                  <div className="col-md-12">
+                    <label className="text-black" htmlFor="name">
+                      Name
                     </label>
                     <input
                       type="text"
-                      id="firstName"
-                      {...register("firstName")}
-                      className="form-control"
-                      placeholder="enter your first name..."
+                      id="name"
+                      {...register("name")}
+                      className={`form-control ${
+                        errors.name ? "is-invalid" : ""
+                      }`}
                     />
-                    <p className="text-danger">{errors.firstName?.message}</p>
-                  </div>
-                  <div className="col-md-6 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="lastName">
-                      Last Name*
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      {...register("lastName")}
-                      className="form-control"
-                      placeholder="enter your last name..."
-                    />
-                    <p className="text-danger">{errors.lastName?.message}</p>
+                    {errors.name && (
+                      <div className="invalid-feedback">
+                        {errors.name.message}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="row form-group">
-                  <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="username">
-                      Username*
+                  <div className="col-md-12">
+                    <label className="text-black" htmlFor="title">
+                      Title
                     </label>
                     <input
                       type="text"
-                      id="username"
-                      {...register("username")}
-                      className="form-control"
-                      placeholder="enter your username..."
+                      id="title"
+                      {...register("title")}
+                      className={`form-control ${
+                        errors.title ? "is-invalid" : ""
+                      }`}
                     />
-                    <p className="text-danger">{errors.username?.message}</p>
+                    {errors.title && (
+                      <div className="invalid-feedback">
+                        {errors.title.message}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="row form-group">
-                  <div className="col-md-12 mb-3 mb-md-0">
+                  <div className="col-md-12">
                     <label className="text-black" htmlFor="email">
-                      Email Works*
+                      Email
                     </label>
                     <input
-                      type="text"
+                      type="email"
                       id="email"
                       {...register("email")}
-                      className="form-control"
-                      placeholder="enter your email address..."
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
                     />
-                    <p className="text-danger">{errors.email?.message}</p>
+                    {errors.email && (
+                      <div className="invalid-feedback">
+                        {errors.email.message}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="row form-group">
-                  <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="password">
-                      Password*
+                  <div className="col-md-12">
+                    <label className="text-black" htmlFor="phoneNumber">
+                      Phone Number
                     </label>
                     <input
-                      type="password"
-                      id="password"
-                      {...register("password")}
-                      className="form-control"
-                      placeholder="enter your password..."
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      type="text"
+                      id="phoneNumber"
+                      {...register("phoneNumber")}
+                      className={`form-control ${
+                        errors.phoneNumber ? "is-invalid" : ""
+                      }`}
                     />
-                    <ul className="password-requirements">
-                      {passwordValidations.map((validation, index) => (
-                        <li
-                          key={index}
-                          className={validation.test ? "valid" : "invalid"}
-                        >
-                          {validation.test ? (
-                            <FaCheck className="text-success" />
-                          ) : (
-                            <FaTimes className="text-danger" />
-                          )}{" "}
-                          {validation.message}
-                        </li>
-                      ))}
-                    </ul>
+                    {errors.phoneNumber && (
+                      <div className="invalid-feedback">
+                        {errors.phoneNumber.message}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="row form-group mb-4">
-                  <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="confirmPassword">
-                      Re-Type Password*
-                    </label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      {...register("confirmPassword")}
-                      className="form-control"
-                      placeholder="re-type password ..."
-                    />
-                    <p className="text-danger">
-                      {errors.confirmPassword?.message}
-                    </p>
-                  </div>
-                </div>
-                
                 <div className="row form-group">
-                  <div className="col-md-12 mb-3 mb-md-0">
+                  <div className="col-md-12">
                     <label className="text-black" htmlFor="companyName">
-                      Company Name*
+                      Company Name
                     </label>
                     <input
                       type="text"
                       id="companyName"
                       {...register("companyName")}
-                      className="form-control"
-                      placeholder="enter your company name..."
+                      className={`form-control ${
+                        errors.companyName ? "is-invalid" : ""
+                      }`}
                     />
-                    <p className="text-danger">{errors.companyName?.message}</p>
+                    {errors.companyName && (
+                      <div className="invalid-feedback">
+                        {errors.companyName.message}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="row form-group">
-                  <div className="col-md-12 mb-3 mb-md-0">
+                  <div className="col-md-12">
                     <label className="text-black" htmlFor="companyAddress">
-                      Company Address*
+                      Company Address
                     </label>
                     <input
                       type="text"
                       id="companyAddress"
                       {...register("companyAddress")}
-                      className="form-control"
-                      placeholder="enter your company address..."
+                      className={`form-control ${
+                        errors.companyAddress ? "is-invalid" : ""
+                      }`}
                     />
-                    <p className="text-danger">{errors.companyAddress?.message}</p>
+                    {errors.companyAddress && (
+                      <div className="invalid-feedback">
+                        {errors.companyAddress.message}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="row form-group">
-                  <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="companyWebsite">
-                      Company Website*
-                    </label>
-                    <input
-                      type="text"
-                      id="companyWebsite"
-                      {...register("companyWebsite")}
-                      className="form-control"
-                      placeholder="enter your company website..."
-                    />
-                    <p className="text-danger">{errors.companyWebsite?.message}</p>
-                  </div>
-                </div>
-                <div className="row form-group">
-      <div className="col-md-12 mb-3 mb-md-0">
-        <label className="text-black" htmlFor="position">
-          Position*
-        </label>
-        <input
-          type="text"
-          id="position"
-          {...register("position")}
-          className="form-control"
-          placeholder="enter your position in the company..."
-        />
-        <p className="text-danger">{errors.position?.message}</p>
-      </div>
-    </div>
-    <div className="row form-group">
-      <div className="col-md-12 mb-3 mb-md-0">
-        <label className="text-black" htmlFor="phone">
-          Phone*
-        </label>
-        <input
-          type="text"
-          id="phone"
-          {...register("phone")}
-          className="form-control"
-          placeholder="enter your phone number..."
-        />
-        <p className="text-danger">{errors.phone?.message}</p>
-      </div>
-    </div>
-    <div className="row form-group">
-      <div className="col-md-12">
-        <div className="form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            id="agreementCheckbox"
-            {...register("agreement", { required: true })}
-          />
-          <label className="form-check-label" htmlFor="agreementCheckbox">
-            I agree to the Terms and Conditions
-          </label>
-          <p className="text-danger">
-            {errors.agreement && "You must agree to the terms and conditions"}
-          </p>
-        </div>
-      </div>
-    </div>
                 <div className="row form-group">
                   <div className="col-md-12">
-                    <button
-                      type="submit"
-                      className="btn px-4 btn-primary text-white"
-                    >
-                      Register as Employer
+                    <label className="text-black" htmlFor="companyWebsite">
+                      Company Website
+                    </label>
+                    <input
+                      type="url"
+                      id="companyWebsite"
+                      {...register("companyWebsite")}
+                      className={`form-control ${
+                        errors.companyWebsite ? "is-invalid" : ""
+                      }`}
+                    />
+                    {errors.companyWebsite && (
+                      <div className="invalid-feedback">
+                        {errors.companyWebsite.message}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="row form-group">
+                  <div className="col-md-12">
+                    <button type="submit" className="btn btn-primary">
+                      Sign Up
                     </button>
                   </div>
                 </div>
               </form>
             </div>
             <div className="col-lg-6">
-              <img
-                src={registerImage}
-                alt="Register"
-                className="img-fluid d-block mx-auto"
-              />
+              <img src={registerImage} alt="Register" className="img-fluid" />
             </div>
-          </div>
-          <div className="mt-5 text-center">
-            <p>Already have an account? <NavLink to="/sign-in">Sign In</NavLink></p>
           </div>
         </div>
       </section>

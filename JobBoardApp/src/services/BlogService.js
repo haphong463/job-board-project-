@@ -8,6 +8,16 @@ export const getAllBlog = async () => {
   }
 };
 
+export const getAllBlogFilter = async (params) => {
+  try {
+    return await axiosRequest.get("/blogs/search", {
+      params,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const findBlogById = async (blogId) => {
   try {
     return await axiosRequest.get(`/blogs/${blogId}`);

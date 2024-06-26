@@ -3,20 +3,14 @@ package com.project4.JobBoardService.Entity;
 
 import com.project4.JobBoardService.Enum.Gender;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users",
@@ -57,13 +51,10 @@ public class User   {
 
     private String verificationCode;
 
+    private String imageUrl;
+    private String thumbnailUrl;
+    private String bio;
 
-    // Employer-specific fields
-    private String companyName;
-    private String companyAddress;
-    private String companyWebsite;
-    private String position;
-    private String phone;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(  name = "user_roles",
@@ -78,9 +69,12 @@ public class User   {
 
     @OneToMany(mappedBy = "id")
     private List<Comment> comments;
-    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Quiz> quizzes = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCV> userCVs;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Employer employer;
 
     public User(String username, String email, String password) {
         this.username = username;

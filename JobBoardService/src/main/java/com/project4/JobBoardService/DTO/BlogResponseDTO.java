@@ -1,7 +1,6 @@
 package com.project4.JobBoardService.DTO;
 
 import com.project4.JobBoardService.Enum.BlogStatus;
-import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,10 +19,9 @@ public class BlogResponseDTO {
     private Long id;
     private String title;
     private String content;
-    private BlogCategoryDTO category;
+    private List<BlogCategoryDTO> categories; // Change to List<BlogCategoryDTO>
     private UserDTO user;
-    @Enumerated(EnumType.STRING)
-    private BlogStatus status;
+    private boolean visibility;
     private String slug;
     private String citation;
     private String imageUrl;
@@ -31,8 +29,30 @@ public class BlogResponseDTO {
     private Date createdAt;
     private Date updatedAt;
     private int commentCount;
+
     // Getters and setters
 
     // Inner class for category DTO
+    @Getter
+    @Setter
+    public static class BlogCategoryDTO {
+        private Long id;
+        private String name;
 
+        // Getters and setters
+    }
+
+    // Inner class for user DTO
+    @Getter
+    @Setter
+    public static class UserDTO {
+        private Long id;
+        private String username;
+        private String email;
+        private String firstName;
+        private String lastName;
+        private String bio;
+        private String imageUrl;
+        // Getters and setters
+    }
 }

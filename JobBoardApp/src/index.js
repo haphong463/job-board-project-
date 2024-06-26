@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
@@ -8,18 +8,19 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import persistStore from "redux-persist/es/persistStore";
 import { PersistGate } from "redux-persist/integration/react";
+import LoadingSpinner from "./components/loading-spinner/LoadingSpinner";
 // import { I18nextProvider } from "react-i18next";
 // import i18n from "./translation/translatetion";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-let persistor = persistStore(store);
+// let persistor = persistStore(store);
 root.render(
   <Router>
     <Provider store={store}>
       {/* <I18nextProvider i18n={i18n}> */}
-      <PersistGate persistor={persistor}>
-        <App />
-      </PersistGate>
+      {/* <PersistGate loading={null} persistor={persistor}> */}
+      <App />
+      {/* </PersistGate> */}
       {/* </I18nextProvider> */}
     </Provider>
   </Router>

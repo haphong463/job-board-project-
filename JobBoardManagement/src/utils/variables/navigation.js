@@ -9,9 +9,15 @@ export const navigation = [
     icon: "bi bi-collection",
     children: [
       {
-        title: "Alerts",
-        href: "/jobportal/alerts",
+        title: "Job",
         icon: "bi bi-bell",
+        children: [
+          {
+            title: "Category",
+            href: "/jobportal/job-category",
+            icon: "bi bi-patch-check",
+          },
+        ],
       },
       {
         title: "Blog",
@@ -27,20 +33,24 @@ export const navigation = [
             href: "/jobportal/table",
             icon: "bi bi-hdd-stack",
           },
+     
+        ],
+      },
+      {
+        title: "Quiz and Questions",
+        icon: "bi bi-question-circle",
+        children: [
+          {
+            title: "Quiz",
+            href: "/jobportal/quiz",
+            icon: "bi bi-question-circle",
+          },
+      
         ],
       },
     ],
   },
-  {
-    title: "Breadcrumbs",
-    href: "/jobportal/breadcrumbs",
-    icon: "bi bi-link",
-  },
-  {
-    title: "About",
-    href: "/jobportal/about",
-    icon: "bi bi-people",
-  },
+
   {
     title: "Settings",
     href: "/jobportal/settings",

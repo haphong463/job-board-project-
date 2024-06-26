@@ -16,6 +16,7 @@ import {
   deleteBlogCategory,
   fetchBlogCategory,
 } from "../../../features/blogCategorySlice";
+import nprogress from "nprogress";
 
 export function BlogCategory(props) {
   const dispatch = useDispatch();
@@ -26,14 +27,18 @@ export function BlogCategory(props) {
   const [isEdit, setIsEdit] = useState(null); // Changed initial state to null
 
   useEffect(() => {
-    if (blogCategoryStatus === "idle") {
-      dispatch(fetchBlogCategory());
-    }
-  }, [blogCategoryStatus, dispatch]);
+    nprogress.start();
+    dispatch(fetchBlogCategory()).then(() => {
+      nprogress.done();
+    });
+  }, [dispatch]);
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this blog?")) {
-      dispatch(deleteBlogCategory(id));
+      nprogress.start();
+      dispatch(deleteBlogCategory(id)).then(() => {
+        nprogress.done();
+      });
     }
   };
 

@@ -1,7 +1,9 @@
-import { Editor } from "@tinymce/tinymce-react";
+import React from "react";
 import { Controller } from "react-hook-form";
 import { Col, FormGroup, FormText, Input, Label, Row } from "reactstrap";
 import { slugify } from "../../../utils/functions/convertToSlug";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 export function LeftSideBlogForm(props) {
   return (
@@ -9,12 +11,9 @@ export function LeftSideBlogForm(props) {
       <Row>
         <Col md={12}>
           <FormGroup>
-            <div className="d-flex justify-content-between">
-              <Label for="postTitle">
-                Title <span className="text-danger">*</span>
-              </Label>
-              <FormText>{slugify(props.watch("title"))}</FormText>
-            </div>
+            <Label for="postTitle">
+              Title <span className="text-danger">*</span>
+            </Label>
             <Controller
               name="title"
               control={props.control}
@@ -63,24 +62,19 @@ export function LeftSideBlogForm(props) {
             <Label for="content">
               Content <span className="text-danger">*</span>
             </Label>
-            <Editor
-              apiKey={process.env.REACT_APP_TINYMCE_KEY}
-              init={{
-                plugins:
-                  "anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount ",
-                toolbar:
-                  "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat",
-              }}
-              initialValue={
-                props.isEdit ? props.isEdit.content : "Welcome to TinyMCE!"
-              }
-              onEditorChange={(newValue, editor) =>
-                props.setValue("content", newValue, {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                })
-              }
-              id="content"
+            <Controller
+              name="content"
+              control={props.control}
+              render={({ field }) => (
+                <CKEditor
+                  editor={ClassicEditor}
+                  data={props.isEdit ? props.isEdit.content : ""}
+                  onChange={(event, editor) => {
+                    const data = editor.getData();
+                    field.onChange(data);
+                  }}
+                />
+              )}
             />
             {props.errors.content && (
               <FormText color="danger">{props.errors.content.message}</FormText>

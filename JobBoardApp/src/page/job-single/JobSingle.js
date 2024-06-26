@@ -1,5 +1,5 @@
 import React from "react";
-import { GlobalLayoutUser } from "../../components/clients/global-layout-user/GlobalLayoutUser";
+import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 
 export const JobSingle = () => {
   return (
@@ -7,7 +7,9 @@ export const JobSingle = () => {
       <>
         <section
           className="section-hero overlay inner-page bg-image"
-          style={{ backgroundImage: 'url("images/hero_1.jpg")' }}
+          style={{
+            backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
+          }}
           id="home-section"
         >
           <div className="container">
@@ -33,7 +35,10 @@ export const JobSingle = () => {
               <div className="col-lg-8 mb-4 mb-lg-0">
                 <div className="d-flex align-items-center">
                   <div className="border p-2 d-inline-block mr-3 rounded">
-                    <img src="images/job_logo_5.jpg" alt="Image" />
+                    <img
+                      src="../../../../assets/images/job_logo_5.jpg"
+                      alt="Image"
+                    />
                   </div>
                   <div>
                     <h2>Product Designer</h2>
@@ -75,7 +80,7 @@ export const JobSingle = () => {
                 <div className="mb-5">
                   <figure className="mb-5">
                     <img
-                      src="images/job_single_img_1.jpg"
+                      src="../../../../assets/images/job_single_img_1.jpg"
                       alt="Image"
                       className="img-fluid rounded"
                     />
@@ -289,7 +294,7 @@ export const JobSingle = () => {
                 <a href="job-single.html" />
                 <div className="job-listing-logo">
                   <img
-                    src="images/job_logo_1.jpg"
+                    src="../../../../assets/images/job_logo_1.jpg"
                     alt="Image"
                     className="img-fluid"
                   />
@@ -311,7 +316,7 @@ export const JobSingle = () => {
                 <a href="job-single.html" />
                 <div className="job-listing-logo">
                   <img
-                    src="images/job_logo_2.jpg"
+                    src="../../../../assets/images/job_logo_2.jpg"
                     alt="Image"
                     className="img-fluid"
                   />
@@ -333,7 +338,7 @@ export const JobSingle = () => {
                 <a href="job-single.html" />
                 <div className="job-listing-logo">
                   <img
-                    src="images/job_logo_3.jpg"
+                    src="../../../../assets/images/job_logo_3.jpg"
                     alt="Image"
                     className="img-fluid"
                   />
@@ -355,7 +360,7 @@ export const JobSingle = () => {
                 <a href="job-single.html" />
                 <div className="job-listing-logo">
                   <img
-                    src="images/job_logo_4.jpg"
+                    src="../../../../assets/images/job_logo_4.jpg"
                     alt="Image"
                     className="img-fluid"
                   />
@@ -377,7 +382,7 @@ export const JobSingle = () => {
                 <a href="job-single.html" />
                 <div className="job-listing-logo">
                   <img
-                    src="images/job_logo_5.jpg"
+                    src="../../../../assets/images/job_logo_5.jpg"
                     alt="Image"
                     className="img-fluid"
                   />
@@ -399,7 +404,7 @@ export const JobSingle = () => {
                 <a href="job-single.html" />
                 <div className="job-listing-logo">
                   <img
-                    src="images/job_logo_1.jpg"
+                    src="../../../../assets/images/job_logo_1.jpg"
                     alt="Image"
                     className="img-fluid"
                   />
@@ -421,7 +426,7 @@ export const JobSingle = () => {
                 <a href="job-single.html" />
                 <div className="job-listing-logo">
                   <img
-                    src="images/job_logo_2.jpg"
+                    src="../../../../assets/images/job_logo_2.jpg"
                     alt="Image"
                     className="img-fluid"
                   />
@@ -484,7 +489,7 @@ export const JobSingle = () => {
                 </div>
                 <div className="col-lg-6 align-self-end text-center text-lg-right">
                   <img
-                    src="images/person_transparent_2.png"
+                    src="../../../../assets/images/person_transparent_2.png"
                     alt="Image"
                     className="img-fluid mb-0"
                   />
@@ -508,7 +513,7 @@ export const JobSingle = () => {
                 </div>
                 <div className="col-lg-6 align-self-end text-center text-lg-right">
                   <img
-                    src="images/person_transparent.png"
+                    src="../../../../assets/images/person_transparent.png"
                     alt="Image"
                     className="img-fluid mb-0"
                   />
@@ -519,7 +524,9 @@ export const JobSingle = () => {
         </section>
         <section
           className="pt-5 bg-image overlay-primary fixed overlay"
-          style={{ backgroundImage: 'url("images/hero_1.jpg")' }}
+          style={{
+            backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
+          }}
         >
           <div className="container">
             <div className="row">
@@ -547,7 +554,11 @@ export const JobSingle = () => {
                 </p>
               </div>
               <div className="col-md-6 ml-auto align-self-end">
-                <img src="images/apps.png" alt="Image" className="img-fluid" />
+                <img
+                  src="../../../../assets/images/apps.png"
+                  alt="Image"
+                  className="img-fluid"
+                />
               </div>
             </div>
           </div>
@@ -556,3 +567,5 @@ export const JobSingle = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default JobSingle;

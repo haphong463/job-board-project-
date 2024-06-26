@@ -9,9 +9,6 @@ import { signIn, resetSignInSuccess } from "../features/authSlice";
 export const useLoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const signInSuccess = useSelector((state) => state.auth.signInSuccess);
-  const signInError = useSelector((state) => state.auth.error);
-  const location = useLocation();
 
   const {
     register,
@@ -27,22 +24,31 @@ export const useLoginForm = () => {
   });
 
   const onSubmit = (data) => {
-    dispatch(signIn(data));
+    dispatch(signIn(data))
+      .then((res) => {
+        if (res.meta.requestStatus === "fulfilled") {
+          navigate(-1, { replace: true });
+          dispatch(resetSignInSuccess());
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  useEffect(() => {
-    if (signInSuccess) {
-      console.log("Login successful");
-      navigate(-1);
-      dispatch(resetSignInSuccess()); // Reset signInSuccess to handle future logins
-    }
-  }, [signInSuccess, navigate, dispatch]);
+  // useEffect(() => {
+  //   if (signInSuccess) {
+  //     console.log("Login successful");
+  //     navigate(-1);
+  //     dispatch(resetSignInSuccess()); // Reset signInSuccess to handle future logins
+  //   }
+  // }, [signInSuccess, navigate, dispatch]);
 
-  useEffect(() => {
-    if (signInError) {
-      console.error("Login failed:", signInError);
-    }
-  }, [signInError]);
+  // useEffect(() => {
+  //   if (signInError) {
+  //     console.error("Login failed:", signInError);
+  //   }
+  // }, [signInError]);
 
   return { register, handleSubmit, errors, onSubmit };
 };

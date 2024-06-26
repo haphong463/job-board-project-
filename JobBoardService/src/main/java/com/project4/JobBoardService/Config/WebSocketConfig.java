@@ -21,8 +21,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // Cấu hình message broker để phân phối các message từ server tới client
-        registry.enableSimpleBroker("/topic"); // Cho phép đăng ký các topic prefix "/topic"
+        registry.enableSimpleBroker("/topic", "/queue"); // Cho phép đăng ký các topic prefix "/topic"
         registry.setApplicationDestinationPrefixes("/app"); // Định nghĩa các message tới server với prefix "/app"
+        registry.setUserDestinationPrefix("/user");
     }
 
 

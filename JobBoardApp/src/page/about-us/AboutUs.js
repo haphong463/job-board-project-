@@ -181,3 +181,4 @@ export const AboutUs = () => {
     </GlobalLayoutUser>
   );
 };
+export default AboutUs;

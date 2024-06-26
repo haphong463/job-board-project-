@@ -1,39 +1,45 @@
 package com.project4.JobBoardService.DTO;
 
 import com.project4.JobBoardService.Enum.BlogStatus;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.ZonedDateTime;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class BlogDTO {
-    private Long id;
+    @NotNull
     private String title;
+    @NotNull
     private String content;
-    private Long blogCategoryId;
-    private String username;
-    private BlogCategoryDTO category;
+
+    @NotNull
+    private List<Long> categoryIds; // Danh sách id của các BlogCategory
+
+    @NotNull
     private String citation;
-    private Date publishedAt;
-    @Enumerated(EnumType.STRING)
-    private BlogStatus status;
+
+    @NotNull
+    public  String username;
+
+    @NotNull
+    private boolean visibility;
+
+    @NotNull
     private String slug;
     @Nullable
     private MultipartFile image;
-
 
     // Getters and setters
 }

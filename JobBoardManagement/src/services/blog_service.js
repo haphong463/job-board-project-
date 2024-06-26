@@ -5,9 +5,7 @@ const HEADERS_FORM_DATA = {
   "Content-Type": "multipart/form-data",
 };
 
-const HEADERS_FORM_JSON_APPLICATION = {
-  "Content-Type": "application/json",
-};
+
 
 export const getAllBlogs = async () => {
   try {
