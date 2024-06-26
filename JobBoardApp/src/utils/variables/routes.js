@@ -15,6 +15,10 @@ import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import { PostCompany } from "../../page/post-company/PostCompany";
+import CreateCV from "../../page/user-cv/CreateCv";
+import CreateTemplate from "../../page/user-cv/CreateTemplate";
+import ListTemplate from "../../page/list-template/ListTemplate";
+
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -27,6 +31,10 @@ export const routes = [
   { path: "/job-listing", component: <JobListing /> },
   { path: "/login", component: <Login /> },
   { path: "/signup", component: <SignUp /> },
+  { path: "/create-cv", component: <CreateCV /> },
+  { path: "/create-template", component: <CreateTemplate /> },
+
+  { path: "/list-template", component: <ListTemplate /> },
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
   { path: "/EmployerSignUp", component: <EmployerSignUp /> },

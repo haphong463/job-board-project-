@@ -100,6 +100,9 @@ export function GlobalNavbar() {
                     <NavLink to="/blog-single">Blog Single</NavLink>
                   </li>
                   <li>
+                    <NavLink to="/create-cv">Create CV</NavLink>
+                  </li>
+                  <li>
                     <NavLink to="/portfolio">Portfolio</NavLink>
                   </li>
                   <li>
