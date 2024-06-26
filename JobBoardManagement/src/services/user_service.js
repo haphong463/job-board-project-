@@ -2,9 +2,10 @@ import axiosRequest from "../configs/axiosConfig";
 
 const URL = "/user";
 
-export const getAllUserAsync = async () => {
+export const getAllUserAsync = async () => await axiosRequest.get(URL);
+export const getUserByIDAsync = async (id) => {
   try {
-    return await axiosRequest.get(URL);
+    return await axiosRequest.get(`${URL}/${id}`);
   } catch (error) {
     return error;
   }

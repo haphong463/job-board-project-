@@ -1,12 +1,21 @@
 // quizSlice.js
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchQuizzes, createQuiz, deleteQuiz, updateQuiz } from "../services/quiz_service";
-import { createQuestionAsync, updateQuestionAsync, deleteQuestionAsync } from "../services/questionService";
+import {
+  fetchQuizzes,
+  createQuiz,
+  deleteQuiz,
+  updateQuiz,
+} from "../services/quiz_service";
+import {
+  createQuestionAsync,
+  updateQuestionAsync,
+  deleteQuestionAsync,
+} from "../services/questionService";
 
 const initialState = {
   quizzes: [],
-  status: 'idle',
+  status: "idle",
   error: null,
 };
 
@@ -18,29 +27,42 @@ export const fetchQuizzesAsync = createAsyncThunk(
   }
 );
 
-export const createNewQuiz = createAsyncThunk('quizzes/createQuiz', async (formData) => {
-  const { title, description, imageFile } = formData;
-  const response = await createQuiz(title, description, imageFile);
-  return response.data;
-});
+export const createNewQuiz = createAsyncThunk(
+  "quizzes/createQuiz",
+  async (formData) => {
+    const { title, description, imageFile } = formData;
+    const data = await createQuiz(title, description, imageFile);
 
-export const removeQuiz = createAsyncThunk('quizzes/deleteQuiz', async (quizId) => {
-  await deleteQuiz(quizId);
-  return quizId;
-});
+    return data;
+  }
+);
 
-export const modifyQuiz = createAsyncThunk('quizzes/updateQuiz', async ({ id, data, imageFile }) => {
-  const response = await updateQuiz(id, data, imageFile);
-  return response.data;
-});
+export const removeQuiz = createAsyncThunk(
+  "quizzes/deleteQuiz",
+  async (quizId) => {
+    await deleteQuiz(quizId);
+    return quizId;
+  }
+);
 
-export const deleteQuestion = createAsyncThunk('quizzes/deleteQuestion', async ({ quizId, questionId }) => {
-  await deleteQuestionAsync(quizId, questionId);
-  return { quizId, questionId };
-});
+export const modifyQuiz = createAsyncThunk(
+  "quizzes/updateQuiz",
+  async ({ id, data, imageFile }) => {
+    const response = await updateQuiz(id, data, imageFile);
+    return response.data;
+  }
+);
+
+export const deleteQuestion = createAsyncThunk(
+  "quizzes/deleteQuestion",
+  async ({ quizId, questionId }) => {
+    await deleteQuestionAsync(quizId, questionId);
+    return { quizId, questionId };
+  }
+);
 
 const quizSlice = createSlice({
-  name: 'quizzes',
+  name: "quizzes",
   initialState,
   reducers: {
     createQuestion(state, action) {
@@ -54,7 +76,9 @@ const quizSlice = createSlice({
       const { quizId, questionId, ...updatedData } = action.payload;
       const quizIndex = state.quizzes.findIndex((quiz) => quiz.id === quizId);
       if (quizIndex !== -1) {
-        const questionIndex = state.quizzes[quizIndex].questions.findIndex((q) => q.id === questionId);
+        const questionIndex = state.quizzes[quizIndex].questions.findIndex(
+          (q) => q.id === questionId
+        );
         if (questionIndex !== -1) {
           state.quizzes[quizIndex].questions[questionIndex] = {
             ...state.quizzes[quizIndex].questions[questionIndex],
@@ -81,14 +105,16 @@ const quizSlice = createSlice({
         state.quizzes.push(action.payload);
       })
       .addCase(createNewQuiz.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.error.message;
       })
       .addCase(removeQuiz.fulfilled, (state, action) => {
-        state.quizzes = state.quizzes.filter((quiz) => quiz.id !== action.payload);
+        state.quizzes = state.quizzes.filter(
+          (quiz) => quiz.id !== action.payload
+        );
       })
       .addCase(removeQuiz.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.error.message;
       })
       .addCase(modifyQuiz.fulfilled, (state, action) => {
@@ -97,21 +123,23 @@ const quizSlice = createSlice({
         );
       })
       .addCase(modifyQuiz.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.error.message;
       })
       .addCase(deleteQuestion.fulfilled, (state, action) => {
         const { quizId, questionId } = action.payload;
         const quizIndex = state.quizzes.findIndex((quiz) => quiz.id === quizId);
         if (quizIndex !== -1) {
-          state.quizzes[quizIndex].questions = state.quizzes[quizIndex].questions.filter((q) => q.id !== questionId);
+          state.quizzes[quizIndex].questions = state.quizzes[
+            quizIndex
+          ].questions.filter((q) => q.id !== questionId);
         }
       })
       .addMatcher(
         (action) =>
-          action.type.endsWith('/pending') || action.type.endsWith('/rejected'),
+          action.type.endsWith("/pending") || action.type.endsWith("/rejected"),
         (state) => {
-          state.status = 'loading';
+          state.status = "loading";
         }
       );
   },

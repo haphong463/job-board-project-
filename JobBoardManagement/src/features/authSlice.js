@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { jwtDecode } from "jwt-decode";
 import { signInAsync } from "../services/auth_service";
-import { updateUserAsync } from "../services/user_service";
+import { getUserByIDAsync, updateUserAsync } from "../services/user_service";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
 
@@ -53,18 +53,31 @@ export const updateUserThunk = createAsyncThunk(
   }
 );
 
+export const getUserByIDThunk = createAsyncThunk(
+  "user/getOne",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await getUserByIDAsync(id);
+      console.log(res);
+      return res;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const name = "auth";
+const token = localStorage.getItem("accessToken");
+
 const initialState = {
+  accessToken: token && jwtDecode(token),
   error: null,
   state: "idle",
   signInSuccess: false,
   isVerified: true,
   verificationEmail: null,
   verificationMessage: null,
-  roles: [],
-  user:
-    localStorage.getItem("accessToken") &&
-    jwtDecode(localStorage.getItem("accessToken")),
+  user: null,
   location: "",
 };
 
@@ -77,16 +90,12 @@ const authSlice = createSlice({
     },
     logout(state) {
       state.user = null;
-      state.roles = [];
+      state.accessToken = null;
       localStorage.removeItem("accessToken");
     },
 
     setLocationState: (state, action) => {
       state.location = action.payload;
-    },
-    updateRoles: (state) => {
-      state.roles = state.user ? state.user.role.map((r) => r.authority) : [];
-      console.log(state.roles);
     },
   },
   extraReducers: (builder) => {
@@ -99,9 +108,8 @@ const authSlice = createSlice({
         state.state = "succeeded";
         state.signInSuccess = true;
         state.isVerified = true;
-        state.user = jwtDecode(action.payload.accessToken);
-        state.roles = state.user.role.map((r) => r.authority);
         localStorage.setItem("accessToken", action.payload.accessToken);
+        state.accessToken = jwtDecode(action.payload.accessToken);
       })
       .addCase(login.rejected, (state, action) => {
         state.state = "failed";
@@ -113,16 +121,18 @@ const authSlice = createSlice({
         }
       })
       .addCase(updateUserThunk.fulfilled, (state, action) => {
-        state.user = { ...state.user, ...action.payload }; // Update the user information
-        // If the roles have changed, update them as well
+        state.user = action.payload;
       })
       .addCase(updateUserThunk.rejected, (state, action) => {
         state.error = action.payload;
+      })
+      .addCase(getUserByIDThunk.fulfilled, (state, action) => {
+        state.user = action.payload;
       });
   },
 });
 
-export const { resetSignInSuccess, logout, setLocationState, updateRoles } =
+export const { resetSignInSuccess, logout, setLocationState } =
   authSlice.actions;
 
 export default authSlice.reducer;
