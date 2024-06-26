@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 import axiosRequest from '../../configs/axiosConfig';
 import '../../assets/css/list-template.css'; // Import CSS file for custom styles
-import '@fortawesome/fontawesome-free/css/all.min.css';
+// import '@fontawesome/fontawesome-free/css/all.min.css';
 import { useParams } from 'react-router-dom';
 const ListTemplate = () => {
   const [templates, setTemplates] = useState([]);
