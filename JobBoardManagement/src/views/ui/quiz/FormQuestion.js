@@ -3,7 +3,7 @@ import { Modal, ModalHeader, ModalBody, Button, Form, FormGroup, Label, Input } 
 import { useDispatch } from 'react-redux';
 import axiosRequest from '../../../configs/axiosConfig';
 
-import { createQuestion, updateQuestion } from '../../../features/quizSlice';
+import { createQuestion, updateQuestion, deleteQuestion } from '../../../features/quizSlice';
 
 const FormQuestion = ({ quizId, selectedQuestion, toggleModal, isOpen }) => {
   const dispatch = useDispatch();
@@ -19,11 +19,12 @@ const FormQuestion = ({ quizId, selectedQuestion, toggleModal, isOpen }) => {
   useEffect(() => {
     if (selectedQuestion) {
       setQuestionText(selectedQuestion.questionText || '');
+      const existingOptions = selectedQuestion.options?.split(', ') || [];
       setOptions({
-        A: selectedQuestion.options && selectedQuestion.options.A ? selectedQuestion.options.A : '',
-        B: selectedQuestion.options && selectedQuestion.options.B ? selectedQuestion.options.B : '',
-        C: selectedQuestion.options && selectedQuestion.options.C ? selectedQuestion.options.C : '',
-        D: selectedQuestion.options && selectedQuestion.options.D ? selectedQuestion.options.D : '',
+        A: existingOptions[0]?.split('. ')[1] || '',
+        B: existingOptions[1]?.split('. ')[1] || '',
+        C: existingOptions[2]?.split('. ')[1] || '',
+        D: existingOptions[3]?.split('. ')[1] || '',
       });
       setCorrectAnswer(selectedQuestion.correctAnswer || '');
     } else {
@@ -41,33 +42,44 @@ const FormQuestion = ({ quizId, selectedQuestion, toggleModal, isOpen }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('questionText', questionText);
-    formData.append('options', JSON.stringify(options));
-    formData.append('correctAnswer', correctAnswer);
+    const optionsString = `A. ${options.A}, B. ${options.B}, C. ${options.C}, D. ${options.D}`;
+
+    const queryParams = new URLSearchParams({
+      questionText,
+      options: optionsString,
+      correctAnswer,
+    });
 
     try {
       let response;
       if (selectedQuestion) {
         response = await axiosRequest.put(
-          `/quizzes/${quizId}/questions/${selectedQuestion.id}`,
-          formData
+          `/quizzes/${quizId}/questions/${selectedQuestion.id}?${queryParams.toString()}`
         );
-        dispatch(updateQuestion({ quizId, questionId: selectedQuestion.id, ...formData }));
+        dispatch(updateQuestion({ quizId, questionId: selectedQuestion.id, questionText, options: optionsString, correctAnswer }));
       } else {
         response = await axiosRequest.post(
-          `/quizzes/${quizId}/questions`,
-          formData
+          `/quizzes/${quizId}/questions?${queryParams.toString()}`
         );
-        dispatch(createQuestion({ quizId, ...formData }));
+        dispatch(createQuestion({ quizId, questionText, options: optionsString, correctAnswer }));
       }
 
       console.log('Created/updated question:', response);
-      toggleModal(); 
-
+      toggleModal();
     } catch (error) {
       console.error('Error creating/updating question:', error);
-    
+    }
+  };
+
+  const handleDelete = async () => {
+    if (selectedQuestion) {
+      try {
+        await axiosRequest.delete(`/quizzes/${quizId}/questions/${selectedQuestion.id}`);
+        dispatch(deleteQuestion({ quizId, questionId: selectedQuestion.id }));
+        toggleModal();
+      } catch (error) {
+        console.error('Error deleting question:', error);
+      }
     }
   };
 
@@ -90,50 +102,19 @@ const FormQuestion = ({ quizId, selectedQuestion, toggleModal, isOpen }) => {
           </FormGroup>
           <FormGroup>
             <Label>Options</Label>
-            <FormGroup check>
-              <Label check>
-                <Input
-                  type="text"
-                  value={options.A}
-                  onChange={(e) => setOptions({ ...options, A: e.target.value })}
-                  required
-                />{' '}
-                A. {options.A}
-              </Label>
-            </FormGroup>
-            <FormGroup check>
-              <Label check>
-                <Input
-                  type="text"
-                  value={options.B}
-                  onChange={(e) => setOptions({ ...options, B: e.target.value })}
-                  required
-                />{' '}
-                B. {options.B}
-              </Label>
-            </FormGroup>
-            <FormGroup check>
-              <Label check>
-                <Input
-                  type="text"
-                  value={options.C}
-                  onChange={(e) => setOptions({ ...options, C: e.target.value })}
-                  required
-                />{' '}
-                C. {options.C}
-              </Label>
-            </FormGroup>
-            <FormGroup check>
-              <Label check>
-                <Input
-                  type="text"
-                  value={options.D}
-                  onChange={(e) => setOptions({ ...options, D: e.target.value })}
-                  required
-                />{' '}
-                D. {options.D}
-              </Label>
-            </FormGroup>
+            {['A', 'B', 'C', 'D'].map((option) => (
+              <FormGroup key={option}>
+                <Label>
+                  {option}.{' '}
+                  <Input
+                    type="text"
+                    value={options[option]}
+                    onChange={(e) => setOptions({ ...options, [option]: e.target.value })}
+                    required
+                  />
+                </Label>
+              </FormGroup>
+            ))}
           </FormGroup>
           <FormGroup>
             <Label for="correctAnswer">Correct Answer</Label>
@@ -148,6 +129,11 @@ const FormQuestion = ({ quizId, selectedQuestion, toggleModal, isOpen }) => {
           <Button type="submit" color="primary">
             {selectedQuestion ? 'Update' : 'Add'}
           </Button>
+          {selectedQuestion && (
+            <Button type="button" color="danger" onClick={handleDelete} className="ml-2">
+              Delete
+            </Button>
+          )}
         </Form>
       </ModalBody>
     </Modal>

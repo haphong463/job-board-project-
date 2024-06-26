@@ -87,6 +87,13 @@ const quizSlice = createSlice({
         }
       }
     },
+    removeQuestion(state, action) {
+      const { quizId, questionId } = action.payload;
+      const quizIndex = state.quizzes.findIndex((quiz) => quiz.id === quizId);
+      if (quizIndex !== -1) {
+        state.quizzes[quizIndex].questions = state.quizzes[quizIndex].questions.filter((q) => q.id !== questionId);
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -145,6 +152,6 @@ const quizSlice = createSlice({
   },
 });
 
-export const { createQuestion, updateQuestion } = quizSlice.actions;
+export const { createQuestion, updateQuestion , removeQuestion  } = quizSlice.actions;
 
 export default quizSlice.reducer;
