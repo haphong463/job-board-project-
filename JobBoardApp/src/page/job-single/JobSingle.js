@@ -567,3 +567,5 @@ export const JobSingle = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default JobSingle;

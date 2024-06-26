@@ -9,7 +9,7 @@ function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
-function ResetPassword() {
+export function ResetPassword() {
   const query = useQuery();
   const email = query.get("email");
   const token = query.get("token");
@@ -154,4 +154,4 @@ function ResetPassword() {
     </GlobalLayoutUser>
   );
 }
-export { ResetPassword };
+export default ResetPassword;

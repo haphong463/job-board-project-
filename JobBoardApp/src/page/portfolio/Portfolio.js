@@ -188,3 +188,5 @@ export const Portfolio = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default Portfolio;

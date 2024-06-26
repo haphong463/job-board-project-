@@ -10,15 +10,23 @@ import "./sign_up.css";
 
 const schema = yup.object().shape({
   username: yup.string().required("Username is required"),
-  password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
-  confirmPassword: yup.string()
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  confirmPassword: yup
+    .string()
     .oneOf([yup.ref("password"), null], "Passwords must match")
     .required("Confirm Password is required"),
   code: yup.string().required("Verification code is required"),
 });
 
 function SetupCredentials() {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
   });
   const dispatch = useDispatch();
@@ -36,21 +44,31 @@ function SetupCredentials() {
       setShowSuccessMessage(true);
       dispatch(resetSignUpSuccess());
       setTimeout(() => {
-        navigate('/login');
+        navigate("/login");
       }, 3000); // Redirect after 3 seconds
     }
   }, [setupSuccess, dispatch, navigate]);
 
   return (
-    <GlobalLayoutUser>
-      <section className="section-hero overlay inner-page bg-image" style={{ backgroundImage: 'url("../../../../assets/images/hero_1.jpg")' }} id="home-section">
+    <>
+      <section
+        className="section-hero overlay inner-page bg-image"
+        style={{
+          backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
+        }}
+        id="home-section"
+      >
         <div className="container">
           <div className="row">
             <div className="col-md-7">
-              <h1 className="text-white font-weight-bold">Set Up Credentials</h1>
+              <h1 className="text-white font-weight-bold">
+                Set Up Credentials
+              </h1>
               <div className="custom-breadcrumbs">
                 <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                <span className="text-white"><strong>Set Up Credentials</strong></span>
+                <span className="text-white">
+                  <strong>Set Up Credentials</strong>
+                </span>
               </div>
             </div>
           </div>
@@ -71,10 +89,15 @@ function SetupCredentials() {
                   {error}
                 </div>
               )}
-              <form onSubmit={handleSubmit(onSubmit)} className="p-4 border rounded">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="p-4 border rounded"
+              >
                 <div className="row form-group">
                   <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="code">Verification Code*</label>
+                    <label className="text-black" htmlFor="code">
+                      Verification Code*
+                    </label>
                     <input
                       type="text"
                       id="code"
@@ -87,7 +110,9 @@ function SetupCredentials() {
                 </div>
                 <div className="row form-group">
                   <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="username">Username*</label>
+                    <label className="text-black" htmlFor="username">
+                      Username*
+                    </label>
                     <input
                       type="text"
                       id="username"
@@ -100,7 +125,9 @@ function SetupCredentials() {
                 </div>
                 <div className="row form-group">
                   <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="password">Password*</label>
+                    <label className="text-black" htmlFor="password">
+                      Password*
+                    </label>
                     <input
                       type="password"
                       id="password"
@@ -113,7 +140,9 @@ function SetupCredentials() {
                 </div>
                 <div className="row form-group">
                   <div className="col-md-12 mb-3 mb-md-0">
-                    <label className="text-black" htmlFor="confirmPassword">Confirm Password*</label>
+                    <label className="text-black" htmlFor="confirmPassword">
+                      Confirm Password*
+                    </label>
                     <input
                       type="password"
                       id="confirmPassword"
@@ -121,7 +150,9 @@ function SetupCredentials() {
                       className="form-control"
                       placeholder="Confirm your password..."
                     />
-                    <p className="text-danger">{errors.confirmPassword?.message}</p>
+                    <p className="text-danger">
+                      {errors.confirmPassword?.message}
+                    </p>
                   </div>
                 </div>
                 <div className="row form-group">
@@ -141,13 +172,19 @@ function SetupCredentials() {
                 </div>
               </form>
             </div>
-            <div className="col-lg-6 d-flex justify-content-end align-items-center" style={{ height: "auto" }}>
-              <img src="https://itviec.com/assets/robby-login-df4a56395486b5cea97ba1754d226059626e6e124b3ea3db0789ba3c39f644f1.png" alt="Register" />
+            <div
+              className="col-lg-6 d-flex justify-content-end align-items-center"
+              style={{ height: "auto" }}
+            >
+              <img
+                src="https://itviec.com/assets/robby-login-df4a56395486b5cea97ba1754d226059626e6e124b3ea3db0789ba3c39f644f1.png"
+                alt="Register"
+              />
             </div>
           </div>
         </div>
       </section>
-    </GlobalLayoutUser>
+    </>
   );
 }
 

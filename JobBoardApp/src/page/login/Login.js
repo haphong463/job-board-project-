@@ -58,7 +58,6 @@ export const Login = () => {
           <div className="container">
             <div className="row">
               <div className="col-lg-6">
-                <h2 className="mb-4 font-weight-bold">Welcome to Job Board</h2>
                 {verificationMessage && (
                   <>
                     <Alert variant="danger">
@@ -150,3 +149,5 @@ export const Login = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default Login;

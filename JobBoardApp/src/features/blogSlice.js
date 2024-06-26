@@ -101,8 +101,9 @@ const blogSlice = createSlice({
         state.status = "loading";
       })
       .addCase(fetchAllBlog.fulfilled, (state, action) => {
-        state.status = "succeeded";
         state.blogs = action.payload;
+        state.status = "succeeded";
+
         state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
       })
       .addCase(fetchAllBlog.rejected, (state, action) => {

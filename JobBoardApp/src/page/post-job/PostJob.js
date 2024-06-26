@@ -242,3 +242,4 @@ export const PostJob = () => {
     </GlobalLayoutUser>
   );
 };
+export default PostJob;

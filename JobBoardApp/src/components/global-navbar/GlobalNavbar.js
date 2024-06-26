@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/authSlice";
@@ -16,6 +16,7 @@ import {
   readNotificationThunk,
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
+import { debounce } from "@mui/material";
 export function GlobalNavbar() {
   const [searchParams] = useSearchParams();
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -45,6 +46,13 @@ export function GlobalNavbar() {
     // setSelectedCategory(categoryName);
     console.log("Selected category:", categoryName);
   };
+
+  const handleMarkNotification = useCallback(
+    debounce((id) => {
+      dispatch(readNotificationThunk(id));
+    }, 500),
+    [dispatch]
+  );
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
   const toggleNotification = () =>
@@ -198,8 +206,7 @@ export function GlobalNavbar() {
                         className="notifications-item"
                         onClick={
                           !notification.read
-                            ? () =>
-                                dispatch(readNotificationThunk(notification.id))
+                            ? () => handleMarkNotification(notification.id)
                             : undefined
                         }
                       >

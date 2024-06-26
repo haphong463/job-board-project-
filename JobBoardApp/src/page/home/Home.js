@@ -453,3 +453,5 @@ export const Home = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default Home;
