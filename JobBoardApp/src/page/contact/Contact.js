@@ -176,3 +176,5 @@ export const Contact = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default Contact;

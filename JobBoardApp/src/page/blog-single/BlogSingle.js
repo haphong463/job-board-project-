@@ -197,3 +197,5 @@ export const BlogSingle = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default BlogSingle;

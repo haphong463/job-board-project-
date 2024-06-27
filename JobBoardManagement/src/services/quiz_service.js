@@ -1,7 +1,7 @@
 // src/api/quizzes.js
 import axiosRequest from "../configs/axiosConfig";
 
-const URL = "/quizzes"; 
+const URL = "/quizzes";
 const HEADERS_FORM_DATA = {
   "Content-Type": "multipart/form-data",
 };
@@ -15,11 +15,11 @@ export const createQuiz = async (title, description, imageFile) => {
     formData.append("description", description);
     formData.append("imageFile", imageFile);
 
-    const response = await axiosRequest.post(`${URL}/createQuiz`, formData, {
+    const data = await axiosRequest.post(`${URL}/createQuiz`, formData, {
       headers: HEADERS_FORM_DATA,
     });
 
-    return response.data;
+    return data;
   } catch (error) {
     console.error("Error creating quiz:", error);
     throw error;

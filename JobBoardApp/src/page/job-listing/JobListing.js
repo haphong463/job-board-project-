@@ -265,3 +265,5 @@ export const JobListing = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default JobListing;

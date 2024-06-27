@@ -6,14 +6,15 @@ import authReducer from "./features/authSlice";
 import jobCategoryReducer from "./features/jobCategorySlice";
 import storage from "redux-persist/lib/storage";
 import persistReducer from "redux-persist/es/persistReducer";
-import quizReducer from './features/quizSlice'; // Adjust the path as necessary
-import questionReducer from './features/questionSlice';
+import quizReducer from "./features/quizSlice"; // Adjust the path as necessary
+import questionReducer from "./features/questionSlice";
 
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  blacklist: ["jobCategory", "auth"],
+  whitelist: ["auth"],
+  blacklist: ["jobCategory"],
 };
 const reducer = combineReducers({
   blogs: blogsReducer,

@@ -250,3 +250,5 @@ export const Faq = () => {
     </GlobalLayoutUser>
   );
 };
+
+export default Faq;

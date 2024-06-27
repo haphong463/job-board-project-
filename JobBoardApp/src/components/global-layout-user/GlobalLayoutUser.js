@@ -14,7 +14,7 @@ const pageTransition = {
   exit: { opacity: 0, y: 10 },
   transition: {
     duration: 0.4,
-    ease: "easeInOut",
+    ease: "easeInOutQuart",
   },
 };
 
@@ -58,3 +58,5 @@ export const GlobalLayoutUser = ({ children }) => {
     </div>
   );
 };
+
+export default GlobalLayoutUser;

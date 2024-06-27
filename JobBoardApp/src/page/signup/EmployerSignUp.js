@@ -16,14 +16,21 @@ const employerSignUpSchema = yup.object().shape({
   phoneNumber: yup.string().required("Phone number is required"),
   companyName: yup.string().required("Company name is required"),
   companyAddress: yup.string().required("Company address is required"),
-  companyWebsite: yup.string().url("Invalid URL").required("Company website is required"),
+  companyWebsite: yup
+    .string()
+    .url("Invalid URL")
+    .required("Company website is required"),
 });
 
 function EmployerSignUp() {
-  const { register, handleSubmit, formState: { errors, isDirty } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+  } = useForm({
     resolver: yupResolver(employerSignUpSchema),
   });
-  
+
   const dispatch = useDispatch();
   const signUpSuccess = useSelector((state) => state.auth.signUpSuccess);
   const signUpError = useSelector((state) => state.auth.error);
@@ -40,11 +47,11 @@ function EmployerSignUp() {
   useEffect(() => {
     if (signUpSuccess) {
       console.log("Employer registration successful!");
-      setShowSuccessMessage(true);  // Show success message
+      setShowSuccessMessage(true); // Show success message
       dispatch(resetSignUpSuccess());
       setTimeout(() => {
-        navigate('/login');
-      }, 3000);  // Redirect after 3 seconds
+        navigate("/login");
+      }, 3000); // Redirect after 3 seconds
     }
   }, [signUpSuccess, dispatch, navigate]);
 
@@ -83,7 +90,9 @@ function EmployerSignUp() {
               )}
               {signUpError && (
                 <div className="alert alert-danger" role="alert">
-                  {typeof signUpError === "object" ? signUpError.message : signUpError}
+                  {typeof signUpError === "object"
+                    ? signUpError.message
+                    : signUpError}
                 </div>
               )}
               <form
@@ -99,10 +108,14 @@ function EmployerSignUp() {
                       type="text"
                       id="name"
                       {...register("name")}
-                      className={`form-control ${errors.name ? "is-invalid" : ""}`}
+                      className={`form-control ${
+                        errors.name ? "is-invalid" : ""
+                      }`}
                     />
                     {errors.name && (
-                      <div className="invalid-feedback">{errors.name.message}</div>
+                      <div className="invalid-feedback">
+                        {errors.name.message}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -115,10 +128,14 @@ function EmployerSignUp() {
                       type="text"
                       id="title"
                       {...register("title")}
-                      className={`form-control ${errors.title ? "is-invalid" : ""}`}
+                      className={`form-control ${
+                        errors.title ? "is-invalid" : ""
+                      }`}
                     />
                     {errors.title && (
-                      <div className="invalid-feedback">{errors.title.message}</div>
+                      <div className="invalid-feedback">
+                        {errors.title.message}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -131,10 +148,14 @@ function EmployerSignUp() {
                       type="email"
                       id="email"
                       {...register("email")}
-                      className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
                     />
                     {errors.email && (
-                      <div className="invalid-feedback">{errors.email.message}</div>
+                      <div className="invalid-feedback">
+                        {errors.email.message}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -147,7 +168,9 @@ function EmployerSignUp() {
                       type="text"
                       id="phoneNumber"
                       {...register("phoneNumber")}
-                      className={`form-control ${errors.phoneNumber ? "is-invalid" : ""}`}
+                      className={`form-control ${
+                        errors.phoneNumber ? "is-invalid" : ""
+                      }`}
                     />
                     {errors.phoneNumber && (
                       <div className="invalid-feedback">
@@ -165,7 +188,9 @@ function EmployerSignUp() {
                       type="text"
                       id="companyName"
                       {...register("companyName")}
-                      className={`form-control ${errors.companyName ? "is-invalid" : ""}`}
+                      className={`form-control ${
+                        errors.companyName ? "is-invalid" : ""
+                      }`}
                     />
                     {errors.companyName && (
                       <div className="invalid-feedback">
@@ -183,7 +208,9 @@ function EmployerSignUp() {
                       type="text"
                       id="companyAddress"
                       {...register("companyAddress")}
-                      className={`form-control ${errors.companyAddress ? "is-invalid" : ""}`}
+                      className={`form-control ${
+                        errors.companyAddress ? "is-invalid" : ""
+                      }`}
                     />
                     {errors.companyAddress && (
                       <div className="invalid-feedback">
@@ -201,7 +228,9 @@ function EmployerSignUp() {
                       type="url"
                       id="companyWebsite"
                       {...register("companyWebsite")}
-                      className={`form-control ${errors.companyWebsite ? "is-invalid" : ""}`}
+                      className={`form-control ${
+                        errors.companyWebsite ? "is-invalid" : ""
+                      }`}
                     />
                     {errors.companyWebsite && (
                       <div className="invalid-feedback">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import moment from "moment";
 import { calculateReadingTime } from "../../utils/function/readingTime";
 import { Badge, Input } from "reactstrap";
@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs } from "../../features/blogSlice";
 import "./style.css";
 import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
+import { FaHome } from "react-icons/fa";
 
 const Blog = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,8 @@ const Blog = () => {
   const [searchText, setSearchText] = useState("");
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 9;
+  const postsPerPage = 15;
+  const navigate = useNavigate();
 
   const handleSearch = useCallback(
     debounce((text) => {
@@ -163,7 +165,7 @@ const Blog = () => {
                 <div className="col-md-12 text-center ">
                   <div className="custom-pagination ml-auto">
                     <motion.a
-                      href="#"
+                      href="#top"
                       className={`prev ${currentPage === 1 ? "disabled" : ""}`}
                       onClick={() => paginate(currentPage - 1)}
                       whileHover={{ scale: 1.1 }}
@@ -191,7 +193,7 @@ const Blog = () => {
                       )}
                     </div>
                     <motion.a
-                      href="#"
+                      href="#top"
                       className={`next ${
                         currentPage === Math.ceil(blogs.length / postsPerPage)
                           ? "disabled"
@@ -209,17 +211,42 @@ const Blog = () => {
             </div>
           )}
           {status === "succeeded" && blogs.length === 0 && (
-            <motion.h1
-              className="text-center"
+            <motion.div
+              className="text-center text-primary"
               style={{
                 height: 250,
               }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
             >
-              No data found
-            </motion.h1>
+              <motion.h1
+                className="text-primary"
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                Something's wrong here...
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                We can't find any result for your search term.
+              </motion.p>
+              <motion.button
+                className="btn btn-primary mt-3 "
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1 }}
+                onClick={() => navigate("/")} // Or useHistory() for react-router
+              >
+                <div className="d-flex justify-content-center align-items-center">
+                  <FaHome className="mr-2" /> Go back to home
+                </div>
+              </motion.button>
+            </motion.div>
           )}
         </section>
       </>

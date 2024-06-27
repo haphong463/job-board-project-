@@ -23,9 +23,9 @@ export const BlogSideBar = memo((props) => {
     <div className="col-lg-4 sidebar pl-lg-5">
       <div className="sidebar-box">
         <img
-          src="../../../../assets/images/person_1.jpg"
+          src={author.imageUrl}
           alt="Image placeholder"
-          className="img-fluid mb-4 w-50 rounded-circle"
+          className="img-fluid mb-4 w-100 rounded-circle"
         />
         <h3>
           {author?.firstName} {author?.lastName}

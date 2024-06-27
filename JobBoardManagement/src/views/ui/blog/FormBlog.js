@@ -34,6 +34,7 @@ import { RightSideBlogForm } from "./RightSideBlogForm";
 const FormBlog = ({ isEdit, setIsEdit }) => {
   const dispatch = useDispatch();
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
+  const blogs = useSelector((state) => state.blogs.blogs);
   const user = useSelector((state) => state.auth.user);
   const [modal, setModal] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -66,13 +67,14 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     const newData = {
       ...data,
       slug: slugify(data.title),
-      username: user.sub,
+      username: user.username,
     };
 
     if (!newData.image || newData.image.length === 0) {
       delete newData.image;
     }
     console.log(">>> new data: ", newData);
+
     const formData = createFormData(newData);
     if (!isEdit) {
       dispatch(addBlog(formData)).then((response) => {

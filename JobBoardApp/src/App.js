@@ -1,20 +1,22 @@
 import React, { useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useRoutes } from "react-router-dom";
 import { routes } from "./utils/variables/routes";
 import "./index.css";
 import { FaThumbsUp } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { connectWebSocket } from "./services/WebSocketService";
 import { getNotificationThunk } from "./features/notificationSlice";
+import ThemeRoutes from "./router/Router";
 
 function App() {
   const user = useSelector((state) => state.auth.user);
+  const routing = useRoutes(ThemeRoutes);
   const dispatch = useDispatch();
   useEffect(() => {
     if (!document.getElementById("kommunicate-script")) {
       (function (d, m) {
         var kommunicateSettings = {
-          appId: "4ad31fa80e50f3c68e389cbfeffad7ac",
+          appId: process.env.REACT_APP_CHATBOT_ID,
           popupWidget: true,
           automaticChatOpenOnNavigation: true,
         };

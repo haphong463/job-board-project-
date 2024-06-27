@@ -31,7 +31,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const authStatus = useSelector((state) => state.auth.status);
   const messageError = useSelector((state) => state.auth.verificationMessage);
-  const user = useSelector((state) => state.auth.user);
+  const accessToken = useSelector((state) => state.auth.accessToken);
   const roles = useSelector((state) => state.auth.roles);
   const locationState = useSelector((state) => state.auth.location);
   const navigate = useNavigate();
@@ -68,16 +68,22 @@ const Login = () => {
       });
   };
   useEffect(() => {
-    if (user) {
-      if (!roles.includes("ROLE_ADMIN")) {
+    if (accessToken) {
+      console.log(accessToken);
+      if (
+        !accessToken.role.map((item) => item.authority).includes("ROLE_ADMIN")
+      ) {
         showToast("You don't have access rights!", "error");
       } else {
-        showToast(`Welcome back, ${user.sub}`);
+        showToast(`Welcome back, ${accessToken.sub}`);
         // navigate("/jobportal", { replace: true });
       }
     }
-  }, [user, roles]);
-  if (user && roles.includes("ROLE_ADMIN")) {
+  }, [accessToken]);
+  if (
+    accessToken &&
+    accessToken.role.map((item) => item.authority).includes("ROLE_ADMIN")
+  ) {
     const redirectPath = locationState || "/jobportal";
     return <Navigate to={redirectPath} />;
   }
