@@ -3,6 +3,7 @@ package com.project4.JobBoardService.Service;
 import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Quiz;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,4 +19,5 @@ public interface QuizService {
 
 
     List<QuestionResultDTO> calculateDetailedScore(QuizSubmissionDTO quizSubmission);
+
 }

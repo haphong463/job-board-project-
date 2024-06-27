@@ -289,53 +289,60 @@ public class AuthController {
         }
     }
 //Username password Employer
-    @PostMapping("/setup-credentials")
-    public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupRequest passwordSetupRequest) {
-        Employer employer = employerRepository.findByVerificationCode(passwordSetupRequest.getCode());
-        if (employer == null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Invalid verification code."));
-        }
-
-        if (!passwordSetupRequest.getPassword().equals(passwordSetupRequest.getConfirmPassword())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Passwords do not match!"));
-        }
-
-        if (userRepository.existsByUsername(passwordSetupRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
-        }
-
-        User user = new User();
-        user.setUsername(passwordSetupRequest.getUsername());
-        user.setEmail(employer.getEmail());
-        user.setFirstName(employer.getName());
-        user.setLastName(employer.getTitle());
-        user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
-
-        Set<Role> roles = new HashSet<>();
-        Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(employerRole);
-        user.setRoles(roles);
-
-        String verificationCode = employer.getVerificationCode();
-        user.setVerificationCode(verificationCode);
-        user.setVerified(false);
-        userRepository.save(user);
-
-        employer.setUser(user);
-        employer.setVerified(true);
-        employerRepository.save(employer);
-
-        emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
-
-        return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
+@PostMapping("/setup-credentials")
+public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupRequest passwordSetupRequest) {
+    Employer employer = employerRepository.findByVerificationCode(passwordSetupRequest.getCode());
+    if (employer == null) {
+        return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Error: Invalid verification code."));
     }
+
+    if (!passwordSetupRequest.getPassword().equals(passwordSetupRequest.getConfirmPassword())) {
+        return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Error: Passwords do not match!"));
+    }
+
+    if (userRepository.existsByUsername(passwordSetupRequest.getUsername())) {
+        return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Error: Username is already taken!"));
+    }
+
+    if (userRepository.existsByEmail(employer.getEmail())) {
+        return ResponseEntity
+                .badRequest()
+                .body(new MessageResponse("Error: Email is already in use!"));
+    }
+
+    User user = new User();
+    user.setUsername(passwordSetupRequest.getUsername());
+    user.setEmail(employer.getEmail());
+    user.setFirstName(employer.getName());
+    user.setLastName(employer.getTitle());
+    user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
+
+    Set<Role> roles = new HashSet<>();
+    Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
+            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+    roles.add(employerRole);
+    user.setRoles(roles);
+
+    String verificationCode = employer.getVerificationCode();
+    user.setVerificationCode(verificationCode);
+    user.setVerified(false);
+
+    userRepository.save(user);
+
+    employer.setUser(user);
+    employer.setVerified(true);
+    employerRepository.save(employer);
+
+    emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
+
+    return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
+}
 
 
     private String generateVerificationCode() {

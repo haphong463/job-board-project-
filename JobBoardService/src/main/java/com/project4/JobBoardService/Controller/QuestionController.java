@@ -6,6 +6,8 @@ import com.project4.JobBoardService.DTO.QuestionDTO;
 import com.project4.JobBoardService.Service.QuestionService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 
@@ -15,7 +17,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,4 +81,63 @@ public class QuestionController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{quizId}/questions/upload")
+    public ResponseEntity<Void> uploadQuestions(@PathVariable Long quizId, @RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) {
+                    continue; // Bỏ qua hàng đầu tiên (header)
+                }
+
+                QuestionDTO questionDTO = new QuestionDTO();
+                questionDTO.setQuizId(quizId);
+                questionDTO.setQuestionText(getCellValueAsString(row.getCell(0)));
+                questionDTO.setOptions(String.format("A. %s, B. %s, C. %s, D. %s",
+                        getCellValueAsString(row.getCell(1)),
+                        getCellValueAsString(row.getCell(2)),
+                        getCellValueAsString(row.getCell(3)),
+                        getCellValueAsString(row.getCell(4))));
+                questionDTO.setCorrectAnswer(getCellValueAsString(row.getCell(5)));
+
+                questionService.createQuestion(quizId, questionDTO);
+            }
+
+            return new ResponseEntity<>(HttpStatus.CREATED);
+
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().toString();
+                } else {
+                    return Double.toString(cell.getNumericCellValue());
+                }
+            case BOOLEAN:
+                return Boolean.toString(cell.getBooleanCellValue());
+            case FORMULA:
+                return cell.getCellFormula();
+            case BLANK:
+                return "";
+            default:
+                return cell.toString();
+        }
+    }
 }

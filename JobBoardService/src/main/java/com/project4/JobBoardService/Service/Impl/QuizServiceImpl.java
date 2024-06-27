@@ -12,6 +12,11 @@ import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuizService;
 import com.project4.JobBoardService.Util.FileUtils;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,7 +57,6 @@ public class QuizServiceImpl implements QuizService {
     public List<Quiz> getAllQuizzes() {
         return quizRepository.findAll();
     }
-
     @Override
     public Quiz getQuizById(Long id) {
         return quizRepository.findById(id).orElse(null);
@@ -162,5 +166,8 @@ public class QuizServiceImpl implements QuizService {
         List<Question> questions = questionRepository.findByQuizId(quizId);
         return questions.stream().collect(Collectors.toMap(Question::getId, Question::getCorrectAnswer));
     }
+
+
+
 
 }

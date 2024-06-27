@@ -1,42 +1,38 @@
-// src/features/quiz/quizSlice.js
-
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getAllQuizzes } from "../services/QuizService";
+// src/features/quizSlice.js
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { getQuizzes } from '../services/QuizService';
 
 export const fetchQuizzesThunk = createAsyncThunk(
-  "quizzes/fetchAll",
-  async (_, { rejectWithValue }) => {
+  'quizzes/fetchQuizzes',
+  async (_, thunkAPI) => {
     try {
-      const response = await getAllQuizzes();
-      return response.data;
+      const response = await getQuizzes();
+      return response;
     } catch (error) {
-      console.error("Error fetching quizzes:", error);
-      return rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
-const initialState = {
-  quizzes: [],
-  status: "idle",
-  error: null,
-};
-
 const quizSlice = createSlice({
-  name: "quiz",
-  initialState,
+  name: 'quizzes',
+  initialState: {
+    quizzes: [],
+    status: 'idle',
+    error: null,
+  },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchQuizzesThunk.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
       })
       .addCase(fetchQuizzesThunk.fulfilled, (state, action) => {
+        state.status = 'succeeded';
         state.quizzes = action.payload;
-        state.status = "succeeded";
       })
       .addCase(fetchQuizzesThunk.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = 'failed';
         state.error = action.payload;
       });
   },

@@ -4,16 +4,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuizDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
+import com.project4.JobBoardService.Entity.Question;
 import com.project4.JobBoardService.Entity.Quiz;
 import com.project4.JobBoardService.Service.QuizService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpHeaders;
 
+
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -103,4 +115,58 @@ public class QuizController {
         List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
         return ResponseEntity.ok(results);
     }
+//    @PreAuthorize("hasRole('ADMIN')")
+@GetMapping("/{quizId}/export")
+public ResponseEntity<Resource> exportQuizToExcel(@PathVariable Long quizId ) {
+    Quiz quiz = quizService.getQuizById(quizId);
+    if (quiz == null) {
+        return ResponseEntity.notFound().build();
+    }
+
+    List<Question> questions = quiz.getQuestions();
+
+    try (Workbook workbook = new XSSFWorkbook()) {
+        Sheet sheet = workbook.createSheet("Quiz");
+
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Question Text");
+        headerRow.createCell(1).setCellValue("Option A");
+        headerRow.createCell(2).setCellValue("Option B");
+        headerRow.createCell(3).setCellValue("Option C");
+        headerRow.createCell(4).setCellValue("Option D");
+        headerRow.createCell(5).setCellValue("Correct Answer");
+
+        int rowNum = 1;
+        for (Question question : questions) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(question.getQuestionText());
+
+            String[] options = question.getOptions().split(", ");
+            row.createCell(1).setCellValue(options.length > 0 ? options[0].substring(3) : "");
+            row.createCell(2).setCellValue(options.length > 1 ? options[1].substring(3) : "");
+            row.createCell(3).setCellValue(options.length > 2 ? options[2].substring(3) : "");
+            row.createCell(4).setCellValue(options.length > 3 ? options[3].substring(3) : "");
+            row.createCell(5).setCellValue(question.getCorrectAnswer());
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        byte[] bytes = outputStream.toByteArray();
+
+        ByteArrayResource resource = new ByteArrayResource(bytes);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quiz_" + quizId + quiz.getTitle().replaceAll("\\s+", "_")  + ".xls" );
+        headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(bytes.length)
+                .body(resource);
+
+    } catch (IOException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
 }
