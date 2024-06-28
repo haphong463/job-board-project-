@@ -1,97 +1,68 @@
-import React, { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import axiosRequest from "../../configs/axiosConfig";
+import React, { useState, useEffect, useCallback } from "react";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { jwtDecode } from "jwt-decode";
 import { logout } from "../../features/authSlice";
-// import categoryData from './category.json';
-// import companyData from '../../page/job-listing/company_data.json';
-
-import
-{
+import {
   Dropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import { FaUserCircle, FaChevronRight } from "react-icons/fa";
+import { FaBell, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
-import { useTranslation } from "react-i18next";
-export function GlobalNavbar ()
-{
-  const [categories, setCategories] = useState([]);
-  const [companies, setCompanies] = useState([]);
-  const { t, i18n } = useTranslation(); // Initialize the useTranslation hook
-
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedCompany, setSelectedCompany] = useState(null);
+import { fetchCategoryThunk } from "../../features/categorySlice";
+import {
+  markNotificationAsRead,
+  readNotificationThunk,
+} from "../../features/notificationSlice";
+import { fetchAllCategories } from "../../features/blogSlice";
+import { debounce } from "@mui/material";
+export function GlobalNavbar() {
+  const [searchParams] = useSearchParams();
+  const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isSkillsDropdownVisible, setSkillsDropdownVisible] = useState(false);
-  const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
+
+  const notifications = useSelector((state) => state.notification.list);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
   const dispatch = useDispatch();
-  const navigate = useNavigate()
-  //const categories = useSelector((state) => state.category.categories);
+  const categories = useSelector((state) => state.category.categories);
+  const blogCategory = useSelector((state) => state.blogs.categories);
+  const unreadCount = useSelector((state) => state.notification.unreadCount);
 
-  const handleLogout = () =>
-  {
+  const handleLogout = () => {
     dispatch(logout());
   };
 
-  useEffect(() =>
-  {
-    fetchCategories();
-    fetchCompanies();
-  }, []);
-
-  const fetchCategories = async () =>
-  {
-    try
-    {
-      //const response = await axiosRequest.get("/categories");
-      setCategories(categoryData);
-    } catch (error)
-    {
-      console.error("Error fetching categories:", error);
+  useEffect(() => {
+    if (categories.length === 0) {
+      dispatch(fetchCategoryThunk());
+      dispatch(fetchAllCategories());
     }
+  }, [dispatch]);
+
+  const handleCategoryClick = (categoryName) => {
+    // setSelectedCategory(categoryName);
+    console.log("Selected category:", categoryName);
   };
 
-  const fetchCompanies = async () =>
-  {
-    try
-    {
-      //const response = await axiosRequest.get("/categories");
-      setCompanies(companyData);
-    } catch (error)
-    {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  const handleCategoryClick = (categoryId) =>
-  {
-    window.location.href = `/jobList/${categoryId}`;
-  };
-
-  const handleCompanyClick = (companyName) =>
-  {
-    setSelectedCompany(companyName);
-    console.log("Selected category:", companyName);
-  };
+  const handleMarkNotification = useCallback(
+    debounce((id) => {
+      dispatch(readNotificationThunk(id));
+    }, 500),
+    [dispatch]
+  );
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
-  const changeLanguage = (lng) =>
-  {
-    i18n.changeLanguage(lng);
-    setDropdownOpen(false); // Close the dropdown after language change
-  };
+  const toggleNotification = () =>
+    setNotificationOpen((prevState) => !prevState); // Toggle dropdown thông báo
 
   return (
     <header className="site-navbar mt-3">
       <div className="container-fluid">
-        <div className="row">
-          <div className="site-logo col-1">
+        <div className="row align-items-center">
+          <div className="site-logo col-6">
             <NavLink to="/">JobBoard</NavLink>
           </div>
 
@@ -105,105 +76,65 @@ export function GlobalNavbar ()
               <li>
                 <NavLink to="/about">About</NavLink>
               </li>
-              <li className="has-children">
-                <NavLink to="/viewAllJobs">Job Listings</NavLink>
+              <li
+                className="has-children"
+                onMouseEnter={() => setHoveredCategory("Job By Skills")}
+                onMouseLeave={() => setHoveredCategory(null)}
+              >
+                <NavLink to="/job-listings">Job Listings</NavLink>
                 <ul className="dropdown">
-                  <li
-                    className="dropdown-item"
-                    onMouseEnter={() => setSkillsDropdownVisible(true)}
-                    onMouseLeave={() => setSkillsDropdownVisible(false)}
-                  >
-                    <NavLink to="/viewAllSkill">Job By Skills <FaChevronRight className="icon" /></NavLink>
-                    {isSkillsDropdownVisible && (
-                      <div className="skills-dropdown">
-                        <div className="dropdown-columns">
-                          {Array.from({ length: 3 }).map((_, colIndex) => (
-                            <ul key={colIndex} className="sub-dropdown">
-                              {categories.slice(colIndex * 12, colIndex * 3 + 12).map((category) => (
-                                <li key={category.categoryId} onClick={() => handleCategoryClick(category.categoryId)}>
-                                  {category.categoryName}
-                                </li>
-                              ))}
-                              {(colIndex + 1) * 15 <= categories.length && (
-                                <li className="view-all" onClick={() => navigate('/viewAllSkill')}>
-                                  View All Jobs by Skill <FaChevronRight className="icon2" />
-                                </li>
-                              )}
-                            </ul>
+                  <li>
+                    <NavLink to="/job-single">Job By Skills</NavLink>
+                    <div>
+                      {hoveredCategory === "Job By Skills" && (
+                        <ul>
+                          {categories.map((category) => (
+                            <li
+                              key={category.categoryId}
+                              onClick={() =>
+                                handleCategoryClick(category.categoryName)
+                              }
+                            >
+                              <a
+                                href={`/search?category=${category.categoryName}`}
+                              >
+                                {category.categoryName}
+                              </a>
+                            </li>
                           ))}
-                        </div>
-                      </div>
-                    )}
-                  </li>
-                  <li
-                    className="dropdown-item"
-                    onMouseEnter={() => setCompanyDropdownVisible(true)}
-                    onMouseLeave={() => setCompanyDropdownVisible(false)}
-                  >
-                    <NavLink to="#">Job By Company<FaChevronRight className="icon3" /></NavLink>
-                    {isCompanyDropdownVisible && (
-                      <div className="skills-dropdown">
-                        <div className="dropdown-columns">
-                          {Array.from({ length: 3 }).map((_, colIndex) => (
-                            <ul key={colIndex} className="sub-dropdown">
-                              {companies.slice(colIndex * 12, colIndex * 3 + 12).map((company) => (
-                                <li key={company.companyId} onClick={() => handleCompanyClick(company.companyName)}>
-                                  <NavLink to={`/search?company=${company.companyName}`}>
-                                    {company.companyName}
-                                  </NavLink>
-                                </li>
-                              ))}
-                              {(colIndex + 1) * 15 <= companies.length && (
-                                <li className="view-all">
-                                  <NavLink to="/view-all-jobs-by-skill">View All Jobs by Company <FaChevronRight className="icon4" /></NavLink>
-                                </li>
-                              )}
-                            </ul>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                        </ul>
+                      )}
+                    </div>
                   </li>
                 </ul>
               </li>
+
               <li className="has-children">
-                <NavLink to="/blogs">Pages</NavLink>
-                <ul className="dropdown">
-                  <li>
-                    <NavLink to="/services">Services</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/service-single">Service Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/blog-single">Blog Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/portfolio">Portfolio</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/portfolio-single">Portfolio Single</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/testimonials">Testimonials</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/faq">Frequently Ask Questions</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/gallery" className="active">
-                      Gallery
-                    </NavLink>
-                  </li>
-                </ul>
-              </li>
-              <li>
                 <NavLink to="/blogs">Blog</NavLink>
+                <ul className="dropdown">
+                  {blogCategory.map((item) => (
+                    <li key={item.id}>
+                      <NavLink
+                        to={`/blogs?type=${item.name}`}
+                        className={({ isActive }) =>
+                          isActive && searchParams.get("type") === item.name
+                            ? "active"
+                            : ""
+                        }
+                      >
+                        {item.name}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
               </li>
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              {!roles.includes('ROLE_EMPLOYER') && (
+              <li>
+                <NavLink to="/quiz">Quiz</NavLink>
+              </li>
+              {!roles.includes("ROLE_EMPLOYER") && (
                 <li>
                   <NavLink to="/EmployerSignUp">For Employer</NavLink>
                 </li>
@@ -213,7 +144,6 @@ export function GlobalNavbar ()
                 <NavLink to="/post-job">
                   <span className="mr-2">+</span> Post a Job
                 </NavLink>
-
               </li>
 
               <li className="d-lg-none">
@@ -222,7 +152,6 @@ export function GlobalNavbar ()
               <li className="d-lg-none">
                 <NavLink to="/signup">Sign Up</NavLink>
               </li>
-
             </ul>
           </nav>
 
@@ -235,10 +164,83 @@ export function GlobalNavbar ()
                 >
                   <span className="mr-2 icon-add"></span>Post a Job
                 </NavLink>
-
-
               )}
-
+              {user && (
+                <div className="icon-notification" onClick={toggleNotification}>
+                  {/* <img
+                    src="https://i.imgur.com/AC7dgLA.png"
+                    alt=""
+                    className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
+                  /> */}
+                  <FaBell
+                    size={30}
+                    color="white"
+                    className={unreadCount > 0 ? "shake" : ""}
+                  />
+                  {unreadCount > 0 && (
+                    <span
+                      className="badge"
+                      style={{
+                        position: "absolute",
+                        top: "0",
+                        right: "-10px",
+                        backgroundColor: "#ff0000",
+                        color: "#fff",
+                        padding: "5px 7px",
+                        borderRadius: "50%",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+              )}
+              {notificationOpen && (
+                <div className="notifications text-left" id="box">
+                  <h2>Notifications</h2>
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="notifications-item"
+                        onClick={
+                          !notification.read
+                            ? () => handleMarkNotification(notification.id)
+                            : undefined
+                        }
+                      >
+                        <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
+                        <div className="text">
+                          <h4
+                            className={`${
+                              notification.read ? "" : "font-weight-bold"
+                            }`}
+                          >
+                            {notification.sender.firstName}{" "}
+                            {notification.sender.lastName}
+                          </h4>
+                          <p
+                            className={`${
+                              notification.read ? "" : "font-weight-bold"
+                            }`}
+                          >
+                            {notification.message}
+                          </p>
+                          {/* <small className="d-block">
+                          {moment(notification.createdAt).from()}
+                        </small> */}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center">
+                      <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
+                      <p>You don't have any notifications yet.</p>
+                    </div>
+                  )}
+                </div>
+              )}
               <Dropdown
                 isOpen={dropdownOpen}
                 toggle={toggleDropdown}
@@ -272,21 +274,7 @@ export function GlobalNavbar ()
                   )}
                 </DropdownMenu>
               </Dropdown>
-              {/* <div className="ml-auto d-flex align-items-center">
-                <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-                  <DropdownToggle nav caret>
-                    {t("Language")}{" "}
-                  </DropdownToggle>
-                  <DropdownMenu className="custom-dropdown-menu">
-                    <DropdownItem onClick={() => changeLanguage("vi")}>
-                      Tiếng Việt
-                    </DropdownItem>
-                    <DropdownItem onClick={() => changeLanguage("en")}>
-                      English
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </div> */}
+
               <NavLink
                 to="#"
                 className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"

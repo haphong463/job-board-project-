@@ -1,95 +1,126 @@
-.has-children .dropdown {
-  display: none;
-  font-size: 15px;
-  position: absolute;
-  width: 200px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  /* Điều chỉnh chiều rộng của menu dropdown chính */
-  list-style-type: none;
+:root {
+  bg-primary: #89ba16;
 }
 
-.has-children:hover .dropdown {
-  display: block;
+.custom-dropdown-menu {
+  left: auto !important;
+  right: 0 !important;
+  width: 200px !important;
+  transform: translate3d(
+    0,
+    38px,
+    0
+  ) !important; /* Adjust the vertical alignment as needed */
 }
 
-.dropdown-item {
+.active {
+  color: "#fff";
+  background-color: var(--bg-primary);
+}
+
+.icon-notification {
   position: relative;
-  font-size: 15px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  list-style-type: none;
-  /* Thêm dòng này */
+  cursor: pointer;
 }
-
-.dropdown-item .icon {
-  margin-left: 5.1em;
-  font-size: 80%;
+.icon-notification span {
+  background: #f00;
+  padding: 7px;
+  border-radius: 50%;
+  color: #fff;
+  vertical-align: top;
+  margin-left: -25px;
 }
-
-.dropdown-item .icon3 {
-  margin-left: 3em;
-  font-size: 80%;
+.icon-notification svg {
+  display: inline-block;
+  width: 26px;
+  margin-top: 4px;
 }
-
-.sub-dropdown {
+.icon-notification:hover {
+  opacity: 0.7;
+}
+.logo {
+  flex: 1;
+  margin-left: 50px;
+  color: #eee;
+  font-size: 20px;
+  font-family: monospace;
+}
+.notifications {
+  width: 300px;
+  height: auto;
+  opacity: 1;
+  max-height: 300px;
+  overflow-y: auto;
   position: absolute;
-  top: 0;
-  left: 100%;
-  display: none;
-  width: 700px;
-  background-color: rgb(0, 0, 0);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(5, auto);
-  gap: 0;
-  list-style-type: none;
-  /* Thêm dòng này */
-  padding-left: 0;
-  /* Đảm bảo không có thụt lề bên trái */
+  top: 63px;
+  right: 62px;
+  border-radius: 5px 0px 5px 5px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-
-.dropdown-item:hover>a {
-  background-color: #3b3d3e !important;
-  color: #ffffff !important;
-}
-
-.dropdown-item:hover .sub-dropdown {
-  display: grid;
-}
-
-.sub-dropdown li {
-  background-color: rgba(0, 0, 0, 0.838) !important;
-  color: #ffffff95 !important;
-  list-style-type: none;
+.notifications h2 {
+  font-size: 14px;
   padding: 10px;
+  border-bottom: 1px solid #eee;
+  color: #999;
 }
-
-.sub-dropdown li a {
-  background-color: rgba(0, 0, 0, 0.838) !important;
-  color: #ffffff95 !important;
-  width: 100%;
+.notifications h2 span {
+  color: #f00;
 }
-
-.sub-dropdown li:hover {
-  background-color: rgba(192, 192, 192, 0.427) !important;
-  color: #ffffff !important;
+.notifications-item {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  padding: 6px 9px;
+  margin-bottom: 0px;
+  cursor: pointer;
 }
-
-.sub-dropdown li:hover a {
-  background-color: rgba(0, 0, 0, 0) !important;
-  color: #ffffff !important;
+.notifications-item:hover {
+  background-color: #eee;
 }
-
-li .view-all {
+.notifications-item img {
   display: block;
-  padding-right: 188%;
-  padding-left: 112%;
-  margin-bottom: 20px;
+  width: 50px;
+  height: 50px;
+  margin-right: 9px;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+.notifications-item .text h4 {
+  color: #777;
+  font-size: 16px;
+  margin-top: 3px;
+}
+.notifications-item .text p {
+  color: #aaa;
+  font-size: 12px;
+}
+.icon-notification .shake {
+  animation: shake 0.5s linear infinite;
 }
 
-li .view-all .icon2 {
-  font-size: 80%;
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
-li .view-all .icon4 {
-  font-size: 80%;
+.text-truncate-multiline {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1; /* Số lượng dòng bạn muốn hiển thị */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
