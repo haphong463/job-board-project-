@@ -1,6 +1,6 @@
 import { AboutUs } from "../../page/about-us/AboutUs";
 import { BlogSingle } from "../../page/blog-single/BlogSingle";
-import  Blog  from "../../page/blog/Blog";
+import { Blog } from "../../page/blog/Blog";
 import { Contact } from "../../page/contact/Contact";
 import { Faq } from "../../page/faq/Faq";
 import { Home } from "../../page/home/Home";
@@ -16,9 +16,10 @@ import { ResetPassword } from "../../page/login/ResetPassword";
 import { JobSingle } from "../../page/job-single/JobSingle";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import SetupCredentials from "../../page/signup/SetupCredentials";
-import { Quiz } from "../../page/quiz/quiz";
-import QuizResult from "../../page/quiz/QuizResult";
-import QuizQuestions from "../../page/quiz/QuizQuestions";
+import { JobList } from "../../page/job-listing/job_listing";
+import { ViewAllSkill } from "../../page/job-listing/listSkillAll";
+import { JobDetail } from "../../page/job-listing/job_detail";
+import React from "react";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -38,7 +39,9 @@ export const routes = [
   { path: "/gallery", component: <Gallery /> },
   { path: "/EmployerSignUp", component: <EmployerSignUp /> },
   { path: "/SetupCredentials", component: <SetupCredentials /> },
-  { path: "/quiz", component: <Quiz /> },
-  { path: "/quiz/:quizId", component: <QuizQuestions /> },
-  { path: "/quiz/:quizId/result", component: <QuizResult /> },
+  { path: "/jobList/:id", component: <JobList /> },
+  { path: "/jobDetail/:id", component: <JobDetail /> },
+  { path: "/viewAllJobs", component: <JobList /> },
+  { path: "/viewAllSkill", component: <ViewAllSkill /> },
+  { path: "/jobDetail", component: <JobDetail /> }
 ];
