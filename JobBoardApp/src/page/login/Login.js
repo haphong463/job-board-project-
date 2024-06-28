@@ -8,6 +8,8 @@ import { useLoginForm } from "../../hooks/useLoginForm";
 import { MdErrorOutline } from "react-icons/md";
 import { Alert } from "react-bootstrap";
 import "./login.css";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
   const verificationMessage = useSelector(
@@ -124,6 +126,19 @@ export const Login = () => {
                       <NavLink to="/signup">Register now</NavLink>
                     </p>
                   </div>
+                  <GoogleOAuthProvider
+                    clientId={process.env.REACT_APP_GOOGLE_CLIENTID}
+                  >
+                    <GoogleLogin
+                      onSuccess={(credentials) => {
+                        const credential = jwtDecode(credentials.credential);
+                        console.log(credential);
+                      }}
+                      onError={(err) => {
+                        console.log(err);
+                      }}
+                    />
+                  </GoogleOAuthProvider>
                 </form>
               </div>
               <div className="col-lg-6 d-none d-lg-block">

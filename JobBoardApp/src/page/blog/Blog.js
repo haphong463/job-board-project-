@@ -12,7 +12,7 @@ import "./style.css";
 import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
 import { FaHome } from "react-icons/fa";
 
-const Blog = () => {
+export const Blog = () => {
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blogs.blogsFilter);
   const status = useSelector((state) => state.blogs.status);
