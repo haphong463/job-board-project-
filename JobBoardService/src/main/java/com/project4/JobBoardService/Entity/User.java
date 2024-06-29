@@ -49,6 +49,8 @@ public class User   {
     private String resetToken;
     private boolean verified;
 
+    private boolean isOAuth;
+
     private String verificationCode;
 
     private String imageUrl;

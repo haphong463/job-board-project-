@@ -1,4 +1,9 @@
 package com.project4.JobBoardService.Controller;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.project4.JobBoardService.Config.ErrorDetails;
 import com.project4.JobBoardService.Entity.Employer;
 import com.project4.JobBoardService.Entity.Role;
@@ -9,25 +14,25 @@ import com.project4.JobBoardService.Repository.RoleRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Util.HTMLContentProvider;
+import com.project4.JobBoardService.Util.Variables.TokenRequest;
 import com.project4.JobBoardService.payload.*;
 import com.project4.JobBoardService.security.UserDetailsImpl;
 import com.project4.JobBoardService.security.jwt.JwtUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:3000/" )
@@ -53,6 +58,97 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+
+    @Value("${app.googleClientID}")
+    private String CLIENT_ID; // Replace with your actual client ID
+
+
+    // ! Đang trong quá trin sửa, đừng ai động vào!
+    @PostMapping("/google")
+    public ResponseEntity<?> authenticateUserWithGoogle(@RequestBody TokenRequest tokenRequest) {
+        try {
+            // Initialize transport and jsonFactory
+            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+            var transport = GoogleNetHttpTransport.newTrustedTransport();
+
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                    .setAudience(Collections.singletonList(CLIENT_ID))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(tokenRequest.getToken());
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+
+                // Print user identifier
+                String userId = payload.getSubject();
+                System.out.println("User ID: " + userId);
+
+                // Get profile information from payload
+                String email = payload.getEmail();
+                boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+                String name = (String) payload.get("name");
+                String pictureUrl = (String) payload.get("picture");
+                String locale = (String) payload.get("locale");
+                String familyName = (String) payload.get("family_name");
+                String givenName = (String) payload.get("given_name");
+
+                // Use or store profile information
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user != null) {
+                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    String jwt = jwtUtils.generateJwtToken(authentication);
+
+                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+
+                    return ResponseEntity.ok(new JwtResponse(jwt,
+                            user.getId(),
+                            user.getUsername(),
+                            user.getEmail(),
+                            rolesSignIn));
+                }
+
+                // Create new user
+                user = new User();
+                user.setEmail(email);
+                user.setUsername(email); // or some other unique identifier
+                user.setFirstName(givenName);
+                user.setLastName(familyName);
+                user.setVerified(emailVerified);
+                user.setPassword(encoder.encode("google-password"));
+                Set<Role> roles = new HashSet<>();
+                Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                roles.add(userRole);
+                user.setRoles(roles);
+                user = userRepository.save(user);
+
+                UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                String jwt = jwtUtils.generateJwtToken(authentication);
+
+                List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList());
+
+                return ResponseEntity.ok(new JwtResponse(jwt,
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        rolesSignIn));
+            } else {
+                System.out.println("Invalid ID token.");
+                return ResponseEntity.badRequest().body("Invalid token!");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
