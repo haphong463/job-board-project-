@@ -30,6 +30,8 @@ public class Quiz {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
+public Quiz(Long id) {
+        this.id = id;
+    }
 }
 
