@@ -92,4 +92,7 @@ public class User   {
         this.password = password;
         this.gender = gender;
     }
+        public User(Long id) {
+        this.id = id;
+    }
 }
