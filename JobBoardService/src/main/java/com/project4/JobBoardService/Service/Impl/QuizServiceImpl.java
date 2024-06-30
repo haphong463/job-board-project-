@@ -47,6 +47,9 @@ public class QuizServiceImpl implements QuizService {
     private ObjectMapper objectMapper;
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private QuizScoreRepository quizScoreRepository;
     @Override
     public Quiz createQuiz(Quiz quiz, MultipartFile imageFile) throws IOException {
         handleImageFile(quiz, imageFile, "create");
@@ -144,17 +147,20 @@ public class QuizServiceImpl implements QuizService {
 
         return score;
     }
-    @Override
+  @Override
     public List<QuestionResultDTO> calculateDetailedScore(QuizSubmissionDTO quizSubmission) {
         List<QuestionResultDTO> results = new ArrayList<>();
         Map<Long, String> correctAnswers = getCorrectAnswersForQuiz(quizSubmission.getQuizId());
+
+        Long userId = quizSubmission.getUserId(); // Ensure userId is retrieved correctly
 
         for (QuestionSubmissionDTO questionSubmission : quizSubmission.getQuestions()) {
             String correctAnswer = correctAnswers.get(questionSubmission.getQuestionId());
             results.add(new QuestionResultDTO(
                     questionSubmission.getQuestionId(),
                     questionSubmission.getSelectedAnswer(),
-                    correctAnswer
+                    correctAnswer,
+                    userId 
             ));
         }
 
