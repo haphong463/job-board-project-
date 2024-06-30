@@ -6,8 +6,10 @@ import com.project4.JobBoardService.DTO.QuestionSubmissionDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Question;
 import com.project4.JobBoardService.Entity.Quiz;
+import com.project4.JobBoardService.Entity.QuizScore;
 import com.project4.JobBoardService.Repository.QuestionRepository;
 import com.project4.JobBoardService.Repository.QuizRepository;
+import com.project4.JobBoardService.Repository.QuizScoreRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuizService;
@@ -47,7 +49,7 @@ public class QuizServiceImpl implements QuizService {
     private ObjectMapper objectMapper;
     @Autowired
     private EmailService emailService;
-    
+
     @Autowired
     private QuizScoreRepository quizScoreRepository;
     @Override
@@ -147,7 +149,7 @@ public class QuizServiceImpl implements QuizService {
 
         return score;
     }
-  @Override
+    @Override
     public List<QuestionResultDTO> calculateDetailedScore(QuizSubmissionDTO quizSubmission) {
         List<QuestionResultDTO> results = new ArrayList<>();
         Map<Long, String> correctAnswers = getCorrectAnswersForQuiz(quizSubmission.getQuizId());
@@ -160,7 +162,7 @@ public class QuizServiceImpl implements QuizService {
                     questionSubmission.getQuestionId(),
                     questionSubmission.getSelectedAnswer(),
                     correctAnswer,
-                    userId 
+                    userId
             ));
         }
 
@@ -168,11 +170,12 @@ public class QuizServiceImpl implements QuizService {
     }
 
 
+
+
     private Map<Long, String> getCorrectAnswersForQuiz(Long quizId) {
         List<Question> questions = questionRepository.findByQuizId(quizId);
         return questions.stream().collect(Collectors.toMap(Question::getId, Question::getCorrectAnswer));
     }
-
 
 
 
