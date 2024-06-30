@@ -4,8 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuizDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
+import com.project4.JobBoardService.DTO.QuizSubmissionResponseDTO;
 import com.project4.JobBoardService.Entity.Question;
 import com.project4.JobBoardService.Entity.Quiz;
+import com.project4.JobBoardService.Entity.QuizScore;
+import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Repository.QuizRepository;
+import com.project4.JobBoardService.Repository.QuizScoreRepository;
+import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.QuizService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,15 +42,16 @@ public class QuizController {
 
     @Autowired
     private QuizService quizService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private QuizRepository quizRepository;
     @Autowired
     private QuizScoreRepository quizScoreRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Autowired
     private ModelMapper modelMapper;
     public QuizController(QuizService quizService, ModelMapper modelMapper) {
@@ -114,38 +121,39 @@ public class QuizController {
         return ResponseEntity.noContent().build();
     }
 
- @PreAuthorize("permitAll()")
-    @PostMapping("/submit")
-    public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
-   
-        List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
+        @PreAuthorize("permitAll()")
+        @PostMapping("/submit")
+        public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+            List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
 
-        int correctAnswersCount = (int) results.stream()
-                .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
-                .count();
-        double totalQuestions = results.size();
-        double score = totalQuestions > 0 ? ((double) correctAnswersCount / totalQuestions) * 10 : 0;
+            int correctAnswersCount = (int) results.stream()
+                    .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
+                    .count();
+            double totalQuestions = results.size();
+            double score = totalQuestions > 0 ? ((double) correctAnswersCount / totalQuestions) * 10 : 0;
+
+            User user = userRepository.findById(quizSubmission.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
+                    .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+            QuizScore quizScore = new QuizScore();
+            quizScore.setUser(user);
+            quizScore.setQuiz(quiz);
+            quizScore.setScore(score);
+            quizScoreRepository.save(quizScore);
+
+            QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
+            responseDTO.setResults(results);
+            responseDTO.setScore(score);
+
+            System.out.println("Response DTO: " + responseDTO);
+
+            return ResponseEntity.ok(responseDTO);
+        }
 
 
-        User user = userRepository.findById(quizSubmission.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
-                .orElseThrow(() -> new RuntimeException("Quiz not found"));
 
-        QuizScore quizScore = new QuizScore();
-        quizScore.setUser(user);
-        quizScore.setQuiz(quiz);
-        quizScore.setScore(score);
-        quizScoreRepository.save(quizScore);
-
-        QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
-        responseDTO.setResults(results);
-        responseDTO.setScore(score);
-
-        System.out.println("Response DTO: " + responseDTO);
-
-        return ResponseEntity.ok(responseDTO);
-    }
 
 //    @PreAuthorize("hasRole('ADMIN')")
 @GetMapping("/{quizId}/export")
