@@ -35,8 +35,7 @@ export const store = configureStore({
     auth: authReducer,
     category: categoryReducer,
     notification: notificationReducer,
-    quizzes: quizReducer,
-    quizQuestions: quizQuestionsReducer,
+      quiz: quizReducer,
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({
