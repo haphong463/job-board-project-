@@ -36,7 +36,12 @@ public class QuizController {
 
     @Autowired
     private QuizService quizService;
-
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private QuizRepository quizRepository;
+    @Autowired
+    private QuizScoreRepository quizScoreRepository;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -109,12 +114,39 @@ public class QuizController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("permitAll()")
+ @PreAuthorize("permitAll()")
     @PostMapping("/submit")
-    public ResponseEntity<List<QuestionResultDTO>> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+    public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+   
         List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
-        return ResponseEntity.ok(results);
+
+        int correctAnswersCount = (int) results.stream()
+                .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
+                .count();
+        double totalQuestions = results.size();
+        double score = totalQuestions > 0 ? ((double) correctAnswersCount / totalQuestions) * 10 : 0;
+
+
+        User user = userRepository.findById(quizSubmission.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+        QuizScore quizScore = new QuizScore();
+        quizScore.setUser(user);
+        quizScore.setQuiz(quiz);
+        quizScore.setScore(score);
+        quizScoreRepository.save(quizScore);
+
+        QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
+        responseDTO.setResults(results);
+        responseDTO.setScore(score);
+
+        System.out.println("Response DTO: " + responseDTO);
+
+        return ResponseEntity.ok(responseDTO);
     }
+
 //    @PreAuthorize("hasRole('ADMIN')")
 @GetMapping("/{quizId}/export")
 public ResponseEntity<Resource> exportQuizToExcel(@PathVariable Long quizId ) {
