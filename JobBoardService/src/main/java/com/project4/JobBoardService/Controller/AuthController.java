@@ -5,7 +5,9 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.project4.JobBoardService.Config.ErrorDetails;
+import com.project4.JobBoardService.Config.TokenRefreshException;
 import com.project4.JobBoardService.Entity.Employer;
+import com.project4.JobBoardService.Entity.RefreshToken;
 import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
@@ -13,6 +15,7 @@ import com.project4.JobBoardService.Repository.EmployerRepository;
 import com.project4.JobBoardService.Repository.RoleRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
+import com.project4.JobBoardService.Service.RefreshTokenService;
 import com.project4.JobBoardService.Util.HTMLContentProvider;
 import com.project4.JobBoardService.Util.Variables.TokenRequest;
 import com.project4.JobBoardService.payload.*;
@@ -58,6 +61,8 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+    @Autowired
+    RefreshTokenService refreshTokenService;
 
 
     @Value("${app.googleClientID}")
