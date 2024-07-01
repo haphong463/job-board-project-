@@ -109,8 +109,10 @@ public class AuthController {
                     List<String> rolesSignIn = userDetails.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
                             .collect(Collectors.toList());
+                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
                     return ResponseEntity.ok(new JwtResponse(jwt,
+                            refreshToken.getToken(),
                             user.getId(),
                             user.getUsername(),
                             user.getEmail(),
@@ -140,11 +142,13 @@ public class AuthController {
                 List<String> rolesSignIn = userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList());
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
                 return ResponseEntity.ok(new JwtResponse(jwt,
-                        user.getId(),
-                        user.getUsername(),
-                        user.getEmail(),
+                        refreshToken.getToken(),
+                        userDetails.getId(),
+                        userDetails.getUsername(),
+                        userDetails.getEmail(),
                         rolesSignIn));
             } else {
                 System.out.println("Invalid ID token.");
@@ -163,8 +167,11 @@ public class AuthController {
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    String token = jwtUtils.generateTokenFromUsername(user.getUsername());
-                    return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    String jwt = jwtUtils.generateJwtToken(authentication);
+                    return ResponseEntity.ok(new TokenRefreshResponse(jwt, requestRefreshToken));
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh token is not in database!"));
@@ -189,9 +196,6 @@ public class AuthController {
                 user.getEmail(),
                     user.isVerified()
             ));
-//            return ResponseEntity
-//                    .badRequest()
-//                    .body(new MessageResponse("Error: Email not verified! Please verify your email to login."));
         }
 
 
@@ -301,9 +305,20 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Employer registered successfully! Please check your email for verification instructions."));
     }
     @PostMapping("/signout")
-    public ResponseEntity<?> signOutUser() {
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok(new MessageResponse("User signed out successfully!"));
+    public ResponseEntity<?> signOutUser(@RequestBody TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        refreshTokenService.findByToken(requestRefreshToken)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    SecurityContextHolder.clearContext();
+                    refreshTokenService.deleteByUserId(user.getId());
+                    return ResponseEntity.ok().body("User signed out!");
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                        "Refresh token is not in database!"));
+
+        return null;
     }
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) {

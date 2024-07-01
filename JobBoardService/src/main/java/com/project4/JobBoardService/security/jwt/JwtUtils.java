@@ -38,7 +38,7 @@ public class JwtUtils {
                 .claim("bio", userPrincipal.getBio())
                 .claim("gender", userPrincipal.getGender())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .setExpiration(new Date((new Date()).getTime() + 15000))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
