@@ -15,7 +15,7 @@ import com.project4.JobBoardService.Repository.EmployerRepository;
 import com.project4.JobBoardService.Repository.RoleRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
-import com.project4.JobBoardService.Service.RefreshTokenService;
+import com.project4.JobBoardService.Service.Impl.RefreshTokenService;
 import com.project4.JobBoardService.Util.HTMLContentProvider;
 import com.project4.JobBoardService.Util.Variables.TokenRequest;
 import com.project4.JobBoardService.payload.*;

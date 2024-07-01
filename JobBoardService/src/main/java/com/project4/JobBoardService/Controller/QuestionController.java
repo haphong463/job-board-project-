@@ -3,7 +3,6 @@ package com.project4.JobBoardService.Controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.project4.JobBoardService.DTO.QuestionDTO;
-import com.project4.JobBoardService.DTO.QuestionIdsWrapper;
 import com.project4.JobBoardService.Service.QuestionService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
