@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { signInAysnc, signUpAsync } from "../services/AuthService";
+import {
+  signInAysnc,
+  signInOAuth2Async,
+  signOutAsync,
+  signUpAsync,
+} from "../services/AuthService";
 import { jwtDecode } from "jwt-decode"; // Correct import
 import axios from "axios";
 const userNotFound = "User not found";
@@ -30,6 +35,33 @@ export const signIn = createAsyncThunk(
       }
       return res;
     } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const signInOAuth2 = createAsyncThunk(
+  "auth/signInOAuth2",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await signInOAuth2Async(data);
+      return res;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const signOut = createAsyncThunk(
+  "auth/signOut",
+  async (_, { rejectWithValue }) => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      const res = await signOutAsync(refreshToken);
+      return res;
+    } catch (error) {
+      console.log(error);
       return rejectWithValue(error.message);
     }
   }
@@ -109,11 +141,11 @@ const initialState = {
   user:
     localStorage.getItem("accessToken") &&
     jwtDecode(localStorage.getItem("accessToken")),
-    currentUser: null,
+  currentUser: null,
 };
 
 const authSlice = createSlice({
-  name: "auth",
+  name,
   initialState,
   reducers: {
     resetSignUpSuccess(state) {
@@ -127,6 +159,7 @@ const authSlice = createSlice({
       state.roles = [];
       state.status = "idle";
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
     },
     resetVerificationMessage(state) {
       state.verificationMessage = null;
@@ -137,6 +170,10 @@ const authSlice = createSlice({
     },
     setCurrentUser(state, action) {
       state.currentUser = action.payload;
+    },
+    updateToken(state, action) {
+      state.user = jwtDecode(action.payload);
+      state.roles = state.user.role.map((r) => r.authority);
     },
   },
   extraReducers: (builder) => {
@@ -165,8 +202,8 @@ const authSlice = createSlice({
         state.user = jwtDecode(action.payload.accessToken);
         console.log(">>>state user: ", state.user);
         state.roles = state.user.role.map((r) => r.authority);
-       localStorage.setItem("accessToken", action.payload.accessToken);
-
+        localStorage.setItem("accessToken", action.payload.accessToken);
+        localStorage.setItem("refreshToken", action.payload.refreshToken);
       })
       .addCase(signIn.rejected, (state, action) => {
         state.status = "failed";
@@ -207,6 +244,21 @@ const authSlice = createSlice({
       .addCase(setupCredentials.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
+      })
+      .addCase(signInOAuth2.fulfilled, (state, action) => {
+        const user = jwtDecode(action.payload.accessToken);
+        state.user = { ...user, refreshToken: action.payload.refreshToken };
+        console.log(">>>state user: ", state.user);
+        state.roles = state.user.role.map((r) => r.authority);
+        localStorage.setItem("accessToken", action.payload.accessToken);
+        localStorage.setItem("refreshToken", action.payload.refreshToken);
+      })
+      .addCase(signOut.fulfilled, (state) => {
+        state.user = null;
+        state.roles = [];
+
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
       });
   },
 });
@@ -217,6 +269,7 @@ export const {
   logout,
   resetVerificationMessage,
   resetMessages,
+  updateToken,
 } = authSlice.actions;
 export const { setCurrentUser } = authSlice.actions;
 export default authSlice.reducer;

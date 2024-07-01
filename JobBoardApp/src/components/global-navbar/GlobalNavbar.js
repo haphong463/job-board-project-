@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../features/authSlice";
+import { logout, signOut } from "../../features/authSlice";
 import {
   Dropdown,
   DropdownToggle,
@@ -32,7 +32,7 @@ export function GlobalNavbar() {
   const unreadCount = useSelector((state) => state.notification.unreadCount);
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(signOut());
   };
 
   useEffect(() => {

@@ -10,6 +10,7 @@ axiosRequest.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -18,7 +19,6 @@ axiosRequest.interceptors.request.use(
 axiosRequest.interceptors.response.use(
   (response) => response.data, // Automatically return response.data
   (error) => {
-    // Handle errors
     return Promise.reject(error);
   }
 );
