@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,9 +25,9 @@ public class Quiz {
 
     private String imageUrl;
     private String thumbnailUrl;
-    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Question> questions;
+    private List<Question> questions = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
