@@ -8,5 +8,12 @@ import java.util.List;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     List<Question> findByQuizId(Long quizId);
+    List<Question> findAllById(Iterable<Long> ids);
+    @Modifying
+    @Query("DELETE FROM Question q WHERE q.id IN :questionIds")
+    void deleteByIdIn(List<Long> questionIds);
+    @Modifying
+    @Query("DELETE FROM Question q WHERE q.quiz.id = :quizId")
+    void deleteByQuizId(Long quizId);
 
 }
