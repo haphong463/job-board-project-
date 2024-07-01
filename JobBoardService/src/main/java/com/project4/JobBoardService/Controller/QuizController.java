@@ -12,8 +12,10 @@ import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Repository.QuizRepository;
 import com.project4.JobBoardService.Repository.QuizScoreRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
+import com.project4.JobBoardService.Service.QuestionService;
 import com.project4.JobBoardService.Service.QuizService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -46,6 +48,8 @@ public class QuizController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private QuestionService questionService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -100,6 +104,7 @@ public class QuizController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizDTO> updateQuiz(@PathVariable Long id,
@@ -120,6 +125,20 @@ public class QuizController {
         quizService.deleteQuiz(id);
         return ResponseEntity.noContent().build();
     }
+    ///
+    @DeleteMapping("/{quizId}/questions")
+    @Transactional
+    public ResponseEntity<Void> deleteQuestionsByQuizId(@PathVariable Long quizId) {
+        questionService.deleteQuestionsByQuizId(quizId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/questions")
+    @Transactional
+    public ResponseEntity<Void> deleteQuestionsByIds(@RequestBody List<Long> questionIds) {
+        questionService.deleteQuestionsByIds(questionIds);
+        return ResponseEntity.noContent().build();
+    }
 
         @PreAuthorize("permitAll()")
         @PostMapping("/submit")
@@ -130,7 +149,20 @@ public class QuizController {
                     .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
                     .count();
             double totalQuestions = results.size();
-            double score = totalQuestions > 0 ? ((double) correctAnswersCount / totalQuestions) * 10 : 0;
+            double scorePerQuestion;
+
+
+            if (totalQuestions == 20) {
+                scorePerQuestion = 0.5;
+            } else if (totalQuestions == 15) {
+                scorePerQuestion = 0.67;
+            } else if (totalQuestions == 10) {
+                scorePerQuestion = 1.0;
+            } else {
+                scorePerQuestion = 1.0;
+            }
+
+            double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
 
             User user = userRepository.findById(quizSubmission.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
