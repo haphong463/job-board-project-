@@ -3,6 +3,7 @@ package com.project4.JobBoardService.Controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.project4.JobBoardService.DTO.QuestionDTO;
+import com.project4.JobBoardService.DTO.QuestionIdsWrapper;
 import com.project4.JobBoardService.Service.QuestionService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
@@ -20,10 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -48,6 +46,19 @@ public class QuestionController {
         Optional<QuestionDTO> question = questionService.getQuestionById(questionId);
         return question.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+    @PreAuthorize("permitAll()")
+    @GetMapping("/{quizId}/random-questions")
+    public ResponseEntity<List<QuestionDTO>> getRandomQuestionsForQuiz(@PathVariable Long quizId, @RequestParam int count) {
+        List<QuestionDTO> allQuestions = questionService.getAllQuestions()
+                .stream()
+                .filter(question -> question.getQuizId().equals(quizId))
+                .collect(Collectors.toList());
+
+        Collections.shuffle(allQuestions);
+        List<QuestionDTO> randomQuestions = allQuestions.stream().limit(count).collect(Collectors.toList());
+
+        return new ResponseEntity<>(randomQuestions, HttpStatus.OK);
     }
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{quizId}/questions")
@@ -80,9 +91,18 @@ public class QuestionController {
         questionService.deleteQuestion(questionId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    @DeleteMapping("/{quizId}/questions/delete")
+    public ResponseEntity<String> deleteQuestions(
+            @PathVariable Long quizId) {
+        try {
+            questionService.deleteQuestionsByQuizId(quizId);
+            return ResponseEntity.ok("Deleted questions for quiz with ID: " + quizId);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error deleting questions: " + e.getMessage());
+        }
+    }
 
-
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{quizId}/questions/upload")
     public ResponseEntity<Void> uploadQuestions(@PathVariable Long quizId, @RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
