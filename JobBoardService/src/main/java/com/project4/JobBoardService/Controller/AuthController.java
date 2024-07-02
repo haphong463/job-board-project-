@@ -309,10 +309,9 @@ public class AuthController {
         String requestRefreshToken = request.getRefreshToken();
 
         refreshTokenService.findByToken(requestRefreshToken)
-                .map(RefreshToken::getUser)
-                .map(user -> {
+                .map(refreshToken -> {
                     SecurityContextHolder.clearContext();
-                    refreshTokenService.deleteByUserId(user.getId());
+                    refreshTokenService.deleteRefreshToken(refreshToken);
                     return ResponseEntity.ok().body("User signed out!");
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,

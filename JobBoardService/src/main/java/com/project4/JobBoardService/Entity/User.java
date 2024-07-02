@@ -78,6 +78,7 @@ public class User   {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Employer employer;
 
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
