@@ -50,9 +50,28 @@ export const Quiz = () => {
   };
 
   const handleConfirmStart = () => {
-    navigate(`/quiz/${selectedQuiz.id}`);
+    const accessToken = localStorage.getItem('accessToken');
+    // Clear existing cached questions
+    localStorage.removeItem(`questions_${selectedQuiz.id}`);
+    localStorage.removeItem(`sessionId_${selectedQuiz.id}`);
+    axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${selectedQuiz.id}/questions`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      },
+      params: {
+        count: 10 // Assuming you want 10 questions
+      }
+    })
+    .then(response => {
+      const questions = response.data;
+      // Store the questions in localStorage or Redux store, if necessary
+      localStorage.setItem(`questions_${selectedQuiz.id}`, JSON.stringify(questions));
+      navigate(`/quiz/${selectedQuiz.id}`);
+    })
+    .catch(error => {
+      console.error("There was an error fetching the questions!", error);
+    });
   };
-
   if (!loggedIn) {
     return null; 
   }

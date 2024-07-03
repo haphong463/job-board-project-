@@ -11,6 +11,7 @@ import {
 import "./QuizQuestions.css";
 import axiosRequest from "../../configs/axiosConfig";
 import axios from "axios";
+import { v4 as uuidv4 } from 'uuid';
 
 const QuizQuestions = () => {
   const { quizId } = useParams();
@@ -34,11 +35,22 @@ const QuizQuestions = () => {
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
-
+ 
   useEffect(() => {
-    dispatch(fetchQuizDetailsThunk(quizId));
-    dispatch(fetchQuizQuestionsThunk(quizId));
+    const sessionId = localStorage.getItem(`sessionId_${quizId}`);
+    const savedQuestions = localStorage.getItem(`questions_${quizId}`);
+    
+    if (sessionId && savedQuestions) {
+      dispatch({ type: 'quiz/fetchQuizQuestions/fulfilled', payload: JSON.parse(savedQuestions) });
+    } else {
+      const newSessionId = uuidv4();
+      localStorage.setItem(`sessionId_${quizId}`, newSessionId);
+      dispatch(fetchQuizQuestionsThunk(quizId)).then((result) => {
+        localStorage.setItem(`questions_${quizId}`, JSON.stringify(result.payload));
+      });
+    }
 
+    dispatch(fetchQuizDetailsThunk(quizId));
     const savedTimeLeft = localStorage.getItem(`timeLeft_${quizId}`);
     if (savedTimeLeft) {
       setTimeLeft(parseInt(savedTimeLeft, 10));
