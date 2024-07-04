@@ -1,10 +1,7 @@
 package com.project4.JobBoardService.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project4.JobBoardService.DTO.QuestionResultDTO;
-import com.project4.JobBoardService.DTO.QuizDTO;
-import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
-import com.project4.JobBoardService.DTO.QuizSubmissionResponseDTO;
+import com.project4.JobBoardService.DTO.*;
 import com.project4.JobBoardService.Entity.Question;
 import com.project4.JobBoardService.Entity.Quiz;
 import com.project4.JobBoardService.Entity.QuizScore;
@@ -35,6 +32,8 @@ import org.springframework.http.HttpHeaders;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -140,49 +139,51 @@ public class QuizController {
         return ResponseEntity.noContent().build();
     }
 
-        @PreAuthorize("permitAll()")
-        @PostMapping("/submit")
-        public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
-            List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
-
-            int correctAnswersCount = (int) results.stream()
-                    .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
-                    .count();
-            double totalQuestions = results.size();
-            double scorePerQuestion;
 
 
-            if (totalQuestions == 20) {
-                scorePerQuestion = 0.5;
-            } else if (totalQuestions == 15) {
-                scorePerQuestion = 0.67;
-            } else if (totalQuestions == 10) {
-                scorePerQuestion = 1.0;
-            } else {
-                scorePerQuestion = 1.0;
-            }
-
-            double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
-
-            User user = userRepository.findById(quizSubmission.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
-                    .orElseThrow(() -> new RuntimeException("Quiz not found"));
-
-            QuizScore quizScore = new QuizScore();
-            quizScore.setUser(user);
-            quizScore.setQuiz(quiz);
-            quizScore.setScore(score);
-            quizScoreRepository.save(quizScore);
-
-            QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
-            responseDTO.setResults(results);
-            responseDTO.setScore(score);
-
-            System.out.println("Response DTO: " + responseDTO);
-
-            return ResponseEntity.ok(responseDTO);
-        }
+//        @PreAuthorize("permitAll()")
+//        @PostMapping("/submit")
+//        public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+//            List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
+//
+//            int correctAnswersCount = (int) results.stream()
+//                    .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
+//                    .count();
+//            double totalQuestions = results.size();
+//            double scorePerQuestion;
+//
+//
+//            if (totalQuestions == 20) {
+//                scorePerQuestion = 0.5;
+//            } else if (totalQuestions == 15) {
+//                scorePerQuestion = 0.67;
+//            } else if (totalQuestions == 10) {
+//                scorePerQuestion = 1.0;
+//            } else {
+//                scorePerQuestion = 1.0;
+//            }
+//
+//            double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
+//
+//            User user = userRepository.findById(quizSubmission.getUserId())
+//                    .orElseThrow(() -> new RuntimeException("User not found"));
+//            Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
+//                    .orElseThrow(() -> new RuntimeException("Quiz not found"));
+//
+//            QuizScore quizScore = new QuizScore();
+//            quizScore.setUser(user);
+//            quizScore.setQuiz(quiz);
+//            quizScore.setScore(score);
+//            quizScoreRepository.save(quizScore);
+//
+//            QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
+//            responseDTO.setResults(results);
+//            responseDTO.setScore(score);
+//
+//            System.out.println("Response DTO: " + responseDTO);
+//
+//            return ResponseEntity.ok(responseDTO);
+//        }
 
 
 
@@ -240,5 +241,100 @@ public ResponseEntity<Resource> exportQuizToExcel(@PathVariable Long quizId ) {
     } catch (IOException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+}
+
+
+
+//
+@GetMapping("/{quizId}/attempts")
+public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long quizId, @RequestParam Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    Quiz quiz = quizRepository.findById(quizId)
+            .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+    QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
+
+    QuizAttemptResponseDTO responseDTO = new QuizAttemptResponseDTO();
+    responseDTO.setAttemptsLeft(quizScore != null ? 3 - quizScore.getAttempts() : 3);
+
+    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
+        responseDTO.setLocked(true);
+        responseDTO.setLockEndTime(quizScore.getLockEndTime());
+        responseDTO.setTimeLeft(Duration.between(LocalDateTime.now(), quizScore.getLockEndTime()).getSeconds());
+    } else {
+        responseDTO.setLocked(false);
+    }
+
+    return ResponseEntity.ok(responseDTO);
+}
+//
+@PreAuthorize("permitAll()")
+@PostMapping("/submit")
+public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+    User user = userRepository.findById(quizSubmission.getUserId())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
+            .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+    // Fetch the latest QuizScore for this user and quiz
+    QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
+
+    // Check if the user is currently locked out
+    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+    }
+
+    // Calculate the score
+    List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
+    int correctAnswersCount = (int) results.stream()
+            .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
+            .count();
+    double totalQuestions = results.size();
+    double scorePerQuestion;
+
+    if (totalQuestions == 20) {
+        scorePerQuestion = 0.5;
+    } else if (totalQuestions == 15) {
+        scorePerQuestion = 0.67;
+    } else if (totalQuestions == 10) {
+        scorePerQuestion = 1.0;
+    } else {
+        scorePerQuestion = 1.0;
+    }
+
+    double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
+
+    // Save the score and update the attempts
+    if (quizScore == null) {
+        quizScore = new QuizScore();
+        quizScore.setUser(user);
+        quizScore.setQuiz(quiz);
+        quizScore.setAttempts(0); // Initialize attempts if new quizScore
+    }
+
+    quizScore.setScore(score);
+    quizScore.setAttempts(quizScore.getAttempts() + 1);
+
+    System.out.println("User ID: " + user.getId());
+    System.out.println("Quiz ID: " + quiz.getId());
+    System.out.println("Attempts: " + quizScore.getAttempts());
+    System.out.println("Score: " + score);
+
+    // Check if the score is passing
+    double passingScore = 7.0; // Define your passing score
+    if (score < passingScore && quizScore.getAttempts() >= 3) {
+        quizScore.setLocked(true);
+        quizScore.setLockEndTime(LocalDateTime.now().plusDays(3));
+    }
+
+    quizScoreRepository.save(quizScore);
+
+    // Prepare the response
+    QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
+    responseDTO.setResults(results);
+    responseDTO.setScore(score);
+
+    return ResponseEntity.ok(responseDTO);
 }
 }

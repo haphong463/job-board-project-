@@ -1,50 +1,62 @@
 .custom-dialog {
-    max-width: 600px;
-    width: 100%;
-  }
-  
-  .custom-dialog-title {
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    padding-bottom: 0;
-  }
-  
-  .custom-dialog-content {
-    text-align: center;
-  }
-  
-  .custom-dialog-content h2 {
-    margin-bottom: 20px;
-    font-size: 20px;
-    font-weight: bold;
-  }
-  
-  .custom-dialog-content div {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  
-  .custom-dialog-content div p {
-    margin: 0;
-  }
-  
-  .custom-dialog-actions {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .custom-dialog-button {
-    margin: 0 10px;
-  }
-  
-  .custom-dialog-description {
-    text-align: left;
-    margin-top: 20px;
-  }
-  
-  .custom-dialog-description p {
-    margin: 0;
-  }
-  
+  max-width: 600px;
+  width: 100%;
+}
+
+.custom-dialog-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  padding-bottom: 0;
+}
+
+.custom-dialog-content {
+  text-align: center;
+}
+
+.custom-dialog-content h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.custom-dialog-content div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.custom-dialog-content div p {
+  margin: 0;
+}
+
+.custom-dialog-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.custom-dialog-button {
+  margin: 0 10px;
+}
+
+.custom-dialog-description {
+  text-align: left;
+  margin-top: 20px;
+}
+
+.custom-dialog-description p {
+  margin: 0;
+}
+
+.quiz-card {
+  position: relative;
+}
+
+.alert {
+  margin-top: 10px;
+  padding: 10px;
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  border-radius: 5px;
+}

@@ -22,36 +22,36 @@ const QuizResult = () => {
     : 0;
   const percentage = totalQuestions > 0 ? ((correctAnswersCount / totalQuestions) * 100).toFixed(2) : 0;
 
-  const handleRetry = () => {
-    if (quizId) {
-      fetchAndNavigateToQuiz(quizId);
-    } else {
-      console.error('No quizId found in location.state:', location.state);
-    }
-  };
-  const fetchAndNavigateToQuiz = (quizId) => {
-    const accessToken = localStorage.getItem('accessToken');
-    // Clear existing cached questions
-    localStorage.removeItem(`questions_${quizId}`);
-    localStorage.removeItem(`sessionId_${quizId}`);
-    axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quizId}/questions`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      },
-      params: {
-        count: 10 // Assuming you want 10 questions
-      }
-    })
-    .then(response => {
-      const questions = response.data;
-      // Store the questions in localStorage or Redux store, if necessary
-      localStorage.setItem(`questions_${quizId}`, JSON.stringify(questions));
-      navigate(`/quiz/${quizId}`);
-    })
-    .catch(error => {
-      console.error("There was an error fetching the questions!", error);
-    });
-  };
+  // const handleRetry = () => {
+  //   if (quizId) {
+  //     fetchAndNavigateToQuiz(quizId);
+  //   } else {
+  //     console.error('No quizId found in location.state:', location.state);
+  //   }
+  // };
+  // const fetchAndNavigateToQuiz = (quizId) => {
+  //   const accessToken = localStorage.getItem('accessToken');
+  //   // Clear existing cached questions
+  //   localStorage.removeItem(`questions_${quizId}`);
+  //   localStorage.removeItem(`sessionId_${quizId}`);
+  //   axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quizId}/questions`, {
+  //     headers: {
+  //       Authorization: `Bearer ${accessToken}`
+  //     },
+  //     params: {
+  //       count: 10 // Assuming you want 10 questions
+  //     }
+  //   })
+  //   .then(response => {
+  //     const questions = response.data;
+  //     // Store the questions in localStorage or Redux store, if necessary
+  //     localStorage.setItem(`questions_${quizId}`, JSON.stringify(questions));
+  //     navigate(`/quiz/${quizId}`);
+  //   })
+  //   .catch(error => {
+  //     console.error("There was an error fetching the questions!", error);
+  //   });
+  // };
 
 
   const handleGoBack = () => {
@@ -96,7 +96,7 @@ const QuizResult = () => {
             <p>{score < 50 ? "Bạn cần học thêm nhiều hơn!" : "Tốt lắm, tiếp tục phát huy!"}</p>
           </div>
           <div className="result-actions">
-            <button className="btn btn-primary" onClick={handleRetry}>Làm lại bài đánh giá</button>
+            {/* <button className="btn btn-primary" onClick={handleRetry}>Làm lại bài đánh giá</button> */}
             <button className="btn btn-secondary" onClick={handleGoBack}>Quay lại trang danh sách kỹ năng</button>
           </div>
         </div>
