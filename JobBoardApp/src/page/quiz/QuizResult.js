@@ -92,7 +92,7 @@ const QuizResult = () => {
           <h2>Kết quả bài thi</h2>
           <div className="result-score">
             <p>Câu trả lời đúng: {correctAnswersCount} / {totalQuestions}</p>
-            <p>{score}%</p>
+            <p>{score} Điểm</p>
             <p>{score < 50 ? "Bạn cần học thêm nhiều hơn!" : "Tốt lắm, tiếp tục phát huy!"}</p>
           </div>
           <div className="result-actions">
