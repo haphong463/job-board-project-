@@ -6,7 +6,11 @@ import { navigation } from "../utils/variables/navigation";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useDispatch, useSelector } from "react-redux";
-import { checkAndUpdateAccessToken, logout } from "../features/authSlice";
+import {
+  checkAndUpdateAccessToken,
+  logout,
+  signOut,
+} from "../features/authSlice";
 import { IoLogOut } from "react-icons/io5";
 
 const Sidebar = () => {
@@ -18,16 +22,19 @@ const Sidebar = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [countdown, setCountdown] = useState(1);
   const handleLogout = () => {
-    setIsLoggingOut(true);
-    let timer = setInterval(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
+    // setIsLoggingOut(true);
+    // let timer = setInterval(() => {
+    //   setCountdown((prev) => prev - 1);
+    // }, 1000);
 
-    setTimeout(() => {
-      clearInterval(timer);
-      dispatch(logout());
-      navigate("/jobportal/login");
-    }, 1000);
+    // setTimeout(() => {
+    //   clearInterval(timer);
+    dispatch(signOut()).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/jobportal/login");
+      }
+    });
+    // }, 1000);
   };
   const location = useLocation();
   const [collapseStates, setCollapseStates] = useState({});

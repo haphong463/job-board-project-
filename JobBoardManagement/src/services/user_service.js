@@ -23,3 +23,12 @@ export const updateUserAsync = async (data, id) => {
     return error;
   }
 };
+export const signOutAsync = async (data) =>
+  await axiosRequest.post("/auth/signout", {
+    refreshToken: data,
+  });
+
+
+
+
+
