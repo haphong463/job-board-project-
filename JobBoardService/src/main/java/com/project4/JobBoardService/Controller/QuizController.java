@@ -256,12 +256,26 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
     QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
 
     QuizAttemptResponseDTO responseDTO = new QuizAttemptResponseDTO();
-    responseDTO.setAttemptsLeft(quizScore != null ? 3 - quizScore.getAttempts() : 3);
+
+    int attemptsDone = quizScore != null ? quizScore.getAttempts() : 0;
+
+    int maxAttempts = 3;
+
+    if (attemptsDone >= maxAttempts) {
+        attemptsDone = 0;
+        if (quizScore != null) {
+            quizScore.setAttempts(attemptsDone);
+            quizScoreRepository.save(quizScore);
+        }
+    }
+
+    responseDTO.setAttemptsLeft(maxAttempts - attemptsDone);
 
     if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
         responseDTO.setLocked(true);
         responseDTO.setLockEndTime(quizScore.getLockEndTime());
-        responseDTO.setTimeLeft(Duration.between(LocalDateTime.now(), quizScore.getLockEndTime()).getSeconds());
+        long timeLeft = Duration.between(LocalDateTime.now(), quizScore.getLockEndTime()).getSeconds();
+        responseDTO.setTimeLeft(timeLeft > 0 ? timeLeft : 0);
     } else {
         responseDTO.setLocked(false);
     }
@@ -277,60 +291,46 @@ public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSub
     Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
             .orElseThrow(() -> new RuntimeException("Quiz not found"));
 
-    // Fetch the latest QuizScore for this user and quiz
     QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
 
-    // Check if the user is currently locked out
     if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
     }
 
-    // Calculate the score
+    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isBefore(LocalDateTime.now())) {
+        quizScore.setLocked(false);
+        quizScore.setLockEndTime(null);
+        quizScoreRepository.save(quizScore);
+    }
+
     List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
     int correctAnswersCount = (int) results.stream()
             .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
             .count();
     double totalQuestions = results.size();
-    double scorePerQuestion;
-
-    if (totalQuestions == 20) {
-        scorePerQuestion = 0.5;
-    } else if (totalQuestions == 15) {
-        scorePerQuestion = 0.67;
-    } else if (totalQuestions == 10) {
-        scorePerQuestion = 1.0;
-    } else {
-        scorePerQuestion = 1.0;
-    }
-
+    double scorePerQuestion = totalQuestions == 20 ? 0.5 : totalQuestions == 15 ? 0.67 : 1.0;
     double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
 
-    // Save the score and update the attempts
     if (quizScore == null) {
         quizScore = new QuizScore();
         quizScore.setUser(user);
         quizScore.setQuiz(quiz);
-        quizScore.setAttempts(0); // Initialize attempts if new quizScore
+        quizScore.setAttempts(0);
     }
 
     quizScore.setScore(score);
     quizScore.setAttempts(quizScore.getAttempts() + 1);
 
-    System.out.println("User ID: " + user.getId());
-    System.out.println("Quiz ID: " + quiz.getId());
-    System.out.println("Attempts: " + quizScore.getAttempts());
-    System.out.println("Score: " + score);
-
-    // Check if the score is passing
-    double passingScore = 7.0; // Define your passing score
+    double passingScore = 7.0;
     if (score < passingScore && quizScore.getAttempts() >= 3) {
         quizScore.setLocked(true);
-        quizScore.setLockEndTime(LocalDateTime.now().plusDays(3));
+        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
+
+//        quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
     }
 
     quizScoreRepository.save(quizScore);
 
-    // Prepare the response
     QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
     responseDTO.setResults(results);
     responseDTO.setScore(score);

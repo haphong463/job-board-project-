@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import './Quiz.css'; // Import CSS
 
 export const Quiz = () => {
@@ -24,39 +24,48 @@ export const Quiz = () => {
       navigate('/login');
     } else {
       setLoggedIn(true);
-      const accessToken = localStorage.getItem('accessToken');
-      axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      })
-        .then(response => {
-          setQuizzes(response.data);
-          response.data.forEach((quiz) => {
-            axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`
-              },
-              params: {
-                userId: user.id
-              }
-            })
-            .then(response => {
-              setAttemptsInfo(prev => ({
-                ...prev,
-                [quiz.id]: response.data
-              }));
-            })
-            .catch(error => {
-              console.error("There was an error fetching the attempts info!", error);
-            });
-          });
-        })
-        .catch(error => {
-          console.error("There was an error fetching the quizzes!", error);
-        });
+      fetchQuizzesAndAttempts();
+      const intervalId = setInterval(() => {
+        fetchQuizzesAndAttempts();
+      }, 10000); // Polling every 10 seconds
+
+      return () => clearInterval(intervalId);
     }
   }, [navigate, user.id]);
+
+  const fetchQuizzesAndAttempts = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    })
+      .then(response => {
+        setQuizzes(response.data);
+        response.data.forEach((quiz) => {
+          axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            },
+            params: {
+              userId: user.id
+            }
+          })
+          .then(response => {
+            setAttemptsInfo(prev => ({
+              ...prev,
+              [quiz.id]: response.data
+            }));
+          })
+          .catch(error => {
+            console.error("There was an error fetching the attempts info!", error);
+          });
+        });
+      })
+      .catch(error => {
+        console.error("There was an error fetching the quizzes!", error);
+      });
+  };
 
   const handleStartQuiz = (quiz) => {
     const accessToken = localStorage.getItem('accessToken');
@@ -142,7 +151,7 @@ export const Quiz = () => {
                     <img src={quiz.imageUrl} alt={quiz.title} className="img-fluid mb-3" />
                     <h3>{quiz.title}</h3>
                     <p>{quiz.description}</p>
-                    {attemptsInfo[quiz.id]?.attemptsLeft === 0 ? (
+                    {attemptsInfo[quiz.id]?.locked ? (
                       <div className="alert alert-warning">
                         Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào ngày {calculateNextAttemptDate(attemptsInfo[quiz.id]?.timeLeft)}.
                       </div>
@@ -192,3 +201,4 @@ export const Quiz = () => {
     </GlobalLayoutUser>
   );
 };
+  
