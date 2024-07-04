@@ -1,7 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { jwtDecode } from "jwt-decode";
 import { signInAsync } from "../services/auth_service";
-import { getUserByIDAsync, updateUserAsync } from "../services/user_service";
+import {
+  getUserByIDAsync,
+  signOutAsync,
+  updateUserAsync,
+} from "../services/user_service";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
 
@@ -53,6 +57,20 @@ export const updateUserThunk = createAsyncThunk(
   }
 );
 
+export const signOut = createAsyncThunk(
+  "auth/signOut",
+  async (_, { rejectWithValue }) => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      const res = await signOutAsync(refreshToken);
+      return res;
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const getUserByIDThunk = createAsyncThunk(
   "user/getOne",
   async (id, { rejectWithValue }) => {
@@ -70,14 +88,13 @@ const name = "auth";
 const token = localStorage.getItem("accessToken");
 
 const initialState = {
-  accessToken: token && jwtDecode(token),
   error: null,
-  state: "idle",
+  status: "idle",
   signInSuccess: false,
   isVerified: true,
   verificationEmail: null,
   verificationMessage: null,
-  user: null,
+  user: token && jwtDecode(token),
   location: "",
 };
 
@@ -90,29 +107,37 @@ const authSlice = createSlice({
     },
     logout(state) {
       state.user = null;
-      state.accessToken = null;
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
     },
 
     setLocationState: (state, action) => {
       state.location = action.payload;
     },
+    updateToken(state, action) {
+      console.log(action.payload);
+      state.user = jwtDecode(action.payload);
+      localStorage.setItem("accessToken", action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state) => {
-        state.state = "loading";
+        state.status = "loading";
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.state = "succeeded";
+        state.status = "succeeded";
         state.signInSuccess = true;
         state.isVerified = true;
+        state.user = jwtDecode(action.payload.accessToken);
+        state.verificationMessage = null;
+
         localStorage.setItem("accessToken", action.payload.accessToken);
-        state.accessToken = jwtDecode(action.payload.accessToken);
+        localStorage.setItem("refreshToken", action.payload.refreshToken);
       })
       .addCase(login.rejected, (state, action) => {
-        state.state = "failed";
+        state.status = "failed";
         state.error = action.payload;
         if (action.payload && typeof action.payload === "object") {
           state.isVerified = false;
@@ -128,11 +153,16 @@ const authSlice = createSlice({
       })
       .addCase(getUserByIDThunk.fulfilled, (state, action) => {
         state.user = action.payload;
+      })
+      .addCase(signOut.fulfilled, (state) => {
+        state.user = null;
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
       });
   },
 });
 
-export const { resetSignInSuccess, logout, setLocationState } =
+export const { resetSignInSuccess, logout, setLocationState, updateToken } =
   authSlice.actions;
 
 export default authSlice.reducer;

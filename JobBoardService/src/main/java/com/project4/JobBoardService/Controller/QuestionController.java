@@ -102,10 +102,13 @@ public class QuestionController {
     }
 
     @PostMapping("/{quizId}/questions/upload")
-    public ResponseEntity<Void> uploadQuestions(@PathVariable Long quizId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadQuestions(@PathVariable Long quizId, @RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        List<QuestionDTO> createdQuestions = new ArrayList<>();
+
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -124,10 +127,11 @@ public class QuestionController {
                         getCellValueAsString(row.getCell(4))));
                 questionDTO.setCorrectAnswer(getCellValueAsString(row.getCell(5)));
 
-                questionService.createQuestion(quizId, questionDTO);
+                QuestionDTO createdQuestion = questionService.createQuestion(quizId, questionDTO);
+                createdQuestions.add(createdQuestion);
             }
 
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(createdQuestions, HttpStatus.CREATED);
 
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

@@ -8,13 +8,14 @@ import storage from "redux-persist/lib/storage";
 import persistReducer from "redux-persist/es/persistReducer";
 import quizReducer from "./features/quizSlice"; // Adjust the path as necessary
 import questionReducer from "./features/questionSlice";
+import userReducer from "./features/userSlice";
 
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  whitelist: ["auth"],
-  blacklist: ["jobCategory"],
+  whitelist: [""],
+  blacklist: ["jobCategory", "auth"],
 };
 const reducer = combineReducers({
   blogs: blogsReducer,
@@ -23,6 +24,7 @@ const reducer = combineReducers({
   jobCategory: jobCategoryReducer,
   quizzes: quizReducer,
   questions: questionReducer,
+  user: userReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, reducer);

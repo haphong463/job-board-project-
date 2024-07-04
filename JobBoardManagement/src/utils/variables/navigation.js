@@ -33,7 +33,6 @@ export const navigation = [
             href: "/jobportal/table",
             icon: "bi bi-hdd-stack",
           },
-     
         ],
       },
       {
@@ -45,8 +44,12 @@ export const navigation = [
             href: "/jobportal/quiz",
             icon: "bi bi-question-circle",
           },
-      
         ],
+      },
+      {
+        title: "User",
+        icon: "bi bi-question-circle",
+        href: "/jobportal/user",
       },
     ],
   },

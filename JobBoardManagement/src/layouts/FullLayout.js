@@ -9,17 +9,20 @@ import {
   getUserByIDThunk,
   logout,
   setLocationState,
+  signOut,
   updateRoles,
+  updateToken,
   updateUserAndRoles,
 } from "../features/authSlice";
 import "nprogress/nprogress.css"; // Import the CSS file
 import { fetchBlogs } from "../features/blogSlice";
 import { fetchBlogCategory } from "../features/blogCategorySlice";
 import showToast from "../utils/functions/showToast";
+import axiosRequest from "../configs/axiosConfig";
+import axios from "axios";
 const FullLayout = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const accessToken = useSelector((state) => state.auth.accessToken);
   const roles = useSelector((state) => state.auth.roles);
   const blogStatus = useSelector((state) => state.blogs.status);
   const categoryStatus = useSelector((state) => state.blogCategory.status);
@@ -30,30 +33,53 @@ const FullLayout = () => {
   }, [location, dispatch]);
 
   useEffect(() => {
-    if (accessToken) {
-      const refreshAuthToken = () => {
-        const expiresIn = accessToken?.exp || 0;
-        const nowInSeconds = Math.floor(Date.now() / 1000);
-        const remainingTime = expiresIn - nowInSeconds;
-        const refreshTime = Math.max(0, remainingTime - 5);
+    const refreshAuthToken = (user, dispatch, navigate) => {
+      const expiresIn = user?.exp || 0;
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const remainingTime = expiresIn - nowInSeconds;
+      const refreshTime = Math.max(0, remainingTime - 5);
 
-        // Hiển thị số giây còn lại trong console.log
+      const refreshTokenTimeout = setTimeout(async () => {
+        try {
+          const refreshToken = localStorage.getItem("refreshToken");
 
-        const refreshTokenTimeout = setTimeout(() => {
-          dispatch(logout());
+          if (refreshToken) {
+            console.log(">>>user: ", user);
+            const response = await axios.post(
+              "http://localhost:8080/api/auth/refreshtoken",
+              {
+                refreshToken,
+              }
+            );
+
+            if (response.status === 200) {
+              const newAccessToken = response.data.accessToken;
+              dispatch(updateToken(newAccessToken));
+            }
+          }
+        } catch (error) {
+          const status = error.response.status;
+          console.log(">>>status: ", status);
+          if (status === 403) {
+            showToast(
+              "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!",
+              "error"
+            );
+          }
+          dispatch(signOut());
           navigate("/jobportal/login");
-          console.log("Token expired");
-        }, refreshTime * 1000);
+        }
+      }, refreshTime * 1000);
 
-        return () => {
-          clearTimeout(refreshTokenTimeout);
-        };
+      return () => {
+        clearTimeout(refreshTokenTimeout);
       };
-      const refreshTokenTimeout = refreshAuthToken();
+    };
 
-      return () => clearTimeout(refreshTokenTimeout);
+    if (user) {
+      refreshAuthToken(user, dispatch, navigate);
     }
-  }, [user, dispatch, navigate]);
+  }, []);
 
   useEffect(() => {
     // if (blogStatus === "idle" || categoryStatus === "idle") {
@@ -62,7 +88,7 @@ const FullLayout = () => {
         await Promise.all([
           dispatch(fetchBlogs()).unwrap(),
           dispatch(fetchBlogCategory()).unwrap(),
-          dispatch(getUserByIDThunk(accessToken.id)),
+          // dispatch(getUserByIDThunk(user.sub)),
         ]);
         showToast("The data has been loaded successfully.");
       } catch (error) {
@@ -73,9 +99,9 @@ const FullLayout = () => {
     fetchData();
 
     // }
-  }, [dispatch]);
+  }, []);
 
-  if (!accessToken) {
+  if (!user) {
     return <Navigate to="/jobportal/login" />;
   }
 

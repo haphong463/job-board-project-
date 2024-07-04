@@ -15,6 +15,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -53,4 +56,31 @@ public class UserController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllUser(){
+        try {
+                List<User> userList = userService.findAll();
+                List<UserDTO> userDTOS = userList.stream().map(user -> modelMapper.map(user, UserDTO.class)).toList();
+                return ResponseEntity.ok(userDTOS);
+        }   catch(Exception e)  {
+                return ResponseEntity.internalServerError().body("Error load data: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username){
+        try {
+            User user = userService.findByUsername(username).orElse(null);
+            UserDTO userDTOS = modelMapper.map(user, UserDTO.class);
+            return ResponseEntity.ok(userDTOS);
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body("Error load data: " + e.getMessage());
+
+        }
+    }
+
+
+
+
 }
