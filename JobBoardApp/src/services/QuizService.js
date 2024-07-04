@@ -7,8 +7,10 @@ export const getQuizzes = () => {
 export const getQuizDetails = (quizId) => {
   return axiosRequest.get(`/quizzes/${quizId}`);
 };
-export const getQuizQuestions = (quizId) => {
-  return axiosRequest.get(`/quizzes/${quizId}/questions`);
+export const getQuizQuestions = (quizId, count = 10) => {
+  return axiosRequest.get(`/quizzes/${quizId}/questions`, {
+    params: { count }
+  });
 };
 
 export const submitQuiz = async (submission) => {

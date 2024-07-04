@@ -32,13 +32,24 @@ public class QuestionController {
     private QuestionService questionService;
     @PreAuthorize("permitAll()")
     @GetMapping("/{quizId}/questions")
-    public ResponseEntity<List<QuestionDTO>> getAllQuestionsByQuizId(@PathVariable Long quizId) {
+    public ResponseEntity<List<QuestionDTO>> getQuestionsByQuizId(
+            @PathVariable Long quizId,
+            @RequestParam(required = false) Integer count) {
+
         List<QuestionDTO> questions = questionService.getAllQuestions()
                 .stream()
                 .filter(question -> question.getQuizId().equals(quizId))
                 .collect(Collectors.toList());
+
+        if (count != null && count > 0 && count <= questions.size()) {
+            Collections.shuffle(questions);
+            questions = questions.stream().limit(count).collect(Collectors.toList());
+        }
+
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
+
+
     @PreAuthorize("permitAll()")
     @GetMapping("/{quizId}/questions/{questionId}")
     public ResponseEntity<QuestionDTO> getQuestionById(@PathVariable Long quizId, @PathVariable Long questionId) {
@@ -46,19 +57,7 @@ public class QuestionController {
         return question.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    @PreAuthorize("permitAll()")
-    @GetMapping("/{quizId}/random-questions")
-    public ResponseEntity<List<QuestionDTO>> getRandomQuestionsForQuiz(@PathVariable Long quizId, @RequestParam int count) {
-        List<QuestionDTO> allQuestions = questionService.getAllQuestions()
-                .stream()
-                .filter(question -> question.getQuizId().equals(quizId))
-                .collect(Collectors.toList());
 
-        Collections.shuffle(allQuestions);
-        List<QuestionDTO> randomQuestions = allQuestions.stream().limit(count).collect(Collectors.toList());
-
-        return new ResponseEntity<>(randomQuestions, HttpStatus.OK);
-    }
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{quizId}/questions")
     public ResponseEntity<QuestionDTO> createQuestion(

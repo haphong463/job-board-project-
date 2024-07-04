@@ -2,15 +2,15 @@ import axiosRequest from "../configs/axiosConfig";
 
 // Fetch quiz details
 
-export const fetchQuizDetails = async (quizId) => {
-    try {
-      const quizResponse = await axiosRequest.get(`/quizzes/${quizId}`);
-      const questionsResponse = await axiosRequest.get(`/quizzes/${quizId}/questions`);
-      return { quizTitle: quizResponse.data.title, questions: questionsResponse.data };
-    } catch (error) {
-      throw new Error(`Error fetching quiz details for quizId ${quizId}: ${error.message}`);
-    }
-  };
+export const fetchQuizDetails = async (quizId, count) => {
+  try {
+    const quizResponse = await axiosRequest.get(`/quizzes/${quizId}`);
+    const questionsResponse = await getQuizQuestions(quizId, count);
+    return { quizTitle: quizResponse.data.title, questions: questionsResponse.data };
+  } catch (error) {
+    throw new Error(`Error fetching quiz details for quizId ${quizId}: ${error.message}`);
+  }
+};
   
   export const submitQuiz = async (quizId, selectedAnswers) => {
     try {

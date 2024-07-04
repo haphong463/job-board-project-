@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "quiz_scores")
 @Getter
@@ -28,4 +30,10 @@ public class QuizScore {
     @Column(nullable = false)
     private double score;
 
+
+    private int attempts;
+
+    private boolean isLocked;
+
+    private LocalDateTime lockEndTime;
 }

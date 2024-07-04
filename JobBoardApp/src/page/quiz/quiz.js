@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
-import { fetchQuizzesThunk } from '../../features/quizSlice';
-
-import './Quiz.css'; 
+import { useSelector } from "react-redux";
+import './Quiz.css'; // Import CSS
 
 export const Quiz = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [attemptsInfo, setAttemptsInfo] = useState({});
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     const isAuthenticated = () => {
@@ -24,24 +24,60 @@ export const Quiz = () => {
       navigate('/login');
     } else {
       setLoggedIn(true);
-      const accessToken = localStorage.getItem('accessToken');
-      axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      })
-        .then(response => {
-          setQuizzes(response.data);
-        })
-        .catch(error => {
-          console.error("There was an error fetching the quizzes!", error);
-        });
+      fetchQuizzesAndAttempts();
+      const intervalId = setInterval(() => {
+        fetchQuizzesAndAttempts();
+      }, 10000); // Polling every 10 seconds
+
+      return () => clearInterval(intervalId);
     }
-  }, [navigate]);
+  }, [navigate, user.id]);
+
+  const fetchQuizzesAndAttempts = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    })
+      .then(response => {
+        setQuizzes(response.data);
+        response.data.forEach((quiz) => {
+          axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            },
+            params: {
+              userId: user.id
+            }
+          })
+          .then(response => {
+            setAttemptsInfo(prev => ({
+              ...prev,
+              [quiz.id]: response.data
+            }));
+          })
+          .catch(error => {
+            console.error("There was an error fetching the attempts info!", error);
+          });
+        });
+      })
+      .catch(error => {
+        console.error("There was an error fetching the quizzes!", error);
+      });
+  };
 
   const handleStartQuiz = (quiz) => {
-    setSelectedQuiz(quiz);
-    setOpen(true);
+    const accessToken = localStorage.getItem('accessToken');
+    const attemptsLeft = attemptsInfo[quiz.id]?.attemptsLeft || 0;
+    const timeLeft = attemptsInfo[quiz.id]?.timeLeft || 0;
+
+    if (attemptsLeft > 0 || timeLeft === 0) {
+      setSelectedQuiz(quiz);
+      setOpen(true);
+    } else {
+      alert(`You have reached the maximum number of attempts. Please wait for ${timeLeft} seconds to retake the quiz.`);
+    }
   };
 
   const handleClose = () => {
@@ -50,7 +86,30 @@ export const Quiz = () => {
   };
 
   const handleConfirmStart = () => {
-    navigate(`/quiz/${selectedQuiz.id}`);
+    const accessToken = localStorage.getItem('accessToken');
+    localStorage.removeItem(`questions_${selectedQuiz.id}`);
+    localStorage.removeItem(`sessionId_${selectedQuiz.id}`);
+    axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${selectedQuiz.id}/questions`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      },
+      params: {
+        count: 10
+      }
+    })
+    .then(response => {
+      const questions = response.data;
+      localStorage.setItem(`questions_${selectedQuiz.id}`, JSON.stringify(questions));
+      navigate(`/quiz/${selectedQuiz.id}`);
+    })
+    .catch(error => {
+      console.error("There was an error fetching the questions!", error);
+    });
+  };
+
+  const calculateNextAttemptDate = (seconds) => {
+    const nextAttemptDate = new Date(Date.now() + seconds * 1000);
+    return nextAttemptDate.toLocaleDateString('vi-VN');
   };
 
   if (!loggedIn) {
@@ -92,8 +151,13 @@ export const Quiz = () => {
                     <img src={quiz.imageUrl} alt={quiz.title} className="img-fluid mb-3" />
                     <h3>{quiz.title}</h3>
                     <p>{quiz.description}</p>
-
-                    <button className="btn btn-success" onClick={() => handleStartQuiz(quiz)}>Làm bài thi</button>
+                    {attemptsInfo[quiz.id]?.locked ? (
+                      <div className="alert alert-warning">
+                        Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào ngày {calculateNextAttemptDate(attemptsInfo[quiz.id]?.timeLeft)}.
+                      </div>
+                    ) : (
+                      <button className="btn btn-success" onClick={() => handleStartQuiz(quiz)}>Làm bài thi</button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -115,17 +179,21 @@ export const Quiz = () => {
                   <div className="custom-dialog-description">
                     <p>Mô tả bài đánh giá</p>
                     <p>{selectedQuiz.description}</p>
+                    <p>Số lần làm bài còn lại: {attemptsInfo[selectedQuiz.id]?.attemptsLeft}</p>
+                    {attemptsInfo[selectedQuiz.id]?.timeLeft > 0 && (
+                      <p>Thời gian chờ: {attemptsInfo[selectedQuiz.id]?.timeLeft} giây</p>
+                    )}
                   </div>
                 </DialogContentText>
               </>
             )}
           </DialogContent>
           <DialogActions className="custom-dialog-actions">
-            <Button onClick={handleClose} color="primary" className="custom-dialog-button">
-              Hủy bỏ
+            <Button onClick={handleClose} className="custom-dialog-button" color="primary">
+              Đóng
             </Button>
-            <Button onClick={handleConfirmStart} color="primary" className="custom-dialog-button">
-              Bắt đầu làm
+            <Button onClick={handleConfirmStart} className="custom-dialog-button" color="primary" autoFocus>
+              Bắt đầu làm bài
             </Button>
           </DialogActions>
         </Dialog>
@@ -133,3 +201,4 @@ export const Quiz = () => {
     </GlobalLayoutUser>
   );
 };
+  
