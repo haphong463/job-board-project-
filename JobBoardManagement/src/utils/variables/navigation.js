@@ -38,13 +38,7 @@ export const navigation = [
       {
         title: "Quiz and Questions",
         icon: "bi bi-question-circle",
-        children: [
-          {
-            title: "Quiz",
-            href: "/jobportal/quiz",
-            icon: "bi bi-question-circle",
-          },
-        ],
+        href: "/jobportal/quiz",
       },
       {
         title: "User",
