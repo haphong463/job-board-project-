@@ -324,9 +324,9 @@ public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSub
     double passingScore = 7.0;
     if (score < passingScore && quizScore.getAttempts() >= 3) {
         quizScore.setLocked(true);
-        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
+//        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
 
-//        quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
+        quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
     }
 
     quizScoreRepository.save(quizScore);
@@ -337,4 +337,15 @@ public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSub
 
     return ResponseEntity.ok(responseDTO);
 }
+
+
+    @PostMapping("/{quizId}/complete")
+    public ResponseEntity<Void> completeQuiz(@PathVariable Long quizId, @RequestBody QuizCompletionRequest request) {
+        try {
+            quizService.completeQuiz(quizId, request.getUserId());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
