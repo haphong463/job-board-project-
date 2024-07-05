@@ -19,4 +19,5 @@ public class UserDTO {
     private Gender gender;
     private String imageUrl;
     private String bio;
+    private Boolean verified;
 }

@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, User user, MultipartFile multipartFile) {
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
-            updateBlogDetails(existingUser, user);
+            updateUserDetails(existingUser, user);
             handleImageFile(existingUser, multipartFile, "update");
             return userRepository.save(existingUser);
         } else {
@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void updateBlogDetails(User existingBlog, User updatedBlog) {
+    private void updateUserDetails(User existingBlog, User updatedBlog) {
         existingBlog.setFirstName(updatedBlog.getFirstName());
         existingBlog.setLastName(updatedBlog.getLastName());
         existingBlog.setGender(updatedBlog.getGender());

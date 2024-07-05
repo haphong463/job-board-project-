@@ -5,6 +5,8 @@ import com.project4.JobBoardService.DTO.UserDTO;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.security.jwt.JwtUtils;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Null;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +35,7 @@ public class UserController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_EMPLOYER')")
     public ResponseEntity<?> updateUser(@PathVariable Long id,
-                                        @ModelAttribute UserDTO userDTO, @RequestParam("imageFile") MultipartFile file,
+                                        @ModelAttribute UserDTO userDTO, @RequestParam("imageFile") @Nullable MultipartFile file,
                                         @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             String authToken = token.replace("Bearer ", "");

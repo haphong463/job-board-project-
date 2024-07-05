@@ -28,7 +28,7 @@ public class User   {
     private Long id;
 
     @NotBlank
-    @Size(max = 20)
+    @Size(max = 50)
     private String username;
 
     @NotBlank
@@ -49,13 +49,14 @@ public class User   {
     private String resetToken;
     private boolean verified;
 
-    private boolean isOAuth;
 
     private String verificationCode;
 
     private String imageUrl;
     private String thumbnailUrl;
     private String bio;
+
+
 
 
     @ManyToMany(fetch = FetchType.LAZY)
