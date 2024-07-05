@@ -29,9 +29,10 @@ const Sidebar = () => {
 
     // setTimeout(() => {
     //   clearInterval(timer);
-    dispatch(signOut()).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
+    dispatch(signOut()).then(res => {
+      if(res.meta.requestStatus === 'fulfilled'){
         navigate("/jobportal/login");
+
       }
     });
     // }, 1000);

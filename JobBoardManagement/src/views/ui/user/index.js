@@ -8,6 +8,26 @@ const UserList = () => {
   const users = useSelector((state) => state.user.list);
   const columns = [
     {
+      name: "Image",
+      cell: (row) => (
+        <div
+          style={{
+            fontSize: "16px",
+          }}
+        >
+          <img
+            src={
+              row.imageUrl ? row.imageUrl : "https://i.sstatic.net/l60Hf.png"
+            }
+            className="rounded-circle"
+            width={50}
+            height={50}
+            alt={row.id}
+          />
+        </div>
+      ),
+    },
+    {
       name: "Username",
       selector: (row) => row.username,
       sortable: true,
@@ -49,6 +69,7 @@ const UserList = () => {
         </div>
       ),
     },
+
     // {
     //   name: "Posts",
     //   selector: (row) => row.blogCount,
@@ -78,9 +99,18 @@ const UserList = () => {
   useEffect(() => {
     dispatch(getUserThunk());
   }, []);
+
+  const customStyles = {
+    rows: {
+      style: {
+        margin: "15px 0", // Adjust the margin to create spacing between rows
+      },
+    },
+  };
+
   return (
     <div>
-      <DataTable columns={columns} data={users} />
+      <DataTable columns={columns} data={users} customStyles={customStyles} />
     </div>
   );
 };

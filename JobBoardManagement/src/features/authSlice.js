@@ -47,11 +47,9 @@ export const updateUserThunk = createAsyncThunk(
   async ({ formData, userId }, { rejectWithValue }) => {
     try {
       const res = await updateUserAsync(formData, userId);
-      if (res.error) {
-        return rejectWithValue(res.error);
-      }
       return res;
     } catch (error) {
+      console.log("error: ", error);
       return rejectWithValue(error.message);
     }
   }
@@ -76,7 +74,6 @@ export const getUserByIDThunk = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const res = await getUserByIDAsync(id);
-      console.log(res);
       return res;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -94,8 +91,9 @@ const initialState = {
   isVerified: true,
   verificationEmail: null,
   verificationMessage: null,
-  user: token && jwtDecode(token),
+  user: token ? jwtDecode(token) : null,
   location: "",
+  userEdit: null,
 };
 
 const authSlice = createSlice({
@@ -146,13 +144,19 @@ const authSlice = createSlice({
         }
       })
       .addCase(updateUserThunk.fulfilled, (state, action) => {
-        state.user = action.payload;
+        console.log(">>> fulfilled: ", action.payload);
+        state.userEdit = action.payload;
       })
       .addCase(updateUserThunk.rejected, (state, action) => {
+        console.log(">>> rejected: ", action.payload);
         state.error = action.payload;
       })
       .addCase(getUserByIDThunk.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.userEdit = action.payload;
+      })
+      .addCase(getUserByIDThunk.rejected, (state, action) => {
+        console.log(">>> rejected: ", action.payload);
+        state.error = action.payload;
       })
       .addCase(signOut.fulfilled, (state) => {
         state.user = null;

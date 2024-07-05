@@ -33,6 +33,9 @@ const FullLayout = () => {
   }, [location, dispatch]);
 
   useEffect(() => {
+    console.log("---------REFRESH TOKEN---------");
+    console.log(">>>user: ", user);
+
     const refreshAuthToken = (user, dispatch, navigate) => {
       const expiresIn = user?.exp || 0;
       const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -54,6 +57,7 @@ const FullLayout = () => {
 
             if (response.status === 200) {
               const newAccessToken = response.data.accessToken;
+
               dispatch(updateToken(newAccessToken));
             }
           }
@@ -79,16 +83,19 @@ const FullLayout = () => {
     if (user) {
       refreshAuthToken(user, dispatch, navigate);
     }
-  }, []);
+  }, [dispatch, localStorage.getItem("accessToken")]);
 
   useEffect(() => {
     // if (blogStatus === "idle" || categoryStatus === "idle") {
+
+    console.log(">>> user: ", user);
+
     const fetchData = async () => {
       try {
         await Promise.all([
           dispatch(fetchBlogs()).unwrap(),
           dispatch(fetchBlogCategory()).unwrap(),
-          // dispatch(getUserByIDThunk(user.sub)),
+          dispatch(getUserByIDThunk(user.sub)).unwrap(),
         ]);
         showToast("The data has been loaded successfully.");
       } catch (error) {

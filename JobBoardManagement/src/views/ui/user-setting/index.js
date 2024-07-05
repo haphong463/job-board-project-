@@ -19,6 +19,7 @@ import {
 import { getUserByIDThunk, updateUserThunk } from "../../../features/authSlice";
 import { createFormData } from "../../../utils/form-data/formDataUtil";
 import "./style.css";
+import showToast from "../../../utils/functions/showToast";
 const schema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
   lastName: yup.string().required("Last name is required"),
@@ -34,6 +35,7 @@ const schema = yup.object().shape({
 
 const User = () => {
   const user = useSelector((state) => state.auth.user);
+  const userEdit = useSelector((state) => state.auth.userEdit);
   const dispatch = useDispatch();
   const {
     control,
@@ -42,11 +44,18 @@ const User = () => {
     setValue,
   } = useForm({
     resolver: yupResolver(schema),
+    values: {
+      firstName: userEdit?.firstName,
+      lastName: userEdit?.lastName,
+      bio: userEdit?.bio,
+      gender: userEdit?.gender,
+      imageFile: "",
+    },
     defaultValues: {
-      firstName: user?.firstName,
-      lastName: user?.lastName,
-      bio: user?.bio,
-      gender: user?.gender,
+      firstName: "",
+      lastName: "",
+      bio: "",
+      gender: "",
       imageFile: "",
     },
   });
@@ -65,10 +74,11 @@ const User = () => {
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!userEdit) {
       dispatch(getUserByIDThunk(user.sub)).then((res) => {
         const reqStatus = res.meta.requestStatus;
         const payload = res.payload;
+        console.log(">>> payload:", payload);
         if (reqStatus === "fulfilled") {
           setValue("bio", payload.bio);
           setValue("firstName", payload.firstName);
@@ -77,7 +87,7 @@ const User = () => {
         }
       });
     }
-  }, [user]);
+  }, [userEdit]);
 
   return (
     user && (
@@ -87,7 +97,7 @@ const User = () => {
             <CardBody className="text-center">
               <img
                 alt="Avatar"
-                src={user?.imageUrl}
+                src={userEdit?.imageUrl}
                 className="rounded-circle img-fluid"
                 style={{ width: "150px", height: "150px" }}
               />
@@ -95,7 +105,7 @@ const User = () => {
                 {`${user?.firstName} ${user?.lastName}`}
               </CardTitle>
               <CardText className="text-truncate-multiline">
-                {user?.bio}
+                {userEdit?.bio}
               </CardText>
             </CardBody>
           </Card>
