@@ -21,6 +21,7 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    @Column(length = 1000) // Set the length to 1000 characters or any length you need
     private String description;
 
     private String imageUrl;
@@ -33,6 +34,11 @@ public class Quiz {
     private User user;
 public Quiz(Long id) {
         this.id = id;
+    }
+    private int numberOfUsers; // Add this field
+
+    public void incrementNumberOfUsers() {
+        this.numberOfUsers++;
     }
 }
 

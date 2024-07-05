@@ -1,12 +1,12 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuestionSubmissionDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Question;
 import com.project4.JobBoardService.Entity.Quiz;
-import com.project4.JobBoardService.Entity.QuizScore;
 import com.project4.JobBoardService.Repository.QuestionRepository;
 import com.project4.JobBoardService.Repository.QuizRepository;
 import com.project4.JobBoardService.Repository.QuizScoreRepository;
@@ -14,11 +14,6 @@ import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuizService;
 import com.project4.JobBoardService.Util.FileUtils;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -178,5 +173,12 @@ public class QuizServiceImpl implements QuizService {
     }
 
 
+    @Override
+    public void completeQuiz(Long quizId, Long userId) throws ResourceNotFoundException {
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+        quiz.incrementNumberOfUsers();
+        quizRepository.save(quiz);
+        // Add logic to save the user's completion if needed
+    }
 
 }

@@ -18,8 +18,8 @@ import { fetchQuizzesAsync, removeQuiz } from '../../../features/quizSlice';
 import FormQuiz from './FormQuiz';
 import FormQuestion from './FormQuestion';
 import axios from 'axios';
-import axiosRequest from '../../../configs/axiosConfig';
-
+// import axiosRequest from '../../../configs/axiosConfig';
+import './quiz.css';
 const Quiz = ({ quizId }) => {
   const dispatch = useDispatch();
   const quizzes = useSelector((state) => state.quizzes.quizzes || []);
@@ -163,6 +163,11 @@ const Quiz = ({ quizId }) => {
       name: 'Description',
       selector: (row) => row.description,
       sortable: true,
+      cell: (row) => (
+        <div className="description-cell">
+          {row.description}
+        </div>
+      ),
     },
     {
       name: 'Actions',

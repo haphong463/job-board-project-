@@ -20,5 +20,6 @@ public class QuizDTO {
     private String thumbnailUrl;
 
     private List<QuestionDTO> questions;
+    private int numberOfUsers; // Add this field
 
 }

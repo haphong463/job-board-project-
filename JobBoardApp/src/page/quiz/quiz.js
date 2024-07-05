@@ -107,6 +107,23 @@ export const Quiz = () => {
     });
   };
 
+  const handleQuizCompletion = (quizId) => {
+    const accessToken = localStorage.getItem('accessToken');
+    axios.post(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quizId}/complete`, {
+      userId: user.id
+    }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    })
+    .then(response => {
+      fetchQuizzesAndAttempts(); // Refresh quizzes data
+    })
+    .catch(error => {
+      console.error("There was an error completing the quiz!", error);
+    });
+  };
+
   const calculateNextAttemptDate = (seconds) => {
     const nextAttemptDate = new Date(Date.now() + seconds * 1000);
     return nextAttemptDate.toLocaleDateString('vi-VN');
@@ -150,7 +167,10 @@ export const Quiz = () => {
                   <div className="quiz-card border rounded p-4">
                     <img src={quiz.imageUrl} alt={quiz.title} className="img-fluid mb-3" />
                     <h3>{quiz.title}</h3>
-                    <p>{quiz.description}</p>
+                    <div className="quiz-details">
+                      <div className="quiz-level">Trình độ: Trung bình</div>
+                      <div className="quiz-candidates">{quiz.numberOfUsers || 0}+ ứng viên</div>
+                    </div>
                     {attemptsInfo[quiz.id]?.locked ? (
                       <div className="alert alert-warning">
                         Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào ngày {calculateNextAttemptDate(attemptsInfo[quiz.id]?.timeLeft)}.
@@ -172,9 +192,23 @@ export const Quiz = () => {
               <>
                 <DialogContentText>
                   <h2>{selectedQuiz.title}</h2>
-                  <div>
-                    <p>Trình độ: Trung bình</p>
-                    <p>10 câu hỏi nhiều đáp án</p>
+                  <div className="quiz-info">
+                    <div className="info-item">
+                      <i className="fas fa-chart-bar"></i>
+                      <p>Trình độ: Trung bình</p>
+                    </div>
+                    <div className="info-item">
+                      <i className="fas fa-question"></i>
+                      <p>10 câu hỏi nhiều đáp án</p>
+                    </div>
+                    <div className="info-item">
+                      <i className="fas fa-clock"></i>
+                      <p>10 phút làm bài</p>
+                    </div>
+                    <div className="info-item">
+                      <i className="fas fa-users"></i>
+                      <p>{selectedQuiz.numberOfUsers || 0}+ Số lần ứng viên đã làm bài đánh giá này</p>
+                    </div>
                   </div>
                   <div className="custom-dialog-description">
                     <p>Mô tả bài đánh giá</p>
@@ -192,7 +226,7 @@ export const Quiz = () => {
             <Button onClick={handleClose} className="custom-dialog-button" color="primary">
               Đóng
             </Button>
-            <Button onClick={handleConfirmStart} className="custom-dialog-button" color="primary" autoFocus>
+            <Button onClick={() => {handleConfirmStart(); handleQuizCompletion(selectedQuiz.id);}} className="custom-dialog-button" color="primary" autoFocus>
               Bắt đầu làm bài
             </Button>
           </DialogActions>
@@ -201,4 +235,3 @@ export const Quiz = () => {
     </GlobalLayoutUser>
   );
 };
-  

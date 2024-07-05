@@ -1,62 +1,136 @@
 .custom-dialog {
   max-width: 600px;
-  width: 100%;
+  margin: auto;
 }
 
 .custom-dialog-title {
+  text-align: center;
   font-size: 24px;
   font-weight: bold;
-  text-align: center;
-  padding-bottom: 0;
+  color: #333;
 }
 
 .custom-dialog-content {
-  text-align: center;
+  padding: 20px;
 }
 
 .custom-dialog-content h2 {
+  text-align: center;
+  font-size: 22px;
   margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: bold;
 }
 
-.custom-dialog-content div {
+.quiz-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f0fdf4;
+  padding: 10px;
+  border-radius: 10px;
+  width: 24%;
+}
+
+.info-item i {
+  font-size: 24px;
+  color: #34d399;
+  margin-bottom: 10px;
+}
+
+.info-item p {
+  font-size: 14px;
+  text-align: center;
+  color: #333;
+  margin: 0;
+}
+
+.custom-dialog-description {
+  background-color: #f0fdf4;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.custom-dialog-description p {
+  margin: 5px 0;
+}
+
+.custom-dialog-actions {
+  justify-content: center;
+  padding: 20px;
+}
+
+.custom-dialog-button {
+  font-size: 16px;
+  font-weight: bold;
+}
+.quiz-card {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.quiz-card img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.quiz-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.quiz-details {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
 }
 
-.custom-dialog-content div p {
-  margin: 0;
+.quiz-level, .quiz-candidates {
+  font-size: 1rem;
+  color: #555;
 }
 
-.custom-dialog-actions {
+.btn-success {
+  background-color: #28a745;
+  border: none;
+}
+
+.custom-dialog {
+  width: 100%;
+}
+
+.custom-dialog-title {
+  font-weight: bold;
+}
+
+.custom-dialog-content .quiz-info {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.custom-dialog-button {
-  margin: 0 10px;
+.custom-dialog-content .info-item {
+  flex: 1 1 50%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.custom-dialog-content .info-item i {
+  font-size: 1.5rem;
+  margin-right: 10px;
 }
 
 .custom-dialog-description {
-  text-align: left;
   margin-top: 20px;
-}
-
-.custom-dialog-description p {
-  margin: 0;
-}
-
-.quiz-card {
-  position: relative;
-}
-
-.alert {
-  margin-top: 10px;
-  padding: 10px;
-  color: #856404;
-  background-color: #fff3cd;
-  border-color: #ffeeba;
-  border-radius: 5px;
 }
