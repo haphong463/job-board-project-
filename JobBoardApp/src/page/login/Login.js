@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, NavLink } from "react-router-dom";
+import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import {
   resetVerificationMessage,
   signInOAuth2,
@@ -21,6 +21,7 @@ export const Login = () => {
   );
   const status = useSelector((state) => state.auth.status);
   const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   console.log(">>> show password: ", showPassword);
@@ -30,7 +31,11 @@ export const Login = () => {
 
   const handleSuccess = async (credentialResponse) => {
     const credential = credentialResponse.credential;
-    dispatch(signInOAuth2(credential));
+    dispatch(signInOAuth2(credential)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/");
+      }
+    });
   };
 
   useEffect(() => {
