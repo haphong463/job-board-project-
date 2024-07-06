@@ -53,8 +53,8 @@ public class CertificateGenerator {
             Document document = new Document(pdf, PageSize.A4);
 
 
-            String fontPath = "uploads/certificate/MartiniThaiNeueSlabV2-Light.otf";
-            PdfFont font = PdfFontFactory.createFont();
+            String fontPath = "uploads/certificate/DejaVuSansCondensed.ttf";
+            PdfFont font = PdfFontFactory.createFont(fontPath, PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
 
             Color customColor = new DeviceRgb(92, 180, 31);
 
