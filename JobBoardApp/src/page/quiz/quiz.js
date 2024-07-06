@@ -168,8 +168,7 @@ export const Quiz = () => {
                     <img src={quiz.imageUrl} alt={quiz.title} className="img-fluid mb-3" />
                     <h3>{quiz.title}</h3>
                     <div className="quiz-details">
-                      <div className="quiz-level">Trình độ: Trung bình</div>
-                      <div className="quiz-candidates">{quiz.numberOfUsers || 0}+ ứng viên</div>
+                      <div className="quiz-candidates">{quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi </div>
                     </div>
                     {attemptsInfo[quiz.id]?.locked ? (
                       <div className="alert alert-warning">
@@ -191,11 +190,10 @@ export const Quiz = () => {
             {selectedQuiz && (
               <>
                 <DialogContentText>
-                  <h2>{selectedQuiz.title}</h2>
                   <div className="quiz-info">
-                    <div className="info-item">
-                      <i className="fas fa-chart-bar"></i>
-                      <p>Trình độ: Trung bình</p>
+                  <div className="info-item">
+                      <i className="fas fa-book"></i>
+                      <p>Chủ đề: {selectedQuiz.title}</p>
                     </div>
                     <div className="info-item">
                       <i className="fas fa-question"></i>

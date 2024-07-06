@@ -65,7 +65,6 @@ dependencies {
 	implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-logging
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging', version: '3.3.0'
-
 // https://mvnrepository.com/artifact/com.itextpdf/itextpdf
 	implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.4'
 // https://mvnrepository.com/artifact/com.google.code.gson/gson
@@ -74,7 +73,14 @@ dependencies {
 	implementation group: 'org.apache.poi', name: 'poi', version: '5.2.5'
 // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
 	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.5'
-
+// https://mvnrepository.com/artifact/com.itextpdf/itext7-core
+	implementation group: 'com.itextpdf', name: 'itext7-core', version: '8.0.4', ext: 'pom'
+// https://mvnrepository.com/artifact/com.itextpdf/kernel
+	implementation group: 'com.itextpdf', name: 'kernel', version: '8.0.4'
+// https://mvnrepository.com/artifact/com.itextpdf/layout
+	implementation group: 'com.itextpdf', name: 'layout', version: '8.0.4'
+// https://mvnrepository.com/artifact/com.itextpdf/io
+	implementation group: 'com.itextpdf', name: 'io', version: '8.0.4'
 
 
 }

@@ -63,7 +63,7 @@ export function GlobalNavbar() {
       <div className="container-fluid">
         <div className="row align-items-center">
           <div className="site-logo col-6">
-            <NavLink to="/">JobBoard</NavLink>
+            <NavLink to="/">JobGrove </NavLink>
           </div>
 
           <nav className="mx-auto site-navigation">
