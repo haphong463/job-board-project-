@@ -43,9 +43,9 @@ export const fetchAllBlog = createAsyncThunk(
 );
 export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
-  async ({ query, type }, { rejectWithValue }) => {
+  async ({ query, page, size }, { rejectWithValue }) => {
     try {
-      const response = await getAllBlogFilter({ query, type });
+      const response = await getAllBlogFilter(query, page, size);
       return response;
     } catch (error) {
       console.log(error);
@@ -64,7 +64,8 @@ const blogSlice = createSlice({
     error: null,
     categories: [],
     author: null,
-    lastUpdated: null, // Thêm trường lastUpdated vào initialState
+    lastUpdated: null,
+    totalPages: 0,
   },
   reducers: {
     addBlogBySocket: (state, action) => {
@@ -101,7 +102,9 @@ const blogSlice = createSlice({
         state.status = "loading";
       })
       .addCase(fetchAllBlog.fulfilled, (state, action) => {
-        state.blogs = action.payload;
+        console.log(">>> payload: ", action.payload);
+        state.blogs = action.payload.content;
+        state.totalPages = action.payload.totalPages;
         state.status = "succeeded";
 
         state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
@@ -115,6 +118,7 @@ const blogSlice = createSlice({
       })
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
         state.status = "succeeded";
+        3;
         state.categories = action.payload.slice(0, 3);
         state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
       })
@@ -127,7 +131,9 @@ const blogSlice = createSlice({
       })
       .addCase(fetchBlogs.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.blogsFilter = action.payload;
+        console.log(">>>filter: ", action.payload);
+        state.blogsFilter = action.payload.content;
+        state.totalPages = action.payload.totalPages;
       })
       .addCase(fetchBlogs.rejected, (state, action) => {
         state.status = "failed";
