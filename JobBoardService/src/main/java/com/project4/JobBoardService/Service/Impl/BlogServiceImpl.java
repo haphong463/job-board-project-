@@ -1,10 +1,6 @@
 package com.project4.JobBoardService.Service.Impl;
 
-import com.project4.JobBoardService.DTO.BlogDTO;
-import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
-import com.project4.JobBoardService.Entity.BlogCategory;
-import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Repository.BlogRepository;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Util.FileUtils;
@@ -17,11 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Service
 public class BlogServiceImpl implements BlogService {
@@ -106,8 +99,14 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public List<Blog> searchBlogs(String query, String type) {
-        return blogRepository.searchByTypeAndQuery(type, query);
+        return blogRepository.searchByQuery(type, query);
     }
+
+    @Override
+    public Page<Blog> searchBlogs(String query, Pageable pageable) {
+        return blogRepository.searchByQuery(query, pageable);
+    }
+
     private void deleteImageFile(Blog blog) {
         String imageUrl = blog.getImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {

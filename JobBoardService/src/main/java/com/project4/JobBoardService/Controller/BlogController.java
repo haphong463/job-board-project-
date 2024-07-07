@@ -8,6 +8,7 @@ import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Service.UserService;
+import com.project4.JobBoardService.payload.PaginatedResponse;
 import jakarta.annotation.Nullable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,16 +49,24 @@ public class BlogController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<List<BlogResponseDTO>> searchBlogs(
+    public ResponseEntity<?> searchBlogs(
             @RequestParam String query,
-            @RequestParam @Nullable String type
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        List<Blog> blogsPage = blogService.searchBlogs(query, type);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Blog> blogsPage = blogService.searchBlogs(query, pageable);
         List<BlogResponseDTO> blogResponseDTOs = blogsPage.stream()
                 .map(blog -> modelMapper.map(blog, BlogResponseDTO.class))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(blogResponseDTOs);
+        PaginatedResponse<BlogResponseDTO> response = new PaginatedResponse<>();
+        response.setContent(blogResponseDTOs);
+        response.setCurrentPage(blogsPage.getNumber());
+        response.setTotalPages(blogsPage.getTotalPages());
+        response.setTotalItems(blogsPage.getTotalElements());
+
+        return ResponseEntity.ok(response);
     }
 
 

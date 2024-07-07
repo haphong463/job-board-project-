@@ -1,12 +1,15 @@
 package com.project4.JobBoardService.Service.Impl;
 
 
-import com.project4.JobBoardService.Entity.Blog;
+
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.Util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,8 +49,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAll() {
-        return userRepository.findAll();
+    public Page<User> getUsersWithUserRole(ERole roleName, String query, Pageable pageable) {
+        return userRepository.searchByRoleAndQuery(roleName, query, pageable);
+    }
+
+
+    @Override
+    public User updateUserEnableStatus(Long id, Boolean isEnabled) {
+        User existingUser = userRepository.findById(id).orElse(null);
+        if (existingUser != null) {
+                existingUser.setIsEnabled(isEnabled);
+            return userRepository.save(existingUser);
+        } else {
+            logger.warning("Blog not found: " + id);
+            return null;
+        }
     }
 
 

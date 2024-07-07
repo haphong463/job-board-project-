@@ -20,4 +20,5 @@ public interface BlogService {
     void deleteBlog(Long id);
     Blog getBlogBySlug(String slug);
     List<Blog> searchBlogs(String query, String type);//    int getCommentCount();
+    Page<Blog> searchBlogs(String query, Pageable pageable);
 }

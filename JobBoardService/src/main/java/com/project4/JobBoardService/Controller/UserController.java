@@ -1,14 +1,18 @@
 package com.project4.JobBoardService.Controller;
 
-import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.UserDTO;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Service.UserService;
+import com.project4.JobBoardService.payload.PaginatedResponse;
+import com.project4.JobBoardService.payload.UserResponse;
 import com.project4.JobBoardService.security.jwt.JwtUtils;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Null;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -59,12 +62,22 @@ public class UserController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAllUser(){
+    @GetMapping("/search")
+    public ResponseEntity<?> getAllUser(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
         try {
-                List<User> userList = userService.findAll();
-                List<UserDTO> userDTOS = userList.stream().map(user -> modelMapper.map(user, UserDTO.class)).toList();
-                return ResponseEntity.ok(userDTOS);
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<User> userList = userService.getUsersWithUserRole(ERole.ROLE_USER, query, pageable);
+            List<UserDTO> userDTOS = userList.stream().map(user -> modelMapper.map(user, UserDTO.class)).toList();
+            PaginatedResponse<UserDTO> response = new PaginatedResponse<>();
+            response.setContent(userDTOS);
+            response.setCurrentPage(userList.getNumber());
+            response.setTotalPages(userList.getTotalPages());
+            response.setTotalItems(userList.getTotalElements());
+            return ResponseEntity.ok(response);
         }   catch(Exception e)  {
                 return ResponseEntity.internalServerError().body("Error load data: " + e.getMessage());
         }
@@ -79,6 +92,21 @@ public class UserController {
         }catch(Exception e){
             return ResponseEntity.internalServerError().body("Error load data: " + e.getMessage());
 
+        }
+    }
+
+    @PutMapping("/status/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    public ResponseEntity<?> updateUserEnableStatus(@PathVariable Long id, @RequestBody  Boolean isEnabled){
+        try {
+            User updateUser = userService.updateUserEnableStatus(id, isEnabled);
+            if(updateUser == null) return ResponseEntity.notFound().build();
+
+            UserDTO userDTO = modelMapper.map(updateUser, UserDTO.class);
+
+            return ResponseEntity.ok(userDTO);
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
 
