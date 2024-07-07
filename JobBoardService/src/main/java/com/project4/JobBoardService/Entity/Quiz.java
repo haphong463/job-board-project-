@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "quizzes")
@@ -32,6 +34,8 @@ public class Quiz {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+
 public Quiz(Long id) {
         this.id = id;
     }
@@ -40,5 +44,10 @@ public Quiz(Long id) {
     public void incrementNumberOfUsers() {
         this.numberOfUsers++;
     }
+
+
+    @ManyToMany(mappedBy = "completedQuizzes")
+    private Set<User> usersCompleted = new HashSet<>();
+
 }
 

@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 import java.util.*;
 
 @Entity
@@ -83,4 +82,29 @@ public class User   {
         public User(Long id) {
         this.id = id;
     }
+
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_completed_quizzes",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "quiz_id")
+    )
+    private Set<Quiz> completedQuizzes = new HashSet<>();
+
+
+    public Set<Quiz> getCompletedQuizzes() {
+        return completedQuizzes;
+    }
+
+    public void setCompletedQuizzes(Set<Quiz> completedQuizzes) {
+        this.completedQuizzes = completedQuizzes;
+    }
+
+    public void addCompletedQuiz(Quiz quiz) {
+        this.completedQuizzes.add(quiz);
+    }
 }
+
+

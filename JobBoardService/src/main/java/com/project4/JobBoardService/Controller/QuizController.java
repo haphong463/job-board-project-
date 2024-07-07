@@ -407,6 +407,8 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
             try {
                 File certificate = CertificateGenerator.generateCertificate(user.getUsername(), quiz.getTitle(), user.getLastName(), user.getFirstName());
                 certificateGenerator.sendCertificateEmail(user.getEmail(), user.getUsername(), certificate);
+                user.addCompletedQuiz(quiz);
+                userRepository.save(user);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -419,6 +421,14 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
         return ResponseEntity.ok(responseDTO);
     }
 
+    @GetMapping("/{userId}/completed-quizzes")
+    public ResponseEntity<List<Long>> getCompletedQuizzes(@PathVariable Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        List<Long> completedQuizIds = user.getCompletedQuizzes().stream()
+                .map(Quiz::getId)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(completedQuizIds, HttpStatus.OK);
 
+    }
 
 }
