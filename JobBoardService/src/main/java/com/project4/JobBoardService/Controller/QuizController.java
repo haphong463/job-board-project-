@@ -9,9 +9,10 @@ import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Repository.QuizRepository;
 import com.project4.JobBoardService.Repository.QuizScoreRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
+import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuestionService;
 import com.project4.JobBoardService.Service.QuizService;
-import jakarta.servlet.http.HttpServletResponse;
+import com.project4.JobBoardService.Util.Variables.CertificateGenerator;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -42,8 +44,12 @@ import java.util.stream.Collectors;
 public class QuizController {
 
     @Autowired
+    private CertificateGenerator certificateGenerator;
+    @Autowired
     private QuizService quizService;
 
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -61,18 +67,21 @@ public class QuizController {
         this.quizService = quizService;
         this.modelMapper = modelMapper;
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/createQuiz")
-    public ResponseEntity<QuizDTO> createQuiz(@RequestParam("title") String title,
-                                              @RequestParam("description") String description,
 
-                                              @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+    @PostMapping("/createQuiz")
+    public ResponseEntity<QuizDTO> createQuiz(
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+
+
+
+        // Continue with your processing logic
         QuizDTO quizDto = new QuizDTO();
         quizDto.setTitle(title);
         quizDto.setDescription(description);
 
         Quiz quiz = modelMapper.map(quizDto, Quiz.class);
-
         Quiz createdQuiz = quizService.createQuiz(quiz, imageFile);
 
         QuizDTO responseDto = modelMapper.map(createdQuiz, QuizDTO.class);
@@ -104,7 +113,6 @@ public class QuizController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<QuizDTO> updateQuiz(@PathVariable Long id,
                                               @RequestParam("quiz") String quizStr,
@@ -118,7 +126,6 @@ public class QuizController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
         quizService.deleteQuiz(id);
@@ -283,61 +290,61 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
     return ResponseEntity.ok(responseDTO);
 }
 //
-@PreAuthorize("permitAll()")
-@PostMapping("/submit")
-public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
-    User user = userRepository.findById(quizSubmission.getUserId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
-    Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
-            .orElseThrow(() -> new RuntimeException("Quiz not found"));
-
-    QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
-
-    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-    }
-
-    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isBefore(LocalDateTime.now())) {
-        quizScore.setLocked(false);
-        quizScore.setLockEndTime(null);
-        quizScoreRepository.save(quizScore);
-    }
-
-    List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
-    int correctAnswersCount = (int) results.stream()
-            .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
-            .count();
-    double totalQuestions = results.size();
-    double scorePerQuestion = totalQuestions == 20 ? 0.5 : totalQuestions == 15 ? 0.67 : 1.0;
-    double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
-
-    if (quizScore == null) {
-        quizScore = new QuizScore();
-        quizScore.setUser(user);
-        quizScore.setQuiz(quiz);
-        quizScore.setAttempts(0);
-    }
-
-    quizScore.setScore(score);
-    quizScore.setAttempts(quizScore.getAttempts() + 1);
-
-    double passingScore = 7.0;
-    if (score < passingScore && quizScore.getAttempts() >= 3) {
-        quizScore.setLocked(true);
-//        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
-
-        quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
-    }
-
-    quizScoreRepository.save(quizScore);
-
-    QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
-    responseDTO.setResults(results);
-    responseDTO.setScore(score);
-
-    return ResponseEntity.ok(responseDTO);
-}
-
+//@PreAuthorize("permitAll()")
+//@PostMapping("/submit")
+//public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+//    User user = userRepository.findById(quizSubmission.getUserId())
+//            .orElseThrow(() -> new RuntimeException("User not found"));
+//    Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
+//            .orElseThrow(() -> new RuntimeException("Quiz not found"));
+//
+//    QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
+//
+//    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+//    }
+//
+//    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isBefore(LocalDateTime.now())) {
+//        quizScore.setLocked(false);
+//        quizScore.setLockEndTime(null);
+//        quizScoreRepository.save(quizScore);
+//    }
+//
+//    List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
+//    int correctAnswersCount = (int) results.stream()
+//            .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
+//            .count();
+//    double totalQuestions = results.size();
+//    double scorePerQuestion = totalQuestions == 20 ? 0.5 : totalQuestions == 15 ? 0.67 : 1.0;
+//    double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
+//
+//    if (quizScore == null) {
+//        quizScore = new QuizScore();
+//        quizScore.setUser(user);
+//        quizScore.setQuiz(quiz);
+//        quizScore.setAttempts(0);
+//    }
+//
+//    quizScore.setScore(score);
+//    quizScore.setAttempts(quizScore.getAttempts() + 1);
+//
+//    double passingScore = 7.0;
+//    if (score < passingScore && quizScore.getAttempts() >= 3) {
+//        quizScore.setLocked(true);
+////        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
+//
+//        quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
+//    }
+//
+//    quizScoreRepository.save(quizScore);
+//
+//    QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
+//    responseDTO.setResults(results);
+//    responseDTO.setScore(score);
+//
+//    return ResponseEntity.ok(responseDTO);
+//}
+//
 
     @PostMapping("/{quizId}/complete")
     public ResponseEntity<Void> completeQuiz(@PathVariable Long quizId, @RequestBody QuizCompletionRequest request) {
@@ -348,4 +355,70 @@ public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSub
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PostMapping("/submit")
+    public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+        User user = userRepository.findById(quizSubmission.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+        QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
+
+        if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isBefore(LocalDateTime.now())) {
+            quizScore.setLocked(false);
+            quizScore.setLockEndTime(null);
+            quizScoreRepository.save(quizScore);
+        }
+
+        List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
+        int correctAnswersCount = (int) results.stream()
+                .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
+                .count();
+        double totalQuestions = results.size();
+        double scorePerQuestion = totalQuestions == 20 ? 0.5 : totalQuestions == 15 ? 0.67 : 1.0;
+        double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
+
+        if (quizScore == null) {
+            quizScore = new QuizScore();
+            quizScore.setUser(user);
+            quizScore.setQuiz(quiz);
+            quizScore.setAttempts(0);
+        }
+
+        quizScore.setScore(score);
+        quizScore.setAttempts(quizScore.getAttempts() + 1);
+
+        double passingScore = 7.0;
+        if (score < passingScore && quizScore.getAttempts() >= 3) {
+            quizScore.setLocked(true);
+//        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
+
+            quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
+        }
+
+        quizScoreRepository.save(quizScore);
+
+        if (score > 8) {
+            try {
+                File certificate = CertificateGenerator.generateCertificate(user.getUsername(), quiz.getTitle(), user.getLastName(), user.getFirstName());
+                certificateGenerator.sendCertificateEmail(user.getEmail(), user.getUsername(), certificate);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
+        responseDTO.setResults(results);
+        responseDTO.setScore(score);
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+
+
 }

@@ -5,6 +5,8 @@ import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayo
 import { fetchQuizResultsThunk } from "../../features/quizSlice";
 import "./QuizResult.css";
 import axios from "axios";
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 const QuizResult = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -89,11 +91,19 @@ const QuizResult = () => {
           </div>
         </section>
         <div className="result-container">
-          <h2>Kết quả bài thi</h2>
+        <h2>Kết quả bài thi</h2>
           <div className="result-score">
             <p>Câu trả lời đúng: {correctAnswersCount} / {totalQuestions}</p>
             <p>{score} Điểm</p>
-            <p>{score < 50 ? "Bạn cần học thêm nhiều hơn!" : "Tốt lắm, tiếp tục phát huy!"}</p>
+            <p>{score < 5 ? "Bạn cần học thêm nhiều hơn!" : "Tốt lắm, tiếp tục phát huy!"}</p>
+            {score > 8 && (
+              <div className="congratulations">
+                <p>Chúc mừng! Bạn đã hoàn thành xuất sắc.</p>
+                <i className="fa fa-smile-o" aria-hidden="true" style={{fontSize: '24px', color: 'green'}}></i>
+                <i className="fa fa-check-circle" aria-hidden="true" style={{fontSize: '24px', color: 'green'}}></i>
+                <p>Chứng chỉ sẽ được gửi về email của bạn.</p>
+              </div>
+            )}
           </div>
           <div className="result-actions">
             {/* <button className="btn btn-primary" onClick={handleRetry}>Làm lại bài đánh giá</button> */}

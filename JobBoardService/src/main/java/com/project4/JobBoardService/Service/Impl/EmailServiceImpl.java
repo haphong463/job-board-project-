@@ -126,4 +126,22 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Async
+    @Override
+    public void sendCertificateEmail(String toEmail, String username, File certificate) {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(toEmail);
+            helper.setSubject("Congratulations! Here is your Certificate");
+            helper.setText("Dear " + username + ",\n\nCongratulations on your excellent performance! Please find your certificate attached.\n\nBest regards,\nQuiz Team");
+
+            FileDataSource fileDataSource = new FileDataSource(certificate);
+            helper.addAttachment("Certificate.pdf", fileDataSource);
+
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
 }
