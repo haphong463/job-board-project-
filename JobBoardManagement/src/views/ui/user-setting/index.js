@@ -102,7 +102,7 @@ const User = () => {
                 style={{ width: "150px", height: "150px" }}
               />
               <CardTitle tag="h5" className="mt-3">
-                {`${user?.firstName} ${user?.lastName}`}
+                {`${userEdit?.firstName} ${userEdit?.lastName}`}
               </CardTitle>
               <CardText className="text-truncate-multiline">
                 {userEdit?.bio}

@@ -55,6 +55,7 @@ export const updateUserThunk = createAsyncThunk(
   }
 );
 
+
 export const signOut = createAsyncThunk(
   "auth/signOut",
   async (_, { rejectWithValue }) => {

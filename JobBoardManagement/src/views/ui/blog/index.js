@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import DataTable from "react-data-table-component";
 import {
   Row,
@@ -8,7 +8,6 @@ import {
   InputGroup,
   InputGroupText,
   Input,
-  Alert,
   Badge,
   Dropdown,
   DropdownToggle,
@@ -17,15 +16,28 @@ import {
 } from "reactstrap";
 import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
-import moment from "moment/moment";
-import { fetchBlogCategory } from "../../../features/blogCategorySlice";
-import showToast from "../../../utils/functions/showToast";
+import { searchBlogs, deleteBlog } from "../../../features/blogSlice";
+import debounce from "lodash.debounce";
 import "./style.css";
+
 export function Blog(props) {
   const dispatch = useDispatch();
-  const blogData = useSelector((state) => state.blogs.blogs) || [];
+  const blogData = useSelector((state) => state.blogs.blogs);
+  const totalPages = useSelector((state) => state.blogs.totalPages);
+
   const [dropdownOpen, setDropdownOpen] = useState({});
+  
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [isEdit, setIsEdit] = useState(null);
+
+  useEffect(() => {
+    dispatch(
+      searchBlogs({ query: searchTerm, page: currentPage, size: pageSize })
+    );
+  }, [dispatch, currentPage, pageSize]);
 
   const toggleDropdown = (id) => {
     setDropdownOpen((prevState) => ({
@@ -33,8 +45,6 @@ export function Blog(props) {
       [id]: !prevState[id],
     }));
   };
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isEdit, setIsEdit] = useState(null);
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this blog?")) {
@@ -49,9 +59,22 @@ export function Blog(props) {
     }
   };
 
-  const filteredBlogs = blogData.filter((blog) =>
-    blog.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      dispatch(searchBlogs({ query, page: currentPage, size: pageSize }));
+    }, 300),
+    [dispatch, currentPage, pageSize]
   );
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    debouncedSearch(e.target.value);
+  };
+
+  const handlePerRowsChange = (newPageSize, page) => {
+    setPageSize(newPageSize);
+    setCurrentPage(page - 1);
+  };
 
   const columns = [
     {
@@ -108,7 +131,6 @@ export function Blog(props) {
         );
       },
     },
-
     {
       name: "Posted By",
       cell: (row) => (
@@ -121,7 +143,6 @@ export function Blog(props) {
         </div>
       ),
     },
-
     {
       name: "Comments Count",
       selector: (row) => row.commentCount,
@@ -154,6 +175,7 @@ export function Blog(props) {
       ),
     },
   ];
+
   const customStyles = {
     rows: {
       style: {
@@ -179,20 +201,24 @@ export function Blog(props) {
               type="text"
               placeholder="Search by title"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
             />
           </InputGroup>
           <DataTable
             columns={columns}
-            data={filteredBlogs}
+            data={blogData}
             customStyles={customStyles}
             selectableRows
             onSelectedRowsChange={(state) =>
               console.log(state.selectedRows.map((item) => item.id))
             }
             pagination
-            paginationPerPage={15}
+            paginationPerPage={pageSize}
             paginationRowsPerPageOptions={[5, 10, 15]}
+            paginationTotalRows={totalPages * pageSize}
+            paginationServer
+            onChangePage={(page) => setCurrentPage(page - 1)}
+            onChangeRowsPerPage={handlePerRowsChange}
           />
         </Card>
       </Col>

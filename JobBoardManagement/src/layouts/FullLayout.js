@@ -93,7 +93,7 @@ const FullLayout = () => {
     const fetchData = async () => {
       try {
         await Promise.all([
-          dispatch(fetchBlogs()).unwrap(),
+          // dispatch(fetchBlogs()).unwrap(),
           dispatch(fetchBlogCategory()).unwrap(),
           dispatch(getUserByIDThunk(user.sub)).unwrap(),
         ]);

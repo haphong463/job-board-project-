@@ -67,7 +67,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     const newData = {
       ...data,
       slug: slugify(data.title),
-      username: user.username,
+      username: user.sub,
     };
 
     if (!newData.image || newData.image.length === 0) {
