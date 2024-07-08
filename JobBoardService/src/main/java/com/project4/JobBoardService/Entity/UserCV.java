@@ -3,6 +3,7 @@ package com.project4.JobBoardService.Entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
