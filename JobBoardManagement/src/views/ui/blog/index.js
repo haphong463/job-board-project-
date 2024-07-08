@@ -26,7 +26,7 @@ export function Blog(props) {
   const totalPages = useSelector((state) => state.blogs.totalPages);
 
   const [dropdownOpen, setDropdownOpen] = useState({});
-  
+
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,7 +84,6 @@ export function Blog(props) {
       cell: (row) => (
         <div
           style={{
-            fontSize: "16px",
             fontWeight: "bold",
           }}
           className="text-truncate-multiline"
@@ -102,11 +101,7 @@ export function Blog(props) {
         const hasMore = row.categories.length > 2;
 
         return (
-          <div
-            style={{
-              fontSize: "16px",
-            }}
-          >
+          <div>
             {displayCategories.map((item) => (
               <Badge key={item.id}>{item.name}</Badge>
             ))}
@@ -120,42 +115,19 @@ export function Blog(props) {
       selector: (row) => row.visibility,
       sortable: true,
       cell: (row) => {
-        return (
-          <div
-            style={{
-              fontSize: "16px",
-            }}
-          >
-            {row.visibility ? "Show" : "Hide"}
-          </div>
-        );
+        return <div>{row.visibility ? "Show" : "Hide"}</div>;
       },
     },
     {
       name: "Posted By",
-      cell: (row) => (
-        <div
-          style={{
-            fontSize: "16px",
-          }}
-        >
-          {row.user.email}
-        </div>
-      ),
+      width: "300px",
+      cell: (row) => <div>{row.user.email}</div>,
     },
     {
       name: "Comments Count",
       selector: (row) => row.commentCount,
       sortable: true,
-      cell: (row) => (
-        <div
-          style={{
-            fontSize: "16px",
-          }}
-        >
-          {row.commentCount}
-        </div>
-      ),
+      cell: (row) => <div>{row.commentCount}</div>,
     },
     {
       name: "Actions",

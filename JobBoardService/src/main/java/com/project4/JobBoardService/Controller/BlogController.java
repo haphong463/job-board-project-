@@ -51,11 +51,12 @@ public class BlogController {
     @GetMapping("/search")
     public ResponseEntity<?> searchBlogs(
             @RequestParam String query,
+            @RequestParam @Nullable String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Blog> blogsPage = blogService.searchBlogs(query, pageable);
+        Page<Blog> blogsPage = blogService.searchBlogs(query, type, pageable);
         List<BlogResponseDTO> blogResponseDTOs = blogsPage.stream()
                 .map(blog -> modelMapper.map(blog, BlogResponseDTO.class))
                 .collect(Collectors.toList());

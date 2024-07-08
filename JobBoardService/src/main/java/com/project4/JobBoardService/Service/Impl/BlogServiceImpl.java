@@ -98,8 +98,8 @@ public class BlogServiceImpl implements BlogService {
 
 
     @Override
-    public List<Blog> searchBlogs(String query, String type) {
-        return blogRepository.searchByQuery(type, query);
+    public List<Blog> searchBlogs(String query, String type, Pageable pageable) {
+        return blogRepository.searchByQuery(type, query, pageable);
     }
 
     @Override

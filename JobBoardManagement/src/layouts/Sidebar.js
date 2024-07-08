@@ -21,22 +21,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [countdown, setCountdown] = useState(1);
-  const handleLogout = () => {
-    // setIsLoggingOut(true);
-    // let timer = setInterval(() => {
-    //   setCountdown((prev) => prev - 1);
-    // }, 1000);
 
-    // setTimeout(() => {
-    //   clearInterval(timer);
-    dispatch(signOut()).then(res => {
-      if(res.meta.requestStatus === 'fulfilled'){
-        navigate("/jobportal/login");
-
-      }
-    });
-    // }, 1000);
-  };
   const location = useLocation();
   const [collapseStates, setCollapseStates] = useState({});
 
@@ -114,25 +99,6 @@ const Sidebar = () => {
       <div className="pt-4 mt-2">
         <Nav vertical className="sidebarNav">
           {renderNavItems(navigation)}
-          <Button
-            color="danger"
-            tag="a"
-            target="_blank"
-            className="mt-3"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-          >
-            {isLoggingOut ? (
-              <div className="d-flex align-items-center">
-                <Spinner size="sm" color="light" className="me-2" />
-                Log out in {countdown}s
-              </div>
-            ) : (
-              <>
-                <IoLogOut /> Log out
-              </>
-            )}
-          </Button>
         </Nav>
       </div>
     </div>

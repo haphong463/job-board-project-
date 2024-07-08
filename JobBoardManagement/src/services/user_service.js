@@ -2,8 +2,10 @@ import axiosRequest from "../configs/axiosConfig";
 
 const URL = "/user";
 
-export const getAllUserAsync = async (query, page, size) =>
-  await axiosRequest.get(`${URL}/search?query=${query}&page=${page}&size=${size}`);
+export const getAllUserAsync = async (query, role, page, size) =>
+  await axiosRequest.get(
+    `${URL}/search?query=${query}&role=${role}&page=${page}&size=${size}`
+  );
 export const getUserByIDAsync = async (id) =>
   await axiosRequest.get(`${URL}/${id}`);
 
@@ -13,6 +15,12 @@ export const updateUserEnableStatusAsync = async (id, isEnabled) =>
       "Content-Type": "application/json",
     },
   });
+
+export const deleteUserAsync = async (id) =>
+  await axiosRequest.delete(`${URL}/${id}`);
+
+export const createModeratorAsync = async (data) =>
+  await axiosRequest.post(`auth/add-moderator`, data);
 
 export const updateUserAsync = async (data, id) =>
   await axiosRequest.put(`${URL}/${id}`, data, {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Navbar,
   Collapse,
@@ -12,11 +12,17 @@ import {
   DropdownItem,
   Dropdown,
   Button,
+  NavLink,
 } from "reactstrap";
 import { ReactComponent as LogoWhite } from "../assets/images/logos/xtremelogowhite.svg";
 import user1 from "../assets/images/users/user1.jpg";
+import { useDispatch, useSelector } from "react-redux";
+import { signOut } from "../features/authSlice";
 
-const Header = () => {
+const Header = ({ handleLogout }) => {
+  const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
@@ -27,6 +33,7 @@ const Header = () => {
   const showMobilemenu = () => {
     document.getElementById("sidebarArea").classList.toggle("showSidebar");
   };
+
   return (
     <Navbar color="primary" dark expand="md">
       <div className="d-flex align-items-center">
@@ -83,8 +90,8 @@ const Header = () => {
         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
           <DropdownToggle color="primary">
             <img
-              src={user1}
-              alt="profile"
+              src={user.imageUrl}
+              alt="profile" 
               className="rounded-circle"
               width="30"
             ></img>
@@ -92,11 +99,13 @@ const Header = () => {
           <DropdownMenu>
             <DropdownItem header>Info</DropdownItem>
             <DropdownItem>My Account</DropdownItem>
-            <DropdownItem>Edit Profile</DropdownItem>
+            <DropdownItem onClick={() => navigate("/jobportal/settings")}>
+              Edit Profile
+            </DropdownItem>
             <DropdownItem divider />
             <DropdownItem>My Balance</DropdownItem>
             <DropdownItem>Inbox</DropdownItem>
-            <DropdownItem>Logout</DropdownItem>
+            <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Collapse>
