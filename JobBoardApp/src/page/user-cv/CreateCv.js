@@ -27,9 +27,10 @@ const CreateCV = () => {
         userLanguages: [],
         userProjects: [],
         userSkills: [],
+        cvTitle: '',
     });
      
-      
+    
     const handleInputChange = (e, index, field, section) => {
         const value = e.target.value;
         switch (section) {
@@ -94,9 +95,7 @@ const CreateCV = () => {
     };
    
     const addNewEntry = (section) => {
-        const isValid = validateFields(section, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills);
-
-
+        const isValid = validateFields(section,cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills);
         if (isValid) {
             switch (section) {
                 case 'userEducations':
@@ -143,10 +142,17 @@ const CreateCV = () => {
         }
     };
 
-    const validateFields = (section, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills) => {
+    const validateFields = (section,cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills) => {
         let sectionErrors = [];
       
         switch (section) {
+            case 'cvTitle':
+                if (!cvTitle || cvTitle.trim().length === 0) {
+                    sectionErrors.push('CV Title is required');
+                } else if (cvTitle.length < 3) {
+                    sectionErrors.push('CV Title must be at least 3 characters long');
+                }
+                break;
           case 'userDetails':
             userDetails.forEach((detail, index) => {
               if (!detail.fullName || !detail.address || !detail.email || !detail.phone || !detail.summary) {
@@ -205,8 +211,8 @@ const CreateCV = () => {
       };
       
     const handleContinue = () => {
-        const currentSection = step === 2 ? 'userDetails' : step === 3 ? 'userEducations' : step === 4 ? 'userExperiences' : step === 5 ? 'userLanguages' : step === 6 ? 'userProjects' : step === 7 ? 'userSkills' : null;
-        const isValid = validateFields(currentSection, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills);
+        const currentSection = step === 1 ? 'cvTitle' : step === 2 ? 'userDetails' : step === 3 ? 'userEducations' : step === 4 ? 'userExperiences' : step === 5 ? 'userLanguages' : step === 6 ? 'userProjects' : step === 7 ? 'userSkills' : null;
+        const isValid = validateFields(currentSection, cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills);
       
         if (isValid) {
           setStep(step + 1);
@@ -218,69 +224,69 @@ const CreateCV = () => {
     };
 
     const user = useSelector(state => state.auth.user)
-    console.log(user)
+    // console.log(user)
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // try {
-        //     const params = new FormData();
-        //     params.append('cvTitle', cvTitle);
-         
-        //     userDetails.forEach((detail, index) => {
-        //         const prefix = `userDetails[${index}]`;
-        //         console.log('image: ', detail.profileImage);
-        //         params.append(`${prefix}.fullName`, detail.fullName);
-        //         params.append(`${prefix}.address`, detail.address);
-        //         params.append(`${prefix}.email`, detail.email);
-        //         params.append(`${prefix}.phone`, detail.phone);
-        //         params.append(`${prefix}.summary`, detail.summary);
-        //         params.append('profileImage', detail.profileImage);
-        //     });
-        //     userEducations.forEach((education, index) => {
-        //         const prefix = `userEducations[${index}]`;
-        //         params.append(`${prefix}.institution`, education.institution);
-        //         params.append(`${prefix}.degree`, education.degree);
-        //         params.append(`${prefix}.description`, education.description);
-        //         params.append(`${prefix}.startDate`, education.startDate);
-        //         params.append(`${prefix}.endDate`, education.endDate);
-        //     });
-        //     userExperiences.forEach((experience, index) => {
-        //         const prefix = `userExperiences[${index}]`;
-        //         params.append(`${prefix}.jobTitle`, experience.jobTitle);
-        //         params.append(`${prefix}.company`, experience.company);
-        //         params.append(`${prefix}.description`, experience.description);
-        //         params.append(`${prefix}.startDate`, experience.startDate);
-        //         params.append(`${prefix}.endDate`, experience.endDate);
-        //     });
-        //     userLanguages.forEach((language, index) => {
-        //         const prefix = `userLanguages[${index}]`;
-        //         params.append(`${prefix}.languageName`, language.languageName);
-        //         params.append(`${prefix}.proficiency`, language.proficiency);
-        //     });
-        //     userProjects.forEach((project, index) => {
-        //         const prefix = `userProjects[${index}]`;
-        //         params.append(`${prefix}.projectName`, project.projectName);
-        //         params.append(`${prefix}.description`, project.description);
-        //         params.append(`${prefix}.startDate`, project.startDate);
-        //         params.append(`${prefix}.endDate`, project.endDate);
-        //     });
-        //     userSkills.forEach((skill, index) => {
-        //         const prefix = `userSkills[${index}]`;
-        //         params.append(`${prefix}.skillName`, skill.skillName);
-        //         params.append(`${prefix}.proficiency`, skill.proficiency);
-        //     });
-        //     for (var pair of params.entries()) {
-        //         console.log(pair[0] + ', ' + pair[1]);
-        //     }
-        //     const response = await axiosRequest.post('/usercv/submit-cv', params, {
-        //         headers: {
-        //             'Content-Type': 'multipart/form-data'
-        //         }
-        //     });
-        //     console.log(response.data);
-        //     navigate('/list-template'); // Handle success response
-        // } catch (error) {
-        //     console.error(error); // Handle error
-        // }
+        try {
+            const params = new FormData();
+            params.append('cvTitle', cvTitle);
+            params.append('user.id', user.id);
+            userDetails.forEach((detail, index) => {
+                const prefix = `userDetails[${index}]`;
+                console.log('image: ', detail.profileImage);
+                params.append(`${prefix}.fullName`, detail.fullName);
+                params.append(`${prefix}.address`, detail.address);
+                params.append(`${prefix}.email`, detail.email);
+                params.append(`${prefix}.phone`, detail.phone);
+                params.append(`${prefix}.summary`, detail.summary);
+                params.append('profileImage', detail.profileImage);
+            });
+            userEducations.forEach((education, index) => {
+                const prefix = `userEducations[${index}]`;
+                params.append(`${prefix}.institution`, education.institution);
+                params.append(`${prefix}.degree`, education.degree);
+                params.append(`${prefix}.description`, education.description);
+                params.append(`${prefix}.startDate`, education.startDate);
+                params.append(`${prefix}.endDate`, education.endDate);
+            });
+            userExperiences.forEach((experience, index) => {
+                const prefix = `userExperiences[${index}]`;
+                params.append(`${prefix}.jobTitle`, experience.jobTitle);
+                params.append(`${prefix}.company`, experience.company);
+                params.append(`${prefix}.description`, experience.description);
+                params.append(`${prefix}.startDate`, experience.startDate);
+                params.append(`${prefix}.endDate`, experience.endDate);
+            });
+            userLanguages.forEach((language, index) => {
+                const prefix = `userLanguages[${index}]`;
+                params.append(`${prefix}.languageName`, language.languageName);
+                params.append(`${prefix}.proficiency`, language.proficiency);
+            });
+            userProjects.forEach((project, index) => {
+                const prefix = `userProjects[${index}]`;
+                params.append(`${prefix}.projectName`, project.projectName);
+                params.append(`${prefix}.description`, project.description);
+                params.append(`${prefix}.startDate`, project.startDate);
+                params.append(`${prefix}.endDate`, project.endDate);
+            });
+            userSkills.forEach((skill, index) => {
+                const prefix = `userSkills[${index}]`;
+                params.append(`${prefix}.skillName`, skill.skillName);
+                params.append(`${prefix}.proficiency`, skill.proficiency);
+            });
+            for (var pair of params.entries()) {
+                console.log(pair[0] + ', ' + pair[1]);
+            }
+            const response = await axiosRequest.post('/usercv/submit-cv', params, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            console.log(response.data);
+            navigate('/list-template'); // Handle success response
+        } catch (error) {
+            console.error(error); // Handle error
+        }
     };
 
     return (
@@ -388,14 +394,13 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.cvTitle && <div className="cv-error-message">{errors.cvTitle.join(', ')}</div>}
                                 </div>
                                 <div className="cv-button-group">
-
                                     <button type="button" onClick={handleContinue} className="cv-continue-btn">
                                         Continue
                                     </button>
                                 </div>
-
                             </>
                         )}
 
@@ -437,6 +442,7 @@ const CreateCV = () => {
                                             required
                                             className="cv-input"
                                         />
+                                        
                                         <input
                                             type="number"
                                             placeholder="Phone"

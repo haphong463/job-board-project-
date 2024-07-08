@@ -1,34 +1,38 @@
 package com.project4.JobBoardService.Controller;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import com.project4.JobBoardService.Entity.Template;
+import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Entity.UserCV;
-import com.project4.JobBoardService.Entity.UserDetail;
 import com.project4.JobBoardService.Repository.TemplateRepository;
 import com.project4.JobBoardService.Repository.UserCvRepository;
+import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.TemplateService;
 
 import reactor.core.publisher.Mono;
@@ -39,20 +43,26 @@ public class TemplateController {
 
 	@Autowired
 	private TemplateRepository templateRepository;
+	
 	@Autowired
 	private UserCvRepository userCvRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
+ 
+  
+	 private final TemplateService templateService;
+	    private final TemplateEngine templateEngine;
+	   
 
-	private final TemplateService templateService;
-
-	public TemplateController(TemplateService templateService) {
-		this.templateService = templateService;
-	}
-
-	@GetMapping("/upload")
-	public String showUploadForm(Model model) {
-		return "upload-template"; // Thymeleaf template for upload form
-	}
-
+ 
+	    public TemplateController(TemplateService templateService, TemplateEngine templateEngine) {
+	        this.templateService = templateService;
+	        this.templateEngine = templateEngine;
+	       
+	    }
+	
+	   
 	@PostMapping("/create")
     public ResponseEntity<Map<String, String>> createTemplate(@ModelAttribute("template") Template template,
                                                               @RequestParam("templateImage") MultipartFile templateImage,
@@ -100,72 +110,115 @@ public class TemplateController {
     }
 
  
- 
+    @GetMapping("/selected")
+    public ResponseEntity<String> getTemplateContent(@RequestParam Long templateId) {
+        // Find the template by templateId
+        Template template = templateRepository.findById(templateId).orElse(null);
 
+        if (template == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Fetch template content from templateFilePath (assuming it's a URL)
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.getForEntity(template.getTemplateFilePath(), String.class);
+
+        return ResponseEntity.ok(response.getBody());
+    }
+    
     @GetMapping("/list-template")
     public List<Template> listTemplates() {
         return templateRepository.findAll();
     }
-//    @GetMapping("/{key}")
-//    public Mono<String> getRenderedTemplate(@PathVariable("key") String key) {
-//        return templateService.retrieveTemplate(key)
-//                .flatMap(htmlTemplate -> renderTemplateWithData(htmlTemplate));
-//    }
-
-//    private Mono<String> renderTemplateWithData(String htmlTemplate) {
-//        // Replace Thymeleaf expressions with actual data
-//        // For simplicity, let's assume you have a hard-coded data map
-//        Map<String, Object> data = new HashMap<>();
-//        data.put("detail", new UserDetail("John Doe", "123 Main St", "john.doe@example.com", "123-456-7890", "A brief summary"));
-//
-//        // Use Thymeleaf's TemplateEngine to process the template
-//        Context context = new Context();
-//        context.setVariables(data);
-//
-//        String processedHtml = new SpringTemplateEngine().process(htmlTemplate, context);
-//        return Mono.just(processedHtml);
-//    }
-
    
-//	@GetMapping("/list-template/{id}")
-//	public String viewTemplate(@PathVariable("id") Long templateId, Model model) {
-//		// Retrieve template from repository
-//		Template template = templateRepository.findById(templateId)
-//				.orElseThrow(() -> new RuntimeException("Template not found"));
-//
-//		// Fetch HTML content from URL specified in templateFilePath
-//		try {
-//			String htmlContent = fetchHtmlContent(template.getTemplateFilePath());
-//			model.addAttribute("htmlContent", htmlContent);
-//		} catch (IOException e) {
-//			// Handle file reading error
-//			model.addAttribute("htmlContent", "<p>Failed to load HTML content from URL.</p>");
-//			e.printStackTrace(); // Consider logging the exception instead
-//		}
-//
-//		// Add template to model for rendering details
-//		model.addAttribute("template", template);
-//
-//		return "view-template-closer"; // Return the view template name
-//	}
+   
+    @PutMapping("/select-template")
+	 public ResponseEntity<String> selectTemplate(@RequestParam("userId") Long userId,
+	                                              @RequestParam("templateId") Long templateId) {
+	     try {
+	         // Find User by userId
+	         User user = userRepository.findById(userId).orElse(null);
+	         if (user == null) {
+	             return ResponseEntity.badRequest().body("Invalid user ID");
+	         }
 
-	// Method to fetch HTML content from URL
-	private String fetchHtmlContent(String url) throws IOException {
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-		return response.getBody();
-	}
+	         // Find Template by templateId
+	         Template template = templateRepository.findById(templateId).orElse(null);
+	         if (template == null) {
+	             return ResponseEntity.badRequest().body("Invalid template ID");
+	         }
 
-//    @GetMapping("/preview/{id}")
-//    public String previewTemplate(@PathVariable Long id, Model model) {
-//        // Find template by ID
-//        Template template = templateRepository.findById(id)
-//                .orElseThrow(() -> new IllegalArgumentException("Invalid template ID: " + id));
-//
-//        // Add template to model
-//        model.addAttribute("template", template);
-//
-//        return "preview-template"; // Return the name of the preview page HTML file
-//    }
- 
+	         // Find UserCV by user
+	         UserCV userCV = userCvRepository.findByUser(user);
+	         if (userCV == null) {
+	             return ResponseEntity.notFound().build();
+	         }
+
+	         // Update template
+	         userCV.setTemplate(template);
+
+	         // Save updated UserCV
+	         userCvRepository.save(userCV);
+
+	         return ResponseEntity.ok("UserCV updated successfully with selected template");
+	     } catch (Exception e) {
+	         return ResponseEntity.badRequest().body("Failed to update UserCV: " + e.getMessage());
+	     }
+	 }
+    @GetMapping("/review-template/{key}/{userId}")
+    public Mono<ResponseEntity<String>> getTemplate(@PathVariable("key") String key, @PathVariable("userId") Long userId, Model model) {
+        return Mono.justOrEmpty(userCvRepository.findByUserId(userId))
+            .switchIfEmpty(Mono.just(new UserCV())) // Return empty UserCV if not found (optional)
+            .flatMap(userCV -> {
+                // Add UserCV to the model
+                model.addAttribute("userCV", userCV);
+
+                // Retrieve the template
+                return templateService.retrieveTemplate(key)
+                    .flatMap(template -> {
+                        // Create Thymeleaf context and add the model attributes
+                        Context context = new Context();
+                        model.asMap().forEach(context::setVariable);
+
+                        // Render the template with Thymeleaf
+                        String renderedHtml = templateEngine.process(template, context);
+
+                        // Return the rendered HTML as the response
+                        return Mono.just(ResponseEntity.ok(renderedHtml));
+                    })
+                    .defaultIfEmpty(ResponseEntity.notFound().build())
+                    .onErrorResume(e -> Mono.just(ResponseEntity.status(500).body("Error retrieving template: " + e.getMessage())));
+            });
+    }
+    @GetMapping("/print-to-pdf/{key}/{userId}")
+    public Mono<Object> printToPdf(@PathVariable("key") String key, @PathVariable("userId") Long userId, Model model) {
+        return Mono.justOrEmpty(userCvRepository.findByUserId(userId))
+            .switchIfEmpty(Mono.just(new UserCV())) // Return empty UserCV if not found (optional)
+            .flatMap(userCV -> {
+                // Retrieve the template and render HTML
+                return templateService.retrieveTemplate(key)
+                    .flatMap(htmlContent -> {
+                        try {
+                            // Generate PDF from HTML content
+                            byte[] pdfBytes = templateService.generatePdfFromHtml(htmlContent);
+
+                            // Set headers for PDF response
+                            HttpHeaders headers = new HttpHeaders();
+                            headers.add("Content-Disposition", "inline; filename=output.pdf");
+
+                            // Return ResponseEntity with PDF bytes and headers
+                            return Mono.just(ResponseEntity.ok()
+                                    .headers(headers)
+                                    .contentType(MediaType.APPLICATION_PDF)
+                                    .body(pdfBytes));
+                        } catch (Exception e) {
+                            // Handle exception if PDF generation fails
+                            return Mono.just(ResponseEntity.status(500).body(null)); // Or appropriate error response
+                        }
+                    })
+                    .defaultIfEmpty(ResponseEntity.notFound().build())
+                    .onErrorResume(e -> Mono.just(ResponseEntity.status(500).body(null))); // Handle error in retrieving template
+            });
+    }
+   
 }

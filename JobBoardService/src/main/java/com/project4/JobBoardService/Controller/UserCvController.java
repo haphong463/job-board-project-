@@ -4,15 +4,19 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,87 +43,71 @@ public class UserCvController {
 	@Autowired
 	TemplateRepository templateRepository;
 
-	@GetMapping("")
-	public String createCV(Model model) {
-		model.addAttribute("userCV", new UserCV());
-		return "create-cv";
-	}
 	
-	@GetMapping("/viewCV")
-    public String getCV(Model model) {
-        List<UserCV> userCV = userCvRepository.findAll();
-        model.addAttribute("userCV", userCV);
-        return "user-cv";
-    }
-	
-//	@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-	@PostMapping("/submit-cv")
-	public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV, @RequestParam("profileImage") MultipartFile profileImage) {
-	    userCV.setCreatedAt(LocalDateTime.now());
-	    userCV.setUpdatedAt(LocalDateTime.now());
+	 @PutMapping("/{cvId}")
+	    public UserCV updateUserCV(@PathVariable Long cvId, @RequestBody UserCV updatedCV) {
+	        Optional<UserCV> existingCVOptional = userCvRepository.findById(cvId);
+	        if (existingCVOptional.isPresent()) {
+	            UserCV existingCV = existingCVOptional.get();
 
-	    // Set userCV reference in related entities
-	    userCV.getUserDetails().forEach(detail -> detail.setUserCV(userCV));
-	    userCV.getUserEducations().forEach(education -> education.setUserCV(userCV));
-	    userCV.getUserExperiences().forEach(experience -> experience.setUserCV(userCV));
-	    userCV.getUserSkills().forEach(skill -> skill.setUserCV(userCV));
-	    userCV.getUserProjects().forEach(project -> project.setUserCV(userCV));
-	    userCV.getUserLanguages().forEach(language -> language.setUserCV(userCV));
+	            // Exclude templateId and userId from updating
+	            updatedCV.setTemplate(existingCV.getTemplate());
+	            updatedCV.setUser(existingCV.getUser());
 
-	    // Save the userCV and its related entities
-	    UserCV savedUserCV = userCvRepository.save(userCV);
+	            // Copy non-null properties from updatedCV to existingCV
+	            BeanUtils.copyProperties(updatedCV, existingCV, "cvId", "template", "user", "createdAt", "updatedAt");
 
-	    // Handle the profile image upload
-	    if (!profileImage.isEmpty()) {
-	        try {
-	            byte[] imageBytes = profileImage.getBytes();
-	            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-	            UserDetail userDetail = savedUserCV.getUserDetails().get(0);
-	            userDetail.setProfileImageBase64(base64Image);
-	            userDetailRepository.save(userDetail);
-	        } catch (IOException e) {
-	            // Handle the exception
-	            e.printStackTrace();
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile image");
+	            // Update timestamps
+	            existingCV.setUpdatedAt(LocalDateTime.now());
+
+	            // Save and return updated UserCV
+	            return userCvRepository.save(existingCV);
+	        } else {
+	            throw new RuntimeException("UserCV not found with id: " + cvId);
 	        }
 	    }
+//	@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	 @PostMapping("/submit-cv")
+	    public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV, 
+	                                           @RequestParam("profileImage") MultipartFile profileImage) {
+	        userCV.setCreatedAt(LocalDateTime.now());
+	        userCV.setUpdatedAt(LocalDateTime.now());
 
-	    return ResponseEntity.ok().body("CV Save Success!");
-	}
+	        // Set the user
+	        User user = userRepository.findById(userCV.getUser().getId()).orElse(null);
+	        if (user == null) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user ID");
+	        }
+	        userCV.setUser(user);
 
-	@PutMapping("/select-template")
-    public ResponseEntity<String> selectTemplate(@RequestParam("cvId") Long cvId, @RequestParam("userId") Long userId, @RequestParam("templateId") Long templateId) {
-        try {
-            // Find UserCV by cvId
-            UserCV userCV = userCvRepository.findById(cvId).orElse(null);
+	        // Set userCV reference in related entities
+	        userCV.getUserDetails().forEach(detail -> detail.setUserCV(userCV));
+	        userCV.getUserEducations().forEach(education -> education.setUserCV(userCV));
+	        userCV.getUserExperiences().forEach(experience -> experience.setUserCV(userCV));
+	        userCV.getUserSkills().forEach(skill -> skill.setUserCV(userCV));
+	        userCV.getUserProjects().forEach(project -> project.setUserCV(userCV));
+	        userCV.getUserLanguages().forEach(language -> language.setUserCV(userCV));
 
-            if (userCV == null) {
-                return ResponseEntity.notFound().build();
-            }
+	        // Save the userCV and its related entities
+	        UserCV savedUserCV = userCvRepository.save(userCV);
 
-            // Find user and template
-            User user = userRepository.findById(userId).orElse(null);
-            Template template = templateRepository.findById(templateId).orElse(null);
-
-            if (user == null || template == null) {
-                return ResponseEntity.badRequest().body("Invalid user or template ID");
-            }
-
-            // Update user_id and template_id
-            userCV.setUser(user);
-            userCV.setTemplate(template);
-
-            // Save updated UserCV
-            userCvRepository.save(userCV);
-
-            return ResponseEntity.ok("UserCV updated successfully with selected template");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to update UserCV: " + e.getMessage());
-        }
-    }
-
-
-
+	        // Handle the profile image upload
+	        if (!profileImage.isEmpty()) {
+	            try {
+	                byte[] imageBytes = profileImage.getBytes();
+	                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+	                UserDetail userDetail = savedUserCV.getUserDetails().get(0);
+	                userDetail.setProfileImageBase64(base64Image);
+	                userDetailRepository.save(userDetail);
+	            } catch (IOException e) {
+	                // Handle the exception
+	                e.printStackTrace();
+	                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile image");
+	            }
+	        }
+	        
+	        return ResponseEntity.ok().body("CV Save Success!");
+	    }
 
 	
 //	@PostMapping("/submit-cv")

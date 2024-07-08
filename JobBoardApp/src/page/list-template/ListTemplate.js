@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 import axiosRequest from '../../configs/axiosConfig';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import '../../assets/css/list-template.css'; // Import CSS file for custom styles
+import DialogBox from '../../components/dialog-box/Dialogbox';
 // import '@fontawesome/fontawesome-free/css/all.min.css';
-import { useParams } from 'react-router-dom';
+ 
 const ListTemplate = () => {
   const [templates, setTemplates] = useState([]);
   const [sortOrder, setSortOrder] = useState('asc');
   const [showFilters, setShowFilters] = useState(false); // New state for showing/hiding filters
   const [searchQuery, setSearchQuery] = useState(''); // New state for search query
-  const { cvId } = useParams();
+  const user = useSelector(state => state.auth.user);
+  const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false); // Add a state for the dialog box
+
   const fetchTemplates = async () => {
     try {
       const response = await axiosRequest.get('/templates/list-template');
@@ -43,17 +49,30 @@ const ListTemplate = () => {
     setSearchQuery(e.target.value);
     // You can implement the search logic here
   };
-  const handleTemplateClick = async (templateId) => {
+  const handleDialogClose = () => {
+    setShowDialog(false); // Close the dialog box
+  };
+  
+  const handleTemplateClick = async (templateId, templateName) => {
+    if (!user) {
+      setShowDialog(true); // Show the dialog box if the user is not logged in
+      return;
+    }
     try {
-      const userId = 2; // Replace with your logic to get user ID
-      await axiosRequest.put('/usercv/select-template', null, {
-        params: { cvId, userId, templateId }
+      await axiosRequest.put('/templates/select-template', null, {
+        params: {
+          userId: user.id,
+          templateId: templateId,
+        }
       });
+  
       alert('Template selected successfully');
+      navigate(`/review-template/${templateName}`); // Navigate to review-template with templateName
     } catch (error) {
       console.error('Error selecting template:', error);
     }
   };
+  
   const filteredTemplates = templates.filter((template) =>
     template.templateName.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -142,7 +161,7 @@ const ListTemplate = () => {
             {filteredTemplates.length > 0 ? (
               filteredTemplates.map((template) => (
                 <div key={template.templateId} className="col-md-4 mb-4">
-                  <div className="template-card" onClick={() => handleTemplateClick(template.templateId)}>
+                  <div className="template-card" onClick={() => handleTemplateClick(template.templateId, template.templateName)}>
                     {template.templateImageBase64 ? (
                       <>
                         <img
@@ -170,7 +189,9 @@ const ListTemplate = () => {
             )}
           </div>
         </div>
+        
       </section>
+      <DialogBox isOpen={showDialog} onClose={handleDialogClose} />
     </GlobalLayoutUser>
   );
 };

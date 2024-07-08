@@ -32,13 +32,13 @@ function App() {
       })(document, window.kommunicate || {});
     }
   }, []);
-  useEffect(() => {
-    if (user) {
-      connectWebSocket(user);
-      dispatch(getNotificationThunk(user.id));
-    }
-    localStorage.removeItem("persist:root");
-  }, [dispatch, user]);
+  // useEffect(() => {
+  //   if (user) {
+  //     connectWebSocket(user);
+  //     dispatch(getNotificationThunk(user.id));
+  //   }
+  //   localStorage.removeItem("persist:root");
+  // }, [dispatch, user]);
   return (
     <>
       <Routes>
