@@ -139,9 +139,7 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/create-cv">Create CV</NavLink>
               </li>
-              <li>
-                <NavLink to="/quiz">Quiz</NavLink>
-              </li>
+
               {!roles.includes("ROLE_EMPLOYER") && (
                 <li>
                   <NavLink to="/EmployerSignUp">For Employer</NavLink>
@@ -218,7 +216,7 @@ export function GlobalNavbar() {
                             : undefined
                         }
                       >
-                        <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
+                        <img src={notification.sender.imageUrl} alt="img" />
                         <div className="text">
                           <h4
                             className={`${

@@ -26,8 +26,16 @@ export const Blog = () => {
 
   const debouncedSearch = useCallback(
     debounce((query) => {
+      console.log(searchParams.get("type"));
       setCurrentPage(0);
-      dispatch(fetchBlogs({ query, page: currentPage, size: postsPerPage }));
+      dispatch(
+        fetchBlogs({
+          query,
+          page: currentPage,
+          size: postsPerPage,
+          type: searchParams.get("type") || "ALL",
+        })
+      );
     }, 500),
     [dispatch, currentPage]
   );
@@ -38,10 +46,16 @@ export const Blog = () => {
   };
 
   useEffect(() => {
+    const type = searchParams.get("type");
     dispatch(
-      fetchBlogs({ query: searchText, size: postsPerPage, page: currentPage })
+      fetchBlogs({
+        query: searchText,
+        size: postsPerPage,
+        page: currentPage,
+        type: type || "ALL",
+      })
     );
-  }, [dispatch, currentPage]);
+  }, [dispatch, currentPage, searchParams]);
 
   const paginate = (pageNumber) => {
     if (pageNumber >= 0 && pageNumber < totalPages) {

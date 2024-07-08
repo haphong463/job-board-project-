@@ -101,10 +101,7 @@ export const Comment = ({
   return (
     <li className={`comment level-${level}`}>
       <div className="vcard bio">
-        <img
-          src="../../../../assets/images/person_2.jpg"
-          alt="Image placeholder"
-        />
+        <img src={comment.user.imageUrl} alt="Image placeholder" />
       </div>
       <div className="comment-body">
         <div className="d-flex justify-content-between">
