@@ -9,17 +9,17 @@ import lombok.Data;
 @Data
 @Table(name = "Templates")
 public class Template {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long templateId;
-    
-    @Column(name = "name", unique = true, nullable = false)
-    private String templateName;
-    private String templateDescription;
-    private String templateFilePath;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long templateId;
 
-    // Getters and setters
+	private String templateName;
+	private String templateDescription;
+	private String templateFilePath;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
+	@Column(columnDefinition = "TEXT")
+	private String templateImageBase64;
+
+	// Getters and setters
 }
-
