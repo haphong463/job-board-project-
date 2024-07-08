@@ -84,6 +84,7 @@ const initialState = {
   quizId: null,
   status: 'idle',
   error: null,
+  completedQuizzes: [],
 };
 
 // Redux Slice
@@ -104,6 +105,10 @@ const quizSlice = createSlice({
       state.quizId = null;
       state.certificateUrl = null;
     },
+    completeQuiz: (state, action) => {
+      state.completedQuizzes.push(action.payload);
+    },
+
     // Add your reducers here if needed
   },
   extraReducers: (builder) => {
@@ -169,6 +174,7 @@ const quizSlice = createSlice({
       });
   },
 });
+export const { completeQuiz } = quizSlice.actions;
 
 export const { setQuizResults, clearQuizResults } = quizSlice.actions;
 

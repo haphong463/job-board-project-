@@ -12,6 +12,7 @@ export const Quiz = () => {
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [attemptsInfo, setAttemptsInfo] = useState({});
+  const [completedQuizzes, setCompletedQuizzes] = useState([]);
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
 
@@ -25,8 +26,10 @@ export const Quiz = () => {
     } else {
       setLoggedIn(true);
       fetchQuizzesAndAttempts();
+      fetchCompletedQuizzes();
       const intervalId = setInterval(() => {
         fetchQuizzesAndAttempts();
+        fetchCompletedQuizzes();
       }, 10000); // Polling every 10 seconds
 
       return () => clearInterval(intervalId);
@@ -65,6 +68,21 @@ export const Quiz = () => {
       .catch(error => {
         console.error("There was an error fetching the quizzes!", error);
       });
+  };
+
+  const fetchCompletedQuizzes = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    axios.get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes/${user.id}/completed-quizzes`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    })
+    .then(response => {
+      setCompletedQuizzes(response.data);
+    })
+    .catch(error => {
+      console.error("There was an error fetching the completed quizzes!", error);
+    });
   };
 
   const handleStartQuiz = (quiz) => {
@@ -118,6 +136,7 @@ export const Quiz = () => {
     })
     .then(response => {
       fetchQuizzesAndAttempts(); // Refresh quizzes data
+      fetchCompletedQuizzes(); // Refresh completed quizzes data
     })
     .catch(error => {
       console.error("There was an error completing the quiz!", error);
@@ -170,7 +189,11 @@ export const Quiz = () => {
                     <div className="quiz-details">
                       <div className="quiz-candidates">{quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi </div>
                     </div>
-                    {attemptsInfo[quiz.id]?.locked ? (
+                    {completedQuizzes.includes(quiz.id) ? (
+                      <div className="alert alert-success">
+                        Bạn đã hoàn thành quiz này.
+                      </div>
+                    ) : attemptsInfo[quiz.id]?.locked ? (
                       <div className="alert alert-warning">
                         Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào ngày {calculateNextAttemptDate(attemptsInfo[quiz.id]?.timeLeft)}.
                       </div>
@@ -191,7 +214,7 @@ export const Quiz = () => {
               <>
                 <DialogContentText>
                   <div className="quiz-info">
-                  <div className="info-item">
+                    <div className="info-item">
                       <i className="fas fa-book"></i>
                       <p>Chủ đề: {selectedQuiz.title}</p>
                     </div>
