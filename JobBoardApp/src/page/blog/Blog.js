@@ -24,22 +24,12 @@ export const Blog = () => {
   const postsPerPage = 9;
   const navigate = useNavigate();
 
-  const handleSearch = useCallback(
-    debounce((text) => {
-      setCurrentPage(0);
-      dispatch(
-        fetchAllBlog({ query: text, size: postsPerPage, page: currentPage })
-      );
-    }, 500),
-    [dispatch, searchParams, currentPage]
-  );
-
   const debouncedSearch = useCallback(
     debounce((query) => {
       setCurrentPage(0);
       dispatch(fetchBlogs({ query, page: currentPage, size: postsPerPage }));
     }, 500),
-    [dispatch, currentPage, searchText]
+    [dispatch, currentPage]
   );
 
   const handleSearchChange = (e) => {

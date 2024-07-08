@@ -131,9 +131,11 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              <li>
-                <NavLink to="/quiz">Quiz</NavLink>
-              </li>
+              {user && (
+                <li>
+                  <NavLink to="/quiz">Quiz</NavLink>
+                </li>
+              )}
               {!roles.includes("ROLE_EMPLOYER") && (
                 <li>
                   <NavLink to="/EmployerSignUp">For Employer</NavLink>
