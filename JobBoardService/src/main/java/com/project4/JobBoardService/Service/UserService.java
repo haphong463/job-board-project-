@@ -13,7 +13,8 @@ public interface UserService {
     Optional<User> findByUsername(String username);
     Optional<User> findById(Long id);
     User updateUser(Long id, User user, MultipartFile multipartFile);
-    Page<User> getUsersWithUserRole(ERole roleName, String query, Pageable pageable);  // Updated method with Pageable
+    Page<User> getUsersWithUserRole(ERole roleName, String query, Pageable pageable);
+    Page<User> getAllUsersWithQuery(String query, Pageable pageable);
     User updateUserEnableStatus(Long id, Boolean isEnabled);
-
+    void deleteUser(Long id);
 }

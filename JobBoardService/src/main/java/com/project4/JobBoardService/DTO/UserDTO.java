@@ -1,10 +1,14 @@
 package com.project4.JobBoardService.DTO;
+import com.project4.JobBoardService.Entity.Role;
+import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Enum.Gender;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,4 +24,5 @@ public class UserDTO {
     private String imageUrl;
     private String bio;
     private Boolean isEnabled;
+    private Set<Role> roles;
 }

@@ -1,7 +1,6 @@
 package com.project4.JobBoardService.Service.Impl;
 
 
-
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Repository.UserRepository;
@@ -25,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -53,17 +53,27 @@ public class UserServiceImpl implements UserService {
         return userRepository.searchByRoleAndQuery(roleName, query, pageable);
     }
 
+    @Override
+    public Page<User> getAllUsersWithQuery(String query, Pageable pageable) {
+        return userRepository.searchAllUsers(query, pageable);
+    }
+
 
     @Override
     public User updateUserEnableStatus(Long id, Boolean isEnabled) {
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser != null) {
-                existingUser.setIsEnabled(isEnabled);
+            existingUser.setIsEnabled(isEnabled);
             return userRepository.save(existingUser);
         } else {
             logger.warning("Blog not found: " + id);
             return null;
         }
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
     }
 
 
@@ -100,7 +110,7 @@ public class UserServiceImpl implements UserService {
                 String[] pathParts = urlParts[1].split("/");
                 String folder = pathParts[0];
                 String fileName = pathParts[1];
-                if(fileName.equals("thumbnail")){
+                if (fileName.equals("thumbnail")) {
                     fileName += "/" + pathParts[2];
                 }
                 boolean fileDeleted = FileUtils.deleteFile(folder, fileName);

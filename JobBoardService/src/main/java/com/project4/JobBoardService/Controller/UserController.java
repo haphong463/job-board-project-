@@ -63,14 +63,20 @@ public class UserController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
     public ResponseEntity<?> getAllUser(
             @RequestParam String query,
+            @RequestParam @Nullable ERole role,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size){
         try {
             Pageable pageable = PageRequest.of(page, size);
-
-            Page<User> userList = userService.getUsersWithUserRole(ERole.ROLE_USER, query, pageable);
+            Page<User> userList;
+            if(role == null){
+                userList = userService.getAllUsersWithQuery(query ,pageable);
+            }else{
+                userList = userService.getUsersWithUserRole(role, query, pageable);
+            }
             List<UserDTO> userDTOS = userList.stream().map(user -> modelMapper.map(user, UserDTO.class)).toList();
             PaginatedResponse<UserDTO> response = new PaginatedResponse<>();
             response.setContent(userDTOS);
@@ -110,7 +116,16 @@ public class UserController {
         }
     }
 
-
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id){
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
 
 
 }
