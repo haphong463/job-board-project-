@@ -403,7 +403,7 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
 
         quizScoreRepository.save(quizScore);
 
-        if (score > 8) {
+        if (score >= 8) {
             try {
                 File certificate = CertificateGenerator.generateCertificate(user.getUsername(), quiz.getTitle(), user.getLastName(), user.getFirstName());
                 certificateGenerator.sendCertificateEmail(user.getEmail(), user.getUsername(), certificate);
