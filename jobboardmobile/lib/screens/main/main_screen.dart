@@ -90,7 +90,46 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      prefixIcon: BoxIcon(),
+      prefixIcon: PopupMenuButton<String>(
+        icon: Icon(
+          Icons.menu,
+          color: Colors.black,
+        ),
+        onSelected: (String result) {
+          switch (result) {
+            case 'Home':
+              Navigator.of(context).pushNamed('/home');
+              break;
+            case 'Profile':
+              Navigator.of(context).pushNamed('/profile');
+              break;
+            case 'Settings':
+              Navigator.of(context).pushNamed('/settings');
+              break;
+            case 'Logout':
+              _logout();
+              break;
+          }
+        },
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          const PopupMenuItem<String>(
+            value: 'Home',
+            child: Text('Home'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'Profile',
+            child: Text('Profile'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'Settings',
+            child: Text('Settings'),
+          ),
+          const PopupMenuItem<String>(
+            value: 'Logout',
+            child: Text('Logout'),
+          ),
+        ],
+      ),
       suffixIcon: SearchIcon(),
       onTapSuffix: () => Navigator.of(context).pushNamed('/search'),
       backgroundColor: ColorUtil.backgroundColor,
