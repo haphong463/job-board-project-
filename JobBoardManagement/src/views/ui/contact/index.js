@@ -12,15 +12,24 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 import axios from "axios";
 import nprogress from "nprogress";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ContactIndex = (props) => {
   const [contacts, setContacts] = useState([]);
   const [status, setStatus] = useState("idle");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedContact, setSelectedContact] = useState(null); // State để lưu contact được chọn
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
+  const [emailMessage, setEmailMessage] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState([]);
 
   useEffect(() => {
     nprogress.start();
@@ -57,7 +66,57 @@ const ContactIndex = (props) => {
   };
 
   const handleRead = (contact) => {
-    setSelectedContact(contact); // Set contact được chọn để hiển thị chi tiết
+    setSelectedContact(contact);
+  };
+
+  const toggleDropdown = (index) => {
+    const newDropdownOpen = [...dropdownOpen];
+    newDropdownOpen[index] = !newDropdownOpen[index];
+    setDropdownOpen(newDropdownOpen);
+  };
+
+  const handleDropdownAction = (action, row, index) => {
+    switch (action) {
+      case 'read':
+        handleRead(row);
+        break;
+      case 'delete':
+        handleDelete(row.id);
+        break;
+      case 'sendEmail':
+        handleRead(row);
+        setSendEmailDialogOpen(true);
+        break;
+      default:
+        break;
+    }
+    toggleDropdown(index);
+  };
+
+  const handleSendEmail = () => {
+    nprogress.start();
+    axios.post("http://localhost:8080/api/contacts/send", {
+      email: selectedContact.email,
+      subject: selectedContact.subject,
+      message: emailMessage,
+    })
+    .then((response) => {
+      toast.success("Email sent successfully");
+      setSendEmailDialogOpen(false);
+      setSelectedContact(null); // Reset selectedContact to close Contact Details modal
+      setEmailMessage(""); // Clear email message after sending
+      nprogress.done();
+    })
+    .catch((error) => {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send email. Please try again later.");
+      nprogress.done();
+    });
+  };
+
+  const handleCancelSendEmail = () => {
+    setSendEmailDialogOpen(false);
+    setSelectedContact(null); // Reset selectedContact to close Contact Details modal
   };
 
   const columns = [
@@ -88,15 +147,23 @@ const ContactIndex = (props) => {
     },
     {
       name: "Actions",
-      cell: (row) => (
-        <div className="d-flex">
-          <button onClick={() => handleRead(row)} className="btn btn-primary me-2">
-            Read
-          </button>
-          <button onClick={() => handleDelete(row.id)} className="btn btn-danger">
-            Delete
-          </button>
-        </div>
+      cell: (row, index) => (
+        <Dropdown isOpen={dropdownOpen[index]} toggle={() => toggleDropdown(index)}>
+          <DropdownToggle caret>
+            Actions
+          </DropdownToggle>
+          <DropdownMenu>
+            <DropdownItem onClick={() => handleDropdownAction('read', row, index)}>
+              Read
+            </DropdownItem>
+            <DropdownItem onClick={() => handleDropdownAction('delete', row, index)}>
+              Delete
+            </DropdownItem>
+            <DropdownItem onClick={() => handleDropdownAction('sendEmail', row, index)}>
+              Send Email
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       ),
     },
   ];
@@ -136,7 +203,7 @@ const ContactIndex = (props) => {
       </Col>
 
       {/* Modal để hiển thị chi tiết contact */}
-      <Modal isOpen={selectedContact !== null} toggle={() => setSelectedContact(null)}>
+      <Modal isOpen={selectedContact !== null && !sendEmailDialogOpen} toggle={() => setSelectedContact(null)}>
         <ModalHeader toggle={() => setSelectedContact(null)}>Contact Details</ModalHeader>
         <ModalBody>
           {selectedContact && (
@@ -151,6 +218,29 @@ const ContactIndex = (props) => {
         </ModalBody>
         <ModalFooter>
           <button className="btn btn-secondary" onClick={() => setSelectedContact(null)}>Close</button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Modal để gửi email */}
+      <Modal isOpen={sendEmailDialogOpen} toggle={handleCancelSendEmail}>
+        <ModalHeader toggle={handleCancelSendEmail}>Send Email</ModalHeader>
+        <ModalBody>
+          {selectedContact && (
+            <div>
+              <p><strong>Email:</strong> {selectedContact.email}</p>
+              <textarea
+                className="form-control"
+                rows="5"
+                placeholder="Enter your message..."
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+              ></textarea>
+            </div>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <button className="btn btn-primary" onClick={handleSendEmail}>Send</button>
+          <button className="btn btn-secondary" onClick={handleCancelSendEmail}>Cancel</button>
         </ModalFooter>
       </Modal>
     </Row>

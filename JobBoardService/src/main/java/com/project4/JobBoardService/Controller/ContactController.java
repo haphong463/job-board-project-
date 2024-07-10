@@ -3,8 +3,15 @@ package com.project4.JobBoardService.Controller;
 import com.project4.JobBoardService.DTO.ContactDTO;
 import com.project4.JobBoardService.Entity.Contact;
 import com.project4.JobBoardService.Service.ContactService;
+import com.project4.JobBoardService.Service.EmailService;
+import com.project4.JobBoardService.payload.EmailRequest;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +22,9 @@ import java.util.List;
 @RequestMapping("/api/contacts")
 public class ContactController {
 
+
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private ContactService contactService;
 
@@ -52,6 +62,16 @@ public class ContactController {
     public ResponseEntity<Void> deleteContact(@PathVariable Long id) {
         contactService.deleteContact(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/send")
+    public ResponseEntity<String> sendEmail(@RequestBody EmailRequest emailRequest) {
+        try {
+            emailService.sendEmail(emailRequest.getEmail(), emailRequest.getSubject(), emailRequest.getMessage());
+            return ResponseEntity.ok("Email sent successfully!");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email: " + ex.getMessage());
+        }
     }
 
 }
