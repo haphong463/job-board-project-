@@ -43,9 +43,9 @@ export const fetchAllBlog = createAsyncThunk(
 );
 export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
-  async ({ query, page, size }, { rejectWithValue }) => {
+  async ({ query, page, size, type }, { rejectWithValue }) => {
     try {
-      const response = await getAllBlogFilter(query, page, size);
+      const response = await getAllBlogFilter(query, type, page, size);
       return response;
     } catch (error) {
       console.log(error);

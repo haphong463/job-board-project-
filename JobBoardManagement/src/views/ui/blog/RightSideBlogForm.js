@@ -35,6 +35,7 @@ export function RightSideBlogForm(props) {
                     })}
                     isMulti
                     closeMenuOnSelect={false}
+                    placeholder="Select category..."
                   />
                 );
               }}

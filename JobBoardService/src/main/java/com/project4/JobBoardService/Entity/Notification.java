@@ -27,6 +27,7 @@ public class Notification extends AbstractEntity {
     @JoinColumn(name = "recipient_id")
     private User recipient;
 
+    private String url;
     private String message;
     private boolean isRead;
 

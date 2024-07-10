@@ -221,49 +221,48 @@ const UserList = () => {
   // }
 
   return (
-    <>
-      <ModeratorForm />
-
-      <Card>
-        <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-          <i className="bi bi-card-text me-2"> </i>
-          User List
-        </CardTitle>
-        <InputGroup className="mb-3">
-          <InputGroupText>Search</InputGroupText>
+    <Card>
+      <div className="d-flex justify-content-between align-items-center p-3 gap-3">
+        <h4>User List</h4>
+        <ModeratorForm />
+      </div>
+      <div className="d-flex w-100 gap-2 p-2">
+        <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
           <Input
             type="text"
-            placeholder="Search by username or email"
+            placeholder="Search"
             value={searchTerm}
             onChange={handleSearchChange}
+            className="form-control"
+            id="floatingSearch"
           />
-          <InputGroupText>Role</InputGroupText>
+          <label htmlFor="floatingSearch">Search</label>
+        </div>
+        <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
           <Input type="select" value={roleFilter} onChange={handleRoleChange}>
             <option value="">All Roles</option>
             <option value="ROLE_ADMIN">Admin</option>
             <option value="ROLE_MODERATOR">Moderator</option>
             <option value="ROLE_USER">User</option>
           </Input>
-        </InputGroup>
-        {status === "loading" && (
-          <div className="d-flex justify-content-center h-100">
-            <Spinner type="grow" />
-          </div>
-        )}
-        <DataTable
-          columns={columns}
-          data={users}
-          customStyles={customStyles}
-          pagination
-          paginationPerPage={pageSize}
-          paginationRowsPerPageOptions={[5, 10, 15]}
-          paginationServer
-          paginationTotalRows={totalPages * pageSize} // Assuming 10 items per page
-          onChangePage={(page) => setCurrentPage(page - 1)}
-          onChangeRowsPerPage={handlePerRowsChange}
-        />
-      </Card>
-    </>
+          <label htmlFor="floatingSearch">Role</label>
+        </div>
+      </div>
+      <DataTable
+        columns={columns}
+        data={users}
+        customStyles={customStyles}
+        pagination
+        paginationPerPage={pageSize}
+        paginationRowsPerPageOptions={[5, 10, 15]}
+        paginationServer
+        paginationTotalRows={totalPages * pageSize} // Assuming 10 items per page
+        onChangePage={(page) => setCurrentPage(page - 1)}
+        onChangeRowsPerPage={handlePerRowsChange}
+        progressComponent={<Spinner />}
+        progressPending={status === "loading"}
+      />
+    </Card>
   );
 };
 

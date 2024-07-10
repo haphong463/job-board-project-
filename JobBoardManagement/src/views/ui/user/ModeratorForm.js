@@ -114,7 +114,7 @@ export function ModeratorForm() {
 
   return (
     <>
-      <div className="d-flex justify-content-end mb-2">
+      <div>
         <Button color="primary" onClick={toggleNewModeratorModal}>
           <IoMdAdd className="me-2" />
           New Moderator

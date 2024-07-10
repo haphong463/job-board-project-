@@ -15,8 +15,16 @@ export const signIn = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await signInAysnc(data);
-      if (typeof res === "string") {
-        switch (res) {
+      if (typeof res === "object" && res.verified === false) {
+        return rejectWithValue({
+          email: res.email,
+          message: "Please check your email to verify your account.",
+        });
+      }
+      return res;
+    } catch (error) {
+      if (typeof error.response.data.message === "string") {
+        switch (error.response.data.message) {
           case badCredentials:
             return rejectWithValue({
               message: "Your username or password is incorrect.",
@@ -27,14 +35,6 @@ export const signIn = createAsyncThunk(
             });
         }
       }
-      if (typeof res === "object" && res.verified === false) {
-        return rejectWithValue({
-          email: res.email,
-          message: "Please check your email to verify your account.",
-        });
-      }
-      return res;
-    } catch (error) {
       return rejectWithValue(error.message);
     }
   }

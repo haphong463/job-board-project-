@@ -51,12 +51,26 @@ public class BlogController {
     @GetMapping("/search")
     public ResponseEntity<?> searchBlogs(
             @RequestParam String query,
-            @RequestParam @Nullable String type,
+            @RequestParam(defaultValue = "ALL") String type,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "2") int visibility
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Blog> blogsPage = blogService.searchBlogs(query, type, pageable);
+        Page<Blog> blogsPage;
+        if(type.equals("ALL")){
+            blogsPage = switch (visibility) {
+                case 0 -> blogService.searchBlogs(query, pageable, true);
+                case 1 -> blogService.searchBlogs(query, pageable, false);
+                default -> blogService.searchBlogs(query, pageable);
+            };
+        }else{
+            blogsPage = switch (visibility) {
+                case 0 -> blogService.searchBlogs(query, type, pageable, true);
+                case 1 -> blogService.searchBlogs(query, type, pageable, false);
+                default -> blogService.searchBlogs(query, type, pageable);
+            };
+        }
         List<BlogResponseDTO> blogResponseDTOs = blogsPage.stream()
                 .map(blog -> modelMapper.map(blog, BlogResponseDTO.class))
                 .collect(Collectors.toList());
@@ -69,6 +83,9 @@ public class BlogController {
 
         return ResponseEntity.ok(response);
     }
+
+
+
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

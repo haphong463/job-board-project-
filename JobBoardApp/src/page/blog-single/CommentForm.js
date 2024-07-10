@@ -12,7 +12,10 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
   const blog = useSelector((state) => state.blogs.blog);
   const handleSubmit = (e) => {
     e.preventDefault();
+    const temporaryCommentId = `${Date.now()}`; // Generate a temporary unique ID based on the current timestamp
+
     const comment = {
+      id: temporaryCommentId, // Assign the temporary ID to the new comment
       blog: { id: blogId },
       content,
       parent: parentId ? { id: parentId } : null,
@@ -20,6 +23,7 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
         username: user.sub,
       },
     };
+
     console.log(comment);
     addComment(comment);
     if (user.sub !== blog.user.username) {
@@ -31,6 +35,7 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
         recipient: {
           username: blog.user.username,
         },
+        url: `/blog/${blog.slug}#comment-${temporaryCommentId}`,
         isRead: false,
       });
     }
