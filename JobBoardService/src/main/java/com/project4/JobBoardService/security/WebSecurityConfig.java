@@ -71,13 +71,14 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/uploads/**").permitAll()
                                 .requestMatchers(HttpMethod.GET).permitAll()
-//<<<<<<< HEAD
+
                                 .requestMatchers("/api/comments/**").permitAll()
                                 .requestMatchers("/api/usercv/**").permitAll()
                                 .requestMatchers("/api/templates/**").permitAll()
-//=======
+
                                 .requestMatchers("/api/quizzes/**").permitAll()
-//>>>>>>> main
+                                .requestMatchers("/api/contacts/**").permitAll()
+
                                 .anyRequest().authenticated()
 
                 );
