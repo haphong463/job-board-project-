@@ -21,8 +21,9 @@ import { BlogTitle } from "./BlogTitle";
 import ReadingBar from "./ReadingBar";
 import { calculateReadingTime } from "../../utils/function/readingTime";
 import { BlogSideBar } from "./BlogSideBar";
-import { motion } from "framer-motion";
 import "./style.css";
+import { Spinner } from "react-bootstrap";
+
 export const BlogSingle = () => {
   const dispatch = useDispatch();
   const blog = useSelector((state) => state.blogs.blog);
@@ -32,6 +33,7 @@ export const BlogSingle = () => {
   const user = useSelector((state) => state.auth.user);
   const { id } = useParams();
   const [readingTime, setReadingTime] = useState(0);
+  const isLoading = useSelector((state) => state.blogs.loading); // Assuming you have a loading state
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,29 +72,25 @@ export const BlogSingle = () => {
     return payload;
   };
 
+  if (isLoading) {
+    return <Spinner />;
+  }
+
   return (
     <GlobalLayoutUser>
       {blog && (
         <>
-          <motion.section
+          <section
             className="section-hero overlay inner-page bg-image"
             style={{
               backgroundImage: 'url("../../../../assets/images/hero_1.jpg")',
             }}
             id="home-section"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
           >
             <div className="container">
               <div className="row">
                 <div className="col-md-12">
-                  <motion.div
-                    className="custom-breadcrumbs mb-0"
-                    initial={{ x: -100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
+                  <div className="custom-breadcrumbs mb-0">
                     <span className="slash">Posted by</span>{" "}
                     <span className="text-white">
                       {blog.user.firstName} {blog.user.lastName}
@@ -105,31 +103,19 @@ export const BlogSingle = () => {
                     </span>
                     <span className="mx-2 slash">•</span>
                     <span className="text-white">{readingTime} min read</span>
-                  </motion.div>
+                  </div>
                   <BlogTitle title={blog.title} />
                 </div>
               </div>
             </div>
-          </motion.section>
+          </section>
           <section className="site-section" id="next-section">
             <ReadingBar />
             <div className="container">
               <div className="row">
                 <div className="col-lg-8 blog-content">
-                  <motion.h3
-                    className="mb-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {blog.title}
-                  </motion.h3>
-                  <motion.p
-                    className="text-center"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
+                  <h3 className="mb-4">{blog.title}</h3>
+                  <p className="text-center">
                     <img
                       src={blog.imageUrl}
                       alt="Image"
@@ -138,7 +124,7 @@ export const BlogSingle = () => {
                         width: "100%",
                       }}
                     />
-                  </motion.p>
+                  </p>
                   <i>{blog.citation}</i>
                   <hr />
                   <BlogContent content={blog.content} />
@@ -156,14 +142,7 @@ export const BlogSingle = () => {
                   <div className="pt-5">
                     {comments.length > 0 ? (
                       <>
-                        <motion.h3
-                          className="mb-5"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          {comments.length} Comments
-                        </motion.h3>
+                        <h3 className="mb-5">{comments.length} Comments</h3>
                         <CommentList
                           comments={comments}
                           addComment={handleAddComment}
@@ -175,18 +154,13 @@ export const BlogSingle = () => {
                     ) : (
                       <p className="font-weight-bold">No comments yet.</p>
                     )}
-                    <motion.div
-                      className="comment-form-wrap pt-5"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5 }}
-                    >
+                    <div className="comment-form-wrap pt-5">
                       <CommentForm
                         blogId={blog.id}
                         addComment={handleAddComment}
                         user={user}
                       />
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>

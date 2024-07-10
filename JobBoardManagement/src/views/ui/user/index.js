@@ -1,202 +1,269 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import {
+  deleteUserThunk,
+  getUserThunk,
+  updateUserStatusThunk,
+} from "../../../features/userSlice";
+import {
+  Alert,
+  Badge,
   Button,
   Card,
-  CardBody,
-  CardText,
   CardTitle,
-  Col,
-  Form,
-  FormGroup,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
   Input,
-  Label,
-  Row,
+  InputGroup,
+  InputGroupText,
+  Spinner,
 } from "reactstrap";
-import { getUserByIDThunk, updateUserThunk } from "../../../features/authSlice";
-import { createFormData } from "../../../utils/form-data/formDataUtil";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
+import debounce from "lodash.debounce";
+import { ModeratorForm } from "./ModeratorForm";
 import "./style.css";
-const schema = yup.object().shape({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-  bio: yup.string(),
-  gender: yup
-    .string()
-    .oneOf(["MALE", "FEMALE", "OTHER"])
-    .required("Gender is required"),
-  imageFile: yup.mixed().test("fileSize", "File is too large", (value) => {
-    return !value || (value && value.size <= 2000000); // 2MB
-  }),
-});
-
-const User = () => {
-  const user = useSelector((state) => state.auth.user);
-  const accessToken = useSelector((state) => state.auth.accessToken);
+import Swal from "sweetalert2";
+const UserList = () => {
   const dispatch = useDispatch();
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isDirty },
-    setValue,
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      firstName: user?.firstName,
-      lastName: user?.lastName,
-      bio: user?.bio,
-      gender: user?.gender,
-      imageFile: "",
+  const users = useSelector((state) => state.user.list);
+  const totalPages = useSelector((state) => state.user.totalPages);
+  const status = useSelector((state) => state.user.status);
+  const error = useSelector((state) => state.user.error);
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [dropdownOpen, setDropdownOpen] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+
+  const toggleDropdown = (id) => {
+    setDropdownOpen((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
+  };
+  const handleStatusToggle = (userId, isEnabled) => {
+    NProgress.start();
+    dispatch(updateUserStatusThunk({ userId, isEnabled: !isEnabled })).finally(
+      () => {
+        NProgress.done();
+      }
+    );
+  };
+
+  const handleDeleteUser = (userId) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Gọi action để xóa user
+        dispatch(deleteUserThunk(userId)).then((res) => {
+          if (res.meta.requestStatus === "fulfilled") {
+            Swal.fire("Deleted!", "The user has been deleted.", "success");
+          }
+        });
+      }
+    });
+  };
+  const mapRoleName = (roleName) => {
+    switch (roleName) {
+      case "ROLE_ADMIN":
+        return "ADMINISTRATOR";
+      case "ROLE_MODERATOR":
+        return "MODERATOR";
+      case "ROLE_USER":
+        return "USER";
+      default:
+        return "";
+    }
+  };
+
+  const columns = [
+    {
+      name: "Image",
+      cell: (row) => (
+        <div>
+          <img
+            src={
+              row.imageUrl
+                ? row.imageUrl
+                : "https://i.pinimg.com/736x/0d/64/98/0d64989794b1a4c9d89bff571d3d5842.jpg"
+            }
+            className="rounded-circle"
+            width={50}
+            height={50}
+            alt={row.id}
+          />
+        </div>
+      ),
     },
-  });
+    {
+      name: "Username",
+      selector: (row) => row.username,
+      sortable: true,
+      cell: (row) => <div>{row.username}</div>,
+      width: "300px",
+    },
+    {
+      name: "Email",
+      selector: (row) => row.email,
+      sortable: true,
+      cell: (row) => <div>{row.email}</div>,
+      width: "300px",
+    },
+    {
+      name: "Gender",
+      cell: (row) => row.gender ?? "Not updated",
+    },
 
-  const onSubmit = (data) => {
-    data = {
-      ...data,
-      id: user.id,
-      username: user.username,
-    };
+    {
+      name: "Status",
+      selector: (row) => row.isEnabled,
+      sortable: true,
+      cell: (row) => (
+        <Badge pill color={row.isEnabled ? "primary" : "danger"}>
+          {row.isEnabled ? "Active" : "Deactive"}
+        </Badge>
+      ),
+    },
+    {
+      name: "Role",
+      cell: (row) => row.roles.map((item) => mapRoleName(item.name)).join(", "),
+      width: "200px",
+    },
+    {
+      name: "Actions",
+      cell: (row) =>
+        !row.roles.map((item) => item.name).includes("ROLE_ADMIN") && (
+          <Dropdown
+            isOpen={dropdownOpen[row.id]}
+            toggle={() => toggleDropdown(row.id)}
+            a11y
+          >
+            <DropdownToggle caret size="sm">
+              Actions
+            </DropdownToggle>
+            <DropdownMenu>
+              <DropdownItem
+                onClick={() => handleStatusToggle(row.id, row.isEnabled)}
+              >
+                {row.isEnabled ? "Deactivate" : "Activate"}
+              </DropdownItem>
+              {!row.isEnabled && (
+                <DropdownItem
+                  color="danger"
+                  onClick={() => handleDeleteUser(row.id)}
+                >
+                  Delete
+                </DropdownItem>
+              )}
+            </DropdownMenu>
+          </Dropdown>
+        ),
+    },
+  ];
 
-    console.log(">>> data to update: ", data);
+  const debouncedSearch = useCallback(
+    debounce((query, role) => {
+      dispatch(
+        getUserThunk({ query, role, page: currentPage, size: pageSize })
+      );
+    }, 500),
+    [dispatch, currentPage, pageSize]
+  );
 
-    const formData = createFormData(data);
-    dispatch(updateUserThunk({ formData, userId: data.id }));
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    debouncedSearch(e.target.value, roleFilter);
+  };
+
+  const handleRoleChange = (e) => {
+    setRoleFilter(e.target.value);
+    debouncedSearch(searchTerm, e.target.value);
+  };
+
+  const handlePerRowsChange = (newPageSize, page) => {
+    setPageSize(newPageSize);
+    setCurrentPage(page - 1);
   };
 
   useEffect(() => {
-    if (!user) {
-      dispatch(getUserByIDThunk(accessToken.id)).then((res) => {
-        const reqStatus = res.meta.requestStatus;
-        const payload = res.payload;
-        if (reqStatus === "fulfilled") {
-          setValue("bio", payload.bio);
-          setValue("firstName", payload.firstName);
-          setValue("lastName", payload.lastName);
-          setValue("gender", payload.gender);
-        }
-      });
-    }
-  }, [user]);
+    dispatch(
+      getUserThunk({
+        query: searchTerm,
+        role: roleFilter,
+        page: currentPage,
+        size: pageSize,
+      })
+    );
+  }, [dispatch, currentPage, pageSize]);
+
+  const customStyles = {
+    rows: {
+      style: {
+        padding: "15px 0",
+      },
+    },
+  };
+
+  // if (status === "rejected") {
+  //   return <Alert color="danger">Error: {error}</Alert>;
+  // }
 
   return (
-    user && (
-      <Row>
-        <Col lg={4} md={6} sm={12}>
-          <Card>
-            <CardBody className="text-center">
-              <img
-                alt="Avatar"
-                src={user?.imageUrl}
-                className="rounded-circle img-fluid"
-                style={{ width: "150px", height: "150px" }}
-              />
-              <CardTitle tag="h5" className="mt-3">
-                {`${user?.firstName} ${user?.lastName}`}
-              </CardTitle>
-              <CardText className="text-truncate-multiline">
-                {user?.bio}
-              </CardText>
-            </CardBody>
-          </Card>
-        </Col>
-        <Col lg={8} md={6} sm={12}>
-          <Card className="p-4">
-            <Form onSubmit={handleSubmit(onSubmit)}>
-              <FormGroup>
-                <Label for="firstName">First Name</Label>
-                <Controller
-                  name="firstName"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="firstName"
-                      placeholder="Enter your first name"
-                    />
-                  )}
-                />
-                {errors.firstName && <p>{errors.firstName.message}</p>}
-              </FormGroup>
-              <FormGroup>
-                <Label for="lastName">Last Name</Label>
-                <Controller
-                  name="lastName"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="lastName"
-                      placeholder="Enter your last name"
-                    />
-                  )}
-                />
-                {errors.lastName && <p>{errors.lastName.message}</p>}
-              </FormGroup>
-              <FormGroup>
-                <Label for="bio">Bio</Label>
-                <Controller
-                  name="bio"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="bio"
-                      type="textarea"
-                      rows={10}
-                      placeholder="Enter your bio"
-                    />
-                  )}
-                />
-                {errors.bio && <p>{errors.bio.message}</p>}
-              </FormGroup>
-              <FormGroup>
-                <Label for="gender">Gender</Label>
-                <Controller
-                  name="gender"
-                  control={control}
-                  render={({ field }) => (
-                    <Input {...field} id="gender" type="select">
-                      <option value="" disabled>
-                        Select your gender
-                      </option>
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
-                    </Input>
-                  )}
-                />
-                {errors.gender && <p>{errors.gender.message}</p>}
-              </FormGroup>
-              <FormGroup>
-                <Label for="file">File</Label>
-                <Controller
-                  name="imageFile"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="file"
-                      type="file"
-                      onChange={(e) =>
-                        setValue("imageFile", e.target.files[0], {
-                          shouldDirty: true,
-                        })
-                      }
-                    />
-                  )}
-                />
-                {errors.file && <p>{errors.file.message}</p>}
-              </FormGroup>
-              <Button color="primary" type="submit" disabled={!isDirty}>
-                Save Changes
-              </Button>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
-    )
+    <Card>
+      <div className="d-flex justify-content-between align-items-center p-3 gap-3">
+        <h4>User List</h4>
+        <ModeratorForm />
+      </div>
+      <div className="d-flex w-100 gap-2 p-2">
+        <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
+          <Input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="form-control"
+            id="floatingSearch"
+          />
+          <label htmlFor="floatingSearch">Search</label>
+        </div>
+        <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
+          <Input type="select" value={roleFilter} onChange={handleRoleChange}>
+            <option value="">All Roles</option>
+            <option value="ROLE_ADMIN">Admin</option>
+            <option value="ROLE_MODERATOR">Moderator</option>
+            <option value="ROLE_USER">User</option>
+          </Input>
+          <label htmlFor="floatingSearch">Role</label>
+        </div>
+      </div>
+      <DataTable
+        columns={columns}
+        data={users}
+        customStyles={customStyles}
+        pagination
+        paginationPerPage={pageSize}
+        paginationRowsPerPageOptions={[5, 10, 15]}
+        paginationServer
+        paginationTotalRows={totalPages * pageSize} // Assuming 10 items per page
+        onChangePage={(page) => setCurrentPage(page - 1)}
+        onChangeRowsPerPage={handlePerRowsChange}
+        progressComponent={<Spinner />}
+        progressPending={status === "loading"}
+      />
+    </Card>
   );
 };
 
-export default User;
+export default UserList;

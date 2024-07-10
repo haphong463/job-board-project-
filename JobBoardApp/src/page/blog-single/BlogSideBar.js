@@ -14,8 +14,11 @@ export const BlogSideBar = memo((props) => {
 
   // Lọc ra các bài blog có ít nhất một category giống với blog hiện tại
   const relatedBlogs = blogs
-    .filter((item) =>
-      item.categories.some((cat) => currentBlogCategories.includes(cat.name))
+    .filter(
+      (item) =>
+        item.categories.some((cat) =>
+          currentBlogCategories.includes(cat.name)
+        ) && item.id !== blog.id
     )
     .slice(0, 5);
 
@@ -54,7 +57,7 @@ export const BlogSideBar = memo((props) => {
           <h3>Related article</h3>
           {relatedBlogs.map((blog) => (
             <li key={blog.id}>
-              <NavLink href="#">{blog.title}</NavLink>
+              <NavLink to={`/blog/${blog.slug}`}>{blog.title}</NavLink>
             </li>
           ))}
         </div>

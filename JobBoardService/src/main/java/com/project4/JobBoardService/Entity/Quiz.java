@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "quizzes")
@@ -20,16 +23,31 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    @Column(length = 1000) // Set the length to 1000 characters or any length you need
     private String description;
 
     private String imageUrl;
     private String thumbnailUrl;
-    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Question> questions;
+    private List<Question> questions = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+
+public Quiz(Long id) {
+        this.id = id;
+    }
+    private int numberOfUsers; // Add this field
+
+    public void incrementNumberOfUsers() {
+        this.numberOfUsers++;
+    }
+
+
+    @ManyToMany(mappedBy = "completedQuizzes")
+    private Set<User> usersCompleted = new HashSet<>();
 
 }
 

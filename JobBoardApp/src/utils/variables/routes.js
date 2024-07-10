@@ -17,6 +17,12 @@ import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
 import { JobSingle } from "../../page/job-single/JobSingle";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
+import CreateCV from "../../page/user-cv/CreateCv";
+import CreateTemplate from "../../page/user-cv/CreateTemplate";
+import ListTemplate from "../../page/list-template/ListTemplate";
+import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
+
+
 import SetupCredentials from "../../page/signup/SetupCredentials";
 import { Quiz } from "../../page/quiz/quiz";
 import QuizResult from "../../page/quiz/QuizResult";
@@ -24,8 +30,7 @@ import QuizQuestions from "../../page/quiz/QuizQuestions";
 import { CompanyDetail } from "../../page/job-listing/company_detail";
 import { ViewAllCompany } from "../../page/job-listing/listCompanyAll";
 import { WriteReview } from "../../page/job-listing/company-review";
-
-import React from "react";
+import UpdateCv from "../../page/user-cv/UpdateCv";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -41,6 +46,12 @@ export const routes = [
   { path: "/viewAllSkill", component: <ViewAllSkill /> },
   { path: "/login", component: <Login /> },
   { path: "/signup", component: <SignUp /> },
+  { path: "/create-cv", component: <CreateCV /> },
+  { path: "/update-cv/:cvId", component: <UpdateCv /> },
+  { path: "/create-template", component: <CreateTemplate /> },
+
+  { path: "/list-template", component: <ListTemplate /> },
+  { path: "/review-template/:templateName", component: <ReviewTemplate /> },
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
   { path: "/job/:id", component: <JobSingle /> },

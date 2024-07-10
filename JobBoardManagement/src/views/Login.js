@@ -16,7 +16,7 @@ import {
 } from "reactstrap";
 import logo from "../assets/images/logos/logo.png";
 import { useDispatch, useSelector } from "react-redux";
-import { login, updateUserAndRoles } from "../features/authSlice";
+import { login, signOut, updateUserAndRoles } from "../features/authSlice";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import showToast from "../utils/functions/showToast";
 import nprogress from "nprogress";
@@ -31,8 +31,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const authStatus = useSelector((state) => state.auth.status);
   const messageError = useSelector((state) => state.auth.verificationMessage);
-  const accessToken = useSelector((state) => state.auth.accessToken);
-  const roles = useSelector((state) => state.auth.roles);
+  const user = useSelector((state) => state.auth.user);
   const locationState = useSelector((state) => state.auth.location);
   const navigate = useNavigate();
   const {
@@ -52,41 +51,37 @@ const Login = () => {
     nprogress.start();
     dispatch(login(data))
       .then((res) => {
-        // Handle successful login
         if (res.meta.requestStatus === "fulfilled") {
-          // Navigate to the desired route
-          console.log("dang nhap ok!");
-          navigate("/jobportal");
+          if (
+            res.payload.roles.some(
+              (item) => item === "ROLE_ADMIN" || item === "ROLE_MODERATOR"
+            )
+          ) {
+            navigate("/jobportal");
+          } else {
+            showToast("You don't have access rights!", "error");
+            dispatch(signOut());
+          }
         }
       })
       .catch((err) => {
-        // Handle error
         console.error("Login failed:", err);
       })
       .finally(() => {
         nprogress.done();
       });
   };
-  useEffect(() => {
-    if (accessToken) {
-      console.log(accessToken);
-      if (
-        !accessToken.role.map((item) => item.authority).includes("ROLE_ADMIN")
-      ) {
-        showToast("You don't have access rights!", "error");
-      } else {
-        showToast(`Welcome back, ${accessToken.sub}`);
-        // navigate("/jobportal", { replace: true });
-      }
-    }
-  }, [accessToken]);
-  if (
-    accessToken &&
-    accessToken.role.map((item) => item.authority).includes("ROLE_ADMIN")
-  ) {
-    const redirectPath = locationState || "/jobportal";
-    return <Navigate to={redirectPath} />;
-  }
+
+  // if (
+  //   user &&
+  //   user.role.some(
+  //     (role) =>
+  //       role.authority === "ROLE_ADMIN" || role.authority === "ROLE_MODERATOR"
+  //   )
+  // ) {
+  //   const redirectPath = locationState || "/jobportal";
+  //   return <Navigate to={redirectPath} />;
+  // }
 
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
@@ -107,14 +102,14 @@ const Login = () => {
                   <Input
                     type="text"
                     id="username"
-                    placeholder="enter your username..."
-                    invalid={!!errors.email}
+                    placeholder="Enter your username..."
+                    invalid={!!errors.username}
                     {...field}
                   />
                 )}
               />
-              {errors.email && (
-                <FormFeedback>{errors.email.message}</FormFeedback>
+              {errors.username && (
+                <FormFeedback>{errors.username.message}</FormFeedback>
               )}
             </FormGroup>
             <FormGroup>
@@ -126,7 +121,7 @@ const Login = () => {
                   <Input
                     type="password"
                     id="password"
-                    placeholder="enter your password..."
+                    placeholder="Enter your password..."
                     invalid={!!errors.password}
                     {...field}
                   />

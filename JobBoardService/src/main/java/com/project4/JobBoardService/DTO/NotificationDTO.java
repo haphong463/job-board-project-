@@ -13,4 +13,5 @@ public class NotificationDTO {
     private UserDTO recipient;
     private String message;
     private boolean isRead;
+    private String url;
 }

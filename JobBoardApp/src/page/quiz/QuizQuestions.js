@@ -1,45 +1,56 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
+import {
+  fetchQuizDetailsThunk,
+  fetchQuizQuestionsThunk,
+  submitQuizThunk,
+} from "../../features/quizSlice";
 import "./QuizQuestions.css";
+import axiosRequest from "../../configs/axiosConfig";
+import axios from "axios";
+import { v4 as uuidv4 } from 'uuid';
 
 const QuizQuestions = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [quizTitle, setQuizTitle] = useState("");
-  const [questions, setQuestions] = useState([]);
+  const {
+    quizTitle,
+    questions,
+    status,
+    error,
+    score,
+    totalQuestions,
+  } = useSelector((state) => state.quiz);
+  const user = useSelector((state) => state.auth.user); // Assuming you have stored user information in Redux
+
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10 * 60); 
+  const [timeLeft, setTimeLeft] = useState(10 * 60);
   const [showModal, setShowModal] = useState(false);
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
-  const [score, setScore] = useState(null);
-  const [totalQuestions, setTotalQuestions] = useState(0);
-
-  const REACT_APP_API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "http://localhost:8080/api";
-
+ 
   useEffect(() => {
-    const fetchQuizDetails = async () => {
-      try {
-        const quizResponse = await axios.get(`${REACT_APP_API_ENDPOINT}/quizzes/${quizId}`);
-        setQuizTitle(quizResponse.data.title);
+    const sessionId = localStorage.getItem(`sessionId_${quizId}`);
+    const savedQuestions = localStorage.getItem(`questions_${quizId}`);
+    
+    if (sessionId && savedQuestions) {
+      dispatch({ type: 'quiz/fetchQuizQuestions/fulfilled', payload: JSON.parse(savedQuestions) });
+    } else {
+      const newSessionId = uuidv4();
+      localStorage.setItem(`sessionId_${quizId}`, newSessionId);
+      dispatch(fetchQuizQuestionsThunk(quizId)).then((result) => {
+        localStorage.setItem(`questions_${quizId}`, JSON.stringify(result.payload));
+      });
+    }
 
-        const questionsResponse = await axios.get(`${REACT_APP_API_ENDPOINT}/quizzes/${quizId}/questions`);
-        setQuestions(questionsResponse.data);
-        setTotalQuestions(questionsResponse.data.length); 
-        
-      } catch (error) {
-        console.error("Error fetching quiz details:", error);
-      }
-    };
-
-    fetchQuizDetails();
-
+    dispatch(fetchQuizDetailsThunk(quizId));
     const savedTimeLeft = localStorage.getItem(`timeLeft_${quizId}`);
     if (savedTimeLeft) {
       setTimeLeft(parseInt(savedTimeLeft, 10));
@@ -64,7 +75,7 @@ const QuizQuestions = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [quizId, REACT_APP_API_ENDPOINT]);
+  }, [quizId, dispatch]);
 
   useEffect(() => {
     localStorage.setItem(`selectedAnswers_${quizId}`, JSON.stringify(selectedAnswers));
@@ -93,40 +104,55 @@ const QuizQuestions = () => {
     };
     setSelectedAnswers(updatedAnswers);
   };
-
   const handleSubmitQuiz = async () => {
     const submission = {
-      quizId: parseInt(quizId),
-      questions: Object.keys(selectedAnswers).map((questionId) => ({
-        questionId: parseInt(questionId),
-        selectedAnswer: selectedAnswers[questionId].split(".")[0].trim(),
-      })),
+        quizId: parseInt(quizId),
+        userId: user.id,
+        questions: Object.keys(selectedAnswers).map((questionId) => ({
+            questionId: parseInt(questionId),
+            selectedAnswer: selectedAnswers[questionId].split(".")[0].trim(),
+            userAnswer: selectedAnswers[questionId],
+        })),
     };
 
     try {
-      const response = await axios.post(`${REACT_APP_API_ENDPOINT}/quizzes/submit`, submission);
+        console.log("Submitting quiz with data:", submission);
+        const response = await axiosRequest.post(`/quizzes/submit`, submission);
 
-      if (response.data && Array.isArray(response.data)) {
-        const results = response.data;
-        setShowModal(false);
-        setShowScoreModal(true);
-        localStorage.removeItem(`timeLeft_${quizId}`);
-        localStorage.removeItem(`selectedAnswers_${quizId}`);
-        navigate(`/quiz/${quizId}/result`, {
-          state: {
-            results: results,
-            totalQuestions: questions.length,
-            quizId: quizId 
-          },
-        });
-      } else {
-        console.error("Unexpected response data:", response.data);
-      }
+        // Debug: Log the full response
+        console.log("Full response from server:", response);
+
+        if (response) {
+            const { results, score } = response;
+            console.log("Results:", results);
+            console.log("Score:", score);
+
+            // Ensure results and score are present
+            if (Array.isArray(results) && typeof score === 'number') {
+                console.log("Valid response data:", response);
+
+                setShowModal(false);
+                setShowScoreModal(true);
+                localStorage.removeItem(`timeLeft_${quizId}`);
+                localStorage.removeItem(`selectedAnswers_${quizId}`);
+                navigate(`/quiz/${quizId}/result`, {
+                    state: {
+                        results: results,
+                        totalQuestions: questions.length,
+                        score: score,
+                        quizId: quizId, 
+                    },
+                });
+            } else {
+                console.error("Unexpected response structure:", response);
+            }
+        } else {
+            console.error("No data received:", response);
+        }
     } catch (error) {
-      console.error("Error submitting quiz:", error);
+        console.error("Error submitting quiz:", error);
     }
-  };
-
+};
   const handleExitQuiz = () => {
     setShowExitConfirmModal(true);
   };

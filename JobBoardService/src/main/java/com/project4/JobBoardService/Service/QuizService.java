@@ -1,6 +1,8 @@
 package com.project4.JobBoardService.Service;
 
+import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.QuestionResultDTO;
+import com.project4.JobBoardService.DTO.QuizDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Quiz;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,4 +22,5 @@ public interface QuizService {
 
     List<QuestionResultDTO> calculateDetailedScore(QuizSubmissionDTO quizSubmission);
 
+    void completeQuiz(Long quizId, Long userId) throws ResourceNotFoundException;
 }

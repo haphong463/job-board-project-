@@ -13,18 +13,17 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+import javax.crypto.SecretKey;
+
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${app.jwtSecret}")
-    private String jwtSecret;
-
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-
-
+    // Generate a secure key for HS512 algorithm
+    private SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
@@ -32,32 +31,43 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
                 .claim("role", userPrincipal.getAuthorities())
-                .claim("firstName", userPrincipal.getFirstName())   // Use userPrincipal.getFirstName()
+                .claim("firstName", userPrincipal.getFirstName())
                 .claim("lastName", userPrincipal.getLastName())
                 .claim("id", userPrincipal.getId())
                 .claim("imageUrl", userPrincipal.getImageUrl())
-                .claim("bio", userPrincipal.getBio())// Use userPrincipal.getLastName()
+                .claim("bio", userPrincipal.getBio())
                 .claim("gender", userPrincipal.getGender())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
-                .signWith(key(), SignatureAlgorithm.HS256)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    private Key key() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+    public String generateTokenFromUsername(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
     }
 
-
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key()).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser()
+                .setSigningKey(key)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
+            Jwts.parser()
+                    .setSigningKey(key)
+                    .parseClaimsJws(authToken);
             return true;
+        } catch (SignatureException e) {
+            logger.error("Invalid JWT signature: {}", e.getMessage());
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
@@ -70,5 +80,4 @@ public class JwtUtils {
 
         return false;
     }
-
 }

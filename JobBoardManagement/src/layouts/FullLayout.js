@@ -4,78 +4,96 @@ import Header from "./Header";
 import { Container } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import {
   getUserByIDThunk,
   logout,
   setLocationState,
+  signOut,
   updateRoles,
+  updateToken,
   updateUserAndRoles,
 } from "../features/authSlice";
 import "nprogress/nprogress.css"; // Import the CSS file
 import { fetchBlogs } from "../features/blogSlice";
 import { fetchBlogCategory } from "../features/blogCategorySlice";
 import showToast from "../utils/functions/showToast";
+import axios from "axios";
+
 const FullLayout = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const accessToken = useSelector((state) => state.auth.accessToken);
-  const roles = useSelector((state) => state.auth.roles);
-  const blogStatus = useSelector((state) => state.blogs.status);
-  const categoryStatus = useSelector((state) => state.blogCategory.status);
+
   const navigate = useNavigate();
   const location = useLocation();
+  const handleLogout = () => {
+    dispatch(signOut());
+    navigate("/jobportal/login");
+  };
+
   useEffect(() => {
     dispatch(setLocationState(location.pathname));
   }, [location, dispatch]);
 
   useEffect(() => {
-    if (accessToken) {
-      const refreshAuthToken = () => {
-        const expiresIn = accessToken?.exp || 0;
-        const nowInSeconds = Math.floor(Date.now() / 1000);
-        const remainingTime = expiresIn - nowInSeconds;
-        const refreshTime = Math.max(0, remainingTime - 5);
+    console.log("---------REFRESH TOKEN---------");
+    console.log(">>>user: ", user);
 
-        // Hiển thị số giây còn lại trong console.log
+    const refreshAuthToken = (user, dispatch, navigate) => {
+      const expiresIn = user?.exp || 0;
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const remainingTime = expiresIn - nowInSeconds;
+      const refreshTime = Math.max(0, remainingTime - 5);
 
-        const refreshTokenTimeout = setTimeout(() => {
-          dispatch(logout());
+      const refreshTokenTimeout = setTimeout(async () => {
+        try {
+          const refreshToken = localStorage.getItem("refreshToken");
+
+          if (refreshToken) {
+            console.log(">>>user: ", user);
+            const response = await axios.post(
+              "http://localhost:8080/api/auth/refreshtoken",
+              {
+                refreshToken,
+              }
+            );
+
+            if (response.status === 200) {
+              const newAccessToken = response.data.accessToken;
+
+              dispatch(updateToken(newAccessToken));
+            }
+          }
+        } catch (error) {
+          const status = error.response.status;
+          console.log(">>>status: ", status);
+          if (status === 403) {
+            showToast(
+              "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!",
+              "error"
+            );
+          }
+          dispatch(signOut());
           navigate("/jobportal/login");
-          console.log("Token expired");
-        }, refreshTime * 1000);
+        }
+      }, refreshTime * 1000);
 
-        return () => {
-          clearTimeout(refreshTokenTimeout);
-        };
+      return () => {
+        clearTimeout(refreshTokenTimeout);
       };
-      const refreshTokenTimeout = refreshAuthToken();
-
-      return () => clearTimeout(refreshTokenTimeout);
-    }
-  }, [user, dispatch, navigate]);
-
-  useEffect(() => {
-    // if (blogStatus === "idle" || categoryStatus === "idle") {
-    const fetchData = async () => {
-      try {
-        await Promise.all([
-          dispatch(fetchBlogs()).unwrap(),
-          dispatch(fetchBlogCategory()).unwrap(),
-          dispatch(getUserByIDThunk(accessToken.id)),
-        ]);
-        showToast("The data has been loaded successfully.");
-      } catch (error) {
-        showToast("Error loading data.", "error");
-      }
     };
 
-    fetchData();
+    if (user) {
+      refreshAuthToken(user, dispatch, navigate);
+    }
+  }, [dispatch, localStorage.getItem("accessToken")]);
 
-    // }
-  }, [dispatch]);
+  const hasAdminOrModeratorRole = user?.role.some(
+    (role) =>
+      role.authority === "ROLE_ADMIN" || role.authority === "ROLE_MODERATOR"
+  );
 
-  if (!accessToken) {
+  if (!hasAdminOrModeratorRole) {
     return <Navigate to="/jobportal/login" />;
   }
 
@@ -87,7 +105,7 @@ const FullLayout = () => {
         </aside>
 
         <div className="contentArea">
-          <Header />
+          <Header handleLogout={handleLogout} />
           <Container className="p-4 wrapper" fluid>
             <Outlet />
           </Container>

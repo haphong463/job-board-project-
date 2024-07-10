@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../features/authSlice";
+import { logout, signOut } from "../../features/authSlice";
 import
-{
-   Dropdown,
-   DropdownToggle,
-   DropdownMenu,
-   DropdownItem,
-} from "reactstrap";
+   {
+      Dropdown,
+      DropdownToggle,
+      DropdownMenu,
+      DropdownItem,
+   } from "reactstrap";
 import { FaBell, FaChevronRight, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import
-{
-   markNotificationAsRead,
-   readNotificationThunk,
-} from "../../features/notificationSlice";
+   {
+      markNotificationAsRead,
+      readNotificationThunk,
+   } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
 import categoryData from './category.json';
@@ -25,36 +25,29 @@ import companyData from '../../page/job-listing/company_data.json';
 export function GlobalNavbar ()
 {
    const [searchParams] = useSearchParams();
-   const [categoriess, setCategoriess] = useState([]);
+   const [categories, setCategories] = useState([]);
    const [companies, setCompanies] = useState([]);
-   const [hoveredCategory, setHoveredCategory] = useState(null);
-   const [dropdownOpen, setDropdownOpen] = useState(false);
-   const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
    const [isSkillsDropdownVisible, setSkillsDropdownVisible] = useState(false);
    const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
+   const [dropdownOpen, setDropdownOpen] = useState(false);
+   const [notificationOpen, setNotificationOpen] = useState(false);
 
    const notifications = useSelector((state) => state.notification.list);
    const user = useSelector((state) => state.auth.user);
    const roles = useSelector((state) => state.auth.roles);
    const dispatch = useDispatch();
-   const categories = useSelector((state) => state.category.categories);
    const blogCategory = useSelector((state) => state.blogs.categories);
    const unreadCount = useSelector((state) => state.notification.unreadCount);
    const navigate = useNavigate();
 
    const handleLogout = () =>
    {
-      dispatch(logout());
+      dispatch(signOut());
    };
 
    useEffect(() =>
    {
-      // if (categories.length === 0)
-      // {
-      //   dispatch(fetchCategoryThunk());
-      //   dispatch(fetchAllCategories());
-      // }
-      setCategoriess(categoryData);
+      setCategories(categoryData);
       setCompanies(companyData);
    }, [dispatch]);
 
@@ -106,19 +99,31 @@ export function GlobalNavbar ()
                               onMouseEnter={() => setSkillsDropdownVisible(true)}
                               onMouseLeave={() => setSkillsDropdownVisible(false)}
                            >
-                              <NavLink to="/viewAllSkill">Job By Skills <FaChevronRight className="icon" /></NavLink>
+                              <NavLink to="/viewAllSkill">
+                                 Job By Skills <FaChevronRight className="icon" />
+                              </NavLink>
                               {isSkillsDropdownVisible && (
                                  <div className="skills-dropdown">
                                     <div className="dropdown-columns">
                                        {Array.from({ length: 3 }).map((_, colIndex) => (
                                           <ul key={colIndex} className="sub-dropdown">
-                                             {categoriess.slice(colIndex * 12, colIndex * 3 + 12).map((category) => (
-                                                <li key={category.categoryId} onClick={() => handleCategoryClick(category.categoryId)}>
-                                                   {category.categoryName}
-                                                </li>
-                                             ))}
-                                             {(colIndex + 1) * 15 <= categoriess.length && (
-                                                <li className="view-all" onClick={() => navigate('/viewAllSkill')}>
+                                             {categories
+                                                .slice(colIndex * 12, colIndex * 3 + 12)
+                                                .map((category) => (
+                                                   <li
+                                                      key={category.categoryId}
+                                                      onClick={() =>
+                                                         handleCategoryClick(category.categoryId)
+                                                      }
+                                                   >
+                                                      {category.categoryName}
+                                                   </li>
+                                                ))}
+                                             {(colIndex + 1) * 15 <= categories.length && (
+                                                <li
+                                                   className="view-all"
+                                                   onClick={() => navigate('/viewAllSkill')}
+                                                >
                                                    View All Jobs by Skill <FaChevronRight className="icon2" />
                                                 </li>
                                              )}
@@ -133,19 +138,31 @@ export function GlobalNavbar ()
                               onMouseEnter={() => setCompanyDropdownVisible(true)}
                               onMouseLeave={() => setCompanyDropdownVisible(false)}
                            >
-                              <NavLink to="/viewAllCompany">Job By Company<FaChevronRight className="icon3" /></NavLink>
+                              <NavLink to="/viewAllCompany">
+                                 Job By Company<FaChevronRight className="icon3" />
+                              </NavLink>
                               {isCompanyDropdownVisible && (
                                  <div className="skills-dropdown">
                                     <div className="dropdown-columns">
                                        {Array.from({ length: 3 }).map((_, colIndex) => (
                                           <ul key={colIndex} className="sub-dropdown">
-                                             {companies.slice(colIndex * 12, colIndex * 3 + 12).map((company) => (
-                                                <li key={company.companyId} onClick={() => handleCompanyClick(company.companyId)}>
-                                                   {company.companyName}
-                                                </li>
-                                             ))}
+                                             {companies
+                                                .slice(colIndex * 12, colIndex * 3 + 12)
+                                                .map((company) => (
+                                                   <li
+                                                      key={company.companyId}
+                                                      onClick={() =>
+                                                         handleCompanyClick(company.companyId)
+                                                      }
+                                                   >
+                                                      {company.companyName}
+                                                   </li>
+                                                ))}
                                              {(colIndex + 1) * 15 <= companies.length && (
-                                                <li className="view-all" onClick={() => navigate('/viewAllCompany')}>
+                                                <li
+                                                   className="view-all"
+                                                   onClick={() => navigate('/viewAllCompany')}
+                                                >
                                                    View All Jobs by Company <FaChevronRight className="icon4" />
                                                 </li>
                                              )}
@@ -180,9 +197,15 @@ export function GlobalNavbar ()
                      <li>
                         <NavLink to="/contact">Contact</NavLink>
                      </li>
+                     {user && (
+                        <li>
+                           <NavLink to="/quiz">Quiz</NavLink>
+                        </li>
+                     )}
                      <li>
-                        <NavLink to="/quiz">Quiz</NavLink>
+                        <NavLink to="/create-cv">Create CV</NavLink>
                      </li>
+
                      {!roles.includes("ROLE_EMPLOYER") && (
                         <li>
                            <NavLink to="/EmployerSignUp">For Employer</NavLink>
@@ -216,11 +239,6 @@ export function GlobalNavbar ()
                      )}
                      {user && (
                         <div className="icon-notification" onClick={toggleNotification}>
-                           {/* <img
-               src="https://i.imgur.com/AC7dgLA.png"
-               alt=""
-               className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
-               /> */}
                            <FaBell
                               size={30}
                               color="white"
@@ -255,36 +273,35 @@ export function GlobalNavbar ()
                                     className="notifications-item"
                                     onClick={
                                        !notification.read
-                                          ? () => handleMarkNotification(notification.id)
-                                          : undefined
+                                          ? () =>
+                                          {
+                                             handleMarkNotification(notification.id);
+                                             navigate(notification.url);
+                                          }
+                                          : () =>
+                                          {
+                                             navigate(notification.url);
+                                          }
                                     }
                                  >
-                                    <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
+                                    <img src={notification.sender.imageUrl} alt="img" />
                                     <div className="text">
                                        <h4
-                                          className={`${notification.read ? "" : "font-weight-bold"
-                                             }`}
+                                          className={`${notification.read ? "" : "font-weight-bold"}`}
                                        >
                                           {notification.sender.firstName}{" "}
                                           {notification.sender.lastName}
                                        </h4>
                                        <p
-                                          className={`${notification.read ? "" : "font-weight-bold"
-                                             }`}
+                                          className={`${notification.read ? "" : "font-weight-bold"}`}
                                        >
                                           {notification.message}
                                        </p>
-                                       {/* <small className="d-block">
-                     {moment(notification.createdAt).from()}
-                  </small> */}
                                     </div>
                                  </div>
                               ))
                            ) : (
-                              <div className="text-center">
-                                 <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
-                                 <p>You don't have any notifications yet.</p>
-                              </div>
+                              <p>No new notifications</p>
                            )}
                         </div>
                      )}
@@ -293,41 +310,32 @@ export function GlobalNavbar ()
                         toggle={toggleDropdown}
                         direction="down"
                      >
-                        <DropdownToggle nav caret>
+                        <DropdownToggle className="icon-person">
                            <FaUserCircle size={30} color="white" />
                         </DropdownToggle>
-                        <DropdownMenu className="custom-dropdown-menu">
-                           {user ? (
-                              <>
-                                 <DropdownItem
-                                    header
-                                    className="text-uppercase font-weight-bold"
-                                 >
-                                    {user.sub}
-                                 </DropdownItem>
-                                 <DropdownItem onClick={handleLogout}>
-                                    Log out
-                                 </DropdownItem>
-                              </>
-                           ) : (
-                              <>
-                                 <NavLink to="/login" className="dropdown-item">
-                                    <span className="mr-2 icon-lock_outline"></span>Log In
-                                 </NavLink>
-                                 <NavLink to="/signup" className="dropdown-item">
-                                    <span className="mr-2 icon-lock_outline"></span>Sign Up
-                                 </NavLink>
-                              </>
-                           )}
+                        <DropdownMenu>
+                           <DropdownItem>
+                              <NavLink to="/profile">Profile</NavLink>
+                           </DropdownItem>
+                           <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
                         </DropdownMenu>
                      </Dropdown>
-
-                     <NavLink
-                        to="#"
-                        className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"
-                     >
-                        <span className="icon-menu h3 m-0 p-0 mt-2"></span>
-                     </NavLink>
+                     {!user && (
+                        <>
+                           <NavLink
+                              to="/login"
+                              className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
+                           >
+                              Log In
+                           </NavLink>
+                           <NavLink
+                              to="/signup"
+                              className="btn btn-primary ml-3 d-none d-lg-inline-block"
+                           >
+                              Sign Up
+                           </NavLink>
+                        </>
+                     )}
                   </div>
                </div>
             </div>
@@ -335,3 +343,5 @@ export function GlobalNavbar ()
       </header>
    );
 }
+
+export default GlobalNavbar;

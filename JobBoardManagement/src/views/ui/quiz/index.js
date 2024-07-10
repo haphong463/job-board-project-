@@ -18,9 +18,9 @@ import { fetchQuizzesAsync, removeQuiz } from '../../../features/quizSlice';
 import FormQuiz from './FormQuiz';
 import FormQuestion from './FormQuestion';
 import axios from 'axios';
-import axiosRequest from '../../../configs/axiosConfig';
-
-const Quiz = () => {
+// import axiosRequest from '../../../configs/axiosConfig';
+import './quiz.css';
+const Quiz = ({ quizId }) => {
   const dispatch = useDispatch();
   const quizzes = useSelector((state) => state.quizzes.quizzes || []);
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,6 +30,7 @@ const Quiz = () => {
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [questionModal, setQuestionModal] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -75,6 +76,39 @@ const Quiz = () => {
     setQuestionModal(true);
   };
 
+  const handleSelectQuestion = (questionId) => {
+    setSelectedQuestions((prevSelected) => {
+      if (prevSelected.includes(questionId)) {
+        return prevSelected.filter((id) => id !== questionId);
+      } else {
+        return [...prevSelected, questionId];
+      }
+    });
+  };
+
+  const handleDeleteSelectedQuestions = async () => {
+    if (window.confirm('Are you sure you want to delete the selected questions?')) {
+      try {
+        if (!selectedQuestions || selectedQuestions.length === 0) {
+          alert("No questions selected for deletion.");
+          return;
+        }
+  
+        await axios.delete(`http://localhost:8080/api/quizzes/questions`, {
+          data: selectedQuestions
+        });
+  
+        // Optionally reset the selectedQuestions if needed
+        setSelectedQuestions([]);
+  
+        // Dispatch an action to fetch quizzes again or update your state as necessary
+        dispatch(fetchQuizzesAsync());
+      } catch (error) {
+        console.error("There was an error deleting the questions:", error);
+        alert("An error occurred while deleting the questions. Please try again.");
+      }
+    }
+  };
   const exportQuiz = (quizId, quizTitle) => {
     axios({
       url: `http://localhost:8080/api/quizzes/${quizId}/export`,
@@ -129,6 +163,11 @@ const Quiz = () => {
       name: 'Description',
       selector: (row) => row.description,
       sortable: true,
+      cell: (row) => (
+        <div className="description-cell">
+          {row.description}
+        </div>
+      ),
     },
     {
       name: 'Actions',
@@ -200,6 +239,11 @@ const Quiz = () => {
               <ul>
                 {(selectedQuiz.questions || []).map((question) => (
                   <li key={question.id}>
+                    <input
+                      type="checkbox"
+                      checked={selectedQuestions.includes(question.id)}
+                      onChange={() => handleSelectQuestion(question.id)}
+                    />
                     {question.questionText} - Correct Answer: {question.correctAnswer}
                     <Button
                       color="info"
@@ -212,6 +256,9 @@ const Quiz = () => {
                   </li>
                 ))}
               </ul>
+              <Button color="danger" onClick={handleDeleteSelectedQuestions}>
+                Delete Selected Questions
+              </Button>
               <Button
                 color="primary"
                 onClick={() => setQuestionModal(true)}

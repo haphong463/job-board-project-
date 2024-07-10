@@ -1,0 +1,96 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  createModeratorAsync,
+  deleteUserAsync,
+  getAllUserAsync,
+  updateUserEnableStatusAsync,
+} from "../services/user_service";
+export const getUserThunk = createAsyncThunk(
+  "user/getUser",
+  async ({ query, role, page, size }, { rejectWithValue }) => {
+    try {
+      return await getAllUserAsync(query, role, page, size);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteUserThunk = createAsyncThunk(
+  "user/deleteUser",
+  async (id, { rejectWithValue }) => {
+    try {
+      await deleteUserAsync(id);
+      return id;
+    } catch (error) {
+      console.log("error: ", error.response.data);
+
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateUserStatusThunk = createAsyncThunk(
+  "user/update",
+  async ({ userId, isEnabled }, { rejectWithValue }) => {
+    try {
+      console.log(">>> isEnabled: ", isEnabled);
+      const res = await updateUserEnableStatusAsync(userId, isEnabled);
+      return res;
+    } catch (error) {
+      console.log("error: ", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const createModeratorThunk = createAsyncThunk(
+  "user/add-moderator",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await createModeratorAsync(data);
+      return res;
+    } catch (error) {
+      console.log("error: ", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+const userSlice = createSlice({
+  initialState: {
+    list: [],
+    totalPages: 0,
+    status: "idle",
+    error: null,
+  },
+  name: "user",
+  reducers: {},
+  extraReducers: (builder) =>
+    builder
+      .addCase(getUserThunk.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(getUserThunk.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        console.log(">>>list: ", action.payload);
+        state.list = action.payload.content;
+        state.totalPages = action.payload.totalPages;
+      })
+      .addCase(getUserThunk.rejected, (state, action) => {
+        state.status = "rejected";
+        state.error = action.payload;
+      })
+      .addCase(updateUserStatusThunk.fulfilled, (state, action) => {
+        state.list = state.list.map((user) =>
+          user.id === action.payload.id ? action.payload : user
+        );
+      })
+      .addCase(createModeratorThunk.fulfilled, (state, action) => {
+        state.list.unshift(action.payload);
+      })
+      .addCase(deleteUserThunk.fulfilled, (state, action) => {
+        state.list = state.list.filter((user) => user.id !== action.payload);
+      }),
+});
+
+export default userSlice.reducer;
