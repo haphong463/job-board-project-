@@ -107,24 +107,23 @@ public class AuthController {
                 // Use or store profile information
                 User user = userRepository.findByEmail(email).orElse(null);
                 if (user != null) {
-                    return ResponseEntity.badRequest().body("This email already exists in the database!");
-//                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-//                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-//                    SecurityContextHolder.getContext().setAuthentication(authentication);
-//                    String jwt = jwtUtils.generateJwtToken(authentication);
-//
-//                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
-//                            .map(GrantedAuthority::getAuthority)
-//                            .collect(Collectors.toList());
-//                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-//
-//                    return ResponseEntity.ok(new JwtResponse(jwt,
-//                            refreshToken.getToken(),
-//                            user.getId(),
-//                            user.getUsername(),
-//                            user.getEmail(),
-//                            rolesSignIn));
-//
+                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    String jwt = jwtUtils.generateJwtToken(authentication);
+
+                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+                    return ResponseEntity.ok(new JwtResponse(jwt,
+                            refreshToken.getToken(),
+                            user.getId(),
+                            user.getUsername(),
+                            user.getEmail(),
+                            rolesSignIn));
+
 
                 }
 
