@@ -1,0 +1,359 @@
+[
+    {
+        "companyId": 1,
+        "companyName": "Tech Innovators Inc.",
+        "logo": "https://tse1.mm.bing.net/th?id=OIP.S2TzPRWuytH-bUSgC0vCSQAAAA&pid=Api&P=0&h=220",
+        "websiteLink": "https://fpt.vn/vi",
+        "description": "<p>Welcome to the Home of Media</p>\n<p><br>We are large, but we are still personal. We are international, yet down to earth. We are innovative, creative, and digital.</p>\n<p>As Europe's most effective partner for holistic product and brand communication, we want to make our customers and their brands irresistible.</p>\n<p>To achieve this, we create with over 600 employees at 8 locations new content and optimize existing one. We design and implement customized systems to manage content and present it perfectly in all channels.</p>\n<p>We consult with many years of expertise and help our customers to implement increasingly complex communication in a perfect, simple and structured way, to make it irresistible at all touchpoints and therefore successful.&nbsp;</p>\n<p>Our Ho Chi Minh City branch is growing fast since November 2015 and together with our German colleagues we are providing media production and IT services!</p>\n<h2 class=\"border-bottom-dashed ipb-4\">Why you'll love working here</h2>\n<div class=\"position-relative read-more-container\" data-controller=\"read-more\" data-read-more-target=\"container\">\n<div data-read-more-target=\"content\">\n<ul class=\"paragraph ipt-4 text-break\">\n<li class=\"ipy-1 fw-700\">Diverse and interesting projects</li>\n<li class=\"ipy-1 fw-700\">Long-term personal development and social support</li>\n<li class=\"ipy-1 fw-700\">Flexible working times</li>\n</ul>\n<p><strong>What awaits you</strong></p>\n<ul>\n<li>A professional working atmosphere in a committed&nbsp;and successful team</li>\n<li>Diverse and interesting projects with a high level of personal responsibility and independence</li>\n<li>Improvement of your English skills by daily communication</li>\n<li>Flat hierarchies, appreciation and respect as well as a feel-good environment</li>\n</ul>\n<p><br><strong>What we can offer you</strong></p>\n<ul>\n<li>Fair and competitive salary</li>\n<li>Annual performance review and two performance reviews in the first year</li>\n<li>Performance and Tet bonus</li>\n<li>Full salary for sick leaves with doctor&rsquo;s notes (75% from local Social Insurance Department and 25% from our company)</li>\n<li>15 vacation days</li>\n<li>English training courses</li>\n<li>Business trips and training at the headquarter in Germany</li>\n<li>Private health-insurance after probation</li>\n<li>Company trip, team building activities</li>\n<li>Free soft drinks in the office and every Friday outdoor coffee gathering with the team</li>\n</ul>\n</div>\n</div>",
+        "location": "Số 9-11 Đường Đống Đa, Phường 02, Quận Tân Bình, Thành phố Hồ Chí Minh, Việt Nam",
+        "keySkills": "Java, Spring Boot, RESTful APIs, SQL",
+        "type": "IT Outsourcing",
+        "companySize": "51-150 employees",
+        "country": "America",
+        "countryCode": "us",
+        "workingDays": "Monday - Friday",
+        "reviews": [
+            {
+                "rating": 4.5,
+                "description": "Great company to work for, innovative and supportive environment.",
+                "title": "John Doe"
+            },
+            {
+                "rating": 4.0,
+                "description": "Good work-life balance and opportunities for growth.",
+                "title": "Jane Smith"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 2,
+        "companyName": "11Data Insights Ltd.",
+        "logo": "https://example.com/logos/data_insights.png",
+        "websiteLink": "https://www.datainsights.com",
+        "description": "Data Insights Ltd. provides advanced data analytics and business intelligence services to help companies make data-driven decisions.",
+        "location": "Ho Chi Minh City, Vietnam",
+        "type": "Consulting",
+        "reviews": [
+            {
+                "rating": 4.7,
+                "description": "Excellent team and challenging projects. Great place for data enthusiasts.",
+                "title": "Alice Brown"
+            },
+            {
+                "rating": 4.3,
+                "description": "Supportive management and good opportunities for professional development.",
+                "title": "Bob Johnson"
+            }
+        ],
+        "membershipRequired": true
+    },
+    {
+        "companyId": 3,
+        "companyName": "Project Masters Corp.",
+        "logo": "https://example.com/logos/project_masters.png",
+        "websiteLink": "https://www.projectmasters.com",
+        "description": "Project Masters Corp. specializes in project management and consulting services across various industries.",
+        "location": "Da Nang, Vietnam",
+        "type": "Consulting",
+        "reviews": [
+            {
+                "rating": 4.8,
+                "description": "Top-notch project management firm with excellent leadership.",
+                "title": "Charlie Davis"
+            },
+            {
+                "rating": 4.2,
+                "description": "Dynamic work environment and great career growth opportunities.",
+                "title": "Diana Evans"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 4,
+        "companyName": "Creative Marketing Solutions",
+        "logo": "https://example.com/logos/creative_marketing.png",
+        "websiteLink": "https://www.creativemarketing.com",
+        "description": "Creative Marketing Solutions is a full-service marketing agency specializing in digital marketing, SEO, and content creation.",
+        "location": "Can Tho, Vietnam",
+        "type": "Marketing",
+        "reviews": [
+            {
+                "rating": 4.6,
+                "description": "Innovative marketing strategies and a collaborative team.",
+                "title": "Emily Wilson"
+            },
+            {
+                "rating": 4.1,
+                "description": "Creative work environment and supportive management.",
+                "title": "Frank Taylor"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 5,
+        "companyName": "Global HR Solutions",
+        "logo": "https://example.com/logos/global_hr.png",
+        "websiteLink": "https://www.globalhr.com",
+        "description": "Global HR Solutions offers comprehensive human resources services, including recruitment, training, and compliance.",
+        "location": "Hai Phong, Vietnam",
+        "type": "Human Resources",
+        "reviews": [
+            {
+                "rating": 4.9,
+                "description": "Exceptional HR services and a very professional team.",
+                "title": "George Miller"
+            },
+            {
+                "rating": 4.4,
+                "description": "Great place for HR professionals to grow and develop their careers.",
+                "title": "Hannah Lee"
+            }
+        ],
+        "membershipRequired": true
+    },
+    {
+        "companyId": 6,
+        "companyName": "CloudWave Solutions",
+        "logo": "https://example.com/logos/cloudwave.png",
+        "websiteLink": "https://www.cloudwave.com",
+        "description": "CloudWave Solutions provides cutting-edge cloud computing and storage solutions for businesses of all sizes.",
+        "location": "Da Nang, Vietnam",
+        "type": "Technology",
+        "reviews": [
+            {
+                "rating": 4.8,
+                "description": "Innovative cloud solutions with excellent support.",
+                "title": "Isaac Newton"
+            },
+            {
+                "rating": 4.5,
+                "description": "Great company culture and growth opportunities.",
+                "title": "Marie Curie"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 7,
+        "companyName": "Green Energy Corp.",
+        "logo": "https://example.com/logos/greenenergy.png",
+        "websiteLink": "https://www.greenenergy.com",
+        "description": "Green Energy Corp. specializes in renewable energy solutions, including solar and wind power.",
+        "location": "Nha Trang, Vietnam",
+        "type": "Energy",
+        "reviews": [
+            {
+                "rating": 4.7,
+                "description": "Leader in renewable energy with a strong commitment to sustainability.",
+                "title": "Nikola Tesla"
+            },
+            {
+                "rating": 4.3,
+                "description": "Innovative projects and supportive management.",
+                "title": "Thomas Edison"
+            }
+        ],
+        "membershipRequired": true
+    },
+    {
+        "companyId": 8,
+        "companyName": "HealthTech Innovations",
+        "logo": "https://example.com/logos/healthtech.png",
+        "websiteLink": "https://www.healthtech.com",
+        "description": "HealthTech Innovations develops advanced healthcare technologies and medical devices.",
+        "location": "Hanoi, Vietnam",
+        "type": "Healthcare",
+        "reviews": [
+            {
+                "rating": 4.9,
+                "description": "Pioneers in healthcare technology with a focus on patient care.",
+                "title": "Florence Nightingale"
+            },
+            {
+                "rating": 4.6,
+                "description": "Excellent R&D and supportive work environment.",
+                "title": "Louis Pasteur"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 9,
+        "companyName": "AgriTech Solutions",
+        "logo": "https://example.com/logos/agritech.png",
+        "websiteLink": "https://www.agritech.com",
+        "description": "AgriTech Solutions offers innovative agricultural technologies to enhance productivity and sustainability.",
+        "location": "Can Tho, Vietnam",
+        "type": "Agriculture",
+        "reviews": [
+            {
+                "rating": 4.8,
+                "description": "Leaders in agricultural innovation with a commitment to sustainability.",
+                "title": "George Washington Carver"
+            },
+            {
+                "rating": 4.4,
+                "description": "Great opportunities for growth and development.",
+                "title": "Norman Borlaug"
+            }
+        ],
+        "membershipRequired": true
+    },
+    {
+        "companyId": 10,
+        "companyName": "FinancePro Services",
+        "logo": "https://example.com/logos/financepro.png",
+        "websiteLink": "https://www.financepro.com",
+        "description": "FinancePro Services provides comprehensive financial consulting and advisory services.",
+        "location": "Ho Chi Minh City, Vietnam",
+        "type": "Finance",
+        "reviews": [
+            {
+                "rating": 4.7,
+                "description": "Top-notch financial consulting with a client-first approach.",
+                "title": "Benjamin Graham"
+            },
+            {
+                "rating": 4.5,
+                "description": "Professional team and excellent career growth opportunities.",
+                "title": "Warren Buffett"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 11,
+        "companyName": "EduFuture Learning",
+        "logo": "https://example.com/logos/edufuture.png",
+        "websiteLink": "https://www.edufuture.com",
+        "description": "EduFuture Learning provides innovative educational solutions and e-learning platforms.",
+        "location": "Hanoi, Vietnam",
+        "type": "Education",
+        "reviews": [
+            {
+                "rating": 4.9,
+                "description": "Leading the future of education with innovative solutions.",
+                "title": "Maria Montessori"
+            },
+            {
+                "rating": 4.7,
+                "description": "Supportive work environment and excellent resources for teachers.",
+                "title": "John Dewey"
+            }
+        ],
+        "membershipRequired": true
+    },
+    {
+        "companyId": 12,
+        "companyName": "Global Logistics Inc.",
+        "logo": "https://example.com/logos/globallogistics.png",
+        "websiteLink": "https://www.globallogistics.com",
+        "description": "Global Logistics Inc. provides comprehensive logistics and supply chain solutions worldwide.",
+        "location": "Hai Phong, Vietnam",
+        "type": "Logistics",
+        "reviews": [
+            {
+                "rating": 4.6,
+                "description": "Efficient logistics services with a global reach.",
+                "title": "Frederick Taylor"
+            },
+            {
+                "rating": 4.4,
+                "description": "Great place to build a career in logistics.",
+                "title": "Henry Ford"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 13,
+        "companyName": "Urban Developers Ltd.",
+        "logo": "https://example.com/logos/urbandevelopers.png",
+        "websiteLink": "https://www.urbandevelopers.com",
+        "description": "Urban Developers Ltd. specializes in urban development and construction projects.",
+        "location": "Da Nang, Vietnam",
+        "type": "Construction",
+        "reviews": [
+            {
+                "rating": 4.8,
+                "description": "Leaders in urban development with innovative projects.",
+                "title": "Frank Lloyd Wright"
+            },
+            {
+                "rating": 4.5,
+                "description": "Supportive management and great career growth opportunities.",
+                "title": "Le Corbusier"
+            }
+        ],
+        "membershipRequired": true
+    },
+    {
+        "companyId": 14,
+        "companyName": "RetailXperts Co.",
+        "logo": "https://example.com/logos/retailxperts.png",
+        "websiteLink": "https://www.retailxperts.com",
+        "description": "RetailXperts Co. provides advanced retail solutions and consulting services.",
+        "location": "Ho Chi Minh City, Vietnam",
+        "type": "Retail",
+        "reviews": [
+            {
+                "rating": 4.7,
+                "description": "Innovative retail solutions and excellent customer service.",
+                "title": "Sam Walton"
+            },
+            {
+                "rating": 4.5,
+                "description": "Dynamic work environment and great growth opportunities.",
+                "title": "Jeff Bezos"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 15,
+        "companyName": "TravelPro Agency",
+        "logo": "https://example.com/logos/travelpro.png",
+        "websiteLink": "https://www.travelpro.com",
+        "description": "TravelPro Agency offers comprehensive travel and tourism services, including bookings and tours.",
+        "location": "Hanoi, Vietnam",
+        "type": "Travel",
+        "reviews": [
+            {
+                "rating": 4.8,
+                "description": "Excellent travel services with a customer-first approach.",
+                "title": "Marco Polo"
+            },
+            {
+                "rating": 4.6,
+                "description": "Great team and opportunities for growth in the travel industry.",
+                "title": "Christopher Columbus"
+            }
+        ],
+        "membershipRequired": false
+    },
+    {
+        "companyId": 16,
+        "companyName": "CyberSecurity Protectors",
+        "logo": "https://example.com/logos/cybersecurity.png",
+        "websiteLink": "https://www.cybersecurity.com",
+        "description": "CyberSecurity Protectors offers comprehensive cybersecurity solutions to safeguard businesses from digital threats.",
+        "location": "Ho Chi Minh City, Vietnam",
+        "type": "Technology",
+        "reviews": [
+            {
+                "rating": 4.9,
+                "description": "Leaders in cybersecurity with top-notch solutions.",
+                "title": "Alan Turing"
+            },
+            {
+                "rating": 4.7,
+                "description": "Great work environment and opportunities for professional growth.",
+                "title": "Ada Lovelace"
+            }
+        ],
+        "membershipRequired": true
+    }
+]

@@ -6,15 +6,19 @@ import { FaThumbsUp } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { connectWebSocket } from "./services/WebSocketService";
 import { getNotificationThunk } from "./features/notificationSlice";
-import ThemeRoutes from "./router/Router";
+// import ThemeRoutes from "./router/Router";
 
-function App() {
+function App ()
+{
   const user = useSelector((state) => state.auth.user);
-  const routing = useRoutes(ThemeRoutes);
+  // const routing = useRoutes(ThemeRoutes);
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (!document.getElementById("kommunicate-script")) {
-      (function (d, m) {
+  useEffect(() =>
+  {
+    if (!document.getElementById("kommunicate-script"))
+    {
+      (function (d, m)
+      {
         var kommunicateSettings = {
           appId: process.env.REACT_APP_CHATBOT_ID,
           popupWidget: true,
@@ -32,8 +36,10 @@ function App() {
       })(document, window.kommunicate || {});
     }
   }, []);
-  useEffect(() => {
-    if (user) {
+  useEffect(() =>
+  {
+    if (user)
+    {
       connectWebSocket(user);
       dispatch(getNotificationThunk(user.id));
     }

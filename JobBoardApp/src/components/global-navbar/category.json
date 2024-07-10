@@ -1,0 +1,110 @@
+[
+    {
+        "categoryId": 1,
+        "categoryName": "Java"
+    },
+    {
+        "categoryId": 2,
+        "categoryName": "NodeJS"
+    },
+    {
+        "categoryId": 3,
+        "categoryName": "Python"
+    },
+    {
+        "categoryId": 4,
+        "categoryName": "C"
+    },
+    {
+        "categoryId": 5,
+        "categoryName": "SQL"
+    },
+    {
+        "categoryId": 6,
+        "categoryName": "MySQL"
+    },
+    {
+        "categoryId": 7,
+        "categoryName": "Jenkins"
+    },
+    {
+        "categoryId": 8,
+        "categoryName": "Spring"
+    },
+    {
+        "categoryId": 9,
+        "categoryName": "React"
+    },
+    {
+        "categoryId": 10,
+        "categoryName": "Angular"
+    },
+    {
+        "categoryId": 11,
+        "categoryName": "Vue"
+    },
+    {
+        "categoryId": 12,
+        "categoryName": "HTML"
+    },
+    {
+        "categoryId": 13,
+        "categoryName": "CSS"
+    },
+    {
+        "categoryId": 14,
+        "categoryName": "JavaScript"
+    },
+    {
+        "categoryId": 15,
+        "categoryName": "TypeScript"
+    },
+    {
+        "categoryId": 16,
+        "categoryName": "PHP"
+    },
+    {
+        "categoryId": 17,
+        "categoryName": "Ruby"
+    },
+    {
+        "categoryId": 18,
+        "categoryName": "Go"
+    },
+    {
+        "categoryId": 19,
+        "categoryName": "Swift"
+    },
+    {
+        "categoryId": 20,
+        "categoryName": "Kotlin"
+    },
+    {
+        "categoryId": 21,
+        "categoryName": "Rust"
+    },
+    {
+        "categoryId": 22,
+        "categoryName": "Perl"
+    },
+    {
+        "categoryId": 23,
+        "categoryName": "Scala"
+    },
+    {
+        "categoryId": 24,
+        "categoryName": "Shell"
+    },
+    {
+        "categoryId": 25,
+        "categoryName": "Dart"
+    },
+    {
+        "categoryId": 26,
+        "categoryName": "rt"
+    },
+    {
+        "categoryId": 27,
+        "categoryName": "sfhdtguh"
+    }
+]

@@ -1,0 +1,47 @@
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 60px 50px;
+}
+
+.category-item a.item {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.category-item {
+    color: rgb(0, 0, 0);
+    margin-top: 10px;
+}
+
+/* Alphabet Navigation Bar */
+.alphabet-nav {
+    display: flex;
+    justify-content: center;
+    margin: 20px 370px;
+    width: 50%;
+    font-size: 13px;
+}
+
+.alphabet-nav .nav-link {
+    padding: 3px 0;
+    margin: 0 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    color: #007bff;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.alphabet-nav .nav-link:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.alphabet-nav .nav-link.active {
+    background-color: #007bff;
+    color: #fff;
+}

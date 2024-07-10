@@ -1,0 +1,42 @@
+.company-detail2 {
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 170px;
+}
+
+img.company-img2 {
+    width: 9em;
+    height: 9em;
+    border-radius: 6px;
+    border: 1px solid #75757566;
+    object-fit: cover;
+}
+
+.company-name2 {
+    font-size: 16px;
+    color: #333;
+    margin-left: 11em;
+    margin-top: -8.5em;
+    text-decoration: none;
+}
+
+.overview-content .company-link {
+    color: #7282ff;
+    font-weight: normal;
+    display: block;
+    margin-bottom: 10px;
+    width: 0;
+}
+
+.label-skill1 {
+    margin-left: -3px;
+}
+
+.company-info {
+    margin-bottom: 80px;
+}
+
+.company-info .icon1 i {
+    margin-right: 10px;
+    margin-left: 1px;
+}
