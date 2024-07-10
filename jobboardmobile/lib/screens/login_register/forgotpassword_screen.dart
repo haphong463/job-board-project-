@@ -16,24 +16,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   String _errorMessage = '';
 
   void _forgotPassword() async {
-    final response = await _authService.forgotPassword(_emailController.text);
-    if (response.statusCode == 200) {
-      var responseBody = json.decode(response.body);
-      String resetToken =
-          responseBody['resetToken']; // Adjust based on your response structure
+    try {
+      await _authService.forgotPassword(_emailController.text);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResetPasswordScreen(
-            email: _emailController.text,
-            token: resetToken,
-          ),
-        ),
-      );
-    } else {
+      // If no exception is thrown, it means the request was successful
+      Navigator.pushReplacementNamed(
+          context, '/reset-password?email=${_emailController.text}');
+    } catch (e) {
+      print('Error sending forgot password request: $e');
       setState(() {
-        _errorMessage = 'Email not found or request failed.';
+        _errorMessage = 'Failed to send forgot password request.';
       });
     }
   }
