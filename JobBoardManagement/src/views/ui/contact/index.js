@@ -8,6 +8,10 @@ import {
   InputGroup,
   InputGroupText,
   Input,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "reactstrap";
 import axios from "axios";
 import nprogress from "nprogress";
@@ -16,16 +20,18 @@ const ContactIndex = (props) => {
   const [contacts, setContacts] = useState([]);
   const [status, setStatus] = useState("idle");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedContact, setSelectedContact] = useState(null); // State để lưu contact được chọn
 
   useEffect(() => {
     nprogress.start();
-    axios.get("http://localhost:8080/api/contacts")
-      .then(response => {
+    axios
+      .get("http://localhost:8080/api/contacts")
+      .then((response) => {
         setContacts(response.data);
         setStatus("succeeded");
         nprogress.done();
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching contacts:", error);
         setStatus("failed");
         nprogress.done();
@@ -35,20 +41,26 @@ const ContactIndex = (props) => {
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this contact?")) {
       nprogress.start();
-      axios.delete(`http://localhost:8080/api/contacts/${id}`)
+      axios
+        .delete(`http://localhost:8080/api/contacts/${id}`)
         .then(() => {
-          setContacts(prevContacts => prevContacts.filter(contact => contact.id !== id));
+          setContacts((prevContacts) =>
+            prevContacts.filter((contact) => contact.id !== id)
+          );
           nprogress.done();
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(`Error deleting contact with id ${id}:`, error);
           nprogress.done();
         });
     }
   };
 
-  const columns = [
+  const handleRead = (contact) => {
+    setSelectedContact(contact); // Set contact được chọn để hiển thị chi tiết
+  };
 
+  const columns = [
     {
       name: "First Name",
       selector: (row) => row.firstName,
@@ -78,6 +90,9 @@ const ContactIndex = (props) => {
       name: "Actions",
       cell: (row) => (
         <div className="d-flex">
+          <button onClick={() => handleRead(row)} className="btn btn-primary me-2">
+            Read
+          </button>
           <button onClick={() => handleDelete(row.id)} className="btn btn-danger">
             Delete
           </button>
@@ -103,23 +118,43 @@ const ContactIndex = (props) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </InputGroup>
-          {status === 'loading' ? (
+          {status === "loading" ? (
             <div>Loading...</div>
           ) : (
             <DataTable
               columns={columns}
-              data={contacts.filter((contact) =>
-                `${contact.firstName} ${contact.lastName} ${contact.email} ${contact.subject} ${contact.message}`
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase())
+              data={contacts.filter(
+                (contact) =>
+                  `${contact.firstName} ${contact.lastName} ${contact.email} ${contact.subject} ${contact.message}`
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
               )}
               pagination
             />
           )}
         </Card>
       </Col>
+
+      {/* Modal để hiển thị chi tiết contact */}
+      <Modal isOpen={selectedContact !== null} toggle={() => setSelectedContact(null)}>
+        <ModalHeader toggle={() => setSelectedContact(null)}>Contact Details</ModalHeader>
+        <ModalBody>
+          {selectedContact && (
+            <div>
+              <p><strong>First Name:</strong> {selectedContact.firstName}</p>
+              <p><strong>Last Name:</strong> {selectedContact.lastName}</p>
+              <p><strong>Email:</strong> {selectedContact.email}</p>
+              <p><strong>Subject:</strong> {selectedContact.subject}</p>
+              <p><strong>Message:</strong> {selectedContact.message}</p>
+            </div>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <button className="btn btn-secondary" onClick={() => setSelectedContact(null)}>Close</button>
+        </ModalFooter>
+      </Modal>
     </Row>
   );
-}
+};
 
 export default ContactIndex;

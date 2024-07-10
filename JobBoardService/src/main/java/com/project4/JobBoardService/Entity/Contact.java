@@ -41,6 +41,9 @@ public class Contact {
     @Size(max = 500)
     private String message;
 
+
+
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

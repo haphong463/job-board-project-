@@ -2,12 +2,12 @@ package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.DTO.ContactDTO;
 import com.project4.JobBoardService.DTO.UserContactDTO;
-import com.project4.JobBoardService.DTO.UserDTO;
 import com.project4.JobBoardService.Entity.Contact;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Repository.ContactRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.ContactService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,8 +48,9 @@ public class ContactServiceImpl implements ContactService {
         contactRepository.deleteById(id);
     }
 
+
     private ContactDTO convertToDTO(Contact contact) {
-        UserContactDTO userContactDTOD = new UserContactDTO(contact.getUser().getId(), contact.getUser().getUsername());
+        UserContactDTO userContactDTO = new UserContactDTO(contact.getUser().getId(), contact.getUser().getUsername());
         return new ContactDTO(
                 contact.getId(),
                 contact.getFirstName(),
@@ -57,7 +58,8 @@ public class ContactServiceImpl implements ContactService {
                 contact.getEmail(),
                 contact.getSubject(),
                 contact.getMessage(),
-                userContactDTOD
+                userContactDTO
         );
     }
+
 }
