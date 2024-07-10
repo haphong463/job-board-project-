@@ -5,23 +5,12 @@ const HEADERS_FORM_DATA = {
   "Content-Type": "multipart/form-data",
 };
 
-export const getAllBlogs = async () => {
-  try {
-    return await axiosRequest.get(URL);
-  } catch (error) {
-    console.log(error);
-  }
-};
+export const getAllBlogs = async () => await axiosRequest.get(URL);
 
-export const getAllBlogsByQuery = async (query, page, size) => {
-  try {
-    return await axiosRequest.get(
-      `${URL}/search?query=${query}&page=${page}&size=${size}`
-    );
-  } catch (error) {
-    console.log(error);
-  }
-};
+export const getAllBlogsByQuery = async (query, type, visibility, page, size) =>
+  await axiosRequest.get(
+    `${URL}/search?query=${query}&type=${type}&page=${page}&size=${size}&visibility=${visibility}`
+  );
 
 export const createBlog = async (data) =>
   await axiosRequest.post(URL, data, {
