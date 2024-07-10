@@ -8,6 +8,7 @@ import 'screens/main/main_screen.dart';
 import 'screens/main/search_page.dart';
 import 'screens/job/application_page.dart';
 import 'screens/job/job_info_page.dart';
+import 'screens/quiz/quiz_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/search': (context) => SearchPage(),
         '/application': (context) => MainScreen(),
         '/job': (context) => JobInfoPage(),
+        '/quizzes': (context) => QuizListScreen(),
       },
     );
   }

@@ -5,7 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AuthService {
   // final String baseUrl = 'http://localhost:8080/api/auth';
   final String baseUrl = 'http://192.168.110.15:8080/api/auth';
-
   final storage = FlutterSecureStorage();
 
   Future<http.Response> login(String username, String password) async {
@@ -20,6 +19,9 @@ class AuthService {
       await storage.write(key: 'accessToken', value: jsonResponse['jwt']);
       await storage.write(
           key: 'refreshToken', value: jsonResponse['refreshToken']);
+      await storage.write(key: 'firstName', value: jsonResponse['firstName']);
+      await storage.write(key: 'lastName', value: jsonResponse['lastName']);
+      await storage.write(key: 'email', value: jsonResponse['email']);
     } else {
       throw Exception('Failed to login');
     }
@@ -53,13 +55,22 @@ class AuthService {
     }
   }
 
-  Future<http.Response> forgotPassword(String email) {
-    return http.post(
-      Uri.parse('$baseUrl/forgot-password?email=$email'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+  Future<void> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/forgot-password?email=$email'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to send forgot password request: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Failed to send forgot password request: $error');
+    }
   }
 
   Future<String> setNewPassword(String email, String token, String newPassword,
@@ -91,6 +102,9 @@ class AuthService {
   Future<void> logout() async {
     await storage.delete(key: 'accessToken');
     await storage.delete(key: 'refreshToken');
+    await storage.delete(key: 'firstName');
+    await storage.delete(key: 'lastName');
+    await storage.delete(key: 'email');
   }
 
   Future<String?> getAccessToken() async {
@@ -99,5 +113,25 @@ class AuthService {
 
   Future<String?> getRefreshToken() async {
     return await storage.read(key: 'refreshToken');
+  }
+
+  Future<String?> getUserId() async {
+    return await storage.read(key: 'userId');
+  }
+
+  Future<void> saveUserId(String userId) async {
+    await storage.write(key: 'userId', value: userId);
+  }
+
+  Future<String?> getFirstName() async {
+    return await storage.read(key: 'firstName');
+  }
+
+  Future<String?> getLastName() async {
+    return await storage.read(key: 'lastName');
+  }
+
+  Future<String?> getEmail() async {
+    return await storage.read(key: 'email');
   }
 }
