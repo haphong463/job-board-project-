@@ -26,7 +26,6 @@ export const Blog = () => {
 
   const debouncedSearch = useCallback(
     debounce((query) => {
-      console.log(searchParams.get("type"));
       setCurrentPage(0);
       dispatch(
         fetchBlogs({
@@ -36,7 +35,7 @@ export const Blog = () => {
           type: searchParams.get("type") || "ALL",
         })
       );
-    }, 500),
+    }, 300),
     [dispatch, currentPage]
   );
 
@@ -179,7 +178,6 @@ export const Blog = () => {
                 <div className="col-md-12 text-center ">
                   <div className="custom-pagination ml-auto">
                     <motion.a
-                      href="#top"
                       className={`prev ${currentPage === 0 ? "disabled" : ""}`}
                       onClick={() => paginate(currentPage - 1)}
                       whileHover={{ scale: 1.1 }}
@@ -191,7 +189,6 @@ export const Blog = () => {
                       {Array.from({ length: totalPages }, (_, i) => (
                         <motion.a
                           key={i}
-                          href={`#${i}`}
                           className={`${currentPage === i ? "active" : ""}`}
                           onClick={() => paginate(i)}
                           whileHover={{ scale: 1.1 }}
@@ -202,7 +199,6 @@ export const Blog = () => {
                       ))}
                     </div>
                     <motion.a
-                      href="#top"
                       className={`next ${
                         currentPage === totalPages - 1 ? "disabled" : ""
                       }`}

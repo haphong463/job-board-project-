@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import {
@@ -23,6 +23,7 @@ export function GlobalNavbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
 
+  const navigate = useNavigate();
   const notifications = useSelector((state) => state.notification.list);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
@@ -212,8 +213,13 @@ export function GlobalNavbar() {
                         className="notifications-item"
                         onClick={
                           !notification.read
-                            ? () => handleMarkNotification(notification.id)
-                            : undefined
+                            ? () => {
+                                handleMarkNotification(notification.id);
+                                navigate(notification.url);
+                              }
+                            : () => {
+                                navigate(notification.url);
+                              }
                         }
                       >
                         <img src={notification.sender.imageUrl} alt="img" />
