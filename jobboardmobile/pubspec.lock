@@ -208,6 +208,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  kommunicate_flutter:
+    dependency: "direct main"
+    description:
+      name: kommunicate_flutter
+      sha256: "9be878ca177adb0e32b31ef932b4404538bdba1ffce92a309fc800556f54a904"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.3"
   leak_tracker:
     dependency: transitive
     description:

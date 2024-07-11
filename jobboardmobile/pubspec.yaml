@@ -40,6 +40,9 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   flutter_svg: ^2.0.10+1
   font_awesome_flutter: ^10.7.0
+  kommunicate_flutter: ^1.9.3
+
+
   liquid_pull_to_refresh: ^3.0.1
   get: ^4.6.6
   fluttertoast: ^8.2.6
