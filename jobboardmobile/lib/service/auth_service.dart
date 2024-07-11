@@ -33,7 +33,7 @@ class AuthService {
       String firstName, String lastName) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/signupFlutter'),
+        Uri.parse('$baseUrl/signup'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
@@ -96,25 +96,15 @@ class AuthService {
       if (response.statusCode == 200) {
         return "Password reset successfully!";
       } else {
+        // Handle error cases where response status code is not 200
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        return jsonResponse['message'];
+        return jsonResponse[
+            'message']; // Assuming your backend returns an error message
       }
     } catch (error) {
+      // Handle network or other errors
       print('Error setting new password: $error');
       return "Something went wrong. Please try again later.";
-    }
-  }
-
-  Future<http.Response> verifyEmail(String email, String code) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/verifyFlutter?email=$email&code=$code'),
-        headers: {'Content-Type': 'application/json'},
-      );
-      return response;
-    } catch (e) {
-      print('Error verifying email: $e');
-      throw Exception('Failed to verify email: $e');
     }
   }
 
