@@ -29,9 +29,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     );
 
     if (result == "Password reset successfully!") {
-      // Password reset successfully
-      Navigator.pushReplacementNamed(
-          context, '/login'); // Navigate to login screen
+      Navigator.pushReplacementNamed(context, '/login');
     } else {
       setState(() {
         _errorMessage = result;
@@ -136,8 +134,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  Navigator.pop(
-                                      context); // Go back to login screen
+                                  Navigator.pop(context);
                                 },
                             ),
                           ],

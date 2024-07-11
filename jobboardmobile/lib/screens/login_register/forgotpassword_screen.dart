@@ -128,8 +128,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  Navigator.pop(
-                                      context); // Go back to login screen
+                                  Navigator.pop(context);
                                 },
                             ),
                           ],
