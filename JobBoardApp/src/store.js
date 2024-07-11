@@ -9,6 +9,7 @@ import { persistReducer } from "redux-persist";
 import { combineReducers } from "@reduxjs/toolkit";
 import quizReducer from './features/quizSlice';
 import quizQuestionsReducer from './features/quizQuestionsSlice';
+import contactsReducer from './features/contactsSlice'; // Import the contacts slice
 
 // Cấu hình persist với whitelist
 // const persistConfig = {
@@ -36,6 +37,7 @@ export const store = configureStore({
     category: categoryReducer,
     notification: notificationReducer,
       quiz: quizReducer,
+      contacts: contactsReducer, // Add the contacts slice to the store
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({

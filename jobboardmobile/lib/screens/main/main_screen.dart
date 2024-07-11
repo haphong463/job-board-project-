@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jobboardmobile/service/quiz_service.dart';
 
 import '../../core/utils/color_util.dart';
 import '../../service/auth_service.dart';
@@ -7,6 +9,20 @@ import '../../widget/custom_app_bar.dart';
 import '../../core/utils/asset_path_list.dart' as assetPath;
 import '../../widget/search_icon.dart';
 
+class SearchIcon extends StatelessWidget {
+  final Function onTapSuffix;
+
+  SearchIcon({required this.onTapSuffix});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.search),
+      onPressed: () => onTapSuffix(),
+    );
+  }
+}
+
 class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -14,6 +30,22 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final AuthService _authService = AuthService();
+  final storage = FlutterSecureStorage();
+  String? firstName;
+  String? lastName;
+  String? email;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserDetails();
+  }
+
+  void _fetchUserDetails() async {
+    firstName = await _authService.getFirstName();
+    lastName = await _authService.getLastName();
+    email = await _authService.getEmail();
+    setState(() {});
+  }
 
   void _logout() async {
     await _authService.logout();
@@ -67,86 +99,73 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomAppBar.scaffold(
-      key: Key('your_key_here'),
-      onTapPrefix: () {},
-      iconColor: Colors.black,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Find your",
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            "perfect job",
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: ColorUtil.primaryColor,
+        actions: [
+          SearchIcon(
+            onTapSuffix: () => Navigator.of(context).pushNamed('/search'),
           ),
         ],
       ),
-      prefixIcon: PopupMenuButton<String>(
-        icon: Icon(
-          Icons.menu,
-          color: Colors.black,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text('${firstName ?? ''} ${lastName ?? ''}'),
+              accountEmail: Text(email ?? ''),
+              currentAccountPicture: Icon(
+                Icons.face,
+                size: 48.0,
+                color: Colors.white,
+              ),
+              otherAccountsPictures: [
+                Icon(
+                  Icons.bookmark_border,
+                  color: Colors.white,
+                ),
+              ],
+              decoration: BoxDecoration(
+                color: ColorUtil.primaryColor,
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.note_add),
+              title: Text('Quiz'),
+              onTap: () {
+                Navigator.pushNamed(context, '/quizzes');
+              },
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Logout'),
+              onTap: () {
+                _logout();
+              },
+            ),
+          ],
         ),
-        onSelected: (String result) {
-          switch (result) {
-            case 'Home':
-              Navigator.of(context).pushNamed('/home');
-              break;
-            case 'Profile':
-              Navigator.of(context).pushNamed('/profile');
-              break;
-            case 'Settings':
-              Navigator.of(context).pushNamed('/settings');
-              break;
-            case 'Logout':
-              _logout();
-              break;
-          }
-        },
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(
-            value: 'Home',
-            child: Text('Home'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'Profile',
-            child: Text('Profile'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'Settings',
-            child: Text('Settings'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'Logout',
-            child: Text('Logout'),
-          ),
-        ],
       ),
-      suffixIcon: SearchIcon(),
-      onTapSuffix: () => Navigator.of(context).pushNamed('/search'),
-      backgroundColor: ColorUtil.backgroundColor,
-      child: Expanded(
-        child: Container(
-          constraints: BoxConstraints.expand(),
-          margin: EdgeInsets.symmetric(horizontal: 25),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTags(),
-              SizedBox(height: 10),
-              _buildForYouSection(),
-              SizedBox(height: 10),
-              _buildRecentlyAddedSection(),
-            ],
-          ),
+      body: Container(
+        margin: EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTags(),
+            SizedBox(height: 10),
+            _buildForYouSection(),
+            SizedBox(height: 10),
+            _buildRecentlyAddedSection(),
+          ],
         ),
       ),
     );

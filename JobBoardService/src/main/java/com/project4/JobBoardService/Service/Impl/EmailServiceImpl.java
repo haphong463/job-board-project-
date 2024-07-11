@@ -2,14 +2,10 @@ package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Util.HTMLContentProvider;
-import jakarta.activation.DataHandler;
-import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Properties;
 
 import static com.project4.JobBoardService.Util.HTMLContentProvider.generateEmailHTMLContent;
@@ -143,5 +138,23 @@ public class EmailServiceImpl implements EmailService {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+
+    @Async("emailTaskExecutor")
+    @Override
+    public void sendEmail(String to, String subject, String text) {
+        try {
+            sendSimpleMessage(to, subject, text);
+        } catch (MessagingException ex) {
+            throw new RuntimeException("Failed to send email", ex);
+        }
+    }
+    private void sendSimpleMessage(String to, String subject, String text) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(text, true);
+        javaMailSender.send(message);
     }
 }

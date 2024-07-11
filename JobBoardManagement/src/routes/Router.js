@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import Login from "../views/Login.js";
+import { exact } from "prop-types";
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
@@ -16,6 +17,7 @@ const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
 const UserSetting = lazy(() => import("../views/ui/user-setting/index"));
 const Quiz = lazy(() => import("../views/ui/quiz/index"));
 const User = lazy(() => import("../views/ui/user/index"));
+const Contact = lazy(() => import("../views/ui/contact/index"));
 /*****Routes******/
 const ThemeRoutes = [
   {
@@ -41,6 +43,9 @@ const ThemeRoutes = [
         exact: true,
         element: <BlogCategory />,
       },
+      {
+        path:"/jobportal/contact", exact: true, element: <Contact />
+      }
     ],
   },
   {
