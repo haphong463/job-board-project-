@@ -41,6 +41,8 @@ public class User   {
     @NotBlank
     @Size(max = 120)
     private String password;
+
+
     private String resetToken;
     private boolean verified;
     private String verificationCode;
@@ -66,6 +68,8 @@ public class User   {
     private List<UserCV> userCVs;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Employer employer;
+
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;

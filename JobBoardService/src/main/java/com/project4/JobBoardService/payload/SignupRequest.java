@@ -52,4 +52,6 @@ public class SignupRequest {
     @Getter
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
+
 }
