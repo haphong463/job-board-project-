@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../service/auth_service.dart';
-import 'resetpassword_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override
@@ -17,11 +14,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   void _forgotPassword() async {
     try {
-      await _authService.forgotPassword(_emailController.text);
+      String email = _emailController.text;
+      await _authService.forgotPassword(email);
 
-      // If no exception is thrown, it means the request was successful
       Navigator.pushReplacementNamed(
-          context, '/reset-password?email=${_emailController.text}');
+        context,
+        '/reset_password',
+        arguments: {'email': email},
+      );
     } catch (e) {
       print('Error sending forgot password request: $e');
       setState(() {

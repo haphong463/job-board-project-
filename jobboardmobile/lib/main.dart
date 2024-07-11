@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'screens/login_register/forgotpassword_screen.dart';
 import 'screens/login_register/login_screen.dart';
-import 'screens/login_register/resetpassword_screen.dart';
 import 'screens/login_register/signup_screen.dart';
 import 'screens/main/main_screen.dart';
 import 'screens/main/search_page.dart';
 import 'screens/job/job_info_page.dart';
 import 'screens/quiz/quiz_screen.dart';
+import 'screens/login_register/forgotpassword_screen.dart';
+import 'screens/login_register/resetpassword_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,10 +25,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupScreen(),
         '/forgot_password': (context) => ForgotPasswordScreen(),
         '/main': (context) => MainScreen(),
-        '/reset_password': (context) => ResetPasswordScreen(
-              email: '',
-              token: '',
-            ),
+        '/reset_password': (context) => ResetPasswordScreen(),
         '/search': (context) => SearchPage(),
         '/application': (context) => MainScreen(),
         '/job': (context) => JobInfoPage(),

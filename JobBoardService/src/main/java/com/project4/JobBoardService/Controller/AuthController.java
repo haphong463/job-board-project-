@@ -432,6 +432,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
+
 //VerifyUser
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
     public void verifyEmail(
@@ -528,6 +529,40 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
     return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
 }
 
+
+
+    @PostMapping("/forgot-password-flutter")
+    public ResponseEntity<?> forgotPasswordFlutter(@RequestParam("email") String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+
+            return ResponseEntity.ok(new MessageResponse("Reset password email sent successfully!"));
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+        }
+    }
+
+    @PostMapping("/set-new-passwordFlutter")
+    public ResponseEntity<?> setNewPassword(@RequestBody SetPasswordRequest request) {
+        String email = request.getEmail();
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        if (!newPassword.equals(confirmPassword)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Passwords do not match!"));
+        }
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setPassword(encoder.encode(newPassword));
+            userRepository.save(user);
+            return ResponseEntity.ok(new MessageResponse("Password reset successfully!"));
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+        }
+    }
 
     private String generateVerificationCode() {
         return UUID.randomUUID().toString().substring(0, 6);

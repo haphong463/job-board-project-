@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
   // final String baseUrl = 'http://localhost:8080/api/auth';
-  final String baseUrl = 'http://192.168.110.15:8080/api/auth';
+  final String baseUrl = 'http://192.168.110.22:8080/api/auth';
   final storage = FlutterSecureStorage();
 
   Future<http.Response> login(String username, String password) async {
@@ -58,13 +58,18 @@ class AuthService {
   Future<void> forgotPassword(String email) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/forgot-password?email=$email'),
+        Uri.parse('$baseUrl/forgot-password-flutter?email=$email'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
+        print('Password reset email sent successfully.');
+      } else if (response.statusCode == 400) {
+        print('Invalid token or bad request: ${response.body}');
+        throw Exception('Invalid token or bad request');
+      } else {
         throw Exception(
             'Failed to send forgot password request: ${response.statusCode}');
       }
@@ -73,17 +78,16 @@ class AuthService {
     }
   }
 
-  Future<String> setNewPassword(String email, String token, String newPassword,
-      String confirmPassword) async {
+  Future<String> setNewPassword(
+      String email, String newPassword, String confirmPassword) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/set-new-password'),
+        Uri.parse('$baseUrl/set-new-passwordFlutter'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'email': email,
-          'token': token,
           'newPassword': newPassword,
           'confirmPassword': confirmPassword,
         }),
@@ -92,9 +96,14 @@ class AuthService {
       if (response.statusCode == 200) {
         return "Password reset successfully!";
       } else {
-        return jsonDecode(response.body)['message'];
+        // Handle error cases where response status code is not 200
+        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        return jsonResponse[
+            'message']; // Assuming your backend returns an error message
       }
     } catch (error) {
+      // Handle network or other errors
+      print('Error setting new password: $error');
       return "Something went wrong. Please try again later.";
     }
   }

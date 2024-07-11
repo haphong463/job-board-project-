@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'auth_service.dart';
 
 class QuizService {
-  final String baseUrl = 'http://192.168.110.15:8080/api/quizzes';
+  final String baseUrl = 'http://192.168.110.22:8080/api/quizzes';
   final AuthService _authService = AuthService();
   final storage = FlutterSecureStorage();
 
