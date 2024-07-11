@@ -1,10 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:kommunicate_flutter/kommunicate_flutter.dart';
 import '../../service/auth_service.dart';
 import 'signup_screen.dart';
 import 'forgotpassword_screen.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -36,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/hero_1.jpg'),
                 fit: BoxFit.fitWidth,
@@ -46,26 +49,26 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           Container(
             width: MediaQuery.of(context).size.width,
-            margin: EdgeInsets.only(top: 270),
+            margin: const EdgeInsets.only(top: 270),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Colors.white,
             ),
             child: Padding(
-              padding: EdgeInsets.all(23),
+              padding: const EdgeInsets.all(23),
               child: ListView(
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
                     child: Container(
-                      color: Color(0xfff5f5f5),
+                      color: const Color(0xfff5f5f5),
                       child: TextFormField(
                         controller: _usernameController,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black,
                           fontFamily: 'SFUIDisplay',
                         ),
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'Username',
                           prefixIcon: Icon(Icons.person_outline),
@@ -77,15 +80,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   Container(
-                    color: Color(0xfff5f5f5),
+                    color: const Color(0xfff5f5f5),
                     child: TextFormField(
                       controller: _passwordController,
                       obscureText: true,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black,
                         fontFamily: 'SFUIDisplay',
                       ),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Password',
                         prefixIcon: Icon(Icons.lock_outline),
@@ -96,15 +99,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.only(top: 20),
                     child: MaterialButton(
                       onPressed: _login,
-                      child: Text('SIGN IN',
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontFamily: 'SFUIDisplay',
-                              fontWeight: FontWeight.bold)),
-                      color: Color.fromARGB(255, 45, 255, 132),
+                      color: const Color.fromARGB(255, 45, 255, 132),
                       elevation: 0,
                       minWidth: 400,
                       height: 50,
@@ -112,15 +110,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      child: const Text('SIGN IN',
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontFamily: 'SFUIDisplay',
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                   if (_errorMessage.isNotEmpty)
                     Padding(
-                      padding: EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.only(top: 20),
                       child: Center(
                         child: Text(
                           _errorMessage,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'SFUIDisplay',
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -130,13 +133,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   Padding(
-                    padding: EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.only(top: 20),
                     child: Center(
                       child: GestureDetector(
                         onTap: () {
                           Navigator.pushNamed(context, '/forgot_password');
                         },
-                        child: Text(
+                        child: const Text(
                           'Forgot your password?',
                           style: TextStyle(
                             fontFamily: 'SFUIDisplay',
@@ -148,12 +151,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 30),
+                    padding: const EdgeInsets.only(top: 30),
                     child: Center(
                       child: RichText(
                         text: TextSpan(
                           children: [
-                            TextSpan(
+                            const TextSpan(
                               text: "Don't have an account? ",
                               style: TextStyle(
                                 fontFamily: 'SFUIDisplay',
@@ -163,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             TextSpan(
                               text: "Sign up",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontFamily: 'SFUIDisplay',
                                 color: Color(0xffff2d55),
                                 fontSize: 15,
@@ -184,6 +187,22 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.message),
+        onPressed: () async {
+          dynamic conversationObject = {
+            'appId': '4ad31fa80e50f3c68e389cbfeffad7ac',
+            'isSingleConversation': false
+          };
+          KommunicateFlutterPlugin.buildConversation(conversationObject)
+              .then((result) {
+            print(
+                "Conversation builder success: $result"); //result.toString() will be the clientChannelKey
+          }).catchError((error) {
+            print("Conversation builder error occurred : $error");
+          });
+        },
       ),
     );
   }
