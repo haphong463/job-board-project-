@@ -96,13 +96,11 @@ class AuthService {
       if (response.statusCode == 200) {
         return "Password reset successfully!";
       } else {
-        // Handle error cases where response status code is not 200
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         return jsonResponse[
-            'message']; // Assuming your backend returns an error message
+            'message']; 
       }
     } catch (error) {
-      // Handle network or other errors
       print('Error setting new password: $error');
       return "Something went wrong. Please try again later.";
     }
