@@ -43,9 +43,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     final String email = arguments['email'];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Reset Password'),
-      ),
       body: Stack(
         children: <Widget>[
           Container(

@@ -564,6 +564,87 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
         }
     }
 
+
+
+    @PostMapping("/signupFlutter")
+    public ResponseEntity<?> registerUserFlutter(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getGender());
+
+        Set<String> strRoles = signUpRequest.getRole();
+        Set<Role> roles = new HashSet<>();
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin":
+                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(adminRole);
+                        break;
+                    case "mod":
+                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(modRole);
+                        break;
+
+                    default:
+                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(userRole);
+                }
+            });
+        }
+
+        user.setRoles(roles);
+        user.setIsEnabled(true);
+        String verificationCode = generateVerificationCode();
+        user.setVerificationCode(verificationCode);
+
+        userRepository.save(user);
+        emailService.sendVerificationEmailFlutter(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PostMapping("/verifyFlutter")
+    public ResponseEntity<?> verifyEmailFlutter(@RequestParam("email") String email,
+                                         @RequestParam("code") String code) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String latestVerificationCode = user.getVerificationCode();
+            if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
+                user.setVerified(true);
+                userRepository.save(user);
+                return ResponseEntity.ok(new MessageResponse("Email verified successfully!"));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Invalid verification code!"));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
+        }
+    }
+
     private String generateVerificationCode() {
         return UUID.randomUUID().toString().substring(0, 6);
     }

@@ -9,6 +9,8 @@ import 'screens/quiz/quiz_screen.dart';
 import 'screens/login_register/forgotpassword_screen.dart';
 import 'screens/login_register/resetpassword_screen.dart';
 
+import 'screens/login_register/verify_screen.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/application': (context) => MainScreen(),
         '/job': (context) => JobInfoPage(),
         '/quizzes': (context) => QuizListScreen(),
+        '/verify': (context) => VerifyScreen(email: ''),
       },
     );
   }
