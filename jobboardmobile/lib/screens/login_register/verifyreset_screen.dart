@@ -24,10 +24,10 @@ class _VerifyResetScreenState extends State<VerifyResetScreen> {
       if (response.containsKey('message') &&
           response['message'].startsWith(
               'Email verified successfully! Use the token to reset your password: ')) {
-        // Extract reset token from the response message
         String resetToken = response['message'].split(': ').last.trim();
 
-        // Navigate to the reset password screen
+        _showSnackBar('Email verified successfully!');
+
         Navigator.pushReplacementNamed(
           context,
           '/reset_password',
@@ -44,6 +44,15 @@ class _VerifyResetScreenState extends State<VerifyResetScreen> {
         _errorMessage = 'Failed to verify code.';
       });
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -111,6 +120,19 @@ class _VerifyResetScreenState extends State<VerifyResetScreen> {
                       textColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Center(
+                      child: Text(
+                        'Check your email for the verification code to reset your password.',
+                        style: TextStyle(
+                          fontFamily: 'SFUIDisplay',
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
                       ),
                     ),
                   ),
