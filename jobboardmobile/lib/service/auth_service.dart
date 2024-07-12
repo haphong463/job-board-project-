@@ -139,11 +139,22 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await storage.delete(key: 'accessToken');
-    await storage.delete(key: 'refreshToken');
-    await storage.delete(key: 'firstName');
-    await storage.delete(key: 'lastName');
-    await storage.delete(key: 'email');
+    final refreshToken = await storage.read(key: 'refreshToken');
+    final response = await http.post(
+      Uri.parse('$baseUrl/signout'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'refreshToken': refreshToken}),
+    );
+
+    if (response.statusCode == 200) {
+      await storage.delete(key: 'accessToken');
+      await storage.delete(key: 'refreshToken');
+      await storage.delete(key: 'firstName');
+      await storage.delete(key: 'lastName');
+      await storage.delete(key: 'email');
+    } else {
+      throw Exception('Failed to logout');
+    }
   }
 
   Future<String?> getAccessToken() async {
