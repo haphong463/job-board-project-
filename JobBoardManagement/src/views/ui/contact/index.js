@@ -12,16 +12,12 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
 } from "reactstrap";
 import axios from "axios";
 import nprogress from "nprogress";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import './styles.css'
 const ContactIndex = (props) => {
   const [contacts, setContacts] = useState([]);
   const [status, setStatus] = useState("idle");
@@ -29,7 +25,6 @@ const ContactIndex = (props) => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
   const [emailMessage, setEmailMessage] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState([]);
 
   useEffect(() => {
     nprogress.start();
@@ -67,30 +62,6 @@ const ContactIndex = (props) => {
 
   const handleRead = (contact) => {
     setSelectedContact(contact);
-  };
-
-  const toggleDropdown = (index) => {
-    const newDropdownOpen = [...dropdownOpen];
-    newDropdownOpen[index] = !newDropdownOpen[index];
-    setDropdownOpen(newDropdownOpen);
-  };
-
-  const handleDropdownAction = (action, row, index) => {
-    switch (action) {
-      case 'read':
-        handleRead(row);
-        break;
-      case 'delete':
-        handleDelete(row.id);
-        break;
-      case 'sendEmail':
-        handleRead(row);
-        setSendEmailDialogOpen(true);
-        break;
-      default:
-        break;
-    }
-    toggleDropdown(index);
   };
 
   const handleSendEmail = () => {
@@ -147,23 +118,15 @@ const ContactIndex = (props) => {
     },
     {
       name: "Actions",
-      cell: (row, index) => (
-        <Dropdown isOpen={dropdownOpen[index]} toggle={() => toggleDropdown(index)}>
-          <DropdownToggle caret>
-            Actions
-          </DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem onClick={() => handleDropdownAction('read', row, index)}>
-              Read
-            </DropdownItem>
-            <DropdownItem onClick={() => handleDropdownAction('delete', row, index)}>
-              Delete
-            </DropdownItem>
-            <DropdownItem onClick={() => handleDropdownAction('sendEmail', row, index)}>
-              Send Email
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+      cell: (row) => (
+        <div className="actions-cell">
+          <button className="btn btn-primary btn-sm me-1" onClick={() => handleRead(row)}>Read</button>
+          <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>Delete</button>
+          <button className="btn btn-success btn-sm" onClick={() => {
+            handleRead(row);
+            setSendEmailDialogOpen(true);
+          }}>Send Email</button>
+        </div>
       ),
     },
   ];
@@ -202,7 +165,7 @@ const ContactIndex = (props) => {
         </Card>
       </Col>
 
-      {/* Modal để hiển thị chi tiết contact */}
+      {/* Modal to display contact details */}
       <Modal isOpen={selectedContact !== null && !sendEmailDialogOpen} toggle={() => setSelectedContact(null)}>
         <ModalHeader toggle={() => setSelectedContact(null)}>Contact Details</ModalHeader>
         <ModalBody>
@@ -221,7 +184,7 @@ const ContactIndex = (props) => {
         </ModalFooter>
       </Modal>
 
-      {/* Modal để gửi email */}
+      {/* Modal to send email */}
       <Modal isOpen={sendEmailDialogOpen} toggle={handleCancelSendEmail}>
         <ModalHeader toggle={handleCancelSendEmail}>Send Email</ModalHeader>
         <ModalBody>
