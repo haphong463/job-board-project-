@@ -54,6 +54,24 @@ class _VerifyScreenState extends State<VerifyScreen> {
               padding: EdgeInsets.all(23),
               child: ListView(
                 children: <Widget>[
+                  Text(
+                    'Verify Your Email',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'SFUIDisplay',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Please enter the verification code sent to your email.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SFUIDisplay',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 20, 0, 10),
                     child: Container(

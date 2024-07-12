@@ -118,6 +118,26 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> verifyResetPassWord(
+      String email, String code) async {
+    try {
+      final response = await http.post(
+        Uri.parse(
+            '$baseUrl/verifyResetPassWordFlutter?email=${Uri.encodeComponent(email)}&code=$code'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to verify reset password: ${response.body}');
+      }
+    } catch (e) {
+      print('Error verifying reset password: $e');
+      throw Exception('Failed to verify reset password: $e');
+    }
+  }
+
   Future<void> logout() async {
     await storage.delete(key: 'accessToken');
     await storage.delete(key: 'refreshToken');

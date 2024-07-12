@@ -10,6 +10,7 @@ import 'screens/login_register/forgotpassword_screen.dart';
 import 'screens/login_register/resetpassword_screen.dart';
 
 import 'screens/login_register/verify_screen.dart';
+import 'screens/login_register/verifyreset_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -33,6 +34,14 @@ class MyApp extends StatelessWidget {
         '/job': (context) => JobInfoPage(),
         '/quizzes': (context) => QuizListScreen(),
         '/verify': (context) => VerifyScreen(email: ''),
+        '/verify_reset': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+
+          return VerifyResetScreen(
+            email: args?['email'] ?? '',
+          );
+        },
       },
     );
   }

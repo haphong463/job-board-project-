@@ -536,14 +536,19 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+            String verificationCode = generateVerificationCode();
 
+            user.setVerificationCode(verificationCode);  // Save the verification code
+            userRepository.save(user);
+
+            // Send reset password email
+            emailService.sendResetPasswordEmailFlutter(user.getEmail(), user.getUsername(), verificationCode);
 
             return ResponseEntity.ok(new MessageResponse("Reset password email sent successfully!"));
         } else {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
-
     @PostMapping("/set-new-passwordFlutter")
     public ResponseEntity<?> setNewPassword(@RequestBody SetPasswordRequest request) {
         String email = request.getEmail();
@@ -644,6 +649,27 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
             return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
         }
     }
+
+    @PostMapping("/verifyResetPassWordFlutter")
+    public ResponseEntity<?> verifyResetPassWordFlutter(@RequestParam("email") String email,
+                                                        @RequestParam("code") String code) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String latestVerificationCode = user.getVerificationCode();
+            if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
+                String resetToken = generateResetToken();
+                user.setResetToken(resetToken);
+                userRepository.save(user);
+                return ResponseEntity.ok(new MessageResponse("Email verified successfully! Use the token to reset your password: " + resetToken));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Invalid verification code!"));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
+        }
+    }
+
 
     private String generateVerificationCode() {
         return UUID.randomUUID().toString().substring(0, 6);
