@@ -432,6 +432,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
+
 //VerifyUser
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
     public void verifyEmail(
@@ -527,6 +528,147 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
 
     return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
 }
+
+
+
+    @PostMapping("/forgot-password-flutter")
+    public ResponseEntity<?> forgotPasswordFlutter(@RequestParam("email") String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String verificationCode = generateVerificationCode();
+
+            user.setVerificationCode(verificationCode);  // Save the verification code
+            userRepository.save(user);
+
+            // Send reset password email
+            emailService.sendResetPasswordEmailFlutter(user.getEmail(), user.getUsername(), verificationCode);
+
+            return ResponseEntity.ok(new MessageResponse("Reset password email sent successfully!"));
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+        }
+    }
+    @PostMapping("/set-new-passwordFlutter")
+    public ResponseEntity<?> setNewPassword(@RequestBody SetPasswordRequest request) {
+        String email = request.getEmail();
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        if (!newPassword.equals(confirmPassword)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Passwords do not match!"));
+        }
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setPassword(encoder.encode(newPassword));
+            userRepository.save(user);
+            return ResponseEntity.ok(new MessageResponse("Password reset successfully!"));
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+        }
+    }
+
+
+
+    @PostMapping("/signupFlutter")
+    public ResponseEntity<?> registerUserFlutter(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getGender());
+
+        Set<String> strRoles = signUpRequest.getRole();
+        Set<Role> roles = new HashSet<>();
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin":
+                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(adminRole);
+                        break;
+                    case "mod":
+                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(modRole);
+                        break;
+
+                    default:
+                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(userRole);
+                }
+            });
+        }
+
+        user.setRoles(roles);
+        user.setIsEnabled(true);
+        String verificationCode = generateVerificationCode();
+        user.setVerificationCode(verificationCode);
+
+        userRepository.save(user);
+        emailService.sendVerificationEmailFlutter(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PostMapping("/verifyFlutter")
+    public ResponseEntity<?> verifyEmailFlutter(@RequestParam("email") String email,
+                                         @RequestParam("code") String code) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String latestVerificationCode = user.getVerificationCode();
+            if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
+                user.setVerified(true);
+                userRepository.save(user);
+                return ResponseEntity.ok(new MessageResponse("Email verified successfully!"));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Invalid verification code!"));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
+        }
+    }
+
+    @PostMapping("/verifyResetPassWordFlutter")
+    public ResponseEntity<?> verifyResetPassWordFlutter(@RequestParam("email") String email,
+                                                        @RequestParam("code") String code) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String latestVerificationCode = user.getVerificationCode();
+            if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
+                String resetToken = generateResetToken();
+                user.setResetToken(resetToken);
+                userRepository.save(user);
+                return ResponseEntity.ok(new MessageResponse("Email verified successfully! Use the token to reset your password: " + resetToken));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Invalid verification code!"));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
+        }
+    }
 
 
     private String generateVerificationCode() {

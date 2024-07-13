@@ -1,31 +1,30 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import '../../service/auth_service.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class VerifyScreen extends StatefulWidget {
+  final String email;
+
+  VerifyScreen({required this.email});
+
   @override
-  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
+  _VerifyScreenState createState() => _VerifyScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final AuthService _authService = AuthService();
-  final TextEditingController _emailController = TextEditingController();
+class _VerifyScreenState extends State<VerifyScreen> {
+  final TextEditingController _codeController = TextEditingController();
   String _errorMessage = '';
 
-  void _forgotPassword() async {
-    try {
-      String email = _emailController.text;
-      await _authService.forgotPassword(email);
+  Future<void> _verifyEmail() async {
+    final response =
+        await AuthService().verifyEmail(widget.email, _codeController.text);
 
-      Navigator.pushReplacementNamed(
-        context,
-        '/verify_reset',
-        arguments: {'email': email},
-      );
-    } catch (e) {
-      print('Error sending forgot password request: $e');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
       setState(() {
-        _errorMessage = 'Failed to send forgot password request.';
+        _errorMessage = 'Verification failed. Please try again.';
       });
     }
   }
@@ -55,20 +54,38 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               padding: EdgeInsets.all(23),
               child: ListView(
                 children: <Widget>[
+                  Text(
+                    'Verify Your Email',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'SFUIDisplay',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Please enter the verification code sent to your email.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'SFUIDisplay',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(0, 20, 0, 10),
                     child: Container(
                       color: Color(0xfff5f5f5),
                       child: TextFormField(
-                        controller: _emailController,
+                        controller: _codeController,
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'SFUIDisplay',
                         ),
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_outlined),
+                          labelText: 'Verification Code',
+                          prefixIcon: Icon(Icons.code_outlined),
                           labelStyle: TextStyle(
                             fontSize: 15,
                           ),
@@ -79,9 +96,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Padding(
                     padding: EdgeInsets.only(top: 20),
                     child: MaterialButton(
-                      onPressed: _forgotPassword,
+                      onPressed: _verifyEmail,
                       child: Text(
-                        'RESET PASSWORD',
+                        'VERIFY',
                         style: TextStyle(
                           fontSize: 15,
                           fontFamily: 'SFUIDisplay',
@@ -113,29 +130,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                       ),
                     ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 30),
-                    child: Center(
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Remember your password?',
-                              style: TextStyle(
-                                fontFamily: 'SFUIDisplay',
-                                color: Colors.black,
-                                fontSize: 15,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.pop(context);
-                                },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),

@@ -1,33 +1,58 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../service/auth_service.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class VerifyResetScreen extends StatefulWidget {
+  final String email;
+
+  VerifyResetScreen({required this.email});
+
   @override
-  _ForgotPasswordScreenState createState() => _ForgotPasswordScreenState();
+  _VerifyResetScreenState createState() => _VerifyResetScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _VerifyResetScreenState extends State<VerifyResetScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
   String _errorMessage = '';
 
-  void _forgotPassword() async {
+  void _verifyCode() async {
     try {
-      String email = _emailController.text;
-      await _authService.forgotPassword(email);
+      String code = _codeController.text;
+      final response =
+          await _authService.verifyResetPassWord(widget.email, code);
 
-      Navigator.pushReplacementNamed(
-        context,
-        '/verify_reset',
-        arguments: {'email': email},
-      );
+      if (response.containsKey('message') &&
+          response['message'].startsWith(
+              'Email verified successfully! Use the token to reset your password: ')) {
+        String resetToken = response['message'].split(': ').last.trim();
+
+        _showSnackBar('Email verified successfully!');
+
+        Navigator.pushReplacementNamed(
+          context,
+          '/reset_password',
+          arguments: {'email': widget.email, 'resetToken': resetToken},
+        );
+      } else {
+        setState(() {
+          _errorMessage = 'Invalid verification code.';
+        });
+      }
     } catch (e) {
-      print('Error sending forgot password request: $e');
+      print('Error verifying code: $e');
       setState(() {
-        _errorMessage = 'Failed to send forgot password request.';
+        _errorMessage = 'Failed to verify code.';
       });
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -60,15 +85,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     child: Container(
                       color: Color(0xfff5f5f5),
                       child: TextFormField(
-                        controller: _emailController,
+                        controller: _codeController,
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'SFUIDisplay',
                         ),
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_outlined),
+                          labelText: 'Verification Code',
+                          prefixIcon: Icon(Icons.lock_outline),
                           labelStyle: TextStyle(
                             fontSize: 15,
                           ),
@@ -79,9 +104,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Padding(
                     padding: EdgeInsets.only(top: 20),
                     child: MaterialButton(
-                      onPressed: _forgotPassword,
+                      onPressed: _verifyCode,
                       child: Text(
-                        'RESET PASSWORD',
+                        'VERIFY CODE',
                         style: TextStyle(
                           fontSize: 15,
                           fontFamily: 'SFUIDisplay',
@@ -95,6 +120,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       textColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: Center(
+                      child: Text(
+                        'Check your email for the verification code to reset your password.',
+                        style: TextStyle(
+                          fontFamily: 'SFUIDisplay',
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
                       ),
                     ),
                   ),
@@ -113,29 +151,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                       ),
                     ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 30),
-                    child: Center(
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'Remember your password?',
-                              style: TextStyle(
-                                fontFamily: 'SFUIDisplay',
-                                color: Colors.black,
-                                fontSize: 15,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.pop(context);
-                                },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),

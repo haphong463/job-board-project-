@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../service/auth_service.dart';
+import 'verify_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -26,7 +27,12 @@ class _SignupScreenState extends State<SignupScreen> {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VerifyScreen(email: _emailController.text),
+        ),
+      );
     } else {
       setState(() {
         _errorMessage = 'Signup failed. Please try again.';

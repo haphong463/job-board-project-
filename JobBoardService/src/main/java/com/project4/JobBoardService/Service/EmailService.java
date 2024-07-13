@@ -15,4 +15,10 @@ public interface EmailService {
 
     @Async("emailTaskExecutor")
     void sendEmail(String to, String subject, String text);
+
+    @Async
+    void sendVerificationEmailFlutter(String toEmail, String username, String firstName, String verificationCode, String email);
+
+    @Async
+    void sendResetPasswordEmailFlutter(String toEmail, String username, String resetToken);
 }

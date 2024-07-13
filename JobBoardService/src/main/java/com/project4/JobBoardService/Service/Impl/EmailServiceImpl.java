@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.Properties;
 
 import static com.project4.JobBoardService.Util.HTMLContentProvider.generateEmailHTMLContent;
+import static com.project4.JobBoardService.Util.HTMLContentProvider.readHTMLContentFlutterReset;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -140,6 +141,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+
     @Async("emailTaskExecutor")
     @Override
     public void sendEmail(String to, String subject, String text) {
@@ -156,5 +158,75 @@ public class EmailServiceImpl implements EmailService {
         helper.setSubject(subject);
         helper.setText(text, true);
         javaMailSender.send(message);
+    }
+
+
+    @Async
+    @Override
+    public void sendVerificationEmailFlutter(String toEmail, String username, String firstName, String verificationCode, String email) {
+        Properties properties = new Properties();
+        properties.setProperty("mail.smtp.host", "smtp.gmail.com");
+        properties.setProperty("mail.smtp.port", "587");
+        properties.setProperty("mail.smtp.auth", "true");
+        properties.setProperty("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(properties, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, fromEmailPassword);
+            }
+        });
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(fromEmail));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
+            message.setSubject("Email Verification");
+
+            String emailContent = HTMLContentProvider.readHTMLContentFlutter();
+            emailContent = emailContent.replace("{{username}}", username);
+            emailContent = emailContent.replace("{{verificationCode}}", verificationCode);
+
+            message.setContent(emailContent, "text/html");
+
+            Transport.send(message);
+            System.out.println("Email sent successfully!");
+        } catch (MessagingException mex) {
+            mex.printStackTrace();
+        }
+    }
+
+    @Async
+    @Override
+    public void sendResetPasswordEmailFlutter(String toEmail, String username, String verificationCode) {
+        Properties properties = new Properties();
+        properties.setProperty("mail.smtp.host", "smtp.gmail.com");
+        properties.setProperty("mail.smtp.port", "587");
+        properties.setProperty("mail.smtp.auth", "true");
+        properties.setProperty("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(properties, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, fromEmailPassword);
+            }
+        });
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(fromEmail));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
+            message.setSubject("Reset Password");
+
+            String htmlContent = readHTMLContentFlutterReset(username, verificationCode);
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+
+            Transport.send(message);
+
+            System.out.println("Reset password email sent successfully!");
+        } catch (MessagingException mex) {
+            mex.printStackTrace();
+        }
     }
 }
