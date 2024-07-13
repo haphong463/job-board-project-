@@ -4,13 +4,19 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CountUp from "react-countup";
 import { JobBoardStats } from "../../components/job-board-stats/JobBoardStats";
 import { JobFilter } from "../../components/job-filter/JobFIlter";
+import "../job-listing/listSkillAll"
+import jobData from '../job-listing/job_data.json';
+import companyData from '../job-listing/company_data.json';
 
-export const Home = () => {
+export const Home = () =>
+{
   const location = useLocation();
   const navigate = useNavigate(); // Correct usage of useNavigate
   const [message, setMessage] = useState("");
+  const [jobs, setJobs] = useState([]);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     // Ensure selectpicker is initialized
     $(".selectpicker").selectpicker("refresh");
 
@@ -18,9 +24,11 @@ export const Home = () => {
     const searchParams = new URLSearchParams(location.search);
     const message = searchParams.get("message");
 
-    if (message) {
+    if (message)
+    {
       setMessage(message);
-      setTimeout(() => {
+      setTimeout(() =>
+      {
         setMessage("");
         // Remove the message parameter from the URL
         navigate(location.pathname, { replace: true });
@@ -28,7 +36,27 @@ export const Home = () => {
         window.location.reload();
       }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
     }
+
+    const superHotJobs = jobData.filter(job => job.isSuperHot);
+    setJobs(superHotJobs);
   }, [location, navigate]);
+
+  const getLocation1String = (address) =>
+  {
+    if (typeof address !== 'string')
+    {
+      return '';
+    }
+
+    const parts = address.split(", ");
+    const len = parts.length;
+    if (len >= 2)
+    {
+      return parts.slice(-2).join(", ");
+    }
+    return address;
+  };
+
   return (
     <GlobalLayoutUser>
       <>
@@ -72,166 +100,55 @@ export const Home = () => {
           <div className="container">
             <div className="row mb-5 justify-content-center">
               <div className="col-md-7 text-center">
-                <h2 className="section-title mb-2">43,167 Job Listed</h2>
+                <h2 className="section-title mb-2">Super Hot Jobs Today</h2>
               </div>
             </div>
             <ul className="job-listings mb-5">
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_1.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Product Designer</h2>
-                    <strong>Adidas</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> New York, New York
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-danger">Part Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_2.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Digital Marketing Director</h2>
-                    <strong>Sprint</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Overland Park, Kansas
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_3.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Back-end Engineer (Python)</h2>
-                    <strong>Amazon</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Overland Park, Kansas
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_4.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Senior Art Director</h2>
-                    <strong>Microsoft</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Anywhere
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_5.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Product Designer</h2>
-                    <strong>Puma</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> San Mateo, CA
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_1.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Product Designer</h2>
-                    <strong>Adidas</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> New York, New York
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-danger">Part Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_2.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Digital Marketing Director</h2>
-                    <strong>Sprint</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Overland Park, Kansas
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
+              {jobs.map(job =>
+              {
+                const company = companyData.find(company => company.companyId === job.companyId);
+                const address = getLocation1String(job.location);
+                if (company)
+                {
+                  return (
+                    <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
+                      <a href={`/job/${job.id}`} />
+                      <div className="job-listing-logo">
+                        <img
+                          src={company.logo}
+                          alt="Free Website Template by Free-Template.co"
+                          className="jb_custom-img"
+                        />
+                      </div>
+                      <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3">
+                        <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
+                          <h2>{job.title}</h2>
+                          <strong>{company.companyName}</strong>
+                        </div>
+                        {/* <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
+                          <span className="icon-room" /> {address}
+                        </div>
+                        <div className="job-listing-meta">
+                          <span className="badge badge-danger">{job.contractType}</span>
+                        </div> */}
+
+                        <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">
+                          <div className="justify-content-start me-3">
+                            <span className="icon-room me-2" /> {address}
+                          </div>
+                        </div>
+                        <div className="job-listing-meta ">
+                          <span className="badge bg-danger">{job.contractType}</span>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                }
+                return null;
+              })}
             </ul>
-            <div className="row pagination-wrap">
+
+            {/* <div className="row pagination-wrap">
               <div className="col-md-6 text-center text-md-left mb-4 mb-md-0">
                 <span>Showing 1-7 Of 43,167 Jobs</span>
               </div>
@@ -253,7 +170,7 @@ export const Home = () => {
                   </a>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </section>
         <section

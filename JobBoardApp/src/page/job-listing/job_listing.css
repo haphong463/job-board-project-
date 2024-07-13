@@ -1,57 +1,52 @@
-.job-listing {
+.jb_job-listing {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
     margin: 30px 20px;
     margin-bottom: 50px;
+    font-size: 13.5px;
 }
 
-.single-job-item {
-    border: 2px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-    transition: border-color 0.3s ease;
-}
-
-.number-job {
+.jb_number-job {
     margin: 10px 20px;
     margin-top: 10em;
     font-weight: bolder;
 }
 
-.category-name {
+.jb_category-name {
     color: red;
 }
 
-.single-job-item:hover {
+.jb_single-job-item:hover {
     border-color: #999;
 }
 
-.single-job-item.selected {
+.jb_single-job-item.jb_selected {
     border-color: red;
 }
 
-.single-job-item {
+.jb_single-job-item {
     display: flex;
     border: 1px solid #ffffff;
     border-radius: 10px;
-    padding: 20px;
+    padding: 15px;
+    margin-left: 90px;
     width: 100%;
-    margin: 0 20px;
+    margin: 0 400px;
     background-color: rgb(255, 242, 225);
 }
 
-.company-details {
+.jb_company-details {
     display: flex;
     align-items: center;
     margin: 10px 0;
 }
 
-.company-img {
+.jb_company-img {
     margin-right: -10px;
 }
 
-.company-img img {
+.jb_company-img img {
     margin-top: -10px;
     width: 55px;
     height: 55px;
@@ -59,45 +54,41 @@
     border-radius: 10%;
 }
 
-.job-info .company-name {
-    font-size: 16px;
+.jb_job-info .jb_company-name {
     color: #333;
     margin-left: 1.3em;
     margin-top: 1em;
     text-decoration: none;
 }
 
-.job-info .company-position {
-    font-size: 16px;
+.jb_job-info .jb_company-position {
     color: #333;
     margin-left: 0;
 }
 
-.job-info .job-location {
+.jb_job-info .jb_job-location {
     color: #000000;
     margin-top: -10px;
 }
 
-.job-info {
+.jb_job-info {
     color: #000000;
-    margin: 0 0;
     flex: 1;
 }
 
-.time-post {
+.jb_time-post {
     color: #7e7e7e;
-    font-size: 15px;
 }
 
-.job-info .jobName {
+.jb_job-info .jb_jobName {
     cursor: pointer;
-    font-size: 20px;
+    font-size: 15.5px;
     margin: 0;
     margin-bottom: 10px;
     font-weight: bold;
 }
 
-.job-skills .skill-badge {
+.jb_job-skills .jb_skill-badge {
     display: inline-block;
     background-color: #bcbcbc7c;
     /* border: 100%; */
@@ -107,33 +98,32 @@
     border-bottom-right-radius: 100px;
     padding: 3px 10px;
     margin: 0 5px 0 2px;
-    font-size: 14px;
     color: #000000;
 }
 
-.job-skills {
+.jb_job-skills {
     margin-left: 0;
 }
 
-.job-info .company-link {
+.jb_job-info .jb_company-link {
     display: inline-block;
     margin-top: 10px;
     text-decoration: none;
 }
 
-.icon-location {
+.jb_icon-location {
     color: #777777;
 }
 
-.pagination {
+.jb_pagination {
     display: flex;
     justify-content: center;
-    margin: 0 700px;
-    width: 8%;
+    margin: 0;
+    width: 100%;
     margin-bottom: 60px;
 }
 
-.pagination .pagination-button {
+.jb_pagination .jb_pagination-button {
     border: 1px solid #7a7777c6;
     color: #000000;
     border-radius: 10%;
@@ -144,7 +134,7 @@
     transition: background-color 0.3s ease;
 }
 
-.pagination-ellipsis {
+.jb_pagination-ellipsis {
     border: 1px solid #ffffff;
     color: #000000;
     border-radius: 10%;
@@ -153,16 +143,29 @@
     background-color: #f8f8f8;
 }
 
-.pagination .pagination-button.active {
+.jb_pagination .jb_pagination-button.jb_active {
     background-color: #007bff;
     color: white;
     border-color: #ffffff;
 }
 
-.pagination-button:hover,
-.pagination-button:focus {
+.jb_pagination-button:hover,
+.jb_pagination-button:focus {
     background-color: #007bff;
     color: white;
     border-color: #007bff;
     outline: none;
+}
+
+
+
+
+
+
+.jb_bg-light {
+    background-color: #ffedf9;
+}
+
+.jb_text1 {
+    font-size: 13px;
 }

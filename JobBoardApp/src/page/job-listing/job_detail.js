@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import moment from 'moment';
-import './job_detail.css';
 import { useParams } from 'react-router-dom';
 import jobData1 from './job_data.json';
 import companyData1 from './company_data.json';
@@ -98,57 +97,53 @@ export const JobDetail = () =>
                         </div>
                     </div>
                 </section>
-                {/* <div className=""> */}
 
-                <div className="job-detail-container pt-120 pb-120">
+                <div className="jb-job-detail-container pt-120 pb-120">
                     <div className="container">
-
                         <div className="row justify-content-between">
                             {/* Left Content */}
                             <div className="col-xl-7 col-lg-8">
-                                <div className="job-title mb-50">
+                                <div className="jb-job-detail-container__title mb-50">
                                     <h2>{jobData?.title}</h2>
-                                    <ul className="list-info1">
-                                        <li> <FaMapMarkerAlt className="icon-location" /> {jobData?.location}</li>
-                                        <li><MonetizationOnIcon className="icon-salary" />{jobData?.offeredSalary}</li>
-                                        <li><FaClock className="icon-time" />Deadline for submission: {jobData?.expire}</li>
+                                    <ul className="jb-job-detail-container__info list-info1">
+                                        <li> <FaMapMarkerAlt className="jb-icon-location" /> {jobData?.location}</li>
+                                        <li><MonetizationOnIcon className="jb-icon-salary" />{jobData?.offeredSalary}</li>
+                                        <li><FaClock className="jb-icon-time" />Deadline for submission: {jobData?.expire}</li>
                                     </ul>
-                                    <div className="job-skill">
+                                    <div className="jb-job-detail-container__skills jb-job-skill">
                                         Skills:
-                                        <p className="label-skill">
+                                        <p className="jb-job-skill__label label-skill">
                                             {jobData?.keySkills.split(',').map((skill, index) => (
-                                                <span key={index} className="skill-badges">{skill.trim()}</span>
-                                            ))}</p>
+                                                <span key={index} className="jb-job-skill__badge skill-badges">{skill.trim()}</span>
+                                            ))}
+                                        </p>
                                     </div>
-
                                 </div>
                                 {/* Job Details */}
-                                <div className="job-post-details">
-                                    <div className="post-details-section mb-50">
-                                        <h4 className="job-detail">Job description</h4>
-                                        <div className='list-item' dangerouslySetInnerHTML={{ __html: jobData?.description }} />
-                                        <h5 className="highlighted-text">Working hours:</h5>
-                                        <div className='list-item' dangerouslySetInnerHTML={{ __html: jobData?.workSchedule }} />
+                                <div className="jb-job-detail-container__post-details jb-post-details-section mb-50">
+                                    <h4 className="jb-post-details-section__title jb-job-detail">Job description</h4>
+                                    <div className='jb-post-details-section__item list-item' dangerouslySetInnerHTML={{ __html: jobData?.description }} />
+                                    <h5 className="jb-post-details-section__highlighted-text highlighted-text">Working hours:</h5>
+                                    <div className='jb-post-details-section__item list-item' dangerouslySetInnerHTML={{ __html: jobData?.workSchedule }} />
 
-                                        <hr></hr>
-                                        <h4 className="job-detail">Your role & responsibilities</h4>
-                                        <div className='list-item' dangerouslySetInnerHTML={{ __html: jobData?.responsibilities }} />
-                                        <hr></hr>
-                                        <h4 className="job-detail">Your skills & qualifications</h4>
-                                        <h5 className="highlighted-text">1. Educational Background</h5>
-                                        <div className='list-item' dangerouslySetInnerHTML={{ __html: jobData?.qualification }} />
-                                        <h5 className="highlighted-text">2. Skills</h5>
-                                        <div className='list-item' dangerouslySetInnerHTML={{ __html: jobData?.requiredSkills }} />
-                                        <hr></hr>
-                                        <h4 className="job-detail">Benefits for you</h4>
-                                        <div className='list-item' dangerouslySetInnerHTML={{ __html: jobData?.benefit }} />
-                                    </div>
+                                    <hr></hr>
+                                    <h4 className="jb-post-details-section__title jb-job-detail">Your role & responsibilities</h4>
+                                    <div className='jb-post-details-section__item list-item' dangerouslySetInnerHTML={{ __html: jobData?.responsibilities }} />
+                                    <hr></hr>
+                                    <h4 className="jb-post-details-section__title jb-job-detail">Your skills & qualifications</h4>
+                                    <h5 className="jb-post-details-section__highlighted-text highlighted-text">1. Educational Background</h5>
+                                    <div className='jb-post-details-section__item list-item' dangerouslySetInnerHTML={{ __html: jobData?.qualification }} />
+                                    <h5 className="jb-post-details-section__highlighted-text highlighted-text">2. Skills</h5>
+                                    <div className='jb-post-details-section__item list-item' dangerouslySetInnerHTML={{ __html: jobData?.requiredSkills }} />
+                                    <hr></hr>
+                                    <h4 className="jb-post-details-section__title jb-job-detail">Benefits for you</h4>
+                                    <div className='jb-post-details-section__item list-item' dangerouslySetInnerHTML={{ __html: jobData?.benefit }} />
                                 </div>
                             </div>
                             {/* Right Content */}
-                            <div className="overview-content col-xl-4 col-lg-4">
-                                <div className="job-overview mb-50">
-                                    <div className="section-title">
+                            <div className="jb-overview-content col-xl-4 col-lg-4">
+                                <div className="jb-overview-content__overview jb-job-overview mb-50">
+                                    <div className="jb-overview-content__title section-title">
                                         <h4>Job Overview</h4>
                                     </div>
                                     <ul>
@@ -159,34 +154,32 @@ export const JobDetail = () =>
                                         <li>Number of recruits<span>{jobData?.numberOfRecruits} people</span></li>
                                         <li>Gender<span>{jobData?.gender}</span></li>
                                     </ul>
-                                    <div className="apply-btn">
-                                        <a href="#" className="btn">Apply Now</a>
+                                    <div className="jb-overview-content__apply-btn apply-btn">
+                                        <a href="#" className="jb-apply-btn__btn btn">Apply Now</a>
                                     </div>
                                 </div>
-                                <div className="company-info mb-51">
-                                    <div className="section-title">
+                                <div className="jb-overview-content__company-info jb-company-info mb-51">
+                                    <div className="jb-company-info__title section-title">
                                         <h4>Company Information</h4>
                                     </div>
-                                    <div className="company-detail1">
-                                        <a href={companyData?.websiteLink} target="_blank" rel="noopener noreferrer" className="company-link1">
-                                            <img className="company-img1" src={companyData?.logo} onClick={() => handleCompanyClick(jobData?.companyId)} />
+                                    <div className="jb-company-info__detail company-detail1">
+                                        <a href={companyData?.websiteLink} target="_blank" rel="noopener noreferrer" className="jb-company-detail1__link company-link1">
+                                            <img className="jb-company-detail1__image company-img1" src={companyData?.logo} onClick={() => handleCompanyClick(jobData?.companyId)} />
                                         </a>
-                                        <p className="company-name1">{companyData?.companyName}</p>
+                                        <p className="jb-company-detail1__name company-name1">{companyData?.companyName}</p>
                                     </div>
-                                    <ul>
+                                    <ul className="jb-company-info__list">
                                         <li>Company type<span>{companyData?.type}</span></li>
                                         <li>Company size<span>{companyData?.companySize}</span></li>
-                                        <li>Country<span className='icon1'><i className={`fi fi-${companyData?.countryCode}`}></i>{companyData?.country}</span></li>
+                                        <li>Country<span className='jb-company-info__country icon1'><i className={`fi fi-${companyData?.countryCode}`}></i>{companyData?.country}</span></li>
                                         <li>Working days<span>{companyData?.workingDays}</span></li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                {/* </div> */}
             </>
         </GlobalLayoutUser>
     );

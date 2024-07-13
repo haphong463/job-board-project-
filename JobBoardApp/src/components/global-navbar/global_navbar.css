@@ -132,6 +132,7 @@
   }
 }
 
+
 .text-truncate-multiline {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -145,7 +146,7 @@
 
 .has-children .dropdown {
   display: none;
-  font-size: 14.2px;
+  /* font-size: 14.2px; */
   position: absolute;
   width: 200px;
   /* Điều chỉnh chiều rộng của menu dropdown chính */

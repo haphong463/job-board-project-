@@ -1,4 +1,4 @@
-.company-detail2 {
+/* .company-detail2 {
     align-items: center;
     margin-top: 30px;
     margin-bottom: 170px;
@@ -39,4 +39,273 @@ img.company-img2 {
 .company-info .icon1 i {
     margin-right: 10px;
     margin-left: 1px;
+}
+
+ */
+
+
+
+
+
+
+/* Block chính */
+.cp-job-detail-container {
+    padding-top: 120px;
+    padding-bottom: 120px;
+    background-color: #f9f9f9;
+    /* Thay đổi màu nền cho toàn bộ container */
+}
+
+/* Phần tiêu đề công ty */
+.cp-job-detail__company-title {
+    margin-bottom: 50px;
+}
+
+/* Chi tiết công ty */
+.cp-job-detail__company-detail {
+    display: flex;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 170px;
+}
+
+/* Ảnh logo công ty */
+.cp-job-detail__company-img {
+    width: 9em;
+    height: 9em;
+    border-radius: 6px;
+    border: 1px solid #d0d0d0;
+    /* Thay đổi màu border cho dễ nhìn */
+    object-fit: cover;
+}
+
+/* Tên công ty */
+.cp-job-detail__company-name {
+    font-size: 25px;
+    color: #000;
+    /* Màu nội dung của tên công ty */
+    margin-left: 1em;
+    margin-top: -4em;
+    /* Điều chỉnh cho căn chỉnh tốt hơn */
+    text-decoration: none;
+}
+
+/* Mục danh sách chi tiết công việc */
+.cp-job-detail__list-item {
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+}
+
+/* Thông tin công ty */
+.cp-job-detail__company-info {
+    margin-bottom: 51px;
+}
+
+/* Tiêu đề phần thông tin */
+.cp-job-detail__section-title h4 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Biểu tượng vị trí văn phòng */
+.cp-job-detail__icon i {
+    margin-right: 10px;
+    margin-left: 1px;
+}
+
+/* Kỹ năng công nghệ */
+.cp-job-detail__job-skill {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #000;
+}
+
+/* Thẻ kỹ năng */
+.cp-job-detail__label-skill {
+    margin-left: -3px;
+}
+
+/* Thẻ kỹ năng - badges */
+.cp-job-detail__skill-badge {
+    background-color: #e0e0e0;
+    /* Màu nền cho thẻ kỹ năng */
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+    color: #333;
+    /* Màu nội dung của thẻ kỹ năng */
+    margin-right: 5px;
+    display: inline-block;
+}
+
+/* Liên kết trang web công ty */
+.cp-job-detail__company-link {
+    color: #007bff;
+    /* Màu cho liên kết */
+    font-weight: normal;
+    display: block;
+    margin-bottom: 10px;
+    text-decoration: none;
+}
+
+/* Liên kết trang web công ty khi hover */
+.cp-job-detail__company-link:hover {
+    color: #0056b3;
+    /* Màu khi hover */
+}
+
+/* Biểu tượng vị trí văn phòng */
+.cp-job-detail__icon-location {
+    color: #555;
+    font-size: 1em;
+}
+
+/* Thiết kế responsive */
+@media (max-width: 1199px) {
+    .cp-job-detail__company-name {
+        margin-left: 0;
+        margin-top: 0;
+        font-size: 14px;
+    }
+
+    .cp-job-detail__company-img {
+        width: 7em;
+        height: 7em;
+    }
+
+    .cp-job-detail__section-title h4 {
+        font-size: 18px;
+    }
+
+    .cp-job-detail__skill-badge {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 991px) {
+    .cp-job-detail-container {
+        padding-top: 80px;
+        padding-bottom: 80px;
+    }
+
+    .cp-job-detail__company-detail {
+        margin-bottom: 100px;
+    }
+
+    .cp-job-detail__company-name {
+        font-size: 14px;
+        margin-left: 0;
+        margin-top: -2em;
+    }
+
+    .cp-job-detail__company-img {
+        width: 6em;
+        height: 6em;
+    }
+
+    .cp-job-detail__section-title h4 {
+        font-size: 16px;
+    }
+
+    .cp-job-detail__skill-badge {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 767px) {
+    .cp-job-detail-container {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+    .cp-job-detail__company-detail {
+        margin-bottom: 50px;
+    }
+
+    .cp-job-detail__company-name {
+        font-size: 12px;
+        margin-top: -1em;
+    }
+
+    .cp-job-detail__company-img {
+        width: 5em;
+        height: 5em;
+    }
+
+    .cp-job-detail__section-title h4 {
+        font-size: 14px;
+    }
+
+    .cp-job-detail__job-skill {
+        font-size: 12px;
+    }
+
+    .cp-job-detail__skill-badge {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 575px) {
+    .cp-job-detail__company-name {
+        font-size: 10px;
+    }
+
+    .cp-job-detail__company-img {
+        width: 4em;
+        height: 4em;
+    }
+
+    .cp-job-detail__section-title h4 {
+        font-size: 12px;
+    }
+
+    .cp-job-detail__job-skill {
+        font-size: 10px;
+    }
+
+    .cp-job-detail__skill-badge {
+        font-size: 9px;
+    }
+}
+
+.cp-job-detail__company-info ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.cp-job-detail__company-info ul li {
+    color: #000;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.cp-job-detail__company-info ul li span {
+    color: #757575;
+    margin-top: 5px;
+    display: block;
+}
+
+.cp-job-detail__job-overview ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.cp-job-detail__job-overview ul li {
+    color: #000;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.cp-job-detail__job-overview ul li span {
+    color: #757575;
+    margin-top: 5px;
+    display: block;
+}
+
+.cp-job-detail__overview-content {
+    font-size: 15.5px;
 }

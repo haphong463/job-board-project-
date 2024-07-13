@@ -61,13 +61,12 @@ export function ViewAllSkill ()
                         </div>
                     </div>
                 </section>
-                <div className="category-grid">
+                <div className="jb_category-grid">
                     {categories.map((category) => (
-                        <div key={category.categoryId} className="category-item">
-                            <NavLink to={''} className="item" onClick={() => handleCategoryClick(category.categoryId)}>
+                        <div key={category.categoryId} className="jb_category-item">
+                            <NavLink to={''} className="jb_item" onClick={() => handleCategoryClick(category.categoryId)}>
                                 {category.categoryName}
                             </NavLink>
-
                         </div>
                     ))}
                 </div>

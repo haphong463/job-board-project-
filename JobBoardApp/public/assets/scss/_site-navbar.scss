@@ -5,15 +5,16 @@
 	position: absolute;
 	width: 100%;
 	top: 2rem;
-	
+
 	.container-fluid {
 		padding-left: 7rem;
 		padding-right: 7rem;
+
 		@include media-breakpoint-down(lg) {
 			padding-left: 15px;
 			padding-right: 15px;
 		}
-		
+
 	}
 
 	.site-logo {
@@ -24,11 +25,13 @@
 			position: relative;
 			left: auto;
 		}
+
 		a {
 			color: $white;
 			font-size: 1.5rem;
 			letter-spacing: .2rem;
 			text-transform: uppercase;
+
 			&:hover {
 				text-decoration: none;
 
@@ -36,9 +39,11 @@
 		}
 	}
 
-	.site-burger-menu, .right-cta-menu {
+	.site-burger-menu,
+	.right-cta-menu {
 		position: absolute;
 		right: 5%;
+
 		@include media-breakpoint-down(sm) {
 			position: relative;
 			right: auto;
@@ -48,54 +53,62 @@
 	.site-menu-toggle {
 		color: $white;
 		line-height: 0;
-		font-size: 2.5rem;
+		font-size: 16px;
 		// top: .3rem;
 		position: relative;
+
 		@include media-breakpoint-down(sm) {
 			margin-left: 5px;
 		}
 	}
-	
+
 	.site-navigation {
 		position: absolute;
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 5;
+
 		.site-menu {
-			
+
 			margin-bottom: 0;
+
 			.active {
-		
+
 				color: $white;
 				display: inline-block;
 				padding: 5px 20px;
-			
+
 			}
-			
+
 			a {
-				text-decoration: none!important;
+				text-decoration: none !important;
 				display: inline-block;
 				position: relative;
 			}
-			> li {
+
+			>li {
 				display: inline-block;
-				> a {
-					padding: 20px 20px!important;
+
+				>a {
+					padding: 20px 20px !important;
 					color: rgba($white, .5);
 					display: inline-block;
-					text-decoration: none!important;
-					
+					text-decoration: none !important;
+
 					&:hover {
 						color: $white;
-						
+
 					}
 				}
 			}
+
 			.has-children {
 				position: relative;
-				> a {
+
+				>a {
 					position: relative;
-					padding-right: 20px;						
+					padding-right: 20px;
+
 					&:before {
 						position: absolute;
 						content: "\e313";
@@ -106,6 +119,7 @@
 						font-family: 'icomoon';
 					}
 				}
+
 				.dropdown {
 					visibility: hidden;
 					opacity: 0;
@@ -113,15 +127,16 @@
 					position: absolute;
 					text-align: left;
 					border-top: 2px solid $primary;
-					box-shadow: 0 2px 20px -2px rgba(0,0,0,.2);
+					box-shadow: 0 2px 20px -2px rgba(0, 0, 0, .2);
 					padding: 0px 0;
 					margin-top: 20px;
 					margin-left: 0px;
 					background: $white;
 					transition: 0.2s 0s;
-					
+
 					&.arrow-top {
 						position: absolute;
+
 						&:before {
 							bottom: 100%;
 							left: 20%;
@@ -132,36 +147,41 @@
 							position: absolute;
 							pointer-events: none;
 						}
+
 						&:before {
 							border-color: rgba(136, 183, 213, 0);
 							border-bottom-color: $white;
 							border-width: 10px;
 							margin-left: -10px;
-						}	
+						}
 					}
-					
+
 					li {
 						line-height: 1.4;
 					}
+
 					a {
 						text-transform: none;
 						letter-spacing: normal;
 						transition: 0s all;
 						color: $gray-800;
+
 						&.active {
 							background: lighten($gray-400, 10%);
-										color: $primary;
+							color: $primary;
 						}
 					}
-					
-					> li {
+
+					>li {
 						list-style: none;
 						padding: 0;
 						margin: 0;
 						min-width: 200px;
-						> a {
+
+						>a {
 							padding: 9px 20px;
 							display: block;
+
 							&:hover {
 								background: lighten($gray-400, 10%);
 								color: $gray-900;
@@ -169,69 +189,83 @@
 						}
 
 						&.has-children {
-							> a {
+							>a {
 								&:before {
 									content: "\e315";
 									right: 20px;
 								}
+
 								&.active {
 									// a {
-										background: lighten($gray-400, 10%);
-										color: $primary;
+									background: lighten($gray-400, 10%);
+									color: $primary;
 									// }
 								}
 							}
-							> .dropdown, > ul {
+
+							>.dropdown,
+							>ul {
 								left: 100%;
 								top: 0;
 							}
-							&:hover, &:active, &:focus {
-								> a {
-										background: lighten($gray-400, 10%);
-								color: $gray-900;
+
+							&:hover,
+							&:active,
+							&:focus {
+								>a {
+									background: lighten($gray-400, 10%);
+									color: $gray-900;
 								}
 							}
 						}
 					}
 				}
-				
-				
-				&:hover, &:focus, &:active {
+
+
+				&:hover,
+				&:focus,
+				&:active {
 					cursor: pointer;
-					> .dropdown {
+
+					>.dropdown {
 						transition-delay: 0s;
 						margin-top: 0px;
 						visibility: visible;
 						opacity: 1;
 
-				
+
 					}
 				}
 			}
+
 			&.site-menu-dark {
-				> li {
-					> a {
+				>li {
+					>a {
 						color: black;
-					position: relative;
-					&:after {
-						height: 2px;
-						background: $black;
-						content: "";
-						position: absolute;
-						bottom: 0;
-						left: 20px;
-						right: 20px;
-						transform: scale(0.0);
-						transition: .3s all ease;
-					}
-					&:hover, &.active {
-						color: $primary;
 						position: relative;
+
 						&:after {
-							transform: scale(1.0);
+							height: 2px;
+							background: $black;
+							content: "";
+							position: absolute;
+							bottom: 0;
+							left: 20px;
+							right: 20px;
+							transform: scale(0.0);
+							transition: .3s all ease;
+						}
+
+						&:hover,
+						&.active {
+							color: $primary;
+							position: relative;
+
+							&:after {
+								transform: scale(1.0);
+							}
 						}
 					}
-				}
 				}
 			}
 		}
@@ -249,10 +283,10 @@
 	padding-top: 20px;
 	background: $white;
 	height: calc(100vh);
-	
+
 	transform: translateX(110%);
-	box-shadow: -10px 0 20px -10px rgba(0,0,0,.1);
-	transition: .2s all cubic-bezier(.66,.2,.48,.9);
+	box-shadow: -10px 0 20px -10px rgba(0, 0, 0, .1);
+	transition: .2s all cubic-bezier(.66, .2, .48, .9);
 
 	.offcanvas-menu & {
 		transform: translateX(0%);
@@ -263,10 +297,11 @@
 		float: left;
 		padding-left: 20px;
 		padding-right: 20px;
-		
+
 		.site-mobile-menu-close {
 			float: right;
 			margin-top: 8px;
+
 			span {
 				font-size: 30px;
 				display: inline-block;
@@ -275,21 +310,26 @@
 				line-height: 1;
 				cursor: pointer;
 				transition: .3s all ease;
+
 				&:hover {
 					color: $gray-300;
 				}
 			}
 		}
+
 		.site-mobile-menu-logo {
 			float: left;
 			margin-top: 10px;
 			margin-left: 0px;
+
 			a {
 				display: inline-block;
 				text-transform: uppercase;
+
 				img {
 					max-width: 70px;
 				}
+
 				&:hover {
 					text-decoration: none;
 				}
@@ -299,7 +339,7 @@
 
 	.site-mobile-menu-body {
 		overflow-y: scroll;
-  	-webkit-overflow-scrolling: touch;
+		-webkit-overflow-scrolling: touch;
 		position: relative;
 		padding: 0 20px 20px 20px;
 
@@ -307,6 +347,7 @@
 		padding-bottom: 150px;
 
 	}
+
 	.site-nav-wrap {
 		padding: 0;
 		margin: 0;
@@ -322,20 +363,24 @@
 			display: block;
 			position: relative;
 			color: $gray-900;
+
 			&:hover {
 				color: $primary;
 				text-decoration: none;
 			}
 		}
+
 		li {
 			position: relative;
 			display: block;
+
 			.active {
 				// > a {
-					color: $black;
+				color: $black;
 				// }
 			}
 		}
+
 		.arrow-collapse {
 			position: absolute;
 			right: 0px;
@@ -346,9 +391,11 @@
 			text-align: center;
 			cursor: pointer;
 			border-radius: 50%;
+
 			&:hover {
 				background: $gray-100;
 			}
+
 			&:before {
 				font-size: 12px;
 				z-index: 20;
@@ -360,61 +407,71 @@
 				transform: translate(-50%, -50%) rotate(-180deg);
 				transition: .3s all ease;
 			}
+
 			&.collapsed {
 				&:before {
-					transform: translate(-50%, -50%);	
+					transform: translate(-50%, -50%);
 				}
 			}
 		}
-		> li {
+
+		>li {
 			display: block;
 			position: relative;
 			float: left;
 			width: 100%;
-			
-			> a {
+
+			>a {
 				padding-left: 20px;
 				font-size: 20px;
 			}
-			> ul {
+
+			>ul {
 				padding: 0;
 				margin: 0;
 				list-style: none;
-				> li {
+
+				>li {
 					display: block;
-					> a {
+
+					>a {
 						padding-left: 40px;
 						font-size: 16px;
 					}
-					> ul {
+
+					>ul {
 						padding: 0;
 						margin: 0;
-						> li {
+
+						>li {
 							display: block;
-							> a {
+
+							>a {
 								font-size: 16px;
-								padding-left: 60px;			
+								padding-left: 60px;
 							}
 						}
 					}
 				}
 			}
 		}
-	
-	&[data-class="social"] {
-		float: left;
-		width: 100%;
-		margin-top: 30px;
-		padding-bottom: 5em;
-		> li {
-			width: auto;
-			&:first-child {
-				a {
-					padding-left: 15px!important;
+
+		&[data-class="social"] {
+			float: left;
+			width: 100%;
+			margin-top: 30px;
+			padding-bottom: 5em;
+
+			>li {
+				width: auto;
+
+				&:first-child {
+					a {
+						padding-left: 15px !important;
+					}
 				}
 			}
 		}
-	}
 
 	}
 
@@ -426,23 +483,29 @@
 	z-index: 100;
 	width: 100%;
 
-	& + .site-blocks-cover {
+	&+.site-blocks-cover {
 		// margin-top: 140px;
 		margin-top: 96px;
 	}
+
 	.site-menu-toggle {
 		color: $black;
+
 		@include media-breakpoint-down(md) {
 			color: $white;
 		}
 	}
+
 	.site-navbar {
 		transition: .3s all ease;
+
 		.site-menu {
-			> li {
+			>li {
 				display: inline-block;
-				> a {
+
+				>a {
 					position: relative;
+
 					&:after {
 						height: 2px;
 						background: $white;
@@ -454,9 +517,12 @@
 						transform: scale(0.0);
 						transition: .3s all ease;
 					}
-					&:hover, &.active {
+
+					&:hover,
+					&.active {
 						color: $white;
 						position: relative;
+
 						&:after {
 							transform: scale(1.0);
 						}
@@ -465,12 +531,14 @@
 			}
 		}
 	}
+
 	&.is-sticky {
 		.site-menu-toggle {
 			color: $black;
 		}
+
 		.site-navbar {
-			box-shadow: 4px 0 20px -5px rgba(0,0,0,.2);
+			box-shadow: 4px 0 20px -5px rgba(0, 0, 0, .2);
 			background: $white;
 
 			.site-logo {
@@ -478,14 +546,16 @@
 					color: $black;
 				}
 			}
-			.site-menu {
-				> li {
-					display: inline-block;
-				
 
-					> a {
-					position: relative;
-					color: $black;
+			.site-menu {
+				>li {
+					display: inline-block;
+
+
+					>a {
+						position: relative;
+						color: $black;
+
 						&:after {
 							height: 2px;
 							background: $primary;
@@ -497,9 +567,12 @@
 							transform: scale(0.0);
 							transition: .3s all ease;
 						}
-						&:hover, &.active {
+
+						&:hover,
+						&.active {
 							color: $primary;
 							position: relative;
+
 							&:after {
 								transform: scale(1.0);
 							}
@@ -509,9 +582,10 @@
 			}
 		}
 	}
+
 	.shrink {
-		padding-top: 10px!important;
-		padding-bottom: 10px!important;
+		padding-top: 10px !important;
+		padding-bottom: 10px !important;
 	}
 
 

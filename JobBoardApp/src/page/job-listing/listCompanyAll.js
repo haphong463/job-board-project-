@@ -90,24 +90,24 @@ export function ViewAllCompany ()
                 </section>
 
                 {/* Navigation Bar */}
-                <div className="alphabet-nav">
+                <div className="jb_alphabet-nav">
                     {alphabetGroups.map(group => (
                         <button
                             key={group}
-                            className={`nav-link ${selectedGroup === group ? 'active' : ''}`}
+                            className={`jb_nav-link ${selectedGroup === group ? 'jb_active' : ''}`}
                             onClick={() => setSelectedGroup(group)}
                         >
                             {group}
                         </button>
                     ))}
                 </div>
-                <div className="category-grid">
+                <div className="jb_category-grid">
                     {sortedInitials.map(initial => (
                         <div key={initial}>
                             <h2>{initial}</h2>
                             {groupedCompanies[initial].map(company => (
-                                <div key={company.companyId} className="category-item">
-                                    <NavLink to={''} className="item" onClick={() => handleCompanyClick(company.companyId)}>
+                                <div key={company.companyId} className="jb_category-item">
+                                    <NavLink to={''} className="jb_item" onClick={() => handleCompanyClick(company.companyId)}>
                                         {company.companyName}
                                     </NavLink>
                                 </div>

@@ -1,14 +1,14 @@
-.job-detail-container {
+.jb-job-detail-container {
     font-family: "Lexend", sans-serif;
     background-color: #f9f9f9;
     padding-top: 60px;
     padding-bottom: 60px;
     color: #000000;
-    font-size: 16px;
+    font-size: 14.6px;
     font-weight: 400;
 }
 
-.highlighted-text {
+.jb-highlighted-text {
     font-size: 15px;
     color: #000000;
     font-weight: bold;
@@ -21,52 +21,37 @@
     margin-top: -10px;
 } */
 
-.job-detail {
+.jb-job-detail {
     font-size: 17px;
     /* color: #000000; */
     font-weight: bold;
 }
 
-/* .list-item ul li {
-    position: relative;
-    padding-left: 1.4em;
-    margin-top: 1px;
-}
-
-.list-item ul li::before {
-    content: '•';
-    color: red;
-    position: absolute;
-    left: 0;
-    font-size: 18px;
-    line-height: 1.5;
-} */
-
-ul.list-info1 li {
+ul.jb-job-detail-container__info li {
     list-style: none;
     margin-left: -43px;
     margin-top: 10px;
 }
 
-.icon-location {
+.jb-icon-location {
     color: #777777;
     margin-right: 8px;
     font-size: 20px;
 }
 
-.icon-salary {
+.jb-icon-salary {
     color: #777777;
     margin-right: 10px;
 }
 
-.icon-time {
+.jb-icon-time {
     color: #777777;
     margin-right: 10px;
     margin-left: 2px;
     font-size: 20px;
 }
 
-.job-skill .skill-badges {
+.jb-job-skill .jb-job-skill__badge {
     display: inline-block;
     background-color: #c1c1c18f;
     /* border: 100%; */
@@ -80,11 +65,11 @@ ul.list-info1 li {
     color: #000000;
 }
 
-.job-skill {
+.jb-job-skill {
     margin-left: 0;
 }
 
-.label-skill {
+.jb-job-skill__label {
     margin-left: 55px;
     margin-top: -35px;
 }
@@ -116,12 +101,12 @@ ul.list-info1 li {
     margin-bottom: 50px;
 }
 
-.job-title h2 {
+.jb-job-detail-container__title h2 {
     font-size: 2.5rem;
     margin-bottom: 20px;
 }
 
-.section-title h4 {
+.jb-overview-content__title h4 {
     font-size: 1.5rem;
     color: #333;
     margin-bottom: 15px;
@@ -131,7 +116,7 @@ ul.list-info1 li {
     color: #000000;
 } */
 
-.job-detail-container .post-details-section ul {
+.jb-job-detail-container__post-details ul {
     padding-left: 1em;
     margin-top: 1px;
     list-style: none;
@@ -139,33 +124,43 @@ ul.list-info1 li {
     text-indent: -1.25em;
 }
 
-.job-detail-container .post-details-section ul li::before {
+.jb-job-detail-container__post-details ul li::before {
     content: '•';
-    font-size: 1rem;
+    font-size: 1.3rem;
     margin-bottom: 10px;
     margin-right: 11px;
     color: red;
-    font-size: 18px;
     line-height: 1.5;
 }
 
-.overview-content {
+.jb-post-details-section__item.list-item {
+    padding-left: 1.4em;
+    margin-top: 1px;
+}
+
+.jb-post-details-section__highlighted-text {
+    font-size: 15px;
+    color: #000000;
+    font-weight: bold;
+}
+
+.jb-overview-content {
     color: #616161e3;
 }
 
-.overview-content ul li {
+.jb-overview-content ul li {
     list-style: none;
     margin-left: -40px;
 }
 
-.overview-content ul li span {
+.jb-overview-content ul li span {
     color: #000000;
     text-shadow: 0 0 0.4px black;
     display: block;
     margin-bottom: 10px;
 }
 
-.apply-btn .btn {
+.jb-apply-btn__btn.btn {
     display: inline-block;
     padding: 10px 20px;
     background-color: #007bff;
@@ -176,34 +171,17 @@ ul.list-info1 li {
     transition: background-color 0.3s ease;
 }
 
-.apply-btn .btn:hover {
+.jb-apply-btn__btn.btn:hover {
     background-color: #0056b3;
 }
 
-/* .company-info p {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 20px;
-}
-
-.company-info ul li {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 10px;
-}
-
-.company-info ul li span {
-    color: #333;
-    font-weight: bold;
-} */
-
-.company-detail1 {
+.jb-company-info__detail.company-detail1 {
     align-items: center;
     margin-top: 30px;
     margin-bottom: 50px;
 }
 
-img.company-img1 {
+.jb-company-info__image.company-img1 {
     width: 6em;
     height: 6em;
     border-radius: 6px;
@@ -211,7 +189,7 @@ img.company-img1 {
     object-fit: cover;
 }
 
-.company-name1 {
+.jb-company-info__name.company-name1 {
     font-size: 16px;
     color: #333;
     margin-left: 7em;
@@ -219,6 +197,46 @@ img.company-img1 {
     text-decoration: none;
 }
 
-p.it {
-    color: #000000;
+.jb-company-info__country.icon1 {
+    font-size: 16px;
+    color: #000;
+    display: flex;
+    align-items: center;
+}
+
+.jb-company-info__country.icon1 i {
+    margin-right: 5px;
+}
+
+.jb-company-info__country.icon1 .fi {
+    font-size: 1rem;
+}
+
+.jb-company-info__list {
+    list-style: none;
+    padding: 0;
+}
+
+.jb-company-info__list li {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.jb-company-info__list li span {
+    color: #333;
+    font-weight: bold;
+}
+
+
+li.trf {
+    margin-left: -40px;
+}
+
+.jb_header1 {
+    margin-bottom: 14px;
+}
+
+.jb_content1 {
+    font-size: 15.5px;
 }

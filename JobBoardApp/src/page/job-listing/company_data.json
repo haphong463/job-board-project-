@@ -29,11 +29,11 @@
     {
         "companyId": 2,
         "companyName": "11Data Insights Ltd.",
-        "logo": "https://example.com/logos/data_insights.png",
+        "logo": "https://tse1.mm.bing.net/th?id=OIP.vQ5REFlXnfS3VwXfqPGZOwHaHa&pid=Api&P=0&h=220",
         "websiteLink": "https://www.datainsights.com",
         "description": "Data Insights Ltd. provides advanced data analytics and business intelligence services to help companies make data-driven decisions.",
         "location": "Ho Chi Minh City, Vietnam",
-        "type": "Consulting",
+        "type": "IT Product",
         "reviews": [
             {
                 "rating": 4.7,
@@ -315,7 +315,7 @@
     {
         "companyId": 15,
         "companyName": "TravelPro Agency",
-        "logo": "https://example.com/logos/travelpro.png",
+        "logo": "https://tse1.mm.bing.net/th?id=OIP.S2TzPRWuytH-bUSgC0vCSQAAAA&pid=Api&P=0&h=220",
         "websiteLink": "https://www.travelpro.com",
         "description": "TravelPro Agency offers comprehensive travel and tourism services, including bookings and tours.",
         "location": "Hanoi, Vietnam",

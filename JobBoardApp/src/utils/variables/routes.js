@@ -15,13 +15,14 @@ import SignUp from "../../page/signup/SignUp";
 import ForgotPassword from "../../page/login/ForgotPassword";
 import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
-import { JobSingle } from "../../page/job-single/JobSingle";
+import { JobSingle } from "../../page/job-listing/JobSingle";
+import { JobSingle1 } from "../../page/job-single/JobSingle";
+import { JobListing } from "../../page/job-listing/JobListing";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import CreateCV from "../../page/user-cv/CreateCv";
 import CreateTemplate from "../../page/user-cv/CreateTemplate";
 import ListTemplate from "../../page/list-template/ListTemplate";
 import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
-
 
 import SetupCredentials from "../../page/signup/SetupCredentials";
 import { Quiz } from "../../page/quiz/quiz";
@@ -31,6 +32,7 @@ import { CompanyDetail } from "../../page/job-listing/company_detail";
 import { ViewAllCompany } from "../../page/job-listing/listCompanyAll";
 import { WriteReview } from "../../page/job-listing/company-review";
 import UpdateCv from "../../page/user-cv/UpdateCv";
+import React from "react";
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -41,7 +43,8 @@ export const routes = [
   { path: "/portfolio", component: <Portfolio /> },
   { path: "/portfolio/:id", component: <PortfolioSingle /> },
   { path: "/jobList/:id", component: <JobList /> },
-  { path: "/jobDetail/:id", component: <JobDetail /> },
+  { path: "/jobDetail/:id", component: <JobSingle /> },
+  { path: "/jobListing", component: <JobListing /> },
   { path: "/viewAllJobs", component: <JobList /> },
   { path: "/viewAllSkill", component: <ViewAllSkill /> },
   { path: "/login", component: <Login /> },
@@ -54,7 +57,7 @@ export const routes = [
   { path: "/review-template/:templateName", component: <ReviewTemplate /> },
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
-  { path: "/job/:id", component: <JobSingle /> },
+  { path: "/job", component: <JobSingle1 /> },
   { path: "/gallery", component: <Gallery /> },
   { path: "/EmployerSignUp", component: <EmployerSignUp /> },
   { path: "/SetupCredentials", component: <SetupCredentials /> },

@@ -35,67 +35,58 @@ export const CompanyDetail = () =>
                         </div>
                     </div>
                 </section>
-                {/* <div className=""> */}
 
-                <div className="job-detail-container pt-120 pb-120">
+                <div className="cp-job-detail-container pt-120 pb-120">
                     <div className="container">
-
                         <div className="row justify-content-between">
                             {/* Left Content */}
                             <div className="col-xl-7 col-lg-8">
-                                <div className="company-title mb-50">
-                                    <div className="company-detail2">
-                                        {/* <a href={companyData?.websiteLink} target="_blank" rel="noopener noreferrer" className="company-link2"> */}
-                                        <img className="company-img2" src={companyData?.logo} />
+                                <div className="cp-job-detail__company-title mb-50">
+                                    <div className="cp-job-detail__company-detail">
+                                        {/* <a href={companyData?.websiteLink} target="_blank" rel="noopener noreferrer" className="cp-job-detail__company-link"> */}
+                                        <img className="cp-job-detail__company-img" src={companyData?.logo} />
                                         {/* </a> */}
-                                        <p className="company-name2">{companyData?.companyName}</p>
+                                        <strong className="cp-job-detail__company-name">{companyData?.companyName}</strong>
                                     </div>
                                 </div>
                                 {/* Job Details */}
-                                {/* <div className="job-post-details"> */}
-                                <div className="post-details mb-50">
-
-                                    <div className='list-item' dangerouslySetInnerHTML={{ __html: companyData?.description }} />
-                                </div>
-                                {/* </div> */}
+                                <div className='cp-job-detail__list-item' dangerouslySetInnerHTML={{ __html: companyData?.description }} />
                             </div>
                             {/* Right Content */}
-                            <div className="overview-content col-xl-4 col-lg-4">
-                                <div className="company-info mb-51">
-                                    <div className="section-title">
+                            <div className="cp-job-detail__overview-content col-xl-4 col-lg-4">
+                                <div className="cp-job-detail__company-info mb-51">
+                                    <div className="cp-job-detail__section-title">
                                         <h4>General information</h4>
                                     </div>
                                     <ul>
                                         <li>Company type<span>{companyData?.type}</span></li>
                                         <li>Company size<span>{companyData?.companySize}</span></li>
-                                        <li>Country<span className='icon1'><i className={`fi fi-${companyData?.countryCode}`}></i>{companyData?.country}</span></li>
+                                        <li>Country<span className='cp-job-detail__icon'><i className={`fi fi-${companyData?.countryCode}`}></i>{companyData?.country}</span></li>
                                         <li>Working days<span>{companyData?.workingDays}</span></li>
                                     </ul>
-                                    <div className="job-skill">
+                                    <div className="cp-job-detail__job-skill">
                                         Tech stack
-                                        <p className="label-skill1">
+                                        <p className="cp-job-detail__label-skill">
                                             {companyData?.keySkills.split(',').map((skill, index) => (
-                                                <span key={index} className="skill-badges">{skill.trim()}</span>
-                                            ))}</p>
+                                                <span key={index} className="cp-job-detail__skill-badge">{skill.trim()}</span>
+                                            ))}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="job-overview mb-50">
-                                    <div className="section-title">
+                                <div className="cp-job-detail__job-overview mb-50">
+                                    <div className="cp-job-detail__section-title">
                                         <h4>Contact information</h4>
                                     </div>
                                     <ul>
-                                        <li>Website<a href={companyData?.websiteLink} className="company-link" target="_blank" rel="noopener noreferrer">{companyData?.websiteLink}</a></li>
-                                        <li>Office address<span><FaMapMarkerAlt className="icon-location" />{companyData?.location}</span></li>
+                                        <li>Website<a href={companyData?.websiteLink} className="cp-job-detail__company-link" target="_blank" rel="noopener noreferrer">{companyData?.websiteLink}</a></li>
+                                        <li>Office address<span><FaMapMarkerAlt className="cp-job-detail__icon-location" />{companyData?.location}</span></li>
                                     </ul>
                                 </div>
-
                             </div>
                         </div>
-
                     </div>
                 </div>
 
-                {/* </div> */}
             </>
         </GlobalLayoutUser>
     );
