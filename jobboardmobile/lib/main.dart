@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobboardmobile/screens/blog/blog_screen_widget.dart';
 
 import 'screens/login_register/forgotpassword_screen.dart';
 import 'screens/login_register/login_screen.dart';
@@ -19,9 +20,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Job Board App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/login',
+      //* Nhớ sửa lại chỗ này, em đang test blog nên để init là blog
+      initialRoute: '/blog',
       routes: {
         '/login': (context) => LoginScreen(),
+        '/blog': (context) => BlogScreenWidget(),
         '/signup': (context) => SignupScreen(),
         '/forgot_password': (context) => ForgotPasswordScreen(),
         '/main': (context) => MainScreen(),

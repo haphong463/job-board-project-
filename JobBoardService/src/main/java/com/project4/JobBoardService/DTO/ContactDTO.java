@@ -16,6 +16,4 @@ public class ContactDTO {
     private String email;
     private String subject;
     private String message;
-    private UserContactDTO user;
-
 }

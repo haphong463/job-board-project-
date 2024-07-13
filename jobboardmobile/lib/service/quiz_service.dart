@@ -7,7 +7,7 @@ import 'auth_service.dart';
 class QuizService {
   final String baseUrl = 'http://192.168.110.15:8080/api/quizzes';
   final AuthService _authService = AuthService();
-  final storage = FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   Future<List<Quiz>> getAllQuizzes() async {
     final response = await http.get(Uri.parse(baseUrl));

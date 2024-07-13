@@ -56,7 +56,7 @@ public class BlogController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "2") int visibility
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+   Pageable pageable = PageRequest.of(page, size);
         Page<Blog> blogsPage;
         if(type.equals("ALL")){
             blogsPage = switch (visibility) {

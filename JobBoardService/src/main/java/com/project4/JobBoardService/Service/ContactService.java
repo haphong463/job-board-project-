@@ -7,7 +7,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 
 public interface ContactService {
-    ContactDTO createContact(Contact contact, String username);
+    ContactDTO createContact(Contact contact);
     List<ContactDTO> getAllContacts();
     ContactDTO getContactById(Long id);
     void deleteContact(Long id);

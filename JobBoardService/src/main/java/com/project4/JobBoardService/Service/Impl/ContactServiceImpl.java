@@ -24,11 +24,7 @@ public class ContactServiceImpl implements ContactService {
     private UserRepository userRepository;
 
     @Override
-    public ContactDTO createContact(Contact contact, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        contact.setUser(user);
+    public ContactDTO createContact(Contact contact) {
         Contact savedContact = contactRepository.save(contact);
         return convertToDTO(savedContact);
     }
@@ -50,15 +46,13 @@ public class ContactServiceImpl implements ContactService {
 
 
     private ContactDTO convertToDTO(Contact contact) {
-        UserContactDTO userContactDTO = new UserContactDTO(contact.getUser().getId(), contact.getUser().getUsername());
         return new ContactDTO(
                 contact.getId(),
                 contact.getFirstName(),
                 contact.getLastName(),
                 contact.getEmail(),
                 contact.getSubject(),
-                contact.getMessage(),
-                userContactDTO
+                contact.getMessage()
         );
     }
 
