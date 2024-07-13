@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
       title: 'Job Board App',
       theme: ThemeData(primarySwatch: Colors.blue),
       //* Nhớ sửa lại chỗ này, em đang test blog nên để init là blog
+      //* Oke nhé emmm - Nam
       initialRoute: '/blog',
       routes: {
         '/login': (context) => LoginScreen(),
