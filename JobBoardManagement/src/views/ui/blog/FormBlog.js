@@ -12,6 +12,7 @@ import {
   ModalBody,
   ModalFooter,
   Input,
+  Spinner,
 } from "reactstrap";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -35,6 +36,8 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
   const dispatch = useDispatch();
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
   const blogs = useSelector((state) => state.blogs.blogs);
+  const statusSubmit = useSelector((state) => state.blogs.statusSubmit);
+
   const user = useSelector((state) => state.auth.user);
   const [modal, setModal] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -67,7 +70,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     const newData = {
       ...data,
       slug: slugify(data.title),
-      username: user.username,
+      username: user.sub,
     };
 
     if (!newData.image || newData.image.length === 0) {
@@ -150,8 +153,8 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
 
   return (
     <>
-      <div className="d-flex justify-content-end mb-2">
-        <Button color="danger" onClick={toggle}>
+      <div>
+        <Button color="success" onClick={toggle}>
           <IoMdAdd className="me-2" />
           New blog
         </Button>
@@ -191,7 +194,12 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
             <Button color="secondary" onClick={toggle}>
               Cancel
             </Button>
-            <Button color="primary" type="submit" disabled={!isDirty}>
+            <Button
+              color="primary"
+              type="submit"
+              disabled={!isDirty || !!(statusSubmit === "loading")}
+            >
+              {statusSubmit === "loading" && <Spinner size="sm" />}{" "}
               {isEdit ? "Update" : "Submit"}
             </Button>
           </ModalFooter>

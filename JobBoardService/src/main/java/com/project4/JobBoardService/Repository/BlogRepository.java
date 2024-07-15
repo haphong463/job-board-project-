@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,8 +19,25 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     Blog findBySlug(@Param("slug") String slug);
     int countByComments(Comment comment);
 
-    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
-    List<Blog> searchByTypeAndQuery(@Param("type") String type, @Param("query") String query);
+
+
+
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
+    Page<Blog> searchByQuery(@Param("type") String type, @Param("query") String query, Pageable pageable);
+
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%) AND b.visibility = :visibility")
+    Page<Blog> searchByQuery(@Param("query") String query, Pageable pageable, @Param("visibility") boolean visibility);
+
+
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%) AND b.visibility = :visibility")
+    Page<Blog> searchByQuery(@Param("type") String type, @Param("query") String query, @Param("visibility") boolean visibility, Pageable pageable);
+
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
+    Page<Blog> searchByQuery(@Param("query") String query, Pageable pageable);
 }
 
 

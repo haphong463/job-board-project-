@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import {
@@ -11,16 +10,18 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
-import { fetchQuizzesThunk } from "../../features/quizSlice";
-
-import "./Quiz.css";
+import { useSelector } from "react-redux";
+import "./Quiz.css"; // Import CSS
 
 export const Quiz = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [attemptsInfo, setAttemptsInfo] = useState({});
+  const [completedQuizzes, setCompletedQuizzes] = useState([]);
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     const isAuthenticated = () => {
@@ -31,25 +32,94 @@ export const Quiz = () => {
       navigate("/login");
     } else {
       setLoggedIn(true);
-      const accessToken = localStorage.getItem("accessToken");
-      axios
-        .get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
+      fetchQuizzesAndAttempts();
+      fetchCompletedQuizzes();
+      const intervalId = setInterval(() => {
+        fetchQuizzesAndAttempts();
+        fetchCompletedQuizzes();
+      }, 10000); // Polling every 10 seconds
+
+      return () => clearInterval(intervalId);
+    }
+  }, [navigate, user]);
+
+  const fetchQuizzesAndAttempts = () => {
+    const accessToken = localStorage.getItem("accessToken");
+    axios
+      .get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((response) => {
+        setQuizzes(response.data);
+        response.data.forEach((quiz) => {
+          axios
+            .get(
+              `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                params: {
+                  userId: user.id,
+                },
+              }
+            )
+            .then((response) => {
+              setAttemptsInfo((prev) => ({
+                ...prev,
+                [quiz.id]: response.data,
+              }));
+            })
+            .catch((error) => {
+              console.error(
+                "There was an error fetching the attempts info!",
+                error
+              );
+            });
+        });
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the quizzes!", error);
+      });
+  };
+
+  const fetchCompletedQuizzes = () => {
+    const accessToken = localStorage.getItem("accessToken");
+    axios
+      .get(
+        `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${user.id}/completed-quizzes`,
+        {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        })
-        .then((response) => {
-          setQuizzes(response.data);
-        })
-        .catch((error) => {
-          console.error("There was an error fetching the quizzes!", error);
-        });
-    }
-  }, [navigate]);
+        }
+      )
+      .then((response) => {
+        setCompletedQuizzes(response.data);
+      })
+      .catch((error) => {
+        console.error(
+          "There was an error fetching the completed quizzes!",
+          error
+        );
+      });
+  };
 
   const handleStartQuiz = (quiz) => {
-    setSelectedQuiz(quiz);
-    setOpen(true);
+    const accessToken = localStorage.getItem("accessToken");
+    const attemptsLeft = attemptsInfo[quiz.id]?.attemptsLeft || 0;
+    const timeLeft = attemptsInfo[quiz.id]?.timeLeft || 0;
+
+    if (attemptsLeft > 0 || timeLeft === 0) {
+      setSelectedQuiz(quiz);
+      setOpen(true);
+    } else {
+      alert(
+        `You have reached the maximum number of attempts. Please wait for ${timeLeft} seconds to retake the quiz.`
+      );
+    }
   };
 
   const handleClose = () => {
@@ -58,7 +128,60 @@ export const Quiz = () => {
   };
 
   const handleConfirmStart = () => {
-    navigate(`/quiz/${selectedQuiz.id}`);
+    const accessToken = localStorage.getItem("accessToken");
+    localStorage.removeItem(`questions_${selectedQuiz.id}`);
+    localStorage.removeItem(`sessionId_${selectedQuiz.id}`);
+    axios
+      .get(
+        `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${selectedQuiz.id}/questions`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          params: {
+            count: 10,
+          },
+        }
+      )
+      .then((response) => {
+        const questions = response.data;
+        localStorage.setItem(
+          `questions_${selectedQuiz.id}`,
+          JSON.stringify(questions)
+        );
+        navigate(`/quiz/${selectedQuiz.id}`);
+      })
+      .catch((error) => {
+        console.error("There was an error fetching the questions!", error);
+      });
+  };
+
+  const handleQuizCompletion = (quizId) => {
+    const accessToken = localStorage.getItem("accessToken");
+    axios
+      .post(
+        `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quizId}/complete`,
+        {
+          userId: user.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+      .then((response) => {
+        fetchQuizzesAndAttempts(); // Refresh quizzes data
+        fetchCompletedQuizzes(); // Refresh completed quizzes data
+      })
+      .catch((error) => {
+        console.error("There was an error completing the quiz!", error);
+      });
+  };
+
+  const calculateNextAttemptDate = (seconds) => {
+    const nextAttemptDate = new Date(Date.now() + seconds * 1000);
+    return nextAttemptDate.toLocaleDateString("vi-VN");
   };
 
   if (!loggedIn) {
@@ -117,14 +240,32 @@ export const Quiz = () => {
                       className="img-fluid mb-3"
                     />
                     <h3>{quiz.title}</h3>
-                    <p>{quiz.description}</p>
-
-                    <button
-                      className="btn btn-success"
-                      onClick={() => handleStartQuiz(quiz)}
-                    >
-                      Làm bài thi
-                    </button>
+                    <div className="quiz-details">
+                      <div className="quiz-candidates">
+                        {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi{" "}
+                      </div>
+                    </div>
+                    {completedQuizzes.includes(quiz.id) ? (
+                      <div className="alert alert-success">
+                        Bạn đã hoàn thành quiz này.
+                      </div>
+                    ) : attemptsInfo[quiz.id]?.locked ? (
+                      <div className="alert alert-warning">
+                        Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào
+                        ngày{" "}
+                        {calculateNextAttemptDate(
+                          attemptsInfo[quiz.id]?.timeLeft
+                        )}
+                        .
+                      </div>
+                    ) : (
+                      <button
+                        className="btn btn-success"
+                        onClick={() => handleStartQuiz(quiz)}
+                      >
+                        Làm bài thi
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -144,14 +285,40 @@ export const Quiz = () => {
             {selectedQuiz && (
               <>
                 <DialogContentText>
-                  <h2>{selectedQuiz.title}</h2>
-                  <div>
-                    <p>Trình độ: Trung bình</p>
-                    <p>10 câu hỏi nhiều đáp án</p>
+                  <div className="quiz-info">
+                    <div className="info-item">
+                      <i className="fas fa-book"></i>
+                      <p>Chủ đề: {selectedQuiz.title}</p>
+                    </div>
+                    <div className="info-item">
+                      <i className="fas fa-question"></i>
+                      <p>10 câu hỏi nhiều đáp án</p>
+                    </div>
+                    <div className="info-item">
+                      <i className="fas fa-clock"></i>
+                      <p>10 phút làm bài</p>
+                    </div>
+                    <div className="info-item">
+                      <i className="fas fa-users"></i>
+                      <p>
+                        {selectedQuiz.numberOfUsers || 0}+ Số lần ứng viên đã
+                        làm bài đánh giá này
+                      </p>
+                    </div>
                   </div>
                   <div className="custom-dialog-description">
                     <p>Mô tả bài đánh giá</p>
                     <p>{selectedQuiz.description}</p>
+                    <p>
+                      Số lần làm bài còn lại:{" "}
+                      {attemptsInfo[selectedQuiz.id]?.attemptsLeft}
+                    </p>
+                    {attemptsInfo[selectedQuiz.id]?.timeLeft > 0 && (
+                      <p>
+                        Thời gian chờ: {attemptsInfo[selectedQuiz.id]?.timeLeft}{" "}
+                        giây
+                      </p>
+                    )}
                   </div>
                 </DialogContentText>
               </>
@@ -160,17 +327,21 @@ export const Quiz = () => {
           <DialogActions className="custom-dialog-actions">
             <Button
               onClick={handleClose}
-              color="primary"
               className="custom-dialog-button"
+              color="primary"
             >
-              Hủy bỏ
+              Đóng
             </Button>
             <Button
-              onClick={handleConfirmStart}
-              color="primary"
+              onClick={() => {
+                handleConfirmStart();
+                handleQuizCompletion(selectedQuiz.id);
+              }}
               className="custom-dialog-button"
+              color="primary"
+              autoFocus
             >
-              Bắt đầu làm
+              Bắt đầu làm bài
             </Button>
           </DialogActions>
         </Dialog>
@@ -178,4 +349,3 @@ export const Quiz = () => {
     </GlobalLayoutUser>
   );
 };
-export default Quiz;

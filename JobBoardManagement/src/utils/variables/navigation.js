@@ -4,53 +4,49 @@ export const navigation = [
     href: "/jobportal/starter",
     icon: "bi bi-speedometer2",
   },
+
   {
-    title: "Management",
-    icon: "bi bi-collection",
+    title: "Job",
+    icon: "bi bi-bell",
     children: [
       {
-        title: "Job",
-        icon: "bi bi-bell",
-        children: [
-          {
-            title: "Category",
-            href: "/jobportal/job-category",
-            icon: "bi bi-patch-check",
-          },
-        ],
-      },
-      {
-        title: "Blog",
-        icon: "bi bi-box",
-        children: [
-          {
-            title: "Category",
-            href: "/jobportal/blog-category",
-            icon: "bi bi-patch-check",
-          },
-          {
-            title: "List",
-            href: "/jobportal/table",
-            icon: "bi bi-hdd-stack",
-          },
-     
-        ],
-      },
-      {
-        title: "Quiz and Questions",
-        icon: "bi bi-question-circle",
-        children: [
-          {
-            title: "Quiz",
-            href: "/jobportal/quiz",
-            icon: "bi bi-question-circle",
-          },
-      
-        ],
+        title: "Category",
+        href: "/jobportal/job-category",
+        icon: "bi bi-patch-check",
       },
     ],
   },
-
+  {
+    title: "Blog",
+    icon: "bi bi-box",
+    children: [
+      {
+        title: "Category",
+        href: "/jobportal/blog-category",
+        icon: "bi bi-patch-check",
+      },
+      {
+        title: "List",
+        href: "/jobportal/table",
+        icon: "bi bi-hdd-stack",
+      },
+    ],
+  },
+  {
+    title: "Quiz and Questions",
+    icon: "bi bi-question-circle",
+    href: "/jobportal/quiz",
+  },
+  {
+    title: "User",
+    icon: "bi bi-question-circle",
+    href: "/jobportal/user",
+  },
+  {
+    title: "Contact",
+    icon: "bi bi-envelope", 
+    href: "/jobportal/contact",
+  },
   {
     title: "Settings",
     href: "/jobportal/settings",

@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.Service.QuestionService;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,37 @@ public class QuestionServiceImpl implements QuestionService {
             questionRepository.deleteById(id);
         }
 
-        public QuestionDTO convertToDTO(Question question) {
+    @Override
+    public void deleteQuestionsByQuizIdAndQuestionIds(Long quizId, List<Long> questionIds) {
+        if (questionIds == null || questionIds.isEmpty()) {
+            throw new IllegalArgumentException("Question IDs must not be null or empty");
+        }
+
+        List<Question> questions = questionRepository.findAllById(questionIds)
+                .stream()
+                .filter(question -> question.getQuiz().getId().equals(quizId))
+                .collect(Collectors.toList());
+
+        if (questions.isEmpty()) {
+            throw new RuntimeException("No questions found for the given quiz ID and question IDs");
+        }
+
+        questionRepository.deleteAll(questions);
+    }
+
+    @Override
+    @Transactional
+    public void deleteQuestionsByIds(List<Long> questionIds) {
+        questionRepository.deleteByIdIn(questionIds);
+    }
+
+    @Override
+    @Transactional
+    public void deleteQuestionsByQuizId(Long quizId) {
+        questionRepository.deleteByQuizId(quizId);
+    }
+
+    public QuestionDTO convertToDTO(Question question) {
             QuestionDTO questionDTO = new QuestionDTO();
             questionDTO.setId(question.getId());
             questionDTO.setQuestionText(question.getQuestionText());
@@ -92,4 +123,5 @@ public class QuestionServiceImpl implements QuestionService {
         private Question convertToEntity(QuestionDTO questionDTO) {
             return modelMapper.map(questionDTO, Question.class);
         }
+
 }

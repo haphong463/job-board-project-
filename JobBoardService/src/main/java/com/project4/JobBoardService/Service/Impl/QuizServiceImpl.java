@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.QuestionResultDTO;
 import com.project4.JobBoardService.DTO.QuestionSubmissionDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
@@ -8,6 +9,7 @@ import com.project4.JobBoardService.Entity.Question;
 import com.project4.JobBoardService.Entity.Quiz;
 import com.project4.JobBoardService.Repository.QuestionRepository;
 import com.project4.JobBoardService.Repository.QuizRepository;
+import com.project4.JobBoardService.Repository.QuizScoreRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuizService;
@@ -42,6 +44,9 @@ public class QuizServiceImpl implements QuizService {
     private ObjectMapper objectMapper;
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private QuizScoreRepository quizScoreRepository;
     @Override
     public Quiz createQuiz(Quiz quiz, MultipartFile imageFile) throws IOException {
         handleImageFile(quiz, imageFile, "create");
@@ -52,7 +57,6 @@ public class QuizServiceImpl implements QuizService {
     public List<Quiz> getAllQuizzes() {
         return quizRepository.findAll();
     }
-
     @Override
     public Quiz getQuizById(Long id) {
         return quizRepository.findById(id).orElse(null);
@@ -145,12 +149,15 @@ public class QuizServiceImpl implements QuizService {
         List<QuestionResultDTO> results = new ArrayList<>();
         Map<Long, String> correctAnswers = getCorrectAnswersForQuiz(quizSubmission.getQuizId());
 
+        Long userId = quizSubmission.getUserId(); // Ensure userId is retrieved correctly
+
         for (QuestionSubmissionDTO questionSubmission : quizSubmission.getQuestions()) {
             String correctAnswer = correctAnswers.get(questionSubmission.getQuestionId());
             results.add(new QuestionResultDTO(
                     questionSubmission.getQuestionId(),
                     questionSubmission.getSelectedAnswer(),
-                    correctAnswer
+                    correctAnswer,
+                    userId
             ));
         }
 
@@ -158,9 +165,20 @@ public class QuizServiceImpl implements QuizService {
     }
 
 
+
+
     private Map<Long, String> getCorrectAnswersForQuiz(Long quizId) {
         List<Question> questions = questionRepository.findByQuizId(quizId);
         return questions.stream().collect(Collectors.toMap(Question::getId, Question::getCorrectAnswer));
+    }
+
+
+    @Override
+    public void completeQuiz(Long quizId, Long userId) throws ResourceNotFoundException {
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+        quiz.incrementNumberOfUsers();
+        quizRepository.save(quiz);
+        // Add logic to save the user's completion if needed
     }
 
 }

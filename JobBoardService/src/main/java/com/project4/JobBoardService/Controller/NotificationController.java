@@ -91,4 +91,15 @@ public class NotificationController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<NotificationDTO> deleteNotification(@PathVariable Long id){
+        try {
+            notificationService.deleteNotification(id);
+            return ResponseEntity.noContent().build();
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

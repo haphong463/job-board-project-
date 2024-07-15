@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import Login from "../views/Login.js";
+import { exact } from "prop-types";
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
@@ -13,8 +14,10 @@ const JobCategory = lazy(() => import("../views/ui/job-category/index"));
 const Blog = lazy(() => import("../views/ui/blog/index"));
 const Forms = lazy(() => import("../views/ui/Forms"));
 const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
+const UserSetting = lazy(() => import("../views/ui/user-setting/index"));
+const Quiz = lazy(() => import("../views/ui/quiz/index"));
 const User = lazy(() => import("../views/ui/user/index"));
-const Quiz = lazy(() => import("../views/ui/quiz/index.js"));
+const Contact = lazy(() => import("../views/ui/contact/index"));
 /*****Routes******/
 const ThemeRoutes = [
   {
@@ -25,7 +28,8 @@ const ThemeRoutes = [
       { path: "/", element: <Navigate to="/jobportal/starter" /> },
       { path: "/jobportal/starter", exact: true, element: <Starter /> },
       { path: "/jobportal/alerts", exact: true, element: <BlogCategory /> },
-      { path: "/jobportal/settings", exact: true, element: <User /> },
+      { path: "/jobportal/settings", exact: true, element: <UserSetting /> },
+      { path: "/jobportal/user", exact: true, element: <User /> },
       { path: "/jobportal/table", exact: true, element: <Blog /> },
       { path: "/jobportal/forms", exact: true, element: <Forms /> },
       { path: "/jobportal/quiz", exact: true, element: <Quiz /> },
@@ -39,7 +43,9 @@ const ThemeRoutes = [
         exact: true,
         element: <BlogCategory />,
       },
-     
+      {
+        path:"/jobportal/contact", exact: true, element: <Contact />
+      }
     ],
   },
   {

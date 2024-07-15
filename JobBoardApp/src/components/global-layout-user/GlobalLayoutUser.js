@@ -20,8 +20,6 @@ const pageTransition = {
 
 export const GlobalLayoutUser = ({ children }) => {
   const location = useLocation();
-  const user = useSelector((state) => state.auth.user);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   useEffect(() => {
     scroll.scrollToTop({
@@ -30,13 +28,7 @@ export const GlobalLayoutUser = ({ children }) => {
     });
   }, [location]);
 
-  useEffect(() => {
-    if (user) {
-      const refreshTokenTimeout = refreshAuthToken(user, dispatch, navigate);
-      return () => clearTimeout(refreshTokenTimeout);
-    }
-  }, []);
-
+  
   return (
     <div id="top">
       <div className="site-wrap">

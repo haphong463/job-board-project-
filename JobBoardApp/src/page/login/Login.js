@@ -2,12 +2,18 @@ import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, NavLink } from "react-router-dom";
-import { resetVerificationMessage } from "../../features/authSlice";
+import { Navigate, NavLink, useNavigate } from "react-router-dom";
+import {
+  resetVerificationMessage,
+  signInOAuth2,
+} from "../../features/authSlice";
 import { useLoginForm } from "../../hooks/useLoginForm";
 import { MdErrorOutline } from "react-icons/md";
 import { Alert } from "react-bootstrap";
 import "./login.css";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import { signInOAuth2Async } from "../../services/AuthService";
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
   const verificationMessage = useSelector(
@@ -15,11 +21,21 @@ export const Login = () => {
   );
   const status = useSelector((state) => state.auth.status);
   const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   console.log(">>> show password: ", showPassword);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleSuccess = async (credentialResponse) => {
+    const credential = credentialResponse.credential;
+    dispatch(signInOAuth2(credential)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/");
+      }
+    });
   };
 
   useEffect(() => {
@@ -124,6 +140,16 @@ export const Login = () => {
                       <NavLink to="/signup">Register now</NavLink>
                     </p>
                   </div>
+                  <GoogleOAuthProvider
+                    clientId={process.env.REACT_APP_GOOGLE_CLIENTID}
+                  >
+                    <GoogleLogin
+                      onSuccess={handleSuccess}
+                      onError={(err) => {
+                        console.log(err);
+                      }}
+                    />
+                  </GoogleOAuthProvider>
                 </form>
               </div>
               <div className="col-lg-6 d-none d-lg-block">

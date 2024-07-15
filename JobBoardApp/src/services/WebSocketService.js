@@ -11,6 +11,7 @@ export const connectWebSocket = (user) => {
     const socket = new SockJS(process.env.REACT_APP_WEBSOCKET_ENDPOINT);
     stompClient = new Client({
       webSocketFactory: () => socket,
+      debug: (error) => console.log(error),
     });
 
     stompClient.onConnect = () => {

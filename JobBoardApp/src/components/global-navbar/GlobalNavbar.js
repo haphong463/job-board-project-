@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../features/authSlice";
+import { logout, signOut } from "../../features/authSlice";
 import {
   Dropdown,
   DropdownToggle,
@@ -23,6 +23,7 @@ export function GlobalNavbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
 
+  const navigate = useNavigate();
   const notifications = useSelector((state) => state.notification.list);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
@@ -32,7 +33,7 @@ export function GlobalNavbar() {
   const unreadCount = useSelector((state) => state.notification.unreadCount);
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(signOut());
   };
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export function GlobalNavbar() {
       <div className="container-fluid">
         <div className="row align-items-center">
           <div className="site-logo col-6">
-            <NavLink to="/">JobBoard</NavLink>
+            <NavLink to="/">JobGrove </NavLink>
           </div>
 
           <nav className="mx-auto site-navigation">
@@ -131,9 +132,15 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
+              {user && (
+                <li>
+                  <NavLink to="/quiz">Quiz</NavLink>
+                </li>
+              )}
               <li>
-                <NavLink to="/quiz">Quiz</NavLink>
+                <NavLink to="/create-cv">Create CV</NavLink>
               </li>
+
               {!roles.includes("ROLE_EMPLOYER") && (
                 <li>
                   <NavLink to="/EmployerSignUp">For Employer</NavLink>
@@ -206,11 +213,16 @@ export function GlobalNavbar() {
                         className="notifications-item"
                         onClick={
                           !notification.read
-                            ? () => handleMarkNotification(notification.id)
-                            : undefined
+                            ? () => {
+                                handleMarkNotification(notification.id);
+                                navigate(notification.url);
+                              }
+                            : () => {
+                                navigate(notification.url);
+                              }
                         }
                       >
-                        <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
+                        <img src={notification.sender.imageUrl} alt="img" />
                         <div className="text">
                           <h4
                             className={`${

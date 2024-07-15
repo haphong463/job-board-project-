@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom"; // Import useNavigate here
 import axiosRequest from "../../configs/axiosConfig";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import axios from "axios";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -18,30 +19,9 @@ export function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [redirect, setRedirect] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate here
+
   console.log(">>>> email: ", email);
-  // useEffect(() => {
-  //   const verifyToken = async () => {
-  //     try {
-  //       const response = await axiosRequest.post('/auth/verify-reset-token', null, {
-  //         params: { email, token }
-  //       });
-  //       if (response && response.data) {
-  //         setMessage(response.data.message);
-  //         if (response.data.message === "Token is valid.") {
-  //           setRedirect(false);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       if (error.response && error.response.data) {
-  //         setMessage(error.response.data.message);
-  //       } else {
-  //         setMessage("An error occurred. Please try again.");
-  //       }
-  //     }
-  //   };
-  //   verifyToken();
-  // }, [email, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +30,7 @@ export function ResetPassword() {
       return;
     }
     try {
-      const response = await axiosRequest.post("/auth/set-new-password", null, {
+      const response = await axios.post("http://localhost:8080/api/auth/set-new-password", null, {
         params: {
           email,
           token,
@@ -61,22 +41,25 @@ export function ResetPassword() {
       if (response && response.data) {
         setMessage(response.data.message);
         if (response.data.message === "Password reset successfully!") {
-          setRedirect(true);
-          // Hiển thị thông báo thành công
           console.log("Password reset successfully!");
+          navigate("/login"); // Redirect to login page
+        } else {
+          console.log("Unexpected message: ", response.data.message);
         }
+      } else {
+        console.log("No response or no data in response");
       }
     } catch (error) {
       if (error.response && error.response.data) {
         setMessage(error.response.data.message);
+        console.error("Error response data: ", error.response.data);
       } else {
         setMessage("An error occurred. Please try again.");
+        console.error("Error: ", error);
       }
     }
   };
-  if (redirect) {
-    return <Navigate to="/login" />;
-  }
+
   if (user) return <Navigate to="/" replace={true} />;
 
   return (
@@ -154,4 +137,5 @@ export function ResetPassword() {
     </GlobalLayoutUser>
   );
 }
+
 export default ResetPassword;
