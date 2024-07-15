@@ -28,6 +28,7 @@ public class Notification extends AbstractEntity {
     private User recipient;
 
     private String message;
+
     private boolean isRead;
 
 }

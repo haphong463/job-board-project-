@@ -75,6 +75,8 @@ public class User   {
     private List<UserCV> userCVs;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Employer employer;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Subscription> subscriptions;
 
     public User(String username, String email, String password) {
         this.username = username;
@@ -90,4 +92,5 @@ public class User   {
         this.password = password;
         this.gender = gender;
     }
+
 }

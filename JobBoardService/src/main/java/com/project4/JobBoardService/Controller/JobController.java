@@ -13,9 +13,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/jobs")
+
+@CrossOrigin(origins = "http://localhost:3000")
 public class JobController {
 
     private final JobService jobService;
@@ -25,23 +28,59 @@ public class JobController {
         this.jobService = jobService;
     }
 
-    @GetMapping("/{companyId}")
-    public ResponseEntity<List<JobDTO>> getAllJobsByCompanyId(@PathVariable Long companyId) {
-        List<JobDTO> jobs = jobService.findAllJobsByCompanyId(companyId);
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<JobDTO>> getAllJobsByCompanyId(@PathVariable Long userId) {
+        List<JobDTO> jobs = jobService.findAllJobsByCompanyId(userId);
         if (jobs.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
         }
         return ResponseEntity.ok(jobs);
     }
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    @PostMapping("/companies/{companyId}/categories/{categoryId}/jobs")
-    public ResponseEntity<Boolean> createJob(@PathVariable("companyId") Long companyId,
-                                             @PathVariable("categoryId") Long categoryId,
-                                             @RequestBody JobDTO jobDTO) {
-        boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
-        return ResponseEntity.ok(createdJob);
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @GetMapping("/{userId}/search")
+    public ResponseEntity<List<JobDTO>> searchJobsByCompanyId(@PathVariable Long userId, @RequestParam("text") String query) {
+        List<JobDTO> jobs = jobService.searchJobsByCompanyId(userId, query);
+        if (jobs.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
+        }
+        return ResponseEntity.ok(jobs);
     }
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @GetMapping("/{userId}/filter")
+    public ResponseEntity<List<JobDTO>> filterJobsByExpirationStatus(@PathVariable Long userId, @RequestParam boolean isExpired) {
+        List<JobDTO> jobs = jobService.filterJobsByExpirationStatus(userId, isExpired);
+        if (jobs.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
+        }
+        return ResponseEntity.ok(jobs);
+    }
+
+
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @PostMapping("/users/{userId}/categories/{categoryId}")
+    public ResponseEntity<String> createJob(@PathVariable("userId") Long userId,
+                                            @PathVariable("categoryId") Long categoryId,
+                                            @RequestBody JobDTO jobDTO) {
+        boolean createdJob = jobService.createJob(userId, categoryId, jobDTO);
+
+        if (!createdJob) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User has reached the limit job postings this month.");
+        }
+
+        return ResponseEntity.ok("Job created successfully");
+    }
+
+
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @GetMapping("job/{id}")
+    public ResponseEntity<JobDTO> getJobById(@PathVariable Long id) {
+        Optional<JobDTO> job = jobService.findJobById(id);
+        return job.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')" )
     @PutMapping("/edit/{jobId}")
     public ResponseEntity<JobDTO> updateJob(@PathVariable Long jobId, @RequestBody JobDTO jobDTO) {
         JobDTO updatedJob = jobService.updateJob(jobId, jobDTO);
@@ -55,7 +94,7 @@ public class JobController {
     @DeleteMapping("/{jobId}")
     public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
         jobService.deleteJob(jobId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
 }

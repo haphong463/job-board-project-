@@ -25,8 +25,10 @@ public class JobDTO {
     private String position;
     private String experience;
     private String qualification;
+    private int quantity;
     private LocalDateTime createdAt;
+    private LocalDateTime expired;
     private Long categoryId;
-    private Long companyId;
+    private Long userId;
 
 }
