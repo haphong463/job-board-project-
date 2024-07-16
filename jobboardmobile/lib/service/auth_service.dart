@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
   // final String baseUrl = 'http://localhost:8080/api/auth';
-  final String baseUrl = 'http://192.168.110.22:8080/api/auth';
+  final String baseUrl = 'http://192.168.110.21:8080/api/auth';
   final storage = FlutterSecureStorage();
 
   Future<http.Response> login(String username, String password) async {
@@ -22,11 +22,21 @@ class AuthService {
       await storage.write(key: 'firstName', value: jsonResponse['firstName']);
       await storage.write(key: 'lastName', value: jsonResponse['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
-    } else {
-      throw Exception('Failed to login');
-    }
 
-    return response;
+      if (jsonResponse.containsKey('id') && jsonResponse['id'] != null) {
+        await storage.write(
+            key: 'userId', value: jsonResponse['id'].toString());
+        print('User ID stored: ${jsonResponse['id']}');
+      } else {
+        print('User ID not found in response: $jsonResponse');
+        throw Exception('User ID not found in response');
+      }
+
+      return response;
+    } else {
+      // Trả về một phản hồi khác hoặc ném ngoại lệ
+      throw Exception('Failed to login, status code: ${response.statusCode}');
+    }
   }
 
   Future<http.Response> register(String username, String email, String password,
