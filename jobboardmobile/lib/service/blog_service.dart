@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/blog_model.dart';
 
 class BlogService {
-  final String baseUrl = 'http://192.168.1.17:8080/api/blogs';
+  final String baseUrl = '${Endpoint.baseUrl}/blogs';
 
   Future<BlogModel> searchBlogs(String query, String type,
       {int page = 0, int size = 10, int visibility = 2}) async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobboardmobile/core/utils/color_util.dart';
 import 'package:jobboardmobile/models/blog_model.dart';
 import 'package:jobboardmobile/screens/blog/blog_list_widget.dart';
 import 'package:jobboardmobile/service/blog_service.dart';
@@ -63,7 +64,9 @@ class _BlogScreenWidgetState extends State<BlogScreenWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Blog List'),
+        title: const Text('Blog List', style: TextStyle(color: Colors.white)),
+        backgroundColor: ColorUtil.primaryColor,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -76,15 +79,6 @@ class _BlogScreenWidgetState extends State<BlogScreenWidget> {
                     controller: _queryController,
                     decoration: const InputDecoration(
                       labelText: 'Search Query',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: _typeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Type',
                     ),
                   ),
                 ),
@@ -104,11 +98,23 @@ class _BlogScreenWidgetState extends State<BlogScreenWidget> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.hasData) {
+                } else if (snapshot.hasData && snapshot.data != null) {
                   _totalPages = snapshot.data!.totalPages;
-                  print(snapshot.data!.content.length);
+
+                  // Check if the content list is empty
+                  if (snapshot.data!.content.isEmpty) {
+                    return const Center(child: Text('No blogs found'));
+                  }
+
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 0),
+                        child: Text(
+                            'Result found: ${snapshot.data!.content.length}'),
+                      ),
                       Expanded(
                         child: BlogList(
                           blogs: snapshot.data!.content.map((content) {
@@ -145,7 +151,7 @@ class _BlogScreenWidgetState extends State<BlogScreenWidget> {
                 }
               },
             ),
-          ),
+          )
         ],
       ),
     );

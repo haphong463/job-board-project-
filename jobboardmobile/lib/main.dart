@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jobboardmobile/screens/notification/notification_screen.dart';
+import 'package:kommunicate_flutter/kommunicate_flutter.dart';
 import 'package:jobboardmobile/screens/blog/blog_screen_widget.dart';
-
 import 'screens/login_register/login_screen.dart';
 import 'screens/login_register/signup_screen.dart';
 import 'screens/main/main_screen.dart';
@@ -9,31 +10,31 @@ import 'screens/job/job_info_page.dart';
 import 'screens/quiz/quiz_screen.dart';
 import 'screens/login_register/forgotpassword_screen.dart';
 import 'screens/login_register/resetpassword_screen.dart';
-
 import 'screens/login_register/verify_screen.dart';
 import 'screens/login_register/verifyreset_screen.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Job Board App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      //* Nhớ sửa lại chỗ này, em đang test blog nên để init là blog
-      initialRoute: '/blog',
+      initialRoute: '/login',
       routes: {
-        '/login': (context) => LoginScreen(),
-        '/blog': (context) => BlogScreenWidget(),
+        '/login': (context) => const LoginScreen(),
+        '/blog': (context) => const BlogScreenWidget(),
         '/signup': (context) => SignupScreen(),
         '/forgot_password': (context) => ForgotPasswordScreen(),
-        '/main': (context) => MainScreen(),
+        '/main': (context) => const MainScreen(),
         '/reset_password': (context) => ResetPasswordScreen(),
         '/search': (context) => SearchPage(),
-        '/application': (context) => MainScreen(),
+        '/application': (context) => const MainScreen(),
         '/job': (context) => JobInfoPage(),
         '/quizzes': (context) => QuizListScreen(),
         '/verify': (context) => VerifyScreen(email: ''),
@@ -45,6 +46,8 @@ class MyApp extends StatelessWidget {
             email: args?['email'] ?? '',
           );
         },
+        '/notifications': (context) =>
+            const NotificationScreen(), // Add the notification screen route
       },
     );
   }

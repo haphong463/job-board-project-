@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/comment_model.dart';
+import 'package:jobboardmobile/service/auth_service.dart';
 
 class CommentService {
-  static const String baseUrl = 'http://192.168.1.17:8080/api/comments';
+  final String baseUrl = '${Endpoint.baseUrl}/comments';
 
   Future<List<Comment>> getCommentsByBlogSlug(String slug) async {
     try {
@@ -23,12 +26,17 @@ class CommentService {
 
   Future<Comment> createComment(var comment) async {
     try {
+      final AuthService authService = AuthService();
+
+      String? accessToken = await authService.getAccessToken();
+
+      print('Token: $accessToken');
+
       final response = await http.post(
         Uri.parse(baseUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization':
-              'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJoYXBob25nMjEzNCIsInJvbGUiOlt7ImF1dGhvcml0eSI6IlJPTEVfQURNSU4ifV0sImZpcnN0TmFtZSI6IkjDoCBUaGFuaCIsImxhc3ROYW1lIjoiUGhvbmciLCJpZCI6MSwiaW1hZ2VVcmwiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdXBsb2Fkcy91c2VyLzExMTU2NTQ0Ml8yMDI0MDcwNDIzMTk1MC5qcGciLCJiaW8iOiJBIHBhc3Npb25hdGUgYmxvZ2dlciBhYm91dCBpbmZvcm1hdGlvbiB0ZWNobm9sb2d5IChJVCkuIFdpdGggMyB5ZWFycyBvZiBleHBlcmllbmNlIGluIHRoZSBmaWVsZCwgSSBob3BlIHRvIHNoYXJlIG15IGtub3dsZWRnZSBhbmQgcGFzc2lvbiB3aXRoIHRoZSBjb21tdW5pdHkgdGhyb3VnaCBteSBibG9nLiIsImdlbmRlciI6Ik1BTEUiLCJpYXQiOjE3MjA4NTgwMTksImV4cCI6MTcyMDk0NDQxOX0.DnzUw3xQCkVTAZnb63L6m86YItEVZPoeCORBHPJiIgZbTqklvOoUWKx_jcK7y3GzxMDt8g3IupCPVscGw-qOiw'
+          'Authorization': 'Bearer $accessToken'
         },
         body: jsonEncode(comment),
       );
@@ -47,10 +55,14 @@ class CommentService {
 
   Future<void> deleteComment(String id) async {
     try {
+      final AuthService authService = AuthService();
+
+      String? accessToken = await authService.getAccessToken();
       final response = await http.delete(
-        Uri.parse('$baseUrl/comment/$id'),
+        Uri.parse('$baseUrl/$id'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken'
         },
       );
 
@@ -62,14 +74,18 @@ class CommentService {
     }
   }
 
-  Future<Comment> updateComment(String id, Comment comment) async {
+  Future<Comment> updateComment(String id, var comment) async {
     try {
+      final AuthService authService = AuthService();
+
+      String? accessToken = await authService.getAccessToken();
       final response = await http.put(
-        Uri.parse('$baseUrl/comment/$id'),
+        Uri.parse('$baseUrl/$id'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken'
         },
-        body: jsonEncode(comment.toJson()),
+        body: jsonEncode(comment),
       );
 
       if (response.statusCode == 200) {

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:jobboardmobile/config/GoogleSignInApi.dart';
 import 'package:kommunicate_flutter/kommunicate_flutter.dart';
 import '../../service/auth_service.dart';
 import 'signup_screen.dart';
@@ -33,6 +34,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future signIn() async {
+    final result = await GoogleSignInApi.login();
+    final ggAuth = await result?.authentication;
+    print(ggAuth?.idToken);
+    print(ggAuth?.accessToken);
+    final response = await _authService.loginByGoogle(ggAuth?.accessToken);
+    if (response.statusCode == 200) {
+      Navigator.pushReplacementNamed(context, '/main');
+    } else {
+      setState(() {
+        _errorMessage = 'Invalid username or password';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(23),
-              child: ListView(
+              child: Column(
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
@@ -115,6 +131,65 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontSize: 15,
                               fontFamily: 'SFUIDisplay',
                               fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            "or",
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontFamily: 'SFUIDisplay',
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      backgroundColor: Colors.white,
+                    ),
+                    onPressed: signIn,
+                    child: const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image(
+                            image: AssetImage("assets/icons/google_icon.png"),
+                            height: 18.0,
+                            width: 24,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(left: 24, right: 8),
+                            child: Text(
+                              'Sign in with Google',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   if (_errorMessage.isNotEmpty)
@@ -185,25 +260,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-          ),
+          )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.message),
-        onPressed: () async {
-          dynamic conversationObject = {
-            'appId': '4ad31fa80e50f3c68e389cbfeffad7ac',
-            'isSingleConversation': false
-          };
-          KommunicateFlutterPlugin.buildConversation(conversationObject)
-              .then((result) {
-            print(
-                "Conversation builder success: $result"); //result.toString() will be the clientChannelKey
-          }).catchError((error) {
-            print("Conversation builder error occurred : $error");
-          });
-        },
-      ),
+      resizeToAvoidBottomInset: false,
     );
   }
 }

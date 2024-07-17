@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/blog_model.dart';
 import 'package:jobboardmobile/models/user_model.dart';
 import 'package:jobboardmobile/screens/blog-details/blog_detail_screen_widget.dart';
@@ -16,7 +17,7 @@ class BlogList extends StatelessWidget {
       itemBuilder: (context, index) {
         String modifiedImageUrl = blogs[index]
             .imageUrl
-            .replaceAll('http://localhost:8080', 'http://192.168.1.17:8080');
+            .replaceAll('http://localhost:8080', Endpoint.imageUrl);
 
         return BlogCard(
           blog: BlogPost(
