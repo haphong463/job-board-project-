@@ -19,13 +19,16 @@ class AuthService {
       print(response.body);
       var jsonResponse = jsonDecode(response.body);
       await storage.write(key: 'accessToken', value: jsonResponse['token']);
+      Map<String, dynamic> decodedToken =
+          JwtDecoder.decode(jsonResponse['token']);
       await storage.write(
           key: 'refreshToken', value: jsonResponse['refreshToken']);
-      await storage.write(key: 'firstName', value: jsonResponse['firstName']);
-      await storage.write(key: 'lastName', value: jsonResponse['lastName']);
+      await storage.write(key: 'firstName', value: decodedToken['firstName']);
+      await storage.write(key: 'lastName', value: decodedToken['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
       await storage.write(key: 'username', value: jsonResponse['username']);
-      await storage.write(key: 'imageUrl', value: jsonResponse['imageUrl']);
+      await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      saveUserId(jsonResponse['id'].toString());
     } else {
       throw Exception('Failed to login');
     }
@@ -43,7 +46,6 @@ class AuthService {
     if (response.statusCode == 200) {
       print(response.body);
       var jsonResponse = jsonDecode(response.body);
-      print(jsonResponse['imageUrl']);
       await storage.write(key: 'accessToken', value: jsonResponse['token']);
       Map<String, dynamic> decodedToken =
           JwtDecoder.decode(jsonResponse['token']);
@@ -58,32 +60,7 @@ class AuthService {
     } else {
       throw Exception('Failed to login');
     }
-
-      if (jsonResponse != null) {
-        await storage.write(key: 'accessToken', value: jsonResponse['token']);
-        await storage.write(
-            key: 'refreshToken', value: jsonResponse['refreshToken']);
-        await storage.write(key: 'firstName', value: jsonResponse['firstName']);
-        await storage.write(key: 'lastName', value: jsonResponse['lastName']);
-        await storage.write(key: 'email', value: jsonResponse['email']);
-
-        if (jsonResponse.containsKey('id') && jsonResponse['id'] != null) {
-          await storage.write(
-              key: 'userId', value: jsonResponse['id'].toString());
-          print('User ID stored: ${jsonResponse['id']}');
-        } else {
-          print('User ID not found in response: $jsonResponse');
-          throw Exception('User ID not found in response');
-        }
-      } else {
-        print('Invalid JSON response: $jsonResponse');
-        throw Exception('Invalid JSON response');
-      }
-
-      return response;
-    } else {
-      throw Exception('Failed to login, status code: ${response.statusCode}');
-    }
+    return response;
   }
 
   Future<http.Response> register(String username, String email, String password,
