@@ -7,6 +7,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.project4.JobBoardService.Config.ErrorDetails;
 import com.project4.JobBoardService.Config.TokenRefreshException;
 import com.project4.JobBoardService.DTO.UserDTO;
+import com.project4.JobBoardService.DTO.UserGmailAndroid;
 import com.project4.JobBoardService.Entity.Employer;
 import com.project4.JobBoardService.Entity.RefreshToken;
 import com.project4.JobBoardService.Entity.Role;
@@ -27,7 +28,8 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +39,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.*;
@@ -75,7 +78,6 @@ public class AuthController {
     private String CLIENT_ID; // Replace with your actual client ID
 
 
-    // ! Đang trong quá trin sửa, đừng ai động vào!
     @PostMapping("/google")
     public ResponseEntity<?> authenticateUserWithGoogle(@RequestBody TokenRequest tokenRequest) {
         try {
@@ -167,6 +169,105 @@ public class AuthController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+
+
+    @PostMapping("/google-mobile")
+    public ResponseEntity<?> authenticateUserWithGoogleAndroid(@RequestBody TokenRequest tokenRequest) {
+        try {
+            String token = tokenRequest.getToken();
+            String url = "https://www.googleapis.com/oauth2/v3/userinfo";
+
+            // Create headers and add the token
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // Make the request to Google's userinfo endpoint
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                Map<String, Object> payload = response.getBody();
+
+                if (payload != null) {
+                    // Extract user information from payload
+                    String userId = (String) payload.get("sub");
+                    String email = (String) payload.get("email");
+                    boolean emailVerified = (Boolean) payload.get("email_verified");
+                    String name = (String) payload.get("name");
+                    String pictureUrl = (String) payload.get("picture");
+                    String locale = (String) payload.get("locale");
+                    String familyName = (String) payload.get("family_name");
+                    String givenName = (String) payload.get("given_name");
+
+                    // Use or store profile information
+                    User user = userRepository.findByEmail(email).orElse(null);
+                    if (user != null) {
+                        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        String jwt = jwtUtils.generateJwtToken(authentication);
+
+                        List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList());
+                        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+                        return ResponseEntity.ok(new JwtResponse(jwt,
+                                refreshToken.getToken(),
+                                user.getId(),
+                                user.getUsername(),
+                                user.getEmail(),
+                                rolesSignIn));
+                    }
+
+                    // Create new user
+                    user = new User();
+                    user.setEmail(email);
+                    user.setUsername(email); // or some other unique identifier
+                    user.setFirstName(givenName);
+                    user.setLastName(familyName);
+                    user.setVerified(emailVerified);
+                    user.setPassword(encoder.encode("google-password"));
+                    user.setImageUrl(pictureUrl);
+                    Set<Role> roles = new HashSet<>();
+                    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    roles.add(userRole);
+                    user.setRoles(roles);
+                    user = userRepository.save(user);
+
+                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    String jwt = jwtUtils.generateJwtToken(authentication);
+
+                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+                    return ResponseEntity.ok(new JwtResponse(jwt,
+                            refreshToken.getToken(),
+                            userDetails.getId(),
+                            userDetails.getUsername(),
+                            userDetails.getEmail(),
+                            rolesSignIn));
+                } else {
+                    return ResponseEntity.badRequest().body("Invalid token payload!");
+                }
+            } else {
+                return ResponseEntity.badRequest().body("Invalid token!");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+
+
 
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {

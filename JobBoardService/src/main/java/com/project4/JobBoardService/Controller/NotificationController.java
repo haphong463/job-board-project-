@@ -33,6 +33,8 @@ public class NotificationController {
     private ModelMapper modelMapper;
 
     @PostMapping("/send")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_EMPLOYER') or hasRole('ROLE_MODERATOR')")
+
     public ResponseEntity<NotificationDTO> sendNotification(@RequestBody NotificationDTO notificationDTO) {
        try {
            User sender = userService.findByUsername(notificationDTO.getSender().getUsername()).orElse(null);
@@ -64,6 +66,7 @@ public class NotificationController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_EMPLOYER') or hasRole('ROLE_MODERATOR')")
     public ResponseEntity<List<NotificationDTO>> getNotificationByRecipientId(@PathVariable Long id){
            try {
               User user = userService.findById(id).orElse(null);
@@ -81,6 +84,7 @@ public class NotificationController {
     }
 
     @PutMapping("/read/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_EMPLOYER') or hasRole('ROLE_MODERATOR')")
     public ResponseEntity<NotificationDTO> updateIsReadNotification(@PathVariable Long id) {
         try {
 
@@ -94,6 +98,7 @@ public class NotificationController {
 
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_EMPLOYER') or hasRole('ROLE_MODERATOR')")
     public ResponseEntity<NotificationDTO> deleteNotification(@PathVariable Long id){
         try {
             notificationService.deleteNotification(id);
