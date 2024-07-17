@@ -47,6 +47,8 @@ public class Job {
 
     private String qualification;
 
+    private int quantity;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -58,10 +60,17 @@ public class Job {
     @JoinColumn(name = "company_id")
     private Company company;
 
+    @ManyToOne
+    @JoinColumn(name = "user", nullable = false)
+    private User user;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+
+    @Column(name = "expired")
+    private LocalDateTime expired;
 
 }

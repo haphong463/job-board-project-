@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../service/quiz_service.dart';
 
 class QuizListScreen extends StatefulWidget {
@@ -9,6 +10,8 @@ class QuizListScreen extends StatefulWidget {
 class _QuizListScreenState extends State<QuizListScreen> {
   final QuizService _quizService = QuizService();
   late Future<List<Quiz>> _futureQuizzes;
+  final storage = FlutterSecureStorage();
+  int? userId; // Use nullable type
 
   Quiz? selectedQuiz;
   Map<int, dynamic> attemptsInfo = {}; // Store attempts info for each quiz
@@ -16,12 +19,25 @@ class _QuizListScreenState extends State<QuizListScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeUserId();
     _futureQuizzes = _quizService.getAllQuizzes();
   }
 
-  void fetchAttemptsInfo(int quizId) async {
+  Future<void> _initializeUserId() async {
+    // Lấy userId từ storage
+    String? storedUserId = await storage.read(key: 'userId');
+    if (storedUserId != null) {
+      setState(() {
+        userId = int.parse(storedUserId);
+      });
+    } else {
+      print('User ID not found in storage');
+    }
+  }
+
+  void fetchAttemptsInfo(int quizId, int userId) async {
     try {
-      final attemptsData = await _quizService.getAttemptsInfo(quizId);
+      final attemptsData = await _quizService.getAttemptsInfo(quizId, userId);
       setState(() {
         attemptsInfo[quizId] = attemptsData;
       });
@@ -30,8 +46,8 @@ class _QuizListScreenState extends State<QuizListScreen> {
     }
   }
 
-  void _showQuizDialog(Quiz quiz) {
-    fetchAttemptsInfo(quiz.id);
+  void _showQuizDialog(Quiz quiz, int userId) {
+    fetchAttemptsInfo(quiz.id, userId);
     setState(() {
       selectedQuiz = quiz;
     });
@@ -241,7 +257,12 @@ class _QuizListScreenState extends State<QuizListScreen> {
                         SizedBox(height: 10),
                         ElevatedButton(
                           onPressed: () {
-                            _showQuizDialog(quiz);
+                            if (userId != null) {
+                              _showQuizDialog(
+                                  quiz, userId!); // Pass userId here
+                            } else {
+                              print('User ID is not available');
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,

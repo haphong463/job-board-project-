@@ -29,6 +29,7 @@ public class Notification extends AbstractEntity {
 
     private String url;
     private String message;
+
     private boolean isRead;
 
 }

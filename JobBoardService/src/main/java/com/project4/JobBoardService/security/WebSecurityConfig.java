@@ -72,6 +72,8 @@ public class WebSecurityConfig {
                                 .requestMatchers("/uploads/**").permitAll()
                                 .requestMatchers(HttpMethod.GET).permitAll()
 
+                                .requestMatchers("/api/payment/**").permitAll()
+
                                 .requestMatchers("/api/usercv/**").permitAll()
                                 .requestMatchers("/api/templates/**").permitAll()
 

@@ -15,7 +15,6 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
     );
-
     if (response.statusCode == 200) {
       print(response.body);
       var jsonResponse = jsonDecode(response.body);
@@ -60,7 +59,31 @@ class AuthService {
       throw Exception('Failed to login');
     }
 
-    return response;
+      if (jsonResponse != null) {
+        await storage.write(key: 'accessToken', value: jsonResponse['token']);
+        await storage.write(
+            key: 'refreshToken', value: jsonResponse['refreshToken']);
+        await storage.write(key: 'firstName', value: jsonResponse['firstName']);
+        await storage.write(key: 'lastName', value: jsonResponse['lastName']);
+        await storage.write(key: 'email', value: jsonResponse['email']);
+
+        if (jsonResponse.containsKey('id') && jsonResponse['id'] != null) {
+          await storage.write(
+              key: 'userId', value: jsonResponse['id'].toString());
+          print('User ID stored: ${jsonResponse['id']}');
+        } else {
+          print('User ID not found in response: $jsonResponse');
+          throw Exception('User ID not found in response');
+        }
+      } else {
+        print('Invalid JSON response: $jsonResponse');
+        throw Exception('Invalid JSON response');
+      }
+
+      return response;
+    } else {
+      throw Exception('Failed to login, status code: ${response.statusCode}');
+    }
   }
 
   Future<http.Response> register(String username, String email, String password,

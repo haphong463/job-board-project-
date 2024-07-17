@@ -124,6 +124,8 @@ public class AuthController {
                             user.getId(),
                             user.getUsername(),
                             user.getEmail(),
+                            user.getLastName(),
+                            user.getFirstName(),
                             rolesSignIn));
 
 
@@ -160,6 +162,8 @@ public class AuthController {
                         userDetails.getId(),
                         userDetails.getUsername(),
                         userDetails.getEmail(),
+                        userDetails.getFirstName(),
+                        userDetails.getLastName(),
                         rolesSignIn));
             } else {
                 System.out.println("Invalid ID token.");
@@ -320,9 +324,18 @@ public class AuthController {
                 .collect(Collectors.toList());
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        JwtResponse jwtResponse = new JwtResponse(
+                jwt,
+                refreshToken.getToken(),
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                userDetails.getFirstName(),
+                userDetails.getLastName(),
+                roles
+        );
 
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
-                userDetails.getUsername(), userDetails.getEmail(), roles));
+        return ResponseEntity.ok(jwtResponse);
     }
 
     @PostMapping("/signup")
