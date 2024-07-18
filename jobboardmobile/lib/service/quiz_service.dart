@@ -1,21 +1,13 @@
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/quiz_model.dart';
 import 'auth_service.dart';
 
 class QuizService {
-  final String baseUrl = 'http://192.168.110.21:8080/api';
+  static const String baseUrl = 'http://192.168.110.19:8080/api';
   final AuthService _authService = AuthService();
-
-  Future<List<Quiz>> getAllQuizzes() async {
-    final response = await http.get(Uri.parse('$baseUrl/quizzes'));
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => Quiz.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load quizzes');
-    }
-  }
 
   Future<Map<String, dynamic>> getAttemptsInfo(int quizId, int userId) async {
     final response = await http.get(
@@ -31,41 +23,98 @@ class QuizService {
     }
   }
 
-  Future<void> completeQuiz(int quizId, int userId) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/quizzes/$quizId/complete'),
-      body: json.encode({'userId': userId}),
-      headers: {'Content-Type': 'application/json'},
-    );
-    if (response.statusCode != 200) {
-      throw Exception('Failed to complete quiz');
+  static Future<dynamic> getQuizDetails(String quizId) async {
+    final response = await http.get(Uri.parse('$baseUrl/quizzes/$quizId'));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load quiz details');
     }
   }
-}
 
-class Quiz {
-  final int id;
-  final String title;
-  final String description;
-  final String imageUrl;
-  final int numberOfUsers;
+  static Future<List<dynamic>> getQuizQuestions(String quizId,
+      {int count = 10}) async {
+    final url = '$baseUrl/quizzes/$quizId/questions?count=$count';
+    print('Requesting URL: $url');
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load quiz questions');
+    }
+  }
 
-  Quiz({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.imageUrl,
-    required this.numberOfUsers,
-  });
-
-  factory Quiz.fromJson(Map<String, dynamic> json) {
-    return Quiz(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      imageUrl: json['imageUrl'],
-      numberOfUsers: json['numberOfUsers'],
+  static Future<dynamic> submitQuiz(dynamic submission) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/quizzes/submit'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(submission),
     );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to submit quiz');
+    }
+  }
+
+  Future<List<Quiz>> fetchQuizzes() async {
+    try {
+      String? accessToken = await _authService.getAccessToken();
+      http.Response response = await http.get(
+        Uri.parse('$baseUrl/quizzes'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<Quiz> quizzes =
+            jsonData.map((json) => Quiz.fromJson(json)).toList();
+        return quizzes;
+      } else {
+        throw Exception('Failed to fetch quizzes');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch quizzes: $e');
+    }
+  }
+
+  Future<List<dynamic>> fetchQuizQuestions(String quizId,
+      {int count = 10}) async {
+    try {
+      String? accessToken = await _authService.getAccessToken();
+      http.Response response = await http.get(
+        Uri.parse('$baseUrl/quizzes/$quizId/questions?count=$count'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to fetch quiz questions');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch quiz questions: $e');
+    }
+  }
+
+  Future<void> submitQuizCompletion(String quizId, String userId) async {
+    try {
+      String? accessToken = await _authService.getAccessToken();
+      http.Response response = await http.post(
+        Uri.parse('$baseUrl/quizzes/$quizId/complete'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'userId': userId}),
+      );
+      if (response.statusCode == 200) {
+      } else {
+        throw Exception('Failed to complete quiz');
+      }
+    } catch (e) {
+      throw Exception('Failed to complete quiz: $e');
+    }
   }
 }
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../models/quiz_model.dart';
 import '../../service/quiz_service.dart';
+import 'questions_screen.dart';
 
 class QuizListScreen extends StatefulWidget {
   @override
@@ -14,17 +16,17 @@ class _QuizListScreenState extends State<QuizListScreen> {
   int? userId; // Use nullable type
 
   Quiz? selectedQuiz;
-  Map<int, dynamic> attemptsInfo = {}; // Store attempts info for each quiz
+  Map<int, AttemptsInfo> attemptsInfo = {}; // Store attempts info for each quiz
 
   @override
   void initState() {
     super.initState();
     _initializeUserId();
-    _futureQuizzes = _quizService.getAllQuizzes();
+    _futureQuizzes = _quizService.fetchQuizzes();
   }
 
   Future<void> _initializeUserId() async {
-    // Lấy userId từ storage
+    // Get userId from storage
     String? storedUserId = await storage.read(key: 'userId');
     if (storedUserId != null) {
       setState(() {
@@ -39,7 +41,7 @@ class _QuizListScreenState extends State<QuizListScreen> {
     try {
       final attemptsData = await _quizService.getAttemptsInfo(quizId, userId);
       setState(() {
-        attemptsInfo[quizId] = attemptsData;
+        attemptsInfo[quizId] = AttemptsInfo.fromJson(attemptsData);
       });
     } catch (e) {
       print('Error fetching attempts info: $e');
@@ -99,17 +101,17 @@ class _QuizListScreenState extends State<QuizListScreen> {
                             ),
                             SizedBox(height: 10),
                             Text(
-                              'Số lần làm bài còn lại: ${attemptsInfo[selectedQuiz!.id]?['attemptsLeft'] ?? 0}',
+                              'Số lần làm bài còn lại: ${attemptsInfo[selectedQuiz!.id]?.attemptsLeft ?? 0}',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.black,
                               ),
                             ),
-                            if (attemptsInfo[selectedQuiz!.id]?['timeLeft'] !=
+                            if (attemptsInfo[selectedQuiz!.id]?.timeLeft !=
                                     null &&
-                                attemptsInfo[selectedQuiz!.id]?['timeLeft'] > 0)
+                                attemptsInfo[selectedQuiz!.id]!.timeLeft > 0)
                               Text(
-                                'Thời gian chờ: ${attemptsInfo[selectedQuiz!.id]?['timeLeft']} giây',
+                                'Thời gian chờ: ${attemptsInfo[selectedQuiz!.id]!.timeLeft} giây',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.black,
@@ -135,7 +137,15 @@ class _QuizListScreenState extends State<QuizListScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Add your "Bắt đầu làm bài" functionality here
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizQuestionsPage(
+                      quizId: selectedQuiz!.id,
+                      userId: userId,
+                    ),
+                  ),
+                );
               },
               child: Text(
                 'Bắt đầu làm bài',
@@ -193,7 +203,7 @@ class _QuizListScreenState extends State<QuizListScreen> {
         title: Column(
           children: [
             Text(
-              'Quiz List',
+              'Danh sách Quiz',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.black,
@@ -210,9 +220,9 @@ class _QuizListScreenState extends State<QuizListScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(child: Text('Lỗi: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No quizzes available'));
+            return Center(child: Text('Không có quiz nào'));
           } else {
             return ListView.builder(
               padding: EdgeInsets.all(16),

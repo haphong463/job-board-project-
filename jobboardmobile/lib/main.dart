@@ -7,6 +7,7 @@ import 'screens/login_register/signup_screen.dart';
 import 'screens/main/main_screen.dart';
 import 'screens/main/search_page.dart';
 import 'screens/job/job_info_page.dart';
+import 'screens/quiz/quiz_result.dart';
 import 'screens/quiz/quiz_screen.dart';
 import 'screens/login_register/forgotpassword_screen.dart';
 import 'screens/login_register/resetpassword_screen.dart';
@@ -46,8 +47,19 @@ class MyApp extends StatelessWidget {
             email: args?['email'] ?? '',
           );
         },
-        '/notifications': (context) =>
-            const NotificationScreen(), // Add the notification screen route
+        '/notifications': (context) => const NotificationScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name!.startsWith('/quiz/')) {
+          final uri = Uri.parse(settings.name!);
+          if (uri.pathSegments.length == 3 && uri.pathSegments[2] == 'result') {
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => QuizResultPage(arguments: args),
+            );
+          }
+        }
+        return null;
       },
     );
   }
