@@ -1,15 +1,12 @@
 package com.project4.JobBoardService.Entity;
 
-import com.project4.JobBoardService.Enum.BlogStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity

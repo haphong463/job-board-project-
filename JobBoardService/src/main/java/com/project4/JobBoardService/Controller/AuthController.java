@@ -221,9 +221,11 @@ public class AuthController {
 
                         return ResponseEntity.ok(new JwtResponse(jwt,
                                 refreshToken.getToken(),
-                                user.getId(),
-                                user.getUsername(),
-                                user.getEmail(),
+                                userDetails.getId(),
+                                userDetails.getUsername(),
+                                userDetails.getEmail(),
+                                userDetails.getFirstName(),
+                                userDetails.getLastName(),
                                 rolesSignIn));
                     }
 
@@ -258,6 +260,8 @@ public class AuthController {
                             userDetails.getId(),
                             userDetails.getUsername(),
                             userDetails.getEmail(),
+                            userDetails.getFirstName(),
+                            userDetails.getLastName(),
                             rolesSignIn));
                 } else {
                     return ResponseEntity.badRequest().body("Invalid token payload!");

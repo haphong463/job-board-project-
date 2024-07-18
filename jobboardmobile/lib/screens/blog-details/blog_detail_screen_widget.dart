@@ -10,11 +10,13 @@ import 'package:jobboardmobile/screens/blog-details/full_screen_image_widget.dar
 import 'package:jobboardmobile/screens/blog/blog_list_widget.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/comment_service.dart';
+import 'package:jobboardmobile/service/notification_service.dart';
 
 class BlogDetail extends StatefulWidget {
   final BlogPost blog;
+  final String? commentId;
 
-  const BlogDetail({super.key, required this.blog});
+  const BlogDetail({super.key, required this.blog, this.commentId});
 
   @override
   _BlogDetailState createState() => _BlogDetailState();
@@ -22,10 +24,13 @@ class BlogDetail extends StatefulWidget {
 
 class _BlogDetailState extends State<BlogDetail> {
   final AuthService _authService = AuthService();
+  final ScrollController _scrollController = ScrollController();
+  final NotificationService _notificationService = NotificationService();
+  final Map<String, GlobalKey> _commentKeys = {};
 
   String? username;
   String? imageUrl;
-  bool isShow = true; // Add this variable
+  bool isShow = true;
 
   void _fetchUserDetails() async {
     username = await _authService.getUsername();
@@ -35,7 +40,7 @@ class _BlogDetailState extends State<BlogDetail> {
 
   final CommentService _commentService = CommentService();
   TextEditingController commentEditingController = TextEditingController();
-  FocusNode commentFocusNode = FocusNode(); // Step 1: Declare FocusNode
+  FocusNode commentFocusNode = FocusNode();
 
   List<Comment> _comments = [];
 
@@ -46,12 +51,33 @@ class _BlogDetailState extends State<BlogDetail> {
     _fetchUserDetails();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToComment();
+    });
+  }
+
+  void _scrollToComment() {
+    if (widget.commentId != null &&
+        _commentKeys.containsKey(widget.commentId)) {
+      final context = _commentKeys[widget.commentId]!.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(context, duration: const Duration(seconds: 1));
+      }
+    }
+  }
+
   void _loadComments() async {
     try {
       List<Comment> comments =
           await _commentService.getCommentsByBlogSlug(widget.blog.slug);
       setState(() {
         _comments = comments;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToComment();
       });
     } catch (e) {
       print('Failed to load comments: $e');
@@ -66,15 +92,25 @@ class _BlogDetailState extends State<BlogDetail> {
         'id': temporaryCommentId,
         'blog': {'id': widget.blog.id},
         'content': content,
-        'user': {
-          'username': username
-        }, // Assuming user.username is the username
+        'user': {'username': username},
       };
       Comment createdComment = await _commentService.createComment(comment);
-      print(createdComment.content);
+
+      if (widget.blog.user.username != username) {
+        _notificationService.sendNotification({
+          'sender': {
+            'username': username,
+          },
+          'recipient': {'username': widget.blog.user.username},
+          'message': ' commented on your post.',
+          'type': 'COMMENT',
+          'url': '/blog/${widget.blog.slug}#comment-$temporaryCommentId'
+        });
+      }
       setState(() {
         _comments.add(createdComment);
       });
+
       commentEditingController.clear();
       commentFocusNode.unfocus();
     } catch (e) {
@@ -126,8 +162,8 @@ class _BlogDetailState extends State<BlogDetail> {
             );
           }
         })
-        .where((comment) => comment != null) // Filter out null values
-        .map((comment) => comment!) // Convert Comment? to Comment
+        .where((comment) => comment != null)
+        .map((comment) => comment!)
         .toList();
   }
 
@@ -153,6 +189,7 @@ class _BlogDetailState extends State<BlogDetail> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
+        controller: _scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -187,6 +224,13 @@ class _BlogDetailState extends State<BlogDetail> {
                 "body": Style(
                     fontSize: FontSize(16.0),
                     listStyleType: ListStyleType.none),
+                "img": Style(
+                  width: Width(345, Unit.percent), // Set the width to 100%
+                  height: Height(200, Unit.px), // Maintain aspect ratio
+                  display: Display.block,
+                  margin: Margins.symmetric(vertical: 10),
+                  alignment: Alignment.center, // Center the image
+                ),
               },
             ),
             const SizedBox(height: 16),
@@ -196,15 +240,17 @@ class _BlogDetailState extends State<BlogDetail> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Column(
-              children: _comments
-                  .map((comment) => CommentWidget(
-                        key: ValueKey(comment.id),
-                        comment: comment,
-                        deleteComment: _deleteComment,
-                        toggleMainCommentField:
-                            _toggleCommentField, // Pass the toggle function
-                      ))
-                  .toList(),
+              children: _comments.map((comment) {
+                final key = GlobalKey();
+                _commentKeys[comment.id] = key;
+                print(_commentKeys[comment.id]);
+                return CommentWidget(
+                  key: key,
+                  comment: comment,
+                  deleteComment: _deleteComment,
+                  toggleMainCommentField: _toggleCommentField,
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -231,12 +277,11 @@ class _BlogDetailState extends State<BlogDetail> {
                     else
                       ClipOval(
                         child: Container(
-                          color:
-                              Colors.grey[200], // Background color for the icon
+                          color: Colors.grey[200],
                           width: 40,
                           height: 40,
                           child: const Icon(Icons.person,
-                              size: 24, color: Colors.grey), // Default icon
+                              size: 24, color: Colors.grey),
                         ),
                       ),
                     const SizedBox(width: 10),

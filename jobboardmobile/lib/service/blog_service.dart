@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/blog_model.dart';
+import 'package:jobboardmobile/models/content_model.dart';
 
 class BlogService {
   final String baseUrl = '${Endpoint.baseUrl}/blogs';
@@ -17,5 +18,18 @@ class BlogService {
     } else {
       throw Exception('Failed to load blogs');
     }
+  }
+
+  Future<Content?> getBlogBySlug(String slug) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/$slug'));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        return Content.fromJson(jsonResponse);
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
   }
 }

@@ -122,7 +122,8 @@ class _MainScreenState extends State<MainScreen> {
               accountName: Text('${firstName ?? ''} ${lastName ?? ''}'),
               accountEmail: Text(email ?? ''),
               currentAccountPicture: imageUrl != null
-                  ? Image.network(
+                  ? ClipOval(
+                      child: Image.network(
                       imageUrl!.replaceFirst(
                         'http://localhost:8080',
                         Endpoint.imageUrl,
@@ -130,7 +131,7 @@ class _MainScreenState extends State<MainScreen> {
                       fit: BoxFit.cover,
                       width: 40,
                       height: 40,
-                    )
+                    ))
                   : const Icon(
                       Icons.face,
                       size: 48.0,

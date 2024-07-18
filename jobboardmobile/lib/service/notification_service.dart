@@ -8,8 +8,7 @@ import 'package:jobboardmobile/service/auth_service.dart';
 class NotificationService {
   final String baseUrl = '${Endpoint.baseUrl}/notifications';
 
-  Future<NotificationModel?> sendNotification(
-      NotificationModel notification) async {
+  Future<NotificationModel?> sendNotification(var notification) async {
     final AuthService authService = AuthService();
 
     String? accessToken = await authService.getAccessToken();
@@ -20,7 +19,7 @@ class NotificationService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken'
       },
-      body: jsonEncode(notification.toJson()),
+      body: jsonEncode(notification),
     );
 
     if (response.statusCode == 200) {
@@ -32,7 +31,11 @@ class NotificationService {
   }
 
   Future<List<NotificationModel>> getNotificationsByRecipientId(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/$id'));
+    final AuthService authService = AuthService();
+
+    String? accessToken = await authService.getAccessToken();
+    final response = await http.get(Uri.parse('$baseUrl/$id'),
+        headers: {'Authorization': 'Bearer $accessToken'});
 
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
@@ -60,7 +63,11 @@ class NotificationService {
   }
 
   Future<bool> deleteNotification(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/$id'));
+    final AuthService authService = AuthService();
+
+    String? accessToken = await authService.getAccessToken();
+    final response = await http.delete(Uri.parse('$baseUrl/$id'),
+        headers: {'Authorization': 'Bearer $accessToken'});
 
     return response.statusCode == 204;
   }

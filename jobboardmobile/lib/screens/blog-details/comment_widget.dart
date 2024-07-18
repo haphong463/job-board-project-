@@ -26,6 +26,7 @@ class CommentWidget extends StatefulWidget {
 class _CommentWidgetState extends State<CommentWidget> {
   final CommentService _commentService = CommentService();
   final AuthService _authService = AuthService();
+  final GlobalKey _commentKey = GlobalKey(); // Add this line
 
   String? username;
   bool _replying = false;
@@ -136,6 +137,7 @@ class _CommentWidgetState extends State<CommentWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
+      key: _commentKey, // Add this line
       padding:
           EdgeInsets.only(left: 16.0 * widget.level, top: 8.0, bottom: 8.0),
       child: Column(

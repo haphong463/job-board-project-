@@ -34,20 +34,12 @@ public class NotificationController {
 
     @PostMapping("/send")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_EMPLOYER') or hasRole('ROLE_MODERATOR')")
-
     public ResponseEntity<NotificationDTO> sendNotification(@RequestBody NotificationDTO notificationDTO) {
        try {
            User sender = userService.findByUsername(notificationDTO.getSender().getUsername()).orElse(null);
-           if (sender == null) {
-               return ResponseEntity.badRequest().build(); // Nếu không tìm thấy User, trả về lỗi BadRequest
-           }
-
            User recipient = userService.findByUsername(notificationDTO.getRecipient().getUsername()).orElse(null);
-           if (recipient == null) {
-               return ResponseEntity.badRequest().build(); // Nếu không tìm thấy User, trả về lỗi BadRequest
-           }
 
-           if(sender == recipient){
+           if (sender == null || recipient == null || sender == recipient) {
                return ResponseEntity.badRequest().build();
            }
 
