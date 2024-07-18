@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jobboardmobile/screens/quiz/quiz_screen.dart';
 
 class QuizResultPage extends StatelessWidget {
   final Map<String, dynamic> arguments;
@@ -14,38 +15,108 @@ class QuizResultPage extends StatelessWidget {
         : arguments['score'] as double;
     final quizId = arguments['quizId'] as int;
 
+    List<String> images = [
+      "assets/images/success.png",
+      "assets/images/good.png",
+      "assets/images/bad.png",
+    ];
+
+    String message;
+    String image;
+
+    if (score <= 4) {
+      image = images[2];
+      message = "You Should Try Hard..\nYou Scored $score";
+    } else if (score <= 7) {
+      image = images[1];
+      message = "You Can Do Better..\nYou Scored $score";
+    } else {
+      image = images[0];
+      message = "You Did Very Well..\nYou Scored $score";
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz Result'),
+        title: Text("Quiz Result"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Quiz ID: $quizId',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          children: <Widget>[
+            Material(
+              elevation: 10.0,
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: <Widget>[
+                    Material(
+                      child: Container(
+                        width: 300.0,
+                        height: 300.0,
+                        child: ClipRect(
+                          child: Image.asset(image),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 5.0,
+                        horizontal: 15.0,
+                      ),
+                      child: Center(
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontFamily: "Quando",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            SizedBox(height: 16),
-            Text(
-              'Total Questions: $totalQuestions',
-              style: TextStyle(fontSize: 16),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: results.length,
+                    itemBuilder: (context, index) {
+                      final result = results[index];
+                      final question = result['question'];
+                      final userAnswer = result['userAnswer'];
+                      final correctAnswer = result['correctAnswer'];
+                    },
+                  ),
+                ],
+              ),
             ),
-            Text(
-              'Score: $score',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: results.length,
-                itemBuilder: (context, index) {
-                  final result = results[index];
-                  final question = result['question'];
-                  final userAnswer = result['userAnswer'];
-                  final correctAnswer = result['correctAnswer'];
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => QuizListScreen(),
+                  ));
                 },
+                child: Text(
+                  "Continue",
+                  style: TextStyle(
+                    fontSize: 18.0,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 10.0,
+                    horizontal: 25.0,
+                  ),
+                  side: BorderSide(width: 3.0, color: Colors.indigo),
+                  splashFactory: InkSplash.splashFactory,
+                ),
               ),
             ),
           ],
