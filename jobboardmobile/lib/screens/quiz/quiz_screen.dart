@@ -135,6 +135,13 @@ class _QuizListScreenState extends State<QuizListScreen> {
         elevation: 0,
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.black),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/main', (route) => false);
+          },
+        ),
         title: Column(
           children: [
             Text(

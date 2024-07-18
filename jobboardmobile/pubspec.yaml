@@ -53,6 +53,8 @@ dependencies:
   infinite_scroll_pagination: ^4.0.0
   jwt_decoder: ^2.0.1
   uuid: ^4.4.2
+  html_unescape: ^2.0.0
+  flutter_custom_clippers: ^2.1.0
 
 dev_dependencies:
   flutter_test:
