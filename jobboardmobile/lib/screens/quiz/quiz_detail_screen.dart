@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jobboardmobile/screens/quiz/questions_screen.dart';
+import '../../constant/endpoint.dart';
 import '../../models/quiz_model.dart';
 import '../../service/quiz_service.dart';
 import 'dart:async';
@@ -122,6 +123,10 @@ class _QuizDetailContentState extends State<QuizDetailContent> {
 
   @override
   Widget build(BuildContext context) {
+    // Replace localhost with the base URL
+    String modifiedImageUrl = widget.quiz.imageUrl
+        .replaceAll('http://localhost:8080', Endpoint.imageUrl);
+
     final isLocked = widget.attemptsInfo?.locked ?? false;
 
     if (!isLocked) {
@@ -136,7 +141,7 @@ class _QuizDetailContentState extends State<QuizDetailContent> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
-              widget.quiz.imageUrl,
+              modifiedImageUrl,
               width: double.infinity,
               height: 200,
               fit: BoxFit.cover,

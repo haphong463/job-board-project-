@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../models/quiz_model.dart';
 import '../../service/quiz_service.dart';
 import 'quiz_detail_screen.dart';
+import 'package:jobboardmobile/constant/endpoint.dart';
 
 class QuizListScreen extends StatefulWidget {
   @override
@@ -14,7 +15,6 @@ class _QuizListScreenState extends State<QuizListScreen> {
   late Future<List<Quiz>> _futureQuizzes;
   final storage = FlutterSecureStorage();
   int? userId;
-
   Map<int, AttemptsInfo> attemptsInfo = {};
 
   @override
@@ -47,6 +47,10 @@ class _QuizListScreenState extends State<QuizListScreen> {
   }
 
   Widget customCard(Quiz quiz) {
+    // Replace localhost with the base URL
+    String modifiedImageUrl =
+        quiz.imageUrl.replaceAll('http://localhost:8080', Endpoint.imageUrl);
+
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: 20.0,
@@ -88,8 +92,26 @@ class _QuizListScreenState extends State<QuizListScreen> {
                       width: 150.0,
                       child: ClipOval(
                         child: Image.network(
-                          quiz.imageUrl,
+                          modifiedImageUrl,
                           fit: BoxFit.cover,
+                          loadingBuilder: (BuildContext context, Widget child,
+                              ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        (loadingProgress.expectedTotalBytes ??
+                                            1)
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (BuildContext context, Object error,
+                              StackTrace? stackTrace) {
+                            return Icon(Icons.error);
+                          },
                         ),
                       ),
                     ),

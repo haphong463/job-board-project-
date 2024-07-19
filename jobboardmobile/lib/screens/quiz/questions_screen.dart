@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:convert';
@@ -219,10 +218,10 @@ class _QuizQuestionsPageState extends State<QuizQuestionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvoked: (willPop) async {
+    return WillPopScope(
+      onWillPop: () async {
         bool result = await _showExitConfirmationDialog(context);
-        return Navigator.of(context).pop(result ?? false);
+        return result;
       },
       child: Scaffold(
         key: _key,
@@ -266,6 +265,14 @@ class _QuizQuestionsPageState extends State<QuizQuestionsPage> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        "Time Left: ${formatTime(timeLeft)}",
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
