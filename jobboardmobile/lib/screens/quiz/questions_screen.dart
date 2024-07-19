@@ -81,6 +81,10 @@ class _QuizQuestionsPageState extends State<QuizQuestionsPage> {
           isLoading = false;
         } catch (e) {
           print('Error decoding saved questions: $e');
+          setState(() {
+            isLoading = false;
+            questions = []; // Ensure questions is set to empty on error
+          });
         }
       });
     } else {
@@ -107,6 +111,7 @@ class _QuizQuestionsPageState extends State<QuizQuestionsPage> {
         print('Failed to load quiz questions: $e');
         setState(() {
           isLoading = false;
+          questions = []; // Ensure questions is set to empty on error
         });
       }
     }
@@ -240,111 +245,120 @@ class _QuizQuestionsPageState extends State<QuizQuestionsPage> {
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : Container(
-                color: Colors.grey[200],
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 20, horizontal: 20),
-                      color: Theme.of(context).primaryColor,
-                      child: Row(
-                        children: <Widget>[
-                          CircleAvatar(
-                            backgroundColor: Colors.white70,
-                            child: Text("${currentQuestionIndex + 1}"),
-                          ),
-                          const SizedBox(width: 16.0),
-                          Expanded(
-                            child: Text(
-                              HtmlUnescape().convert(
-                                  questions[currentQuestionIndex].questionText),
-                              softWrap: true,
-                              style:
-                                  _questionStyle.copyWith(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(
-                        "Time Left: ${formatTime(timeLeft)}",
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.all(20.0),
-                        children: <Widget>[
-                          Card(
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                children: <Widget>[
-                                  ...questions[currentQuestionIndex]
-                                      .getOptionsList()
-                                      .map((option) => RadioListTile(
-                                            title: Text(
-                                                HtmlUnescape().convert(option)),
-                                            groupValue: selectedAnswers[
-                                                questions[currentQuestionIndex]
-                                                    .id
-                                                    .toString()],
-                                            value: option,
-                                            onChanged: (value) {
-                                              handleAnswerSelect(
-                                                  questions[
-                                                          currentQuestionIndex]
-                                                      .id
-                                                      .toString(),
-                                                  value!);
-                                            },
-                                          )),
-                                ],
+            : questions.isEmpty
+                ? const Center(
+                    child: Text('No questions available for this quiz'))
+                : Container(
+                    color: Colors.grey[200],
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 20),
+                          color: Theme.of(context).primaryColor,
+                          child: Row(
+                            children: <Widget>[
+                              CircleAvatar(
+                                backgroundColor: Colors.white70,
+                                child: Text("${currentQuestionIndex + 1}"),
                               ),
-                            ),
+                              const SizedBox(width: 16.0),
+                              Expanded(
+                                child: Text(
+                                  HtmlUnescape().convert(
+                                      questions[currentQuestionIndex]
+                                          .questionText),
+                                  softWrap: true,
+                                  style: _questionStyle.copyWith(
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0),
-                      color: Colors.white,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          currentQuestionIndex > 0
-                              ? TextButton(
-                                  child: const Text("Previous"),
-                                  onPressed: handlePrevQuestion,
-                                )
-                              : const SizedBox(),
-                          TextButton(
-                            child: Text(
-                                currentQuestionIndex == (questions.length - 1)
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          child: Text(
+                            "Time Left: ${formatTime(timeLeft)}",
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView(
+                            padding: const EdgeInsets.all(20.0),
+                            children: <Widget>[
+                              Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      ...questions[currentQuestionIndex]
+                                          .getOptionsList()
+                                          .map((option) => RadioListTile(
+                                                title: Text(HtmlUnescape()
+                                                    .convert(option)),
+                                                groupValue: selectedAnswers[
+                                                    questions[
+                                                            currentQuestionIndex]
+                                                        .id
+                                                        .toString()],
+                                                value: option,
+                                                onChanged: (value) {
+                                                  handleAnswerSelect(
+                                                      questions[
+                                                              currentQuestionIndex]
+                                                          .id
+                                                          .toString(),
+                                                      value!);
+                                                },
+                                              )),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20.0),
+                          color: Colors.white,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              currentQuestionIndex > 0
+                                  ? TextButton(
+                                      child: const Text("Previous"),
+                                      onPressed: handlePrevQuestion,
+                                    )
+                                  : const SizedBox(),
+                              TextButton(
+                                child: Text(currentQuestionIndex ==
+                                        (questions.length - 1)
                                     ? "Submit"
                                     : "Next"),
-                            onPressed: () {
-                              if (currentQuestionIndex < questions.length - 1) {
-                                handleNextQuestion();
-                              } else {
-                                handleSubmitQuiz();
-                              }
-                            },
+                                onPressed: () {
+                                  if (questions.isEmpty) {
+                                    return; // Prevent further actions if no questions
+                                  }
+                                  if (currentQuestionIndex <
+                                      questions.length - 1) {
+                                    handleNextQuestion();
+                                  } else {
+                                    handleSubmitQuiz();
+                                  }
+                                },
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
       ),
     );
   }

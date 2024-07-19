@@ -116,6 +116,26 @@ class QuizService {
       throw Exception('Failed to complete quiz: $e');
     }
   }
+
+  Future<List<int>> getCompletedQuizzes(int userId) async {
+    try {
+      String? accessToken = await _authService.getAccessToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/quizzes/$userId/completed-quizzes?userId=$userId'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<int> completedQuizzes =
+            jsonData.map((quizId) => quizId as int).toList();
+        return completedQuizzes;
+      } else {
+        throw Exception('Failed to fetch completed quizzes');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch completed quizzes: $e');
+    }
+  }
 }
 
 class AttemptsInfo {

@@ -32,9 +32,9 @@ class QuizResultPage extends StatelessWidget {
       message = "You Can Do Better..\nYou Scored $score";
     } else {
       image = images[0];
-      message = "You Did Very Well..\nYou Scored $score";
+      message =
+          "You Did Very Well..\nYou Scored $score\n\nCongratulations! You've earned our certificate. Check your email for the certificate, which will be sent to you shortly.";
     }
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Quiz Result"),
