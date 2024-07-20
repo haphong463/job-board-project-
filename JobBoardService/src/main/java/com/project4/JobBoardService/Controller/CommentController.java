@@ -1,15 +1,20 @@
 package com.project4.JobBoardService.Controller;
 import com.project4.JobBoardService.DTO.CommentDTO;
 import com.project4.JobBoardService.DTO.NewCommentDTO;
+import com.project4.JobBoardService.DTO.NotificationDTO;
 import com.project4.JobBoardService.Entity.Comment;
+import com.project4.JobBoardService.Entity.Notification;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Enum.ENotificationType;
 import com.project4.JobBoardService.Service.CommentService;
+import com.project4.JobBoardService.Service.NotificationService;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.Util.AuthorizationUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +36,12 @@ public class CommentController {
 
     @Autowired
     private AuthorizationUtils authorizationUtils;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private SimpMessagingTemplate template;
 //    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/blog/{slug}")
     public ResponseEntity<List<CommentDTO>> getCommentsByBlogId(@PathVariable String slug) {
@@ -53,13 +64,32 @@ public class CommentController {
         try {
 
             User user = userService.findByUsername(comment.getUser().getUsername()).orElse(null);
+            User recipient = userService.findByUsername(comment.getBlog().getUser().getUsername()).orElse(null);
+
             if(user != null){
                 comment.setUser(user);
                 Comment createdComment = commentService.createComment(comment);
                 NewCommentDTO commentResponse = modelMapper.map(createdComment, NewCommentDTO.class);
+
+
+                if(user != recipient){
+                    Notification notification = new Notification(user, recipient, ENotificationType.COMMENT,
+                            "/blog/" + comment.getBlog().getSlug() + "#comment-" + comment.getId(), "commented on your post.", false);
+                    Notification created = notificationService.createNotification(notification);
+                    NotificationDTO response = modelMapper.map(created, NotificationDTO.class);
+                    template.convertAndSend("/topic/notifications", response);
+                }
+
                 return ResponseEntity.ok(commentResponse);
 
             }
+
+
+
+
+
+
+
             return ResponseEntity.badRequest().body(null);
 
 
