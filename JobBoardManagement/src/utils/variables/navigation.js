@@ -42,7 +42,11 @@ export const navigation = [
     icon: "bi bi-question-circle",
     href: "/jobportal/user",
   },
-
+  {
+    title: "CV Management",
+    icon: "bi bi-question-circle",
+    href: "/jobportal/cv-management",
+  },
   {
     title: "Settings",
     href: "/jobportal/settings",

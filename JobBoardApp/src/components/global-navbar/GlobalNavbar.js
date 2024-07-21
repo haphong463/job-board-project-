@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import {
@@ -27,6 +27,7 @@ export function GlobalNavbar() {
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const categories = useSelector((state) => state.category.categories);
   const blogCategory = useSelector((state) => state.blogs.categories);
   const unreadCount = useSelector((state) => state.notification.unreadCount);
@@ -131,9 +132,6 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              <li>
-                    <NavLink to="/create-cv">Create CV</NavLink>
-                  </li>
               <li>
                 <NavLink to="/quiz">Quiz</NavLink>
               </li>
@@ -261,9 +259,14 @@ export function GlobalNavbar() {
                       >
                         {user.sub}
                       </DropdownItem>
+                      <DropdownItem onClick={() => navigate('/cv-management')}>
+                    CV Management
+                  </DropdownItem>
                       <DropdownItem onClick={handleLogout}>
                         Log out
                       </DropdownItem>
+                      
+           
                     </>
                   ) : (
                     <>

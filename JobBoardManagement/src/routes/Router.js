@@ -16,6 +16,7 @@ const Breadcrumbs = lazy(() => import("../views/ui/Breadcrumbs"));
 const UserSetting = lazy(() => import("../views/ui/user-setting/index"));
 const Quiz = lazy(() => import("../views/ui/quiz/index"));
 const User = lazy(() => import("../views/ui/user/index"));
+const CV = lazy(() => import("../views/ui/cv-management/index"));
 /*****Routes******/
 const ThemeRoutes = [
   {
@@ -28,6 +29,7 @@ const ThemeRoutes = [
       { path: "/jobportal/alerts", exact: true, element: <BlogCategory /> },
       { path: "/jobportal/settings", exact: true, element: <UserSetting /> },
       { path: "/jobportal/user", exact: true, element: <User /> },
+      { path: "/jobportal/cv-management", exact: true, element: <CV /> },
       { path: "/jobportal/table", exact: true, element: <Blog /> },
       { path: "/jobportal/forms", exact: true, element: <Forms /> },
       { path: "/jobportal/quiz", exact: true, element: <Quiz /> },
