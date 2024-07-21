@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CountUp from "react-countup";
 import { JobBoardStats } from "../../components/job-board-stats/JobBoardStats";
 import { JobFilter } from "../../components/job-filter/JobFIlter";
+import { fetchJobThunk } from "../../features/jobSlice";
+import { fetchCompanyThunk } from "../../features/companySlice";
+import { useDispatch, useSelector } from "react-redux";
 import "../job-listing/listSkillAll"
 import jobData from '../job-listing/job_data.json';
 import companyData from '../job-listing/company_data.json';
@@ -13,7 +16,22 @@ export const Home = () =>
   const location = useLocation();
   const navigate = useNavigate(); // Correct usage of useNavigate
   const [message, setMessage] = useState("");
-  const [jobs, setJobs] = useState([]);
+  const dispatch = useDispatch();
+  const jobs = useSelector((state) => state.job.jobs);
+  const companies = useSelector((state) => state.company.companies);
+
+  useEffect(() =>
+  {
+    if (companies.length === 0)
+    {
+      dispatch(fetchCompanyThunk());
+    }
+    if (jobs.length === 0)
+    {
+      dispatch(fetchJobThunk());
+    }
+  }, [dispatch, jobs.length, companies.length]);
+
 
   useEffect(() =>
   {
@@ -37,9 +55,14 @@ export const Home = () =>
       }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
     }
 
-    const superHotJobs = jobData.filter(job => job.isSuperHot);
-    setJobs(superHotJobs);
+    // const superHotJobs = jobs.filter(job => job.isSuperHot);
+    // setJobs(superHotJobs);
   }, [location, navigate]);
+
+  const filteredJobs = useMemo(() =>
+  {
+    return jobs.filter(job => job.isSuperHot == 1);
+  }, [jobs]);
 
   const getLocation1String = (address) =>
   {
@@ -55,6 +78,16 @@ export const Home = () =>
       return parts.slice(-2).join(", ");
     }
     return address;
+  };
+
+  const handleCompanyClick = (companyId) =>
+  {
+    window.location.href = `/companyDetail/${companyId}`;
+  };
+
+  const handleJobClick = (jobId) =>
+  {
+    window.location.href = `/jobDetail/${jobId}`;
   };
 
   return (
@@ -104,34 +137,41 @@ export const Home = () =>
               </div>
             </div>
             <ul className="job-listings mb-5">
-              {jobs.map(job =>
+              {filteredJobs.map(job =>
               {
-                const company = companyData.find(company => company.companyId === job.companyId);
-                const address = getLocation1String(job.location);
+                const company = companies.find(company => company.companyId === job.companyId);
+                const address = getLocation1String(company.location);
                 if (company)
                 {
                   return (
-                    <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                      <a href={`/job/${job.id}`} />
+                    <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
+                      {/* <a href={`/jobDetail/${job.id}`} /> */}
                       <div className="job-listing-logo">
                         <img
                           src={company.logo}
                           alt="Free Website Template by Free-Template.co"
-                          className="jb_custom-img"
+                          className="jb_custom-img" onClick={() =>
+                          {
+                            handleCompanyClick(job.companyId);
+                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}
                         />
                       </div>
-                      <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3">
+                      <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
                         <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                          <h2>{job.title}</h2>
-                          <strong>{company.companyName}</strong>
+                          <h2 className="mb-2" onClick={() =>
+                          {
+                            handleJobClick(job.id);
+                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
+                          <strong onClick={() =>
+                          {
+                            handleCompanyClick(job.companyId);
+                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
+                          <div className='d-flex flex-wrap mt-2'>
+                            {job.keySkills.split(',').map((skill, index) => (
+                              <span key={index} className="bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
+                            ))}
+                          </div>
                         </div>
-                        {/* <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                          <span className="icon-room" /> {address}
-                        </div>
-                        <div className="job-listing-meta">
-                          <span className="badge badge-danger">{job.contractType}</span>
-                        </div> */}
-
                         <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">
                           <div className="justify-content-start me-3">
                             <span className="icon-room me-2" /> {address}

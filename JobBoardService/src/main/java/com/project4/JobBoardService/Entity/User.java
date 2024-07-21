@@ -1,6 +1,5 @@
 package com.project4.JobBoardService.Entity;
 
-
 import com.project4.JobBoardService.Enum.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -41,6 +40,8 @@ public class User   {
     @NotBlank
     @Size(max = 120)
     private String password;
+
+
     private String resetToken;
     private boolean verified;
     private String verificationCode;
@@ -66,6 +67,10 @@ public class User   {
     private List<UserCV> userCVs;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Employer employer;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Subscription> subscriptions;
+
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
@@ -79,11 +84,12 @@ public class User   {
         this.password = password;
         this.gender = gender;
     }
-        public User(Long id) {
+
+
+
+    public User(Long id) {
         this.id = id;
     }
-
-
 
     @ManyToMany
     @JoinTable(
@@ -105,6 +111,7 @@ public class User   {
     public void addCompletedQuiz(Quiz quiz) {
         this.completedQuizzes.add(quiz);
     }
+
 }
 
 

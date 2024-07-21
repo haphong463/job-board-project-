@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import axiosRequest from "../../configs/axiosConfig";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchCategoryThunk } from "../../features/categorySlice";
 import { jwtDecode } from "jwt-decode";
 import { logout } from "../../features/authSlice";
 import categoryData from '../../components/global-navbar/category.json';
@@ -10,10 +11,11 @@ import { useTranslation } from "react-i18next";
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 export function ViewAllSkill ()
 {
-    const [categories, setCategories] = useState([]);
+    // const [categories, setCategories] = useState([]);
     const { t, i18n } = useTranslation(); // Initialize the useTranslation hook
     const user = useSelector((state) => state.auth.user);
     const roles = useSelector((state) => state.auth.roles);
+    const categories = useSelector((state) => state.category.categories);
     const dispatch = useDispatch();
 
     const handleLogout = () =>
@@ -23,20 +25,11 @@ export function ViewAllSkill ()
 
     useEffect(() =>
     {
-        fetchCategories();
-    }, []);
-
-    const fetchCategories = async () =>
-    {
-        try
+        if (categories.length === 0)
         {
-            //const response = await axiosRequest.get("/categories");
-            setCategories(categoryData);
-        } catch (error)
-        {
-            console.error("Error fetching categories:", error);
+            dispatch(fetchCategoryThunk());
         }
-    };
+    }, []);
 
     const handleCategoryClick = (categoryId) =>
     {
@@ -56,7 +49,7 @@ export function ViewAllSkill ()
                     <div className="container">
                         <div className="row">
                             <div className="col-md-7">
-                                <h1 className="text-white font-weight-bold">Job By Skill</h1>
+                                <h1 className="text-white font-weight-bold">Jobs by Skill</h1>
                             </div>
                         </div>
                     </div>

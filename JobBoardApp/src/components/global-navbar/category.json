@@ -101,10 +101,154 @@
     },
     {
         "categoryId": 26,
-        "categoryName": "rt"
+        "categoryName": "AWS"
     },
     {
         "categoryId": 27,
-        "categoryName": "sfhdtguh"
+        "categoryName": "Azure"
+    },
+    {
+        "categoryId": 28,
+        "categoryName": "Google Cloud Platform"
+    },
+    {
+        "categoryId": 29,
+        "categoryName": "Heroku"
+    },
+    {
+        "categoryId": 30,
+        "categoryName": "Docker"
+    },
+    {
+        "categoryId": 31,
+        "categoryName": "Kubernetes"
+    },
+    {
+        "categoryId": 32,
+        "categoryName": "Terraform"
+    },
+    {
+        "categoryId": 33,
+        "categoryName": "Ansible"
+    },
+    {
+        "categoryId": 34,
+        "categoryName": "Hadoop"
+    },
+    {
+        "categoryId": 35,
+        "categoryName": "Spark"
+    },
+    {
+        "categoryId": 36,
+        "categoryName": "Kafka"
+    },
+    {
+        "categoryId": 37,
+        "categoryName": "TensorFlow"
+    },
+    {
+        "categoryId": 38,
+        "categoryName": "PyTorch"
+    },
+    {
+        "categoryId": 39,
+        "categoryName": "Scikit-learn"
+    },
+    {
+        "categoryId": 40,
+        "categoryName": "R"
+    },
+    {
+        "categoryId": 41,
+        "categoryName": "MATLAB"
+    },
+    {
+        "categoryId": 42,
+        "categoryName": "MongoDB"
+    },
+    {
+        "categoryId": 43,
+        "categoryName": "PostgreSQL"
+    },
+    {
+        "categoryId": 44,
+        "categoryName": "Redis"
+    },
+    {
+        "categoryId": 45,
+        "categoryName": "Cassandra"
+    },
+    {
+        "categoryId": 46,
+        "categoryName": "React Native"
+    },
+    {
+        "categoryId": 47,
+        "categoryName": "Flutter"
+    },
+    {
+        "categoryId": 48,
+        "categoryName": "Cybersecurity"
+    },
+    {
+        "categoryId": 49,
+        "categoryName": "Penetration Testing"
+    },
+    {
+        "categoryId": 50,
+        "categoryName": "Network Security"
+    },
+    {
+        "categoryId": 51,
+        "categoryName": "Git"
+    },
+    {
+        "categoryId": 52,
+        "categoryName": "SVN"
+    },
+    {
+        "categoryId": 53,
+        "categoryName": "Django"
+    },
+    {
+        "categoryId": 54,
+        "categoryName": "Flask"
+    },
+    {
+        "categoryId": 55,
+        "categoryName": "Laravel"
+    },
+    {
+        "categoryId": 56,
+        "categoryName": "ASP.NET"
+    },
+    {
+        "categoryId": 57,
+        "categoryName": "Objective-C"
+    },
+    {
+        "categoryId": 58,
+        "categoryName": "Agile Methodologies"
+    },
+    {
+        "categoryId": 59,
+        "categoryName": "Project Management"
+    },
+    {
+        "categoryId": 60,
+        "categoryName": "UI/UX Design"
+    },
+    {
+        "categoryId": 61,
+        "categoryName": "Selenium"
+    },
+    {
+        "categoryId": 62,
+        "categoryName": "GraphQL"
+    },
+    {
+        "categoryId": 63,
+        "categoryName": "Elasticsearch"
     }
 ]

@@ -41,6 +41,10 @@ public class Employer {
     @Size(max = 100)
     private String companyName;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @NotBlank
     @Size(max = 200)
     private String companyAddress;

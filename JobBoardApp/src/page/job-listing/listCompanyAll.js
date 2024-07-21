@@ -83,7 +83,7 @@ export function ViewAllCompany ()
                     <div className="container">
                         <div className="row">
                             <div className="col-md-7">
-                                <h1 className="text-white font-weight-bold">Job By Skill</h1>
+                                <h1 className="text-white font-weight-bold">Jobs by Company</h1>
                             </div>
                         </div>
                     </div>

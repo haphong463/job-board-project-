@@ -506,6 +506,7 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
     user.setFirstName(employer.getName());
     user.setLastName(employer.getTitle());
     user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
+    user.setIsEnabled(true);
 
     Set<Role> roles = new HashSet<>();
     Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)

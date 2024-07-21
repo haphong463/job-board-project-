@@ -9,6 +9,8 @@ import { persistReducer } from "redux-persist";
 import { combineReducers } from "@reduxjs/toolkit";
 import quizReducer from './features/quizSlice';
 import quizQuestionsReducer from './features/quizQuestionsSlice';
+import jobReducer from './features/jobSlice';
+import companyReducer from './features/companySlice';
 
 // Cấu hình persist với whitelist
 // const persistConfig = {
@@ -35,7 +37,9 @@ export const store = configureStore({
     auth: authReducer,
     category: categoryReducer,
     notification: notificationReducer,
-      quiz: quizReducer,
+    quiz: quizReducer,
+    job: jobReducer,
+    company: companyReducer
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({

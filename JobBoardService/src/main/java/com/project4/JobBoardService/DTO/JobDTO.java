@@ -15,9 +15,8 @@ import java.time.LocalDateTime;
 public class JobDTO {
     private Long id;
     private String title;
-    private Integer offeredSalary;
+    private String offeredSalary;
     private String description;
-    private String city;
     private String responsibilities;
     private String requiredSkills;
     private String workSchedule;
@@ -25,8 +24,16 @@ public class JobDTO {
     private String position;
     private String experience;
     private String qualification;
+    private String jobType;
+    private String contractType;
+    private String benefit;
     private LocalDateTime createdAt;
+    private String expire;
+    private Integer slot;
+    private Integer profileApproved = 0;
+    private Boolean isSuperHot;
     private Long categoryId;
     private Long companyId;
-
+    private Long userId;
+    private LocalDateTime expired;
 }

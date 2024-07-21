@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
 import moment from 'moment';
-import jobData from './job_data.json';
+import { fetchCategoryThunk } from "../../features/categorySlice";
+import { fetchJobThunk } from "../../features/jobSlice";
+import { fetchCompanyThunk } from "../../features/companySlice";
+// import jobData from './job_data.json';
 import companyData from './company_data.json';
 import categoryData from '../../components/global-navbar/category.json';
 import "./job_listing.css";
@@ -10,6 +14,8 @@ import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayo
 // import Select, { components } from 'react-select';
 // import { Select } from 'antd';
 import { MenuItem, Checkbox, FormControl, Select, FormGroup, FormControlLabel, InputLabel, OutlinedInput, Chip, ListItemText, TextField } from '@mui/material';
+import axios from 'axios';
+import locationMapping from './location_mapping';
 
 export const JobList = () =>
 {
@@ -18,13 +24,15 @@ export const JobList = () =>
    const location = useLocation();
    const jobsPerPage = 3; // Number of jobs per page
 
-   const [jobs, setJobs] = useState([]);
+   // const [jobs, setJobs] = useState([]);
    const [jobCount, setJobCount] = useState(0);
    const [selectedJobId, setSelectedJobId] = useState(null);
    const [categoryName1, setCategoryName] = useState("");
    const [currentPage, setCurrentPage] = useState(1);
-
-
+   const categories = useSelector((state) => state.category.categories);
+   const jobs = useSelector((state) => state.job.jobs);
+   const companies = useSelector((state) => state.company.companies);
+   const dispatch = useDispatch();
    const [filters, setFilters] = useState({
       title: '',
       // offeredSalary: '',
@@ -37,7 +45,23 @@ export const JobList = () =>
 
    useEffect(() =>
    {
-      const categoryInfo = categoryData.find(cat => cat.categoryId === categoryId);
+      if (categories.length === 0)
+      {
+         dispatch(fetchCategoryThunk());
+      }
+      if (companies.length === 0)
+      {
+         dispatch(fetchCompanyThunk());
+      }
+      if (jobs.length === 0)
+      {
+         dispatch(fetchJobThunk());
+      }
+   }, [categories.length, jobs.length, companies.length]);
+
+   useEffect(() =>
+   {
+      const categoryInfo = categories.find(cat => cat.categoryId === categoryId);
       if (categoryInfo)
       {
          setCategoryName(categoryInfo.categoryName);
@@ -45,24 +69,40 @@ export const JobList = () =>
       {
          setCategoryName("");
       }
+   }, [categories, categoryId]);
 
-      let filteredJobs;
+   const applyFilters = (job) =>
+   {
+      const { title, offeredSalary, position, location, keySkills, jobType, contractType, companyType } = filters;
 
-      if (location.pathname === "/viewAllJobs")
+      const searchTextArray = title.toLowerCase().split(' ');
+      // Tìm kiếm theo tiêu đề công việc và kỹ năng chính
+      const titleMatch = searchTextArray.some(searchText => job.title.toLowerCase().includes(searchText));
+      const keySkillsMatch = searchTextArray.some(searchText => job.keySkills.toLowerCase().includes(searchText));
+      // Kiểm tra sự phù hợp với tiêu chí tìm kiếm
+      const isSearchTextMatch = titleMatch || keySkillsMatch;
+
+      const locationMatch = location.length === 0 || location.some(loc =>
       {
-         filteredJobs = jobData;
-      } else
-      {
-         filteredJobs = jobData.filter(job => job.categoryId === categoryId);
-      }
+         const locationString = normalizeLocation(getLocationString(job.companyId));
+         console.log('Location String:', locationString); // Kiểm tra giá trị
+         return Object.keys(locationMapping).some(key =>
+         {
+            const normalizedKey = normalizeLocation(key);
+            console.log('Normalized Key:', normalizedKey); // Kiểm tra giá trị
+            console.log('Location Mapping Value:', locationMapping[normalizedKey]); // Kiểm tra giá trị
+            return locationString.includes(normalizedKey) && locationMapping[normalizedKey] === loc.value;
+         });
+      });
 
-      filteredJobs = filteredJobs.filter(applyFilters); // Áp dụng các bộ lọc
+      const positionMatch = position.length === 0 || position.some(pos => job.position?.toLowerCase().includes(pos.value.toLowerCase()));
+      const jobTypeMatch = jobType.length === 0 || jobType.some(tyle => job.jobType?.toLowerCase().includes(tyle.value.toLowerCase()));
+      const contractTypeMatch = contractType.length === 0 || contractType.some(tyle => job.contractType?.toLowerCase().includes(tyle.value.toLowerCase()));
+      const company = companies.find(company => company.companyId === job.companyId);
+      const companyTypeMatch = companyType.length === 0 || companyType.some(type => company.type?.toLowerCase() === type.value.toLowerCase());
 
-      setJobCount(filteredJobs.length); // Cập nhật số lượng công việc phù hợp với các bộ lọc
-
-      // Cập nhật jobs sau khi lọc
-      setJobs(filteredJobs);
-   }, [categoryId, location.pathname, filters, currentPage]);
+      return isSearchTextMatch && locationMatch && positionMatch && jobTypeMatch && contractTypeMatch && companyTypeMatch;
+   };
 
    const handleJobClick = (jobId) =>
    {
@@ -74,17 +114,10 @@ export const JobList = () =>
       setCurrentPage(pageNumber);
    };
 
-   // Calculate the jobs to display based on the current page
-   const indexOfLastJob = currentPage * jobsPerPage;
-   const indexOfFirstJob = indexOfLastJob - jobsPerPage;
-
-   const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
-
    const handleCategoryClick = (jobId) =>
    {
       const jobDetailUrl = `/jobDetail/${jobId}`;
       window.open(jobDetailUrl, '_blank');
-      // window.location.href = `/jobDetail/${jobId}`;
    };
 
    const getLocation1String = (address) =>
@@ -101,6 +134,12 @@ export const JobList = () =>
          return parts.slice(-2).join(", ");
       }
       return address;
+   };
+
+   const getLocationString = (companyId) =>
+   {
+      const company = companies.find(comp => comp.companyId === companyId);
+      return company ? company.location : '';
    };
 
    const formatJobPostedTime = (date) =>
@@ -144,10 +183,15 @@ export const JobList = () =>
    };
 
    const locations = [
-      { value: 'Ho Chi Minh city', label: 'Ho Chi Minh city' },
-      { value: 'Hanoi', label: 'Hanoi' },
-      { value: 'Da Nang', label: 'Da Nang' },
+      { value: 'Ho Chi Minh', label: 'Ho Chi Minh' },
+      { value: 'Ha Noi', label: 'Ha Noi' },
+      { value: 'Da Nang', label: 'Da Nang' }
    ];
+
+   const normalizeLocation = (locationString) =>
+   {
+      return locationString.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+   };
 
    const position = [
       { value: 'Intern', label: 'Intern' },
@@ -179,125 +223,6 @@ export const JobList = () =>
       { value: 'IT Service and IT Consulting', label: 'IT Service and IT Consulting' },
       { value: 'Non-IT', label: 'Non-IT' }
    ];
-
-   const handleFilterChange1 = (selectedOption, { name }) =>
-   {
-      setFilters({ ...filters, [name]: selectedOption || [] });
-   };
-
-   // const handleFilterChange = (event) =>
-   // {
-   //    const { name, value } = event.target;
-   //    if (name === 'position')
-   //    {
-   //       // Handle position changes separately for multiple values
-   //       setFilters({ ...filters, [name]: value });
-   //    } else
-   //    {
-   //       setFilters({ ...filters, [name]: value });
-   //    }
-   // };
-
-   const applyFilters = (job) =>
-   {
-      const { title, offeredSalary, position, location, keySkills, jobType, contractType, companyType } = filters;
-
-      const searchTextArray = title.toLowerCase().split(' ');
-      // Tìm kiếm theo tiêu đề công việc và kỹ năng chính
-      const titleMatch = searchTextArray.some(searchText => job.title.toLowerCase().includes(searchText));
-      const keySkillsMatch = searchTextArray.some(searchText => job.keySkills.toLowerCase().includes(searchText));
-      // Kiểm tra sự phù hợp với tiêu chí tìm kiếm
-      const isSearchTextMatch = titleMatch || keySkillsMatch;
-
-      const jobLocationParts = job.location.split(", ");
-      const jobLocation = jobLocationParts[jobLocationParts.length - 1]?.trim().toLowerCase() || '';
-
-      // Kiểm tra sự phù hợp với địa điểm
-      const locationMatch = location.length === 0 || location.some(loc => jobLocation === loc.value.toLowerCase());
-
-      const positionMatch = position.length === 0 || position.some(pos => job.position?.toLowerCase().includes(pos.value.toLowerCase()));
-      const jobTypeMatch = jobType.length === 0 || jobType.some(tyle => job.jobType?.toLowerCase().includes(tyle.value.toLowerCase()));
-      const contractTypeMatch = contractType.length === 0 || contractType.some(tyle => job.contractType?.toLowerCase().includes(tyle.value.toLowerCase()));
-      const company = companyData.find(company => company.companyId === job.companyId);
-      const companyTypeMatch = companyType.length === 0 || companyType.some(type => company.type?.toLowerCase() === type.value.toLowerCase());
-
-      return isSearchTextMatch && locationMatch && positionMatch && jobTypeMatch && contractTypeMatch && companyTypeMatch;
-   };
-
-   // const filteredJobs = jobs.filter(applyFilters);
-   // Calculate total number of pages
-   const totalPages = Math.ceil(jobs.length / jobsPerPage);
-
-   // const renderPaginationButtons = () =>
-   // {
-   //    const pages = [];
-   //    const maxVisiblePages = 10;
-
-   //    if (totalPages <= maxVisiblePages)
-   //    {
-   //       for (let i = 1; i <= totalPages; i++)
-   //       {
-   //          pages.push(
-   //             <div>
-   //                <button
-   //                   key={i}
-   //                   className={`jb_pagination-button ${currentPage === i ? 'jb_active' : ''}`}
-   //                   onClick={() => handlePageChange(i)}
-   //                >
-   //                   {i}
-   //                </button></div>
-   //          );
-   //       }
-   //    } else
-   //    {
-   //       pages.push(
-   //          <button
-   //             key={1}
-   //             className={`jb_pagination-button ${currentPage === 1 ? 'jb_active' : ''}`}
-   //             onClick={() => handlePageChange(1)}
-   //          >
-   //             1
-   //          </button>
-   //       );
-
-   //       if (currentPage > 3)
-   //       {
-   //          pages.push(<span key="left-ellipsis" className="jb_pagination-ellipsis">...</span>);
-   //       }
-
-   //       const startPage = Math.max(2, currentPage - 1);
-   //       const endPage = Math.min(totalPages - 1, currentPage + 1);
-
-   //       for (let i = startPage; i <= endPage; i++)
-   //       {
-   //          pages.push(
-   //             <button
-   //                key={i}
-   //                className={`jb_pagination-button ${currentPage === i ? 'jb_active' : ''}`}
-   //                onClick={() => handlePageChange(i)}
-   //             >
-   //                {i}
-   //             </button>
-   //          );
-   //       }
-
-   //       if (currentPage < totalPages - 2)
-   //       {
-   //          pages.push(<span key="right-ellipsis" className="jb_pagination-ellipsis">...</span>);
-   //       }
-
-   //       pages.push(
-   //          <button
-   //             key={totalPages}
-   //             className={`jb_pagination-button ${currentPage === totalPages ? 'jb_active' : ''}`}
-   //             onClick={() => handlePageChange(totalPages)}
-   //          >
-   //             {totalPages}
-   //          </button>
-   //       );
-   //    }
-   //    return pages;
-   // };
 
    const renderPaginationButtons = () =>
    {
@@ -384,14 +309,6 @@ export const JobList = () =>
       });
    };
 
-   const handleLocationItemClick = (level) =>
-   {
-      const newSelection = filters.location.some((item) => item.value === level.value)
-         ? filters.location.filter((item) => item.value !== level.value)
-         : [...filters.location, level];
-      setFilters({ ...filters, location: newSelection });
-   };
-
    const handleJobTypeItemClick = (level) =>
    {
       const newSelection = filters.jobType.some((item) => item.value === level.value)
@@ -421,6 +338,39 @@ export const JobList = () =>
       window.location.href = `/companyDetail/${companyId}`;
    };
 
+   const handleLocationItemClick = (event, location) =>
+   {
+      const newSelection = filters.location.some((item) => item.value === location.value)
+         ? filters.location.filter((item) => item.value !== location.value)
+         : [...filters.location, location];
+
+      setFilters({ ...filters, location: newSelection });
+   };
+
+   const filteredJobs = useMemo(() =>
+   {
+      let updatedFilteredJobs = [];
+      if (location.pathname === "/viewAllJobs")
+      {
+         updatedFilteredJobs = jobs;
+      } else
+      {
+         updatedFilteredJobs = jobs.filter(job => job.categoryId === categoryId);
+      }
+      updatedFilteredJobs = updatedFilteredJobs.filter(applyFilters); // Apply filters
+      setJobCount(updatedFilteredJobs.length); // Update the job count
+
+      return updatedFilteredJobs;
+   }, [jobs, categoryId, location.pathname, filters]);
+
+   // Calculate total number of pages
+   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+   // Calculate the jobs to display based on the current page
+   const indexOfLastJob = currentPage * jobsPerPage;
+   const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+
+   const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+
    return (
       <GlobalLayoutUser>
          <>
@@ -434,219 +384,11 @@ export const JobList = () =>
                <div className="container">
                   <div className="row">
                      <div className="col-md-7">
-                        <h1 className="text-white font-weight-bold">Job By Skill</h1>
+                        <h1 className="text-white font-weight-bold">All jobs</h1>
                      </div>
                   </div>
                </div>
             </section>
-
-            {/* <div className="jb_job-listing">
-
-               <div className="jb_job-filters">
-                  <div className="jb_filter-group">
-                     <label>Search</label>
-                     <input
-                        type="text"
-                        name="title"
-                        placeholder="Job Title"
-                        value={filters.title}
-                        onChange={(e) => setFilters({ ...filters, title: e.target.value })}
-                     />
-                  </div>
-
-                  <div className="jb_filter-group">
-                     <FormControl>
-                        <MuiSelect
-                           name="location"
-                           multiple
-                           value={filters.location.map(loc => loc.value)}
-                           onChange={(event) =>
-                           {
-                              const selectedValues = event.target.value;
-                              const selectedItems = locations.filter(loc => selectedValues.includes(loc.value));
-                              setFilters({ ...filters, location: selectedItems });
-                           }}
-                           renderValue={() => (
-                              <span className="jb_selected-level">Location</span>
-                           )}
-                           displayEmpty
-                        >
-                           {locations.map(level => (
-                              <MenuItem key={level.value} value={level.value} onClick={() => handleLocationItemClick(level)}>
-                                 <Checkbox
-                                    checked={filters.location.some(item => item.value === level.value)}
-                                 />
-                                 <ListItemText primary={level.label} />
-                              </MenuItem>
-                           ))}
-                        </MuiSelect>
-                     </FormControl>
-                  </div>
-
-                  <div className="jb_filter-group">
-                     <FormControl>
-                        <MuiSelect
-                           name="position"
-                           multiple
-                           value={filters.position.map(pos => pos.value)}
-                           onChange={(event) =>
-                           {
-                              const selectedValues = event.target.value;
-                              const selectedItems = position.filter(pos => selectedValues.includes(pos.value));
-                              setFilters({ ...filters, position: selectedItems });
-                           }}
-                           renderValue={() => (
-                              <span className="jb_selected-level">Levels</span>
-                           )}
-                           displayEmpty
-                        >
-                           {position.map(level => (
-                              <MenuItem key={level.value} value={level.value} onClick={() => handlePositionItemClick(level)}>
-                                 <Checkbox
-                                    checked={filters.position.some(item => item.value === level.value)}
-                                 />
-                                 <ListItemText primary={level.label} />
-                              </MenuItem>
-                           ))}
-                        </MuiSelect>
-                     </FormControl>
-                  </div>
-                  <div className="jb_filter-group">
-                     <FormControl>
-                        <MuiSelect
-                           name="jobType"
-                           multiple
-                           value={filters.jobType.map(loc => loc.value)}
-                           onChange={(event) =>
-                           {
-                              const selectedValues = event.target.value;
-                              const selectedItems = jobTypes.filter(loc => selectedValues.includes(loc.value));
-                              setFilters({ ...filters, jobType: selectedItems });
-                           }}
-                           renderValue={() => (
-                              <span className="jb_selected-level">Job types</span>
-                           )}
-                           displayEmpty
-                        >
-                           {jobTypes.map(level => (
-                              <MenuItem key={level.value} value={level.value} onClick={() => handleJobTypeItemClick(level)}>
-                                 <Checkbox
-                                    checked={filters.jobType.some(item => item.value === level.value)}
-                                 />
-                                 <ListItemText primary={level.label} />
-                              </MenuItem>
-                           ))}
-                        </MuiSelect>
-                     </FormControl>
-                  </div>
-                  <div className="jb_filter-group">
-                     <FormControl>
-                        <MuiSelect
-                           name="contractType"
-                           multiple
-                           value={filters.contractType.map(loc => loc.value)}
-                           onChange={(event) =>
-                           {
-                              const selectedValues = event.target.value;
-                              const selectedItems = contractTypes.filter(loc => selectedValues.includes(loc.value));
-                              setFilters({ ...filters, contractType: selectedItems });
-                           }}
-                           renderValue={() => (
-                              <span className="jb_selected-level">Contract types</span>
-                           )}
-                           displayEmpty
-                        >
-                           {contractTypes.map(level => (
-                              <MenuItem key={level.value} value={level.value} onClick={() => handleContractTypeItemClick(level)}>
-                                 <Checkbox
-                                    checked={filters.contractType.some(item => item.value === level.value)}
-                                 />
-                                 <ListItemText primary={level.label} />
-                              </MenuItem>
-                           ))}
-                        </MuiSelect>
-                     </FormControl>
-                  </div>
-                  <div className="jb_filter-group">
-                     <FormControl>
-                        <MuiSelect
-                           name="companyType"
-                           multiple
-                           value={filters.companyType.map(type => type.value)}
-                           onChange={(event) =>
-                           {
-                              const selectedValues = event.target.value;
-                              const selectedItems = companyTypes.filter(type => selectedValues.includes(type.value));
-                              setFilters({ ...filters, companyType: selectedItems });
-                           }}
-                           renderValue={() => (
-                              <span className="jb_selected-level">Company Types</span>
-                           )}
-                           displayEmpty
-                        >
-                           {companyTypes.map(type => (
-                              <MenuItem key={type.value} value={type.value} onClick={() => handleCompanyTypeItemClick(type)}>
-                                 <Checkbox
-                                    checked={filters.companyType.some(item => item.value === type.value)}
-                                 />
-                                 <ListItemText primary={type.label} />
-                              </MenuItem>
-                           ))}
-                        </MuiSelect>
-                     </FormControl>
-                  </div>
-               </div>
-
-               <h3 className="jb_number-job">{jobCount}{" "}
-                  {location.pathname === "/viewAllJobs" ? (
-                     "IT"
-                  ) : (
-                     <span className="jb_category-name">{categoryName1}</span>
-                  )}{" "}
-                  jobs in Vietnam</h3>
-
-               {currentJobs.map(job =>
-               {
-                  const company = companyData.find(company => company.companyId === job.companyId);
-                  const address = getLocation1String(job.location);
-                  let timeAgo = job.createdAt ? formatJobPostedTime(job.createdAt) : '';
-
-                  if (company)
-                  {
-                     return (
-                        <div key={job.id} className={`jb_single-job-item ${selectedJobId === job.id ? 'jb_selected' : ''}`}
-                           onClick={() => handleJobClick(job.id)}>
-                           <div className="jb_job-info">
-                              <p className="jb_time-post">{timeAgo}</p>
-                              <a className="jb_jobName" onClick={() => handleCategoryClick(job.id)}>{job.title}</a>
-                              <div className="jb_company-details">
-                                 <a href={company.websiteLink} target="_blank" rel="noopener noreferrer" className="jb_company-link">
-                                    <div className="jb_company-img">
-                                       <img src={company.logo} />
-                                    </div>
-                                 </a>
-                                 <a href={company.websiteLink} className="jb_company-name">{company.companyName}</a>
-                              </div>
-                              <p className="jb_company-position">{job.position}</p>
-                              <p className="jb_job-location">
-                                 <FaMapMarkerAlt className="jb_icon-location" /> {address}
-                              </p>
-                              <div className="jb_job-skills">
-                                 {job.keySkills.split(',').map((skill, index) => (
-                                    <span key={index} className="jb_skill-badge">{skill.trim()}</span>
-                                 ))}
-                              </div>
-                           </div>
-                        </div>
-                     );
-                  }
-                  return null;
-               })}
-            </div>
-            <div className="jb_pagination">
-               {renderPaginationButtons()}
-            </div> */}
-
 
             <div className="container mt-4">
                <div className="row">
@@ -670,13 +412,14 @@ export const JobList = () =>
                         <div className="mb-3">
                            <label>Location</label>
                            <FormGroup>
-                              {locations.map(location => (
+                              {locations.map((location) => (
                                  <FormControlLabel
                                     key={location.value}
                                     control={
                                        <Checkbox
                                           checked={filters.location.some(item => item.value === location.value)}
-                                          onChange={() => handleLocationItemClick(location)}
+                                          // onChange={() => handleLocationItemClick(location)}
+                                          onChange={(e) => handleLocationItemClick(e, location)}
                                           name={location.label}
                                        />
                                     }
@@ -780,7 +523,6 @@ export const JobList = () =>
                               ))}
                            </FormGroup>
                         </div>
-
                      </div>
                   </div>
 
@@ -797,8 +539,8 @@ export const JobList = () =>
 
                      {currentJobs.map(job =>
                      {
-                        const company = companyData.find(company => company.companyId === job.companyId);
-                        const address = getLocation1String(job.location);
+                        const company = companies.find(company => company.companyId === job.companyId);
+                        const address = getLocation1String(company?.location);
                         let timeAgo = job.createdAt ? formatJobPostedTime(job.createdAt) : '';
 
                         if (company)

@@ -3,82 +3,69 @@ import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import moment from 'moment';
 import './job-single.css';
+import "./job_listing.css";
 import { NavLink, useParams } from 'react-router-dom';
+import { fetchJobThunk } from "../../features/jobSlice";
+import { fetchCompanyThunk } from "../../features/companySlice";
 import jobData1 from './job_data.json';
 import companyData1 from './company_data.json';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import 'flag-icons/css/flag-icons.min.css';
 import parse from 'html-react-parser';
+import { useDispatch, useSelector } from "react-redux";
+import { CheckCircle } from 'react-bootstrap-icons';
 
 export const JobSingle = () =>
 {
    const { id } = useParams();
    const jobId = parseInt(id ?? '0', 10);
+   // const [jobs, setJobs] = useState([]);
+   const dispatch = useDispatch();
+   const jobs = useSelector((state) => state.job.jobs);
+   const companies = useSelector((state) => state.company.companies);
 
-   const jobData = jobData1.find(job => job.id === jobId);
-   const companyData = companyData1.find(company => company.companyId === jobData?.companyId);
-
-   const formatJobPostedTime = (date) =>
+   useEffect(() =>
    {
-      const now = moment();
-      const createdAt = moment(date);
-
-      const monthsAgo = now.diff(createdAt, 'months');
-      const weeksAgo = now.diff(createdAt, 'weeks');
-      const daysAgo = now.diff(createdAt, 'days');
-      const hoursAgo = now.diff(createdAt, 'hours');
-      const minutesAgo = now.diff(createdAt, 'minutes');
-      const secondsAgo = now.diff(createdAt, 'seconds');
-
-      if (monthsAgo >= 1)
+      if (companies.length === 0)
       {
-         return `Posted ${monthsAgo} month${monthsAgo > 1 ? 's' : ''} ago`;
+         dispatch(fetchCompanyThunk());
       }
-
-      if (weeksAgo >= 1)
+      if (jobs.length === 0)
       {
-         return `Posted ${weeksAgo} week${weeksAgo > 1 ? 's' : ''} ago`;
+         dispatch(fetchJobThunk());
       }
+   }, [dispatch, jobs.length, companies.length]);
 
-      if (daysAgo >= 1)
-      {
-         return `Posted ${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
-      }
+   const jobData = jobs.find(job => job.id === jobId);
+   const companyData = companies.find(company => company.companyId === jobData?.companyId);
+   if (!jobData || !companyData)
+   {
+      return <div>Loading...</div>; // Hoặc bạn có thể chuyển hướng đến trang lỗi
+   }
 
-      if (hoursAgo >= 1)
-      {
-         return `Posted ${hoursAgo} hour${hoursAgo > 1 ? 's' : ''} ago`;
-      }
-
-      if (minutesAgo >= 1)
-      {
-         return `Posted ${minutesAgo} minute${minutesAgo > 1 ? 's' : ''} ago`;
-      }
-
-      return `Posted ${secondsAgo} second${secondsAgo > 1 ? 's' : ''} ago`;
-   };
-
-   let timeAgo = jobData?.createdAt ? formatJobPostedTime(jobData.createdAt) : '';
    const getLocation1String = (address) =>
    {
       if (typeof address !== 'string')
       {
          return '';
       }
-
       const parts = address.split(", ");
       const len = parts.length;
       if (len >= 2)
       {
-         return parts[len - 1];
+         return parts.slice(-2).join(", ");
       }
       return address;
    };
-   const address = getLocation1String(companyData?.location);
 
    const handleCompanyClick = (companyId) =>
    {
       window.location.href = `/companyDetail/${companyId}`;
+   };
+
+   const handleJobClick = (jobId) =>
+   {
+      window.location.href = `/jobDetail/${jobId}`;
    };
 
    const addIconsToListItems = (htmlString) =>
@@ -86,18 +73,52 @@ export const JobSingle = () =>
       return parse(htmlString, {
          replace: (domNode) =>
          {
-            if (domNode.name === 'li')
-            {
-               return (
-                  <li className="d-flex align-items-start mb-2 trf">
-                     <span className="icon-check_circle mr-2 text-muted" />
-                     <span>{domNode.children[0].data}</span>
-                  </li>
-               );
-            }
+            return parseChildNode(domNode);
          },
       });
    };
+
+   const parseChildNode = (domNode) =>
+   {
+      if (domNode.type === 'text')
+      {
+         return domNode.data;
+      }
+
+      if (domNode.name === 'li')
+      {
+         return (
+            <li className="d-flex align-items-start mb-2 trf">
+               <span className="icon-check_circle mr-2 text-muted" />
+               <span>{domNode.children.map((child, index) => (
+                  <React.Fragment key={index}>{parseChildNode(child)}</React.Fragment>
+               ))}</span>
+            </li>
+         );
+      }
+
+      if (domNode.type === 'tag')
+      {
+         const Tag = domNode.name;
+         return (
+            <Tag {...domNode.attribs}>
+               {domNode.children.map((child, index) => (
+                  <React.Fragment key={index}>{parseChildNode(child)}</React.Fragment>
+               ))}
+            </Tag>
+         );
+      }
+      return null;
+   };
+
+   const currentJobKeySkills = jobData?.keySkills ? jobData.keySkills.split(',').map(skill => skill.trim()) : [];
+
+   // Filter jobs that share any key skills with the current job
+   const relatedJobs = jobs.filter(job =>
+      job.id !== jobId &&
+      job.keySkills && // Ensure job.keySkills is not null or undefined
+      job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
+   );
 
    return (
       <GlobalLayoutUser>
@@ -113,13 +134,13 @@ export const JobSingle = () =>
                   <div className="row">
                      <div className="col-md-7">
                         <h1 className="text-white font-weight-bold">
-                           Product Designer
+                           {jobData?.title}
                         </h1>
                         <div className="custom-breadcrumbs">
-                           <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                           <a href="#">Job</a> <span className="mx-2 slash">/</span>
+                           <a href="/">Home</a> <span className="mx-2 slash">/</span>
+                           <NavLink to={'/viewAllJobs'}>Job</NavLink> <span className="mx-2 slash">/</span>
                            <span className="text-white">
-                              <strong>Product Designer</strong>
+                              <strong>{jobData?.title}</strong>
                            </span>
                         </div>
                      </div>
@@ -133,11 +154,14 @@ export const JobSingle = () =>
                         <div className="d-flex align-items-center">
                            <div>
                               <h2>{jobData?.title}</h2>
-                              <div>
-                                 <span className="m-2">
-                                    <span className="icon-room mr-2" />
-                                    {jobData?.location}
-                                 </span>
+                              <div className="m-0 mt-3">
+                                 <span className="icon-room" />
+                                 {companyData?.location}
+                              </div>
+                              <div className="m-0 mt-3" >
+                                 {jobData.keySkills.split(',').map((skill, index) => (
+                                    <span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
+                                 ))}
                               </div>
                            </div>
                         </div>
@@ -159,18 +183,29 @@ export const JobSingle = () =>
                      </div>
                   </div>
                   <div className="row">
-                     <div className="col-lg-8">
+                     <div className="col-lg-8 text-dark">
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
                               <span className="icon-align-left mr-3" />
-                              Job Description
+                              Job description
                            </h3>
-                           <div dangerouslySetInnerHTML={{ __html: jobData?.description }} />
+
+                           {addIconsToListItems(jobData?.description)}
+
+                        </div>
+                        <div className="mb-5">
+                           <h3 className="h5 d-flex align-items-center mb-4 text-primary">
+                              <span className="icon-align-left mr-3" />
+                              Work schedule
+                           </h3>
+                           <ul className="list-unstyled m-0 p-0">
+                              {addIconsToListItems(jobData?.workSchedule)}
+                           </ul>
                         </div>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
                               <span className="icon-rocket mr-3" />
-                              Responsibilities
+                              Your responsibilities
                            </h3>
                            <ul className="list-unstyled m-0 p-0">
                               {addIconsToListItems(jobData?.responsibilities)}
@@ -180,13 +215,11 @@ export const JobSingle = () =>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
                               <span className="icon-book mr-3" />
-                              Education + Skills
+                              Your skills and qualifications
                            </h3>
-                           <h6 className="jb_header1">1. Educational Background</h6>
                            <ul className="list-unstyled m-0 p-0 ">
                               {addIconsToListItems(jobData?.qualification)}
                            </ul>
-                           <h6 className="jb_header1">2. Skills</h6>
                            <ul className="list-unstyled m-0 p-0">
                               {addIconsToListItems(jobData?.requiredSkills)}
                            </ul>
@@ -225,15 +258,11 @@ export const JobSingle = () =>
                               </li>
                               <li className="d-flex justify-content-between mb-2">
                                  <strong className="text-black">Number of recruits</strong>
-                                 <span>{jobData?.numberOfRecruits} people</span>
+                                 <span>{jobData?.slot} people</span>
                               </li>
                               <li className="d-flex justify-content-between mb-2">
                                  <strong className="text-black">Salary</strong>
                                  <span>{jobData?.offeredSalary}</span>
-                              </li>
-                              <li className="d-flex justify-content-between mb-2">
-                                 <strong className="text-black">Gender</strong>
-                                 <span>{jobData?.gender}</span>
                               </li>
                               <li className="d-flex justify-content-between mb-2">
                                  <strong className="text-black">Application Deadline</strong>
@@ -250,7 +279,7 @@ export const JobSingle = () =>
                                     alt="Image"
                                     className="w-50 h-100 border p-0 d-inline-block mr-3 rounded"
                                  />
-                                 <NavLink to={``} className="pt-3 pb-3 pr-3 pl-0" onClick={() => handleCompanyClick(jobData?.companyId)}>
+                                 <NavLink to={`/companyDetail/${jobData?.companyId}`} className="pt-3 pb-3 pr-3 pl-0" onClick={() => handleCompanyClick(jobData?.companyId)}>
                                     {companyData?.companyName}
                                  </NavLink>
                               </div>
@@ -266,7 +295,7 @@ export const JobSingle = () =>
                                  </li>
                                  <li className="d-flex justify-content-between mb-2">
                                     <strong className="text-black">Country</strong>
-                                    <span><i className={`fi fi-${companyData?.countryCode}`}></i>&nbsp;&nbsp;{companyData?.country}</span>
+                                    <span><i className={`fi fi-${companyData?.countryCode} border border-gray rounded-sm`}></i>&nbsp;&nbsp;{companyData?.country}</span>
                                  </li>
                                  <li className="d-flex justify-content-between mb-2">
                                     <strong className="text-black">Working days</strong>{" "}
@@ -283,165 +312,63 @@ export const JobSingle = () =>
                <div className="container">
                   <div className="row mb-5 justify-content-center">
                      <div className="col-md-7 text-center">
-                        <h2 className="section-title mb-2">22,392 Related Jobs</h2>
+                        <h2 className="section-title mb-2">More jobs for you</h2>
                      </div>
                   </div>
                   <ul className="job-listings mb-5">
-                     <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                        <a href="job-single.html" />
-                        <div className="job-listing-logo">
-                           <img
-                              src="../../../../assets/images/job_logo_1.jpg"
-                              alt="Image"
-                              className="img-fluid"
-                           />
-                        </div>
-                        <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                           <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                              <h2>Product Designer</h2>
-                              <strong>Adidas</strong>
-                           </div>
-                           <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                              <span className="icon-room" /> New York, New York
-                           </div>
-                           <div className="job-listing-meta">
-                              <span className="badge badge-danger">Part Time</span>
-                           </div>
-                        </div>
-                     </li>
-                     <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                        <a href="job-single.html" />
-                        <div className="job-listing-logo">
-                           <img
-                              src="../../../../assets/images/job_logo_2.jpg"
-                              alt="Image"
-                              className="img-fluid"
-                           />
-                        </div>
-                        <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                           <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                              <h2>Digital Marketing Director</h2>
-                              <strong>Sprint</strong>
-                           </div>
-                           <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                              <span className="icon-room" /> Overland Park, Kansas
-                           </div>
-                           <div className="job-listing-meta">
-                              <span className="badge badge-success">Full Time</span>
-                           </div>
-                        </div>
-                     </li>
-                     <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                        <a href="job-single.html" />
-                        <div className="job-listing-logo">
-                           <img
-                              src="../../../../assets/images/job_logo_3.jpg"
-                              alt="Image"
-                              className="img-fluid"
-                           />
-                        </div>
-                        <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                           <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                              <h2>Back-end Engineer (Python)</h2>
-                              <strong>Amazon</strong>
-                           </div>
-                           <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                              <span className="icon-room" /> Overland Park, Kansas
-                           </div>
-                           <div className="job-listing-meta">
-                              <span className="badge badge-success">Full Time</span>
-                           </div>
-                        </div>
-                     </li>
-                     <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                        <a href="job-single.html" />
-                        <div className="job-listing-logo">
-                           <img
-                              src="../../../../assets/images/job_logo_4.jpg"
-                              alt="Image"
-                              className="img-fluid"
-                           />
-                        </div>
-                        <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                           <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                              <h2>Senior Art Director</h2>
-                              <strong>Microsoft</strong>
-                           </div>
-                           <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                              <span className="icon-room" /> Anywhere
-                           </div>
-                           <div className="job-listing-meta">
-                              <span className="badge badge-success">Full Time</span>
-                           </div>
-                        </div>
-                     </li>
-                     <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                        <a href="job-single.html" />
-                        <div className="job-listing-logo">
-                           <img
-                              src="../../../../assets/images/job_logo_5.jpg"
-                              alt="Image"
-                              className="img-fluid"
-                           />
-                        </div>
-                        <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                           <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                              <h2>Product Designer</h2>
-                              <strong>Puma</strong>
-                           </div>
-                           <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                              <span className="icon-room" /> San Mateo, CA
-                           </div>
-                           <div className="job-listing-meta">
-                              <span className="badge badge-success">Full Time</span>
-                           </div>
-                        </div>
-                     </li>
-                     <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                        <a href="job-single.html" />
-                        <div className="job-listing-logo">
-                           <img
-                              src="../../../../assets/images/job_logo_1.jpg"
-                              alt="Image"
-                              className="img-fluid"
-                           />
-                        </div>
-                        <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                           <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                              <h2>Product Designer</h2>
-                              <strong>Adidas</strong>
-                           </div>
-                           <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                              <span className="icon-room" /> New York, New York
-                           </div>
-                           <div className="job-listing-meta">
-                              <span className="badge badge-danger">Part Time</span>
-                           </div>
-                        </div>
-                     </li>
-                     <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                        <a href="job-single.html" />
-                        <div className="job-listing-logo">
-                           <img
-                              src="../../../../assets/images/job_logo_2.jpg"
-                              alt="Image"
-                              className="img-fluid"
-                           />
-                        </div>
-                        <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                           <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                              <h2>Digital Marketing Director</h2>
-                              <strong>Sprint</strong>
-                           </div>
-                           <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                              <span className="icon-room" /> Overland Park, Kansas
-                           </div>
-                           <div className="job-listing-meta">
-                              <span className="badge badge-success">Full Time</span>
-                           </div>
-                        </div>
-                     </li>
+                     {relatedJobs.map(job =>
+                     {
+                        const company = companies.find(company => company.companyId === job.companyId);
+                        const address = getLocation1String(company?.location);
+                        if (company)
+                        {
+                           return (
+                              <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
+                                 <div className="job-listing-logo">
+                                    <img
+                                       src={company.logo}
+                                       alt="Free Website"
+                                       className="jb_custom-img rounded-sm border border-gray"
+                                       onClick={() =>
+                                       {
+                                          handleCompanyClick(job.companyId);
+                                       }} style={{ textDecoration: 'none', cursor: 'pointer' }}
+                                    />
+                                 </div>
+
+                                 <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
+                                    <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
+                                       <h2 className="mb-2" onClick={() =>
+                                       {
+                                          handleJobClick(job.id);
+                                       }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
+                                       <strong onClick={() =>
+                                       {
+                                          handleCompanyClick(job.companyId);
+                                       }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
+                                       <div className='d-flex flex-wrap mt-2'>
+                                          {job.keySkills.split(',').map((skill, index) => (
+                                             <span key={index} className="bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
+                                          ))}
+                                       </div>
+                                    </div>
+                                    <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">
+                                       <div className="justify-content-start me-3">
+                                          <span className="icon-room me-2" /> {address}
+                                       </div>
+                                    </div>
+                                    <div className="job-listing-meta ">
+                                       <span className="badge bg-danger">{job.contractType}</span>
+                                    </div>
+                                 </div>
+
+                              </li>
+                           );
+                        }
+                        return null;
+                     })}
                   </ul>
+
                   <div className="row pagination-wrap">
                      <div className="col-md-6 text-center text-md-left mb-4 mb-md-0">
                         <span>Showing 1-7 Of 22,392 Jobs</span>

@@ -52,7 +52,12 @@ public class CompanyServiceImpl implements CompanyService {
         company.setWebsiteLink(companyDTO.getWebsiteLink());
         company.setDescription(companyDTO.getDescription());
         company.setLocation(companyDTO.getLocation());
+        company.setKeySkills(companyDTO.getKeySkills());
         company.setType(companyDTO.getType());
+        company.setCompanySize(companyDTO.getCompanySize());
+        company.setCountry(companyDTO.getCountry());
+        company.setCountryCode(companyDTO.getCountryCode());
+        company.setWorkingDays(companyDTO.getWorkingDays());
         company.setMembershipRequired(companyDTO.getMembershipRequired());
         return companyRepository.save(company);
     }
@@ -66,7 +71,13 @@ public class CompanyServiceImpl implements CompanyService {
             company.setWebsiteLink(companyDTO.getWebsiteLink());
             company.setDescription(companyDTO.getDescription());
             company.setLocation(companyDTO.getLocation());
+            company.setKeySkills(companyDTO.getKeySkills());
             company.setType(companyDTO.getType());
+            company.setCompanySize(companyDTO.getCompanySize());
+            company.setCountry(companyDTO.getCountry());
+            company.setCountryCode(companyDTO.getCountryCode());
+            company.setWorkingDays(companyDTO.getWorkingDays());
+
             company.setMembershipRequired(companyDTO.getMembershipRequired());
             return companyRepository.save(company);
         } else {
@@ -115,7 +126,12 @@ public class CompanyServiceImpl implements CompanyService {
         companyDTO.setWebsiteLink(company.getWebsiteLink());
         companyDTO.setDescription(company.getDescription());
         companyDTO.setLocation(company.getLocation());
+        companyDTO.setKeySkills(company.getKeySkills());
         companyDTO.setType(company.getType());
+        companyDTO.setCompanySize(company.getCompanySize());
+        companyDTO.setCountry(company.getCountry());
+        companyDTO.setCountryCode(company.getCountryCode());
+        companyDTO.setWorkingDays(company.getWorkingDays());
         List<ReviewDTO> reviewDTOs = company.getReviews().stream()
                 .map(this::convertReviewToDTO)
                 .collect(Collectors.toList());
@@ -133,7 +149,12 @@ public class CompanyServiceImpl implements CompanyService {
         company.setWebsiteLink(companyDTO.getWebsiteLink());
         company.setDescription(companyDTO.getDescription());
         company.setLocation(companyDTO.getLocation());
+        company.setKeySkills(companyDTO.getKeySkills());
         company.setType(companyDTO.getType());
+        company.setCompanySize(companyDTO.getCompanySize());
+        company.setCountry(companyDTO.getCountry());
+        company.setCountryCode(companyDTO.getCountryCode());
+        company.setWorkingDays(companyDTO.getWorkingDays());
         return company;
     }
 

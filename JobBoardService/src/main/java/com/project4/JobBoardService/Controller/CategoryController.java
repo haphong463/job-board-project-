@@ -30,6 +30,7 @@ public class CategoryController {
     public List<Category> getAllCategory() {
         return categoryRepository.findAll();
     }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable(value = "id") Long categoryId)
@@ -38,11 +39,13 @@ public class CategoryController {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found for this id :: " + categoryId));
         return ResponseEntity.ok().body(category);
     }
+
     @PreAuthorize(" hasRole('ROLE_ADMIN')")
     @PostMapping
     public Category createCategory(@Validated @RequestBody Category category) {
         return categoryRepository.save(category);
     }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable(value = "id") Long categoryId,
@@ -53,6 +56,7 @@ public class CategoryController {
         final Category updatedCategory = categoryRepository.save(category);
         return ResponseEntity.ok(updatedCategory);
     }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public Map<String, Boolean> deleteCategory(@PathVariable(value = "id") Long categoryId)

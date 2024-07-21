@@ -3,10 +3,13 @@ import { getAllCategory } from "../services/CategoryService";
 
 export const fetchCategoryThunk = createAsyncThunk(
   "/categories/fetchAll",
-  async () => {
-    try {
+  async () =>
+  {
+    try
+    {
       return await getAllCategory();
-    } catch (error) {
+    } catch (error)
+    {
       return error.message;
     }
   }
@@ -19,18 +22,21 @@ const initialState = {
 };
 
 const categorySlice = createSlice({
-  initialState,
   name: "category",
+  initialState,
   extraReducers: (builder) =>
     builder
-      .addCase(fetchCategoryThunk.pending, (state, action) => {
+      .addCase(fetchCategoryThunk.pending, (state, action) =>
+      {
         state.state = "Loading...";
       })
-      .addCase(fetchCategoryThunk.fulfilled, (state, action) => {
+      .addCase(fetchCategoryThunk.fulfilled, (state, action) =>
+      {
         state.categories = action.payload;
         state.state = "Fetch ok!";
       })
-      .addCase(fetchCategoryThunk.rejected, (state, action) => {
+      .addCase(fetchCategoryThunk.rejected, (state, action) =>
+      {
         state.error = action.payload;
         state.state = "Rejected!";
       }),

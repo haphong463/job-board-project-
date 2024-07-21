@@ -3,20 +3,20 @@ import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import
-   {
-      Dropdown,
-      DropdownToggle,
-      DropdownMenu,
-      DropdownItem,
-   } from "reactstrap";
+{
+   Dropdown,
+   DropdownToggle,
+   DropdownMenu,
+   DropdownItem,
+} from "reactstrap";
 import { FaBell, FaChevronRight, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import
-   {
-      markNotificationAsRead,
-      readNotificationThunk,
-   } from "../../features/notificationSlice";
+{
+   markNotificationAsRead,
+   readNotificationThunk,
+} from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
 import categoryData from './category.json';
@@ -25,13 +25,14 @@ import companyData from '../../page/job-listing/company_data.json';
 export function GlobalNavbar ()
 {
    const [searchParams] = useSearchParams();
-   const [categories, setCategories] = useState([]);
+   // const [categories, setCategories] = useState([]);
    const [companies, setCompanies] = useState([]);
    const [isSkillsDropdownVisible, setSkillsDropdownVisible] = useState(false);
    const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
    const [dropdownOpen, setDropdownOpen] = useState(false);
    const [notificationOpen, setNotificationOpen] = useState(false);
 
+   const categories = useSelector((state) => state.category.categories);
    const notifications = useSelector((state) => state.notification.list);
    const user = useSelector((state) => state.auth.user);
    const roles = useSelector((state) => state.auth.roles);
@@ -47,9 +48,9 @@ export function GlobalNavbar ()
 
    useEffect(() =>
    {
-      setCategories(categoryData);
+      dispatch(fetchCategoryThunk());
       setCompanies(companyData);
-   }, [dispatch]);
+   }, []);
 
    const handleCategoryClick = (categoryId) =>
    {
