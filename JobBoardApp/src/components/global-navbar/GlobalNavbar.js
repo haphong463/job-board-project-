@@ -17,6 +17,7 @@ import {
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
+import { Link } from "react-scroll";
 export function GlobalNavbar() {
   const [searchParams] = useSearchParams();
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -260,6 +261,11 @@ export function GlobalNavbar() {
                         className="text-uppercase font-weight-bold"
                       >
                         {user.sub}
+                      </DropdownItem>
+                      <DropdownItem>
+                      <NavLink to="/cv-management">
+                    Cv Management
+                      </NavLink>
                       </DropdownItem>
                       <DropdownItem onClick={handleLogout}>
                         Log out

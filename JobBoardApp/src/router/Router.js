@@ -29,6 +29,7 @@ const EmployerSignUp = lazy(() => import("../page/signup/EmployerSignUp"));
 const SetupCredentials = lazy(() => import("../page/signup/SetupCredentials"));
 const Quiz = lazy(() => import("../page/quiz/quiz"));
 const QuizResult = lazy(() => import("../page/quiz/QuizResult"));
+const CvManagement = lazy(() => import("../page/user-cv/MainCv"));
 const QuizQuestions = lazy(() => import("../page/quiz/QuizQuestions"));
 
 /***** Routes ******/
@@ -49,6 +50,7 @@ export const ThemeRoutes = [
       { path: "/job-listing", exact: true, element: <JobListing /> },
       { path: "/login", exact: true, element: <Login /> },
       { path: "/signup", exact: true, element: <SignUp /> },
+      { path: "/cv-management", exact: true, element: <CvManagement /> },
       { path: "/ResetPassword", exact: true, element: <ResetPassword /> },
       { path: "/ForgotPassword", exact: true, element: <ForgotPassword /> },
       { path: "/job-listings", exact: true, element: <JobListing /> },
