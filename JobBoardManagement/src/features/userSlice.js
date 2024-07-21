@@ -1,13 +1,27 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
+  createModeratorAsync,
+  deleteUserAsync,
   getAllUserAsync,
   updateUserEnableStatusAsync,
 } from "../services/user_service";
 export const getUserThunk = createAsyncThunk(
   "user/getUser",
-  async ({ query, page, size }, { rejectWithValue }) => {
+  async ({ query, role, page, size }, { rejectWithValue }) => {
     try {
-      return await getAllUserAsync(query, page, size);
+      return await getAllUserAsync(query, role, page, size);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteUserThunk = createAsyncThunk(
+  "user/deleteUser",
+  async (id, { rejectWithValue }) => {
+    try {
+      await deleteUserAsync(id);
+      return id;
     } catch (error) {
       console.log("error: ", error.response.data);
 
@@ -22,6 +36,19 @@ export const updateUserStatusThunk = createAsyncThunk(
     try {
       console.log(">>> isEnabled: ", isEnabled);
       const res = await updateUserEnableStatusAsync(userId, isEnabled);
+      return res;
+    } catch (error) {
+      console.log("error: ", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const createModeratorThunk = createAsyncThunk(
+  "user/add-moderator",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await createModeratorAsync(data);
       return res;
     } catch (error) {
       console.log("error: ", error);
@@ -57,6 +84,12 @@ const userSlice = createSlice({
         state.list = state.list.map((user) =>
           user.id === action.payload.id ? action.payload : user
         );
+      })
+      .addCase(createModeratorThunk.fulfilled, (state, action) => {
+        state.list.unshift(action.payload);
+      })
+      .addCase(deleteUserThunk.fulfilled, (state, action) => {
+        state.list = state.list.filter((user) => user.id !== action.payload);
       }),
 });
 

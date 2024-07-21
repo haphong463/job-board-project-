@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Entity;
 
+import com.project4.JobBoardService.Enum.ENotificationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,7 +28,11 @@ public class Notification extends AbstractEntity {
     @JoinColumn(name = "recipient_id")
     private User recipient;
 
+    @Enumerated(EnumType.STRING)
+    private ENotificationType type;
+    private String url;
     private String message;
+
     private boolean isRead;
 
 }

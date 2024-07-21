@@ -16,8 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Comment extends AbstractEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "blog_id", nullable = false)

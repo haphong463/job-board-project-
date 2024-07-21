@@ -24,22 +24,19 @@ export const Blog = () => {
   const postsPerPage = 9;
   const navigate = useNavigate();
 
-  const handleSearch = useCallback(
-    debounce((text) => {
-      setCurrentPage(0);
-      dispatch(
-        fetchAllBlog({ query: text, size: postsPerPage, page: currentPage })
-      );
-    }, 500),
-    [dispatch, searchParams, currentPage]
-  );
-
   const debouncedSearch = useCallback(
     debounce((query) => {
       setCurrentPage(0);
-      dispatch(fetchBlogs({ query, page: currentPage, size: postsPerPage }));
-    }, 500),
-    [dispatch, currentPage, searchText]
+      dispatch(
+        fetchBlogs({
+          query,
+          page: currentPage,
+          size: postsPerPage,
+          type: searchParams.get("type") || "ALL",
+        })
+      );
+    }, 300),
+    [dispatch, currentPage]
   );
 
   const handleSearchChange = (e) => {
@@ -48,10 +45,16 @@ export const Blog = () => {
   };
 
   useEffect(() => {
+    const type = searchParams.get("type");
     dispatch(
-      fetchBlogs({ query: searchText, size: postsPerPage, page: currentPage })
+      fetchBlogs({
+        query: searchText,
+        size: postsPerPage,
+        page: currentPage,
+        type: type || "ALL",
+      })
     );
-  }, [dispatch, currentPage]);
+  }, [dispatch, currentPage, searchParams]);
 
   const paginate = (pageNumber) => {
     if (pageNumber >= 0 && pageNumber < totalPages) {
@@ -175,7 +178,6 @@ export const Blog = () => {
                 <div className="col-md-12 text-center ">
                   <div className="custom-pagination ml-auto">
                     <motion.a
-                      href="#top"
                       className={`prev ${currentPage === 0 ? "disabled" : ""}`}
                       onClick={() => paginate(currentPage - 1)}
                       whileHover={{ scale: 1.1 }}
@@ -187,7 +189,6 @@ export const Blog = () => {
                       {Array.from({ length: totalPages }, (_, i) => (
                         <motion.a
                           key={i}
-                          href={`#${i}`}
                           className={`${currentPage === i ? "active" : ""}`}
                           onClick={() => paginate(i)}
                           whileHover={{ scale: 1.1 }}
@@ -198,7 +199,6 @@ export const Blog = () => {
                       ))}
                     </div>
                     <motion.a
-                      href="#top"
                       className={`next ${
                         currentPage === totalPages - 1 ? "disabled" : ""
                       }`}

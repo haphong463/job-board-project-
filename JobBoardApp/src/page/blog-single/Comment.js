@@ -15,6 +15,7 @@ import {
   deleteComment as deleteCommentAction,
 } from "../../features/commentSlice";
 import { AnimatePresence, motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 export const Comment = ({
   comment,
   addComment,
@@ -38,6 +39,19 @@ export const Comment = ({
   const originalContent = useSelector(
     (state) => state.comments.originalContent[comment.id]
   );
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const hash = location.hash;
+    if (hash && hash.startsWith("#comment")) {
+      const commentId = hash.substring(9); // Change '3' to '9' to match the length of "#comment"
+      const commentElement = document.getElementById(`comment-${commentId}`);
+      if (commentElement) {
+        commentElement.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
@@ -99,12 +113,9 @@ export const Comment = ({
   };
 
   return (
-    <li className={`comment level-${level}`}>
+    <li className={`comment level-${level}`} id={`comment-${comment.id}`}>
       <div className="vcard bio">
-        <img
-          src="../../../../assets/images/person_2.jpg"
-          alt="Image placeholder"
-        />
+        <img src={comment.user.imageUrl} alt="Image placeholder" />
       </div>
       <div className="comment-body">
         <div className="d-flex justify-content-between">

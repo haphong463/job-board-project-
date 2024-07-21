@@ -6,6 +6,11 @@ import {
   signOutAsync,
   updateUserAsync,
 } from "../services/user_service";
+import {
+  BAD_CREDENTIALS,
+  GENERIC_ERROR,
+  USER_NOT_FOUND,
+} from "../utils/variables/errorType";
 const userNotFound = "User not found";
 const badCredentials = "Bad credentials";
 
@@ -14,13 +19,21 @@ export const login = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await signInAsync(data);
-      if (typeof res === "string") {
-        switch (res) {
-          case badCredentials:
+      if (typeof res === "object" && res.verified === false) {
+        return rejectWithValue({
+          email: res.email,
+          message: "Please check your email to verify your account.",
+        });
+      }
+      return res;
+    } catch (error) {
+      if (typeof error.response.data.message === "string") {
+        switch (error.response.data.message) {
+          case BAD_CREDENTIALS:
             return rejectWithValue({
               message: "Your username or password is incorrect.",
             });
-          case userNotFound:
+          case USER_NOT_FOUND:
             return rejectWithValue({
               message: "User not found",
             });
@@ -30,15 +43,7 @@ export const login = createAsyncThunk(
             });
         }
       }
-      if (typeof res === "object" && res.verified === false) {
-        return rejectWithValue({
-          email: res.email,
-          message: "Please check your email to verify your account.",
-        });
-      }
-      return res;
-    } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(GENERIC_ERROR);
     }
   }
 );
@@ -54,7 +59,6 @@ export const updateUserThunk = createAsyncThunk(
     }
   }
 );
-
 
 export const signOut = createAsyncThunk(
   "auth/signOut",

@@ -67,6 +67,9 @@ export function LeftSideBlogForm(props) {
               control={props.control}
               render={({ field }) => (
                 <CKEditor
+                  config={{
+                    placeholder: "Enter the content of the blog post...",
+                  }}
                   editor={ClassicEditor}
                   data={props.isEdit ? props.isEdit.content : ""}
                   onChange={(event, editor) => {

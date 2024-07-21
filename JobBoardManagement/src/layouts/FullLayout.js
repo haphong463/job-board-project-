@@ -4,7 +4,7 @@ import Header from "./Header";
 import { Container } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import {
   getUserByIDThunk,
   logout,
@@ -18,16 +18,19 @@ import "nprogress/nprogress.css"; // Import the CSS file
 import { fetchBlogs } from "../features/blogSlice";
 import { fetchBlogCategory } from "../features/blogCategorySlice";
 import showToast from "../utils/functions/showToast";
-import axiosRequest from "../configs/axiosConfig";
 import axios from "axios";
+
 const FullLayout = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const roles = useSelector((state) => state.auth.roles);
-  const blogStatus = useSelector((state) => state.blogs.status);
-  const categoryStatus = useSelector((state) => state.blogCategory.status);
+
   const navigate = useNavigate();
   const location = useLocation();
+  const handleLogout = () => {
+    dispatch(signOut());
+    navigate("/jobportal/login");
+  };
+
   useEffect(() => {
     dispatch(setLocationState(location.pathname));
   }, [location, dispatch]);
@@ -85,30 +88,12 @@ const FullLayout = () => {
     }
   }, [dispatch, localStorage.getItem("accessToken")]);
 
-  useEffect(() => {
-    // if (blogStatus === "idle" || categoryStatus === "idle") {
+  const hasAdminOrModeratorRole = user?.role.some(
+    (role) =>
+      role.authority === "ROLE_ADMIN" || role.authority === "ROLE_MODERATOR"
+  );
 
-    console.log(">>> user: ", user);
-
-    const fetchData = async () => {
-      try {
-        await Promise.all([
-          // dispatch(fetchBlogs()).unwrap(),
-          dispatch(fetchBlogCategory()).unwrap(),
-          dispatch(getUserByIDThunk(user.sub)).unwrap(),
-        ]);
-        showToast("The data has been loaded successfully.");
-      } catch (error) {
-        showToast("Error loading data.", "error");
-      }
-    };
-
-    fetchData();
-
-    // }
-  }, []);
-
-  if (!user) {
+  if (!hasAdminOrModeratorRole) {
     return <Navigate to="/jobportal/login" />;
   }
 
@@ -120,7 +105,7 @@ const FullLayout = () => {
         </aside>
 
         <div className="contentArea">
-          <Header />
+          <Header handleLogout={handleLogout} />
           <Container className="p-4 wrapper" fluid>
             <Outlet />
           </Container>

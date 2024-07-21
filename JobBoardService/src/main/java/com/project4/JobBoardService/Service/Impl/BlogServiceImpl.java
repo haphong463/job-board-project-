@@ -69,6 +69,10 @@ public class BlogServiceImpl implements BlogService {
         return blogRepository.findBySlug(slug);
     }
 
+    @Override
+    public Page<Blog> searchBlogs(String query, String type, Pageable pageable) {
+        return blogRepository.searchByQuery(type, query, pageable);
+    }
 
 
     private void handleImageFile(Blog blog, MultipartFile imageFile, String operationType) {
@@ -98,13 +102,18 @@ public class BlogServiceImpl implements BlogService {
 
 
     @Override
-    public List<Blog> searchBlogs(String query, String type) {
-        return blogRepository.searchByQuery(type, query);
+    public Page<Blog> searchBlogs(String query, String type, Pageable pageable, boolean visibility) {
+        return blogRepository.searchByQuery(type, query, visibility, pageable);
     }
 
     @Override
     public Page<Blog> searchBlogs(String query, Pageable pageable) {
         return blogRepository.searchByQuery(query, pageable);
+    }
+
+    @Override
+    public Page<Blog> searchBlogs(String query, Pageable pageable, boolean visibility) {
+        return blogRepository.searchByQuery(query, pageable, visibility);
     }
 
     private void deleteImageFile(Blog blog) {

@@ -21,10 +21,22 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
 
 
-    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
-    List<Blog> searchByQuery(@Param("type") String type, @Param("query") String query);
 
-    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (LOWER(b.title) LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
+    Page<Blog> searchByQuery(@Param("type") String type, @Param("query") String query, Pageable pageable);
+
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%) AND b.visibility = :visibility")
+    Page<Blog> searchByQuery(@Param("query") String query, Pageable pageable, @Param("visibility") boolean visibility);
+
+
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%) AND b.visibility = :visibility")
+    Page<Blog> searchByQuery(@Param("type") String type, @Param("query") String query, @Param("visibility") boolean visibility, Pageable pageable);
+
+    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (LOWER(b.title) " +
+            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
     Page<Blog> searchByQuery(@Param("query") String query, Pageable pageable);
 }
 

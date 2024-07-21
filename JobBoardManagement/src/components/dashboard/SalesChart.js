@@ -3,43 +3,23 @@ import Chart from "react-apexcharts";
 
 const SalesChart = () => {
   const chartoptions = {
-    series: [
-      {
-        name: "Iphone 13",
-        data: [0, 31, 40, 28, 51, 42, 109, 100],
-      },
-      {
-        name: "Oneplue 9",
-        data: [0, 11, 32, 45, 32, 34, 52, 41],
-      },
-    ],
+    series: [44, 55, 13, 43, 22],
     options: {
       chart: {
-        type: "area",
+        width: 380,
+        type: "pie",
       },
-      dataLabels: {
-        enabled: false,
-      },
-      grid: {
-        strokeDashArray: 3,
-      },
-
-      stroke: {
-        curve: "smooth",
-        width: 1,
-      },
-      xaxis: {
-        categories: [
-          "Jan",
-          "Feb",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "Aug",
-        ],
-      },
+      labels: ["Team A", "Team B", "Team C", "Team D", "Team E"],
+      responsive: [
+        {
+          breakpoint: 480,
+          options: {
+            legend: {
+              position: "bottom",
+            },
+          },
+        },
+      ],
     },
   };
   return (
@@ -50,9 +30,8 @@ const SalesChart = () => {
           Yearly Sales Report
         </CardSubtitle>
         <Chart
-          type="area"
+          type="pie"
           width="100%"
-          height="390"
           options={chartoptions.options}
           series={chartoptions.series}
         ></Chart>

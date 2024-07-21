@@ -122,4 +122,65 @@ public class HTMLContentProvider {
                 "</body>" +
                 "</html>";
     }
+
+    public static String readHTMLContentFlutter() {
+        return "<!DOCTYPE html>" +
+                "<html lang='en'>" +
+                "<head>" +
+                "<meta charset='UTF-8'>" +
+                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "<title>Email Verification</title>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; margin: 0; padding: 0; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background-color: #007bff; color: #fff; padding: 20px; text-align: center; }" +
+                ".content { padding: 20px; background-color: #fff; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>Email Verification</h1>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<p>Hello {{username}},</p>" +
+                "<p>Please use the following code to verify your email:</p>" +
+                "<p style='font-size: 24px; font-weight: bold;'>{{verificationCode}}</p>" + // Display verification code
+                "<p>Thank you!</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
+    public static String readHTMLContentFlutterReset(String username, String verificationCode) {
+        return "<!DOCTYPE html>" +
+                "<html lang='en'>" +
+                "<head>" +
+                "<meta charset='UTF-8'>" +
+                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "<title>Email Verification</title>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; margin: 0; padding: 0; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background-color: #007bff; color: #fff; padding: 20px; text-align: center; }" +
+                ".content { padding: 20px; background-color: #fff; }" +
+                ".verification-code { font-size: 24px; font-weight: bold; color: #007bff; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>Email Verification</h1>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<p>Hello " + username + ",</p>" +
+                "<p>Please use the following verification code to reset your password:</p>" +
+                "<p class='verification-code'>" + verificationCode + "</p>" +
+                "<p>If you did not request a password reset, please ignore this email.</p>" +
+                "<p>Thank you!</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
 }

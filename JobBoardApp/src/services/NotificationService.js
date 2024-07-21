@@ -1,25 +1,10 @@
 import axiosRequest from "../configs/axiosConfig";
 
-export const getNotificationAsync = async (id) => {
-  try {
-    return await axiosRequest.get(`/notifications/${id}`);
-  } catch (error) {
-    return error;
-  }
-};
+export const getNotificationAsync = async (id) =>
+  await axiosRequest.get(`/notifications/${id}`);
 
-export const sendNotificationAsync = async (data) => {
-  try {
-    return await axiosRequest.post(`/notifications/send`, data);
-  } catch (error) {
-    return error;
-  }
-};
+export const sendNotificationAsync = async (data) =>
+  await axiosRequest.post(`/notifications/send`, data);
 
-export const readNotificationAsync = async (id) => {
-  try {
-    return await axiosRequest.put(`/notifications/read/${id}`);
-  } catch (error) {
-    return error;
-  }
-};
+export const readNotificationAsync = async (id) =>
+  await axiosRequest.put(`/notifications/read/${id}`);

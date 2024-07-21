@@ -43,9 +43,9 @@ export const fetchAllBlog = createAsyncThunk(
 );
 export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
-  async ({ query, page, size }, { rejectWithValue }) => {
+  async ({ query, page, size, type }, { rejectWithValue }) => {
     try {
-      const response = await getAllBlogFilter(query, page, size);
+      const response = await getAllBlogFilter(query, type, page, size);
       return response;
     } catch (error) {
       console.log(error);
@@ -102,9 +102,7 @@ const blogSlice = createSlice({
         state.status = "loading";
       })
       .addCase(fetchAllBlog.fulfilled, (state, action) => {
-        console.log(">>> payload: ", action.payload);
-        state.blogs = action.payload.content;
-        state.totalPages = action.payload.totalPages;
+        state.blogs = action.payload;
         state.status = "succeeded";
 
         state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công

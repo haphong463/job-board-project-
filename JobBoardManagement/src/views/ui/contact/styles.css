@@ -1,0 +1,12 @@
+.actions-cell {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.actions-cell .btn {
+  margin-right: 0.5rem;
+}
+
+.actions-cell .btn:last-child {
+  margin-right: 0;
+}

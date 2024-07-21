@@ -13,4 +13,12 @@ public interface EmailService {
 
     void sendCertificateEmail(String toEmail, String username, File certificate);
 
+    @Async("emailTaskExecutor")
+    void sendEmail(String to, String subject, String text);
+
+    @Async
+    void sendVerificationEmailFlutter(String toEmail, String username, String firstName, String verificationCode, String email);
+
+    @Async
+    void sendResetPasswordEmailFlutter(String toEmail, String username, String resetToken);
 }

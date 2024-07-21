@@ -24,6 +24,7 @@ function App() {
           appId: process.env.REACT_APP_CHATBOT_ID,
           popupWidget: true,
           automaticChatOpenOnNavigation: true,
+          
         };
         var s = document.createElement("script");
         s.type = "text/javascript";

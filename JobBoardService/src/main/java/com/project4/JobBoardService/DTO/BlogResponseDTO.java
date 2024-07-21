@@ -1,8 +1,5 @@
 package com.project4.JobBoardService.DTO;
 
-import com.project4.JobBoardService.Enum.BlogStatus;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
