@@ -1,4 +1,4 @@
-*{
+.main-cv-container * {
   color: #000000;
 }
 .main-cv-container {
@@ -109,6 +109,9 @@
   }
   .userName{
     color: #89ba16b8;
+  }
+  .green-text {
+    color: #89ba16;
   }
   .welcome {
     color: white;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams,useNavigate   } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import {
@@ -23,6 +23,7 @@ export function GlobalNavbar() {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
+  const navigate = useNavigate();
 
   const notifications = useSelector((state) => state.notification.list);
   const user = useSelector((state) => state.auth.user);
@@ -34,6 +35,10 @@ export function GlobalNavbar() {
 
   const handleLogout = () => {
     dispatch(signOut());
+  };
+
+  const handleCvManagementClick = () => {
+    navigate('/cv-management');
   };
 
   useEffect(() => {
@@ -262,12 +267,10 @@ export function GlobalNavbar() {
                       >
                         {user.sub}
                       </DropdownItem>
-                      <DropdownItem>
-                      <NavLink to="/cv-management">
-                    Cv Management
-                      </NavLink>
-                      </DropdownItem>
-                      <DropdownItem onClick={handleLogout}>
+                      <DropdownItem onClick={handleCvManagementClick}>
+        CV Management
+      </DropdownItem>
+                      <DropdownItem onClick={handleLogout} >
                         Log out
                       </DropdownItem>
                     </>

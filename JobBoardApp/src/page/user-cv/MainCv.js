@@ -202,21 +202,21 @@ function MainCv() {
 
   return (
     <div className="main-cv-wrapper">
-      <section className='p-4'>
-        <div className="container">
-          <div className="row">
-            <div className="col-md-7">
-              <h1 className="text-white font-weight-bold">CV Management</h1>
-              <div className="custom-breadcrumbs">
-                <a href="/">Home</a> <span className="mx-2 slash">/</span>
-                <span className="text-white font-weight-bold">
-                  CV Management
-                </span>
-              </div>
-            </div>
+    <section className='p-4'>
+    <div className="container">
+      <div className="row">
+        <div className="col-md-7">
+          <h1 className="green-text font-weight-bold">CV Management</h1>
+          <div className="custom-breadcrumbs">
+            <a href="/">Home</a> <span className="mx-2 slash">/</span>
+            <span className="text-white font-weight-bold">
+              CV Management
+            </span>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </section>
       <div className="main-cv-container">
         <div className="actions-container">
           <h2>Local Actions</h2>
