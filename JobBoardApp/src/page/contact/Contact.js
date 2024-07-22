@@ -2,34 +2,41 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { postContactThunk } from "../../features/contactsSlice"; // Adjust the path as necessary
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
+<<<<<<< HEAD
 import './contact.css';
+=======
+import "./contact.css";
+>>>>>>> origin/main
 
 export const Contact = () => {
   const dispatch = useDispatch();
   const contactState = useSelector((state) => state.contacts);
 
-  const initialValues = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    subject: "",
-    message: "",
-  };
-
   const validationSchema = Yup.object({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
-    email: Yup.string().email("Invalid email address").required("Email is required"),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
     subject: Yup.string().required("Subject is required"),
     message: Yup.string().required("Message is required"),
   });
 
-  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  });
+
+  const onSubmit = async (values) => {
     await dispatch(postContactThunk(values));
-    setSubmitting(false);
-    resetForm();
+    reset();
   };
 
   return (
@@ -60,121 +67,120 @@ export const Contact = () => {
           <div className="container">
             <div className="row">
               <div className="col-lg-6 mb-5 mb-lg-0">
-                <Formik
-                  initialValues={initialValues}
-                  validationSchema={validationSchema}
-                  onSubmit={handleSubmit}
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="contact-form"
                 >
-                  {({ isSubmitting }) => (
-                    <Form className="contact-form">
-                      <div className="row form-group">
-                        <div className="col-md-6 mb-3 mb-md-0">
-                          <label className="text-black" htmlFor="firstName">
-                            First Name
-                          </label>
-                          <Field
-                            type="text"
-                            id="firstName"
-                            name="firstName"
-                            className="form-control"
-                          />
-                          <ErrorMessage
-                            name="firstName"
-                            component="div"
-                            className="error-message"
-                          />
+                  <div className="row form-group">
+                    <div className="col-md-6 mb-3 mb-md-0">
+                      <label className="text-black" htmlFor="firstName">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        id="firstName"
+                        {...register("firstName")}
+                        className="form-control"
+                      />
+                      {errors.firstName && (
+                        <div className="error-message">
+                          {errors.firstName.message}
                         </div>
-                        <div className="col-md-6">
-                          <label className="text-black" htmlFor="lastName">
-                            Last Name
-                          </label>
-                          <Field
-                            type="text"
-                            id="lastName"
-                            name="lastName"
-                            className="form-control"
-                          />
-                          <ErrorMessage
-                            name="lastName"
-                            component="div"
-                            className="error-message"
-                          />
+                      )}
+                    </div>
+                    <div className="col-md-6">
+                      <label className="text-black" htmlFor="lastName">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        {...register("lastName")}
+                        className="form-control"
+                      />
+                      {errors.lastName && (
+                        <div className="error-message">
+                          {errors.lastName.message}
                         </div>
-                      </div>
-                      <div className="row form-group">
-                        <div className="col-md-12">
-                          <label className="text-black" htmlFor="email">
-                            Email
-                          </label>
-                          <Field
-                            type="email"
-                            id="email"
-                            name="email"
-                            className="form-control"
-                          />
-                          <ErrorMessage
-                            name="email"
-                            component="div"
-                            className="error-message"
-                          />
+                      )}
+                    </div>
+                  </div>
+                  <div className="row form-group">
+                    <div className="col-md-12">
+                      <label className="text-black" htmlFor="email">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        {...register("email")}
+                        className="form-control"
+                      />
+                      {errors.email && (
+                        <div className="error-message">
+                          {errors.email.message}
                         </div>
-                      </div>
-                      <div className="row form-group">
-                        <div className="col-md-12">
-                          <label className="text-black" htmlFor="subject">
-                            Subject
-                          </label>
-                          <Field
-                            type="text"
-                            id="subject"
-                            name="subject"
-                            className="form-control"
-                          />
-                          <ErrorMessage
-                            name="subject"
-                            component="div"
-                            className="error-message"
-                          />
+                      )}
+                    </div>
+                  </div>
+                  <div className="row form-group">
+                    <div className="col-md-12">
+                      <label className="text-black" htmlFor="subject">
+                        Subject
+                      </label>
+                      <input
+                        type="text"
+                        id="subject"
+                        {...register("subject")}
+                        className="form-control"
+                      />
+                      {errors.subject && (
+                        <div className="error-message">
+                          {errors.subject.message}
                         </div>
-                      </div>
-                      <div className="row form-group">
-                        <div className="col-md-12">
-                          <label className="text-black" htmlFor="message">
-                            Message
-                          </label>
-                          <Field
-                            as="textarea"
-                            name="message"
-                            id="message"
-                            cols={30}
-                            rows={7}
-                            className="form-control"
-                            placeholder="Write your notes or questions here..."
-                          />
-                          <ErrorMessage
-                            name="message"
-                            component="div"
-                            className="error-message"
-                          />
+                      )}
+                    </div>
+                  </div>
+                  <div className="row form-group">
+                    <div className="col-md-12">
+                      <label className="text-black" htmlFor="message">
+                        Message
+                      </label>
+                      <textarea
+                        name="message"
+                        id="message"
+                        cols={30}
+                        rows={7}
+                        {...register("message")}
+                        className="form-control"
+                        placeholder="Write your notes or questions here..."
+                      ></textarea>
+                      {errors.message && (
+                        <div className="error-message">
+                          {errors.message.message}
                         </div>
-                      </div>
-                      <div className="row form-group">
-                        <div className="col-md-12">
-                          <button
-                            type="submit"
-                            className="btn btn-primary btn-md text-white"
-                            disabled={isSubmitting}
-                          >
-                            {isSubmitting ? "Sending..." : "Send Message"}
-                          </button>
-                        </div>
-                      </div>
-                    </Form>
-                  )}
-                </Formik>
+                      )}
+                    </div>
+                  </div>
+                  <div className="row form-group">
+                    <div className="col-md-12">
+                      <button
+                        type="submit"
+                        className="btn btn-primary btn-md text-white"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Sending..." : "Send Message"}
+                      </button>
+                    </div>
+                  </div>
+                </form>
                 {contactState.state === "Loading..." && <p>Loading...</p>}
-                {contactState.state === "Post ok!" && <p>Contact created successfully!</p>}
-                {contactState.state === "Rejected!" && <p>Error: {contactState.error}</p>}
+                {contactState.state === "Post ok!" && (
+                  <p>Contact created successfully!</p>
+                )}
+                {contactState.state === "Rejected!" && (
+                  <p>Error: {contactState.error}</p>
+                )}
               </div>
               <div className="col-lg-6">
                 <div className="p-4 mb-3 bg-white">
@@ -183,6 +189,7 @@ export const Contact = () => {
                   <p className="mb-0 font-weight-bold">Phone</p>
                   <p className="mb-4"><a href="#">+1 232 3235 324</a></p>
                   <p className="mb-0 font-weight-bold">Email Address</p>
+<<<<<<< HEAD
                   <p className="mb-0"><a href="mailto:jobboardfpt@gmail.com">jobboardfpt@gmail.com</a></p>
                   <div className="map-responsive">
                     <iframe 
@@ -197,6 +204,13 @@ export const Contact = () => {
                       tabIndex="0">
                     </iframe>
                   </div>
+=======
+                  <p className="mb-0">
+                    <a href="mailto:jobboardfpt@gmail.com">
+                      jobboardfpt@gmail.com
+                    </a>
+                  </p>
+>>>>>>> origin/main
                 </div>
               </div>
             </div>

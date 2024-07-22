@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllBlog,
@@ -23,6 +23,7 @@ import { calculateReadingTime } from "../../utils/function/readingTime";
 import { BlogSideBar } from "./BlogSideBar";
 import "./style.css";
 import { Spinner } from "react-bootstrap";
+import { Badge } from "reactstrap";
 
 export const BlogSingle = () => {
   const dispatch = useDispatch();
@@ -128,8 +129,31 @@ export const BlogSingle = () => {
                   <i>{blog.citation}</i>
                   <hr />
                   <BlogContent content={blog.content} />
-                  <div className="pt-5">
-                    <hr />
+                  <hr />
+                  <div className="d-flex justify-content-between">
+                    <p>
+                      Categories:
+                      {blog.categories.slice(0, 3).map((item, index) => (
+                        <NavLink
+                          key={item.id}
+                          to={`/blogs?type=${encodeURIComponent(item.name)}`}
+                        >
+                          <Badge
+                            key={item.id}
+                            color="primary"
+                            style={{
+                              color: "white",
+                              marginRight:
+                                index !== blog.categories.length - 1
+                                  ? "10px"
+                                  : "0px",
+                            }}
+                          >
+                            {item.name}
+                          </Badge>
+                        </NavLink>
+                      ))}
+                    </p>{" "}
                     <p className="font-weight-bold text-right">
                       Updated on:{" "}
                       {moment(blog.updatedAt).format("MMMM Do YYYY")}
@@ -138,7 +162,7 @@ export const BlogSingle = () => {
                 </div>
 
                 <BlogSideBar />
-                <div className="col-md-12">
+                <div className="col-md-8">
                   <div className="pt-5">
                     {comments.length > 0 ? (
                       <>

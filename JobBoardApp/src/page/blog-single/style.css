@@ -6,3 +6,19 @@
   text-overflow: ellipsis;
   white-space: normal;
 }
+
+.fixed-sidebar {
+  position: sticky;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  overflow-y: hidden;
+  padding-top: 20px; /* Adjust as needed for spacing */
+  z-index: 1000; /* Ensure it stays above other content */
+  background-color: #fff; /* Optional: Set a background color */
+}
+
+/* Ensure the rest of the page content has enough margin */
+.content-wrapper {
+  margin-right: 25%; /* Same value as the sidebar width */
+}

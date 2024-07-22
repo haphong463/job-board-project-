@@ -11,7 +11,13 @@ import { PersistGate } from "redux-persist/integration/react";
 import LoadingSpinner from "./components/loading-spinner/LoadingSpinner";
 // import { I18nextProvider } from "react-i18next";
 // import i18n from "./translation/translatetion";
+import Kommunicate from "@kommunicate/kommunicate-chatbot-plugin";
 
+Kommunicate.init("kommunicate-support", {
+  appId: process.env.REACT_APP_CHATBOT_ID,
+  automaticChatOpenOnNavigation: true,
+  popupWidget: true,
+});
 const root = ReactDOM.createRoot(document.getElementById("root"));
 // let persistor = persistStore(store);
 root.render(

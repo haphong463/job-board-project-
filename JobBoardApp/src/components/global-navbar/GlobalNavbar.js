@@ -12,11 +12,14 @@ import { FaBell, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import {
+  deleteNotificationThunk,
   markNotificationAsRead,
   readNotificationThunk,
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
+import { MdDelete } from "react-icons/md";
+
 import { Link } from "react-scroll";
 export function GlobalNavbar() {
   const [searchParams] = useSearchParams();
@@ -59,6 +62,10 @@ export function GlobalNavbar() {
     }, 500),
     [dispatch]
   );
+
+  const handleDeleteNotification = (id) => {
+    dispatch(deleteNotificationThunk(id));
+  };
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
   const toggleNotification = () =>
@@ -121,7 +128,7 @@ export function GlobalNavbar() {
                   {blogCategory.map((item) => (
                     <li key={item.id}>
                       <NavLink
-                        to={`/blogs?type=${item.name}`}
+                        to={`/blogs?type=${encodeURIComponent(item.name)}`}
                         className={({ isActive }) =>
                           isActive && searchParams.get("type") === item.name
                             ? "active"
@@ -134,6 +141,7 @@ export function GlobalNavbar() {
                   ))}
                 </ul>
               </li>
+
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
@@ -212,34 +220,48 @@ export function GlobalNavbar() {
                     notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className="notifications-item"
-                        onClick={
-                          !notification.read
-                            ? () => handleMarkNotification(notification.id)
-                            : undefined
-                        }
+                        className="notification-container"
                       >
-                        <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
-                        <div className="text">
-                          <h4
-                            className={`${
-                              notification.read ? "" : "font-weight-bold"
-                            }`}
-                          >
-                            {notification.sender.firstName}{" "}
-                            {notification.sender.lastName}
-                          </h4>
-                          <p
-                            className={`${
-                              notification.read ? "" : "font-weight-bold"
-                            }`}
-                          >
-                            {notification.message}
-                          </p>
-                          {/* <small className="d-block">
-                          {moment(notification.createdAt).from()}
-                        </small> */}
+                        <div
+                          className="notifications-item"
+                          onClick={
+                            !notification.read
+                              ? () => {
+                                  handleMarkNotification(notification.id);
+                                  navigate(notification.url);
+                                }
+                              : () => {
+                                  navigate(notification.url);
+                                }
+                          }
+                        >
+                          <img src={notification.sender.imageUrl} alt="img" />
+                          <div className="text">
+                            <h4
+                              className={`${
+                                notification.read ? "" : "font-weight-bold"
+                              }`}
+                            >
+                              {notification.sender.firstName}{" "}
+                              {notification.sender.lastName}
+                            </h4>
+                            <p
+                              className={`${
+                                notification.read ? "" : "font-weight-bold"
+                              }`}
+                            >
+                              {notification.message}
+                            </p>
+                          </div>
                         </div>
+                        <button
+                          className="delete-button"
+                          onClick={(e) => {
+                            handleDeleteNotification(notification.id);
+                          }}
+                        >
+                          <MdDelete />
+                        </button>
                       </div>
                     ))
                   ) : (
