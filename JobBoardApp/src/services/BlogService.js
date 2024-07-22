@@ -7,7 +7,7 @@ export const getAllBlogFilter = async (query, type, page, size) =>
     `/blogs/search?query=${query}&type=${type}&page=${page}&size=${size}`,
     {
       params: {
-        visibility: 2,
+        visibility: 0,
       },
     }
   );

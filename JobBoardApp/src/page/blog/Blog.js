@@ -23,16 +23,18 @@ export const Blog = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const postsPerPage = 9;
   const navigate = useNavigate();
+  const type = searchParams.get("type");
 
   const debouncedSearch = useCallback(
     debounce((query) => {
       setCurrentPage(0);
+      const encodedType = type ? encodeURIComponent(type) : "ALL";
       dispatch(
         fetchBlogs({
           query,
           page: currentPage,
           size: postsPerPage,
-          type: searchParams.get("type") || "ALL",
+          type: encodedType,
         })
       );
     }, 300),
@@ -45,13 +47,13 @@ export const Blog = () => {
   };
 
   useEffect(() => {
-    const type = searchParams.get("type");
+    const encodedType = type ? encodeURIComponent(type) : "ALL";
     dispatch(
       fetchBlogs({
         query: searchText,
         size: postsPerPage,
         page: currentPage,
-        type: type || "ALL",
+        type: encodedType,
       })
     );
   }, [dispatch, currentPage, searchParams]);
@@ -123,7 +125,7 @@ export const Blog = () => {
                     <div className="card h-100">
                       <NavLink to={`/blog/${blog.slug}`}>
                         <img
-                          src={blog.imageUrl}
+                          src={blog.thumbnailUrl}
                           alt="Image"
                           className="rounded mb-4 card-img-top"
                           style={{

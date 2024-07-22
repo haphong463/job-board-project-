@@ -29,8 +29,5 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.comment-form .post-button:hover {
-  color: #0056b3;
+  outline: none;
 }
