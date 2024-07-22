@@ -87,7 +87,7 @@ public class User   {
 
 
 
-    public User(Long id) {
+        public User(Long id) {
         this.id = id;
     }
 
@@ -112,6 +112,9 @@ public class User   {
         this.completedQuizzes.add(quiz);
     }
 
+
+
 }
+
 
 

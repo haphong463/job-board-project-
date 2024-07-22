@@ -1,7 +1,37 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
+import { postContactThunk } from "../../features/contactsSlice"; // Adjust the path as necessary
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import './contact.css';
 
 export const Contact = () => {
+  const dispatch = useDispatch();
+  const contactState = useSelector((state) => state.contacts);
+
+  const initialValues = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  };
+
+  const validationSchema = Yup.object({
+    firstName: Yup.string().required("First Name is required"),
+    lastName: Yup.string().required("Last Name is required"),
+    email: Yup.string().email("Invalid email address").required("Email is required"),
+    subject: Yup.string().required("Subject is required"),
+    message: Yup.string().required("Message is required"),
+  });
+
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    await dispatch(postContactThunk(values));
+    setSubmitting(false);
+    resetForm();
+  };
+
   return (
     <GlobalLayoutUser>
       <>
@@ -30,82 +60,143 @@ export const Contact = () => {
           <div className="container">
             <div className="row">
               <div className="col-lg-6 mb-5 mb-lg-0">
-                <form action="#" className="">
-                  <div className="row form-group">
-                    <div className="col-md-6 mb-3 mb-md-0">
-                      <label className="text-black" htmlFor="fname">
-                        First Name
-                      </label>
-                      <input type="text" id="fname" className="form-control" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="text-black" htmlFor="lname">
-                        Last Name
-                      </label>
-                      <input type="text" id="lname" className="form-control" />
-                    </div>
-                  </div>
-                  <div className="row form-group">
-                    <div className="col-md-12">
-                      <label className="text-black" htmlFor="email">
-                        Email
-                      </label>
-                      <input type="email" id="email" className="form-control" />
-                    </div>
-                  </div>
-                  <div className="row form-group">
-                    <div className="col-md-12">
-                      <label className="text-black" htmlFor="subject">
-                        Subject
-                      </label>
-                      <input
-                        type="subject"
-                        id="subject"
-                        className="form-control"
-                      />
-                    </div>
-                  </div>
-                  <div className="row form-group">
-                    <div className="col-md-12">
-                      <label className="text-black" htmlFor="message">
-                        Message
-                      </label>
-                      <textarea
-                        name="message"
-                        id="message"
-                        cols={30}
-                        rows={7}
-                        className="form-control"
-                        placeholder="Write your notes or questions here..."
-                        defaultValue={""}
-                      />
-                    </div>
-                  </div>
-                  <div className="row form-group">
-                    <div className="col-md-12">
-                      <input
-                        type="submit"
-                        defaultValue="Send Message"
-                        className="btn btn-primary btn-md text-white"
-                      />
-                    </div>
-                  </div>
-                </form>
+                <Formik
+                  initialValues={initialValues}
+                  validationSchema={validationSchema}
+                  onSubmit={handleSubmit}
+                >
+                  {({ isSubmitting }) => (
+                    <Form className="contact-form">
+                      <div className="row form-group">
+                        <div className="col-md-6 mb-3 mb-md-0">
+                          <label className="text-black" htmlFor="firstName">
+                            First Name
+                          </label>
+                          <Field
+                            type="text"
+                            id="firstName"
+                            name="firstName"
+                            className="form-control"
+                          />
+                          <ErrorMessage
+                            name="firstName"
+                            component="div"
+                            className="error-message"
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <label className="text-black" htmlFor="lastName">
+                            Last Name
+                          </label>
+                          <Field
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            className="form-control"
+                          />
+                          <ErrorMessage
+                            name="lastName"
+                            component="div"
+                            className="error-message"
+                          />
+                        </div>
+                      </div>
+                      <div className="row form-group">
+                        <div className="col-md-12">
+                          <label className="text-black" htmlFor="email">
+                            Email
+                          </label>
+                          <Field
+                            type="email"
+                            id="email"
+                            name="email"
+                            className="form-control"
+                          />
+                          <ErrorMessage
+                            name="email"
+                            component="div"
+                            className="error-message"
+                          />
+                        </div>
+                      </div>
+                      <div className="row form-group">
+                        <div className="col-md-12">
+                          <label className="text-black" htmlFor="subject">
+                            Subject
+                          </label>
+                          <Field
+                            type="text"
+                            id="subject"
+                            name="subject"
+                            className="form-control"
+                          />
+                          <ErrorMessage
+                            name="subject"
+                            component="div"
+                            className="error-message"
+                          />
+                        </div>
+                      </div>
+                      <div className="row form-group">
+                        <div className="col-md-12">
+                          <label className="text-black" htmlFor="message">
+                            Message
+                          </label>
+                          <Field
+                            as="textarea"
+                            name="message"
+                            id="message"
+                            cols={30}
+                            rows={7}
+                            className="form-control"
+                            placeholder="Write your notes or questions here..."
+                          />
+                          <ErrorMessage
+                            name="message"
+                            component="div"
+                            className="error-message"
+                          />
+                        </div>
+                      </div>
+                      <div className="row form-group">
+                        <div className="col-md-12">
+                          <button
+                            type="submit"
+                            className="btn btn-primary btn-md text-white"
+                            disabled={isSubmitting}
+                          >
+                            {isSubmitting ? "Sending..." : "Send Message"}
+                          </button>
+                        </div>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+                {contactState.state === "Loading..." && <p>Loading...</p>}
+                {contactState.state === "Post ok!" && <p>Contact created successfully!</p>}
+                {contactState.state === "Rejected!" && <p>Error: {contactState.error}</p>}
               </div>
-              <div className="col-lg-5 ml-auto">
+              <div className="col-lg-6">
                 <div className="p-4 mb-3 bg-white">
                   <p className="mb-0 font-weight-bold">Address</p>
-                  <p className="mb-4">
-                    203 Fake St. Mountain View, San Francisco, California, USA
-                  </p>
+                  <p className="mb-4">590 Cách Mạng Tháng Tám, Phường 11, Quận 3, HCM.</p>
                   <p className="mb-0 font-weight-bold">Phone</p>
-                  <p className="mb-4">
-                    <a href="#">+1 232 3235 324</a>
-                  </p>
+                  <p className="mb-4"><a href="#">+1 232 3235 324</a></p>
                   <p className="mb-0 font-weight-bold">Email Address</p>
-                  <p className="mb-0">
-                    <a href="#">youremail@domain.com</a>
-                  </p>
+                  <p className="mb-0"><a href="mailto:jobboardfpt@gmail.com">jobboardfpt@gmail.com</a></p>
+                  <div className="map-responsive">
+                    <iframe 
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.323723220671!2d106.66137877635536!3d10.786499231606594!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752ecb37e59e33%3A0xfe7c4d9f94f9e079!2zNTkwIMSQLiBDw6FjaCBN4bqhbmcgVGjDoW5nIDgsIFBoxrDhu51uZyAxMSwgUXXhuq1uIDMsIEjhu5MgQ2jDrSBNaW5oIDcwMDAwMCwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1721632289248!5m2!1svi!2s"  allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" 
+                      width="100%" 
+                      height="450" 
+      
+                      frameBorder="0" 
+                      style={{border: 0}} 
+                      allowFullScreen="" 
+                      aria-hidden="false" 
+                      tabIndex="0">
+                    </iframe>
+                  </div>
                 </div>
               </div>
             </div>

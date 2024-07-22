@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
+  deleteNotificationAsync,
   getNotificationAsync,
   readNotificationAsync,
   sendNotificationAsync,
@@ -19,9 +20,25 @@ export const getNotificationThunk = createAsyncThunk(
 
 export const readNotificationThunk = createAsyncThunk(
   "notification/read",
-  async (id) => {
-    const res = await readNotificationAsync(id);
-    return res;
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await readNotificationAsync(id);
+      return res;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteNotificationThunk = createAsyncThunk(
+  "notification/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await deleteNotificationAsync(id);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -63,6 +80,12 @@ const notificationSlice = createSlice({
           state.list[notificationIndex].read = true;
           state.unreadCount--;
         }
+      })
+      .addCase(deleteNotificationThunk.fulfilled, (state, action) => {
+        state.list = state.list.filter(
+          (notification) => notification.id !== action.payload
+        );
+        state.unreadCount = state.list.filter((item) => !item.read).length;
       });
   },
 });

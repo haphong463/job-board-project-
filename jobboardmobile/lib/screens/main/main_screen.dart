@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jobboardmobile/constant/endpoint.dart';
+import 'package:jobboardmobile/service/quiz_service.dart';
 
 import '../../core/utils/color_util.dart';
 import '../../service/auth_service.dart';
@@ -7,13 +10,48 @@ import '../../widget/custom_app_bar.dart';
 import '../../core/utils/asset_path_list.dart' as assetPath;
 import '../../widget/search_icon.dart';
 
+class SearchIcon extends StatelessWidget {
+  final Function onTapSuffix;
+
+  const SearchIcon({super.key, required this.onTapSuffix});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.search),
+      onPressed: () => onTapSuffix(),
+    );
+  }
+}
+
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   final AuthService _authService = AuthService();
+  final storage = const FlutterSecureStorage();
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? imageUrl;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserDetails();
+  }
+
+  void _fetchUserDetails() async {
+    firstName = await _authService.getFirstName();
+    lastName = await _authService.getLastName();
+    email = await _authService.getEmail();
+    imageUrl = await _authService.getImageUrl();
+
+    setState(() {});
+  }
 
   void _logout() async {
     await _authService.logout();
@@ -67,86 +105,98 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomAppBar.scaffold(
-      key: Key('your_key_here'),
-      onTapPrefix: () {},
-      iconColor: Colors.black,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Find your",
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            "perfect job",
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: ColorUtil.primaryColor,
+        actions: [
+          SearchIcon(
+            onTapSuffix: () => Navigator.of(context).pushNamed('/search'),
           ),
         ],
       ),
-      prefixIcon: PopupMenuButton<String>(
-        icon: Icon(
-          Icons.menu,
-          color: Colors.black,
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text('${firstName ?? ''} ${lastName ?? ''}'),
+              accountEmail: Text(email ?? ''),
+              currentAccountPicture: imageUrl != null
+                  ? ClipOval(
+                      child: Image.network(
+                      imageUrl!.replaceFirst(
+                        'http://localhost:8080',
+                        Endpoint.imageUrl,
+                      ),
+                      fit: BoxFit.cover,
+                      width: 40,
+                      height: 40,
+                    ))
+                  : const Icon(
+                      Icons.face,
+                      size: 48.0,
+                      color: Colors.white,
+                    ),
+              otherAccountsPictures: const [
+                Icon(
+                  Icons.bookmark_border,
+                  color: Colors.white,
+                ),
+              ],
+              decoration: BoxDecoration(
+                color: ColorUtil.primaryColor,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.note_add),
+              title: const Text('Blog'),
+              onTap: () {
+                Navigator.pushNamed(context, '/blog');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Notifications'),
+              onTap: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.note_add),
+              title: const Text('Quiz'),
+              onTap: () {
+                Navigator.pushNamed(context, '/quizzes');
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () {
+                _logout();
+              },
+            ),
+          ],
         ),
-        onSelected: (String result) {
-          switch (result) {
-            case 'Home':
-              Navigator.of(context).pushNamed('/home');
-              break;
-            case 'Profile':
-              Navigator.of(context).pushNamed('/profile');
-              break;
-            case 'Settings':
-              Navigator.of(context).pushNamed('/settings');
-              break;
-            case 'Logout':
-              _logout();
-              break;
-          }
-        },
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(
-            value: 'Home',
-            child: Text('Home'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'Profile',
-            child: Text('Profile'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'Settings',
-            child: Text('Settings'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'Logout',
-            child: Text('Logout'),
-          ),
-        ],
       ),
-      suffixIcon: SearchIcon(),
-      onTapSuffix: () => Navigator.of(context).pushNamed('/search'),
-      backgroundColor: ColorUtil.backgroundColor,
-      child: Expanded(
-        child: Container(
-          constraints: BoxConstraints.expand(),
-          margin: EdgeInsets.symmetric(horizontal: 25),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTags(),
-              SizedBox(height: 10),
-              _buildForYouSection(),
-              SizedBox(height: 10),
-              _buildRecentlyAddedSection(),
-            ],
-          ),
+      body: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTags(),
+            const SizedBox(height: 10),
+            _buildForYouSection(),
+            const SizedBox(height: 10),
+            _buildRecentlyAddedSection(),
+          ],
         ),
       ),
     );
@@ -157,7 +207,7 @@ class _MainScreenState extends State<MainScreen> {
       child: Row(
         children: [
           _buildFlatButton("New York"),
-          SizedBox(width: 15),
+          const SizedBox(width: 15),
           _buildFlatButton("Full Time"),
         ],
       ),
@@ -185,7 +235,7 @@ class _MainScreenState extends State<MainScreen> {
                 color: ColorUtil.primaryColor,
               ),
             ),
-            SizedBox(width: 5),
+            const SizedBox(width: 5),
             Icon(
               Icons.close,
               color: ColorUtil.primaryColor,
@@ -199,10 +249,11 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildForYouSection() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 15),
+      margin: const EdgeInsets.symmetric(vertical: 15),
       child: Column(
         children: [
-          Align(
+          const Align(
+            alignment: Alignment.centerLeft,
             child: Text(
               "For You",
               style: TextStyle(
@@ -210,17 +261,16 @@ class _MainScreenState extends State<MainScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            alignment: Alignment.centerLeft,
           ),
-          SizedBox(height: 10),
-          Container(
+          const SizedBox(height: 10),
+          SizedBox(
             height: 190,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 return _buildForYouCard(_listForYouData[index]);
               },
-              separatorBuilder: (content, index) => SizedBox(
+              separatorBuilder: (content, index) => const SizedBox(
                 width: 15,
               ),
               itemCount: _listForYouData.length,
@@ -233,11 +283,11 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildForYouCard(Map<String, dynamic> data) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
       width: 210,
       decoration: BoxDecoration(
         color: data["is-active"] ? ColorUtil.primaryColor : Colors.white,
-        borderRadius: BorderRadius.all(
+        borderRadius: const BorderRadius.all(
           Radius.circular(10.0),
         ),
       ),
@@ -277,7 +327,7 @@ class _MainScreenState extends State<MainScreen> {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 Text(
                   data["salary"],
                   style: TextStyle(
@@ -297,28 +347,28 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildRecentlyAddedSection() {
     return Expanded(
       child: Container(
-        constraints: BoxConstraints.expand(),
+        constraints: const BoxConstraints.expand(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Recently Added",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Expanded(
               child: Container(
-                padding: EdgeInsets.only(top: 5, bottom: 10),
+                padding: const EdgeInsets.only(top: 5, bottom: 10),
                 child: ListView.separated(
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
                     return _buildRecentlyAddedCard(
                         _listRecentlyAddedData[index]);
                   },
-                  separatorBuilder: (content, index) => SizedBox(
+                  separatorBuilder: (content, index) => const SizedBox(
                     height: 10,
                   ),
                   itemCount: _listRecentlyAddedData.length,
@@ -334,8 +384,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildRecentlyAddedCard(Map<String, dynamic> data) {
     return Container(
       height: 75,
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(15),
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.all(
           Radius.circular(10.0),
@@ -344,7 +394,7 @@ class _MainScreenState extends State<MainScreen> {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.only(right: 15),
+            padding: const EdgeInsets.only(right: 15),
             child: Image.asset(
               data["icon-path"],
               height: 40,
@@ -358,12 +408,12 @@ class _MainScreenState extends State<MainScreen> {
               children: [
                 Text(
                   data["position"],
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
                   data["company"],
                   style: TextStyle(
@@ -376,7 +426,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           Text(
             data["salary"],
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),

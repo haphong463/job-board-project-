@@ -38,11 +38,20 @@ export const navigation = [
     href: "/jobportal/quiz",
   },
   {
+    title: "Cv management",
+    icon: "bi bi-question-circle",
+    href: "/jobportal/cv-management",
+  },
+  {
     title: "User",
     icon: "bi bi-question-circle",
     href: "/jobportal/user",
   },
-
+  {
+    title: "Contact",
+    icon: "bi bi-envelope", 
+    href: "/jobportal/contact",
+  },
   {
     title: "Settings",
     href: "/jobportal/settings",

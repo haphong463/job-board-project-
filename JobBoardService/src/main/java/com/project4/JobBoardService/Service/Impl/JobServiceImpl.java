@@ -1,7 +1,6 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.DTO.CategoryDTO;
-import com.project4.JobBoardService.DTO.CompanyDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
 import com.project4.JobBoardService.Enum.*;
@@ -23,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class JobServiceImpl   implements JobService {
     private final JobRepository jobRepository;
-    private final CompanyService companyService;
     private final CategoryService categoryService;
     private final UserService userService;
     private final TransactionService transactionService;
@@ -33,8 +31,9 @@ public class JobServiceImpl   implements JobService {
     @Autowired
     public JobServiceImpl(JobRepository jobRepository, CompanyService companyService, CategoryService categoryService, UserService userService,TransactionService transactionService) {
         this.jobRepository = jobRepository;
-        this.companyService = companyService;
         this.categoryService = categoryService;
+        this.userService = userService;
+        this.transactionService=transactionService;
         this.userService = userService;
         this.transactionService=transactionService;
     }
@@ -86,6 +85,23 @@ public class JobServiceImpl   implements JobService {
         return job.map(this::convertToDto);
     }
 
+
+    public List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired) {
+        LocalDate currentDate = LocalDate.now();
+        if (isExpired) {
+            List<Job> expiredJobs = jobRepository.findByUser_IdAndExpiredBefore(userId, currentDate);
+            return expiredJobs.stream().map(this::convertToDto).collect(Collectors.toList());
+        } else {
+            List<Job> activeJobs = jobRepository.findByUser_IdAndExpiredAfter(userId, currentDate);
+            return activeJobs.stream().map(this::convertToDto).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public Optional<JobDTO> findJobById(Long jobId) {
+        Optional<Job> job = jobRepository.findById(jobId);
+        return job.map(this::convertToDto);
+    }
   /*  @Override
     public Integer countJobsByCompanyId(Long companyId) {
         return jobRepository.countByCompanyId(companyId);
@@ -132,25 +148,33 @@ public class JobServiceImpl   implements JobService {
         Optional<CompanyDTO> companyOptional = companyService.getCompanyById(companyId);
         Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
 
-        if (companyOptional.isPresent() && categoryOptional.isPresent()) {
-            Company company = companyService.convertCompanyToEntity(companyOptional.get()); // Unwrap the Optional
-            Category category = categoryOptional.get(); // Unwrap the Optional
+      if (userOptional.isPresent() && categoryOptional.isPresent()) {
+          User user = userOptional.get();
+          Category category = categoryOptional.get();
 
-            // Tạo một đối tượng Job từ DTO
-            Job job = convertJobToEntity(jobDTO);
+          int jobCountThisMonth = jobRepository.countJobsByUserIdAndMonth(userId, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
 
-            // Liên kết công ty và danh mục với công việc
-            job.setCompany(company);
-            job.setCategory(category);
 
-            // Save job to the repository
-            jobRepository.save(job);
+          Optional<Subscription> subscriptionOptional = transactionService.findActiveSubscriptionByUser(user, LocalDate.now());
+          int maxPosts = subscriptionOptional.map(Subscription::getPostLimit).orElse(10); // 10 nếu không có subscription
 
-            return true;
-        } else {
-            return false;
-        }
-    }
+          if (jobCountThisMonth >= maxPosts) {
+              return false;
+          }
+
+          // Tạo đối tượng Job từ DTO
+          Job job = convertJobToEntity(jobDTO);
+          job.setUser(user);
+          job.setCategory(category);
+
+          // Lưu job vào repository
+          jobRepository.save(job);
+          return true;
+      } else {
+          return false;
+      }
+  }
+
 
 
     public JobDTO updateJob(Long jobId, JobDTO jobDTO) {
@@ -247,6 +271,7 @@ public class JobServiceImpl   implements JobService {
             dto.setPosition(null);
         }
         dto.setExperience(job.getExperience());
+        dto.setQuantity(job.getQuantity());
         dto.setQualification(job.getQualification());
         if (job.getJobType() != null) {
             dto.setJobType(job.getJobType().getValue());

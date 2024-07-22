@@ -1,84 +1,117 @@
 .template-preview {
-    margin-top: 20px;
-    border-radius: 2%;
-    width: 100%;
-    height: 80vh; /* Set the height to 80% of the viewport height */
-    overflow: auto; /* Add scrollbars if the content exceeds the container height */
-    background-color: #f8f8f8; /* Set the background color */
-    padding: 20px; /* Add some padding for better spacing */
-  }
-  .bg-css{
-   border-top: 1px solid #ccc;
-  }
-  /* Scrollbar styles */
-  .template-preview::-webkit-scrollbar {
-    width: 12px; /* Width of the scrollbar */
-  }
-  
-  .template-preview::-webkit-scrollbar-track {
-    background-color: #f1f1f1; /* Color of the track (area behind the scrollbar) */
-    border-radius: 6px; /* Rounded corners for the track */
-  }
-  
-  .template-preview::-webkit-scrollbar-thumb {
-    background-color: #888; /* Color of the scrollbar thumb */
-    border-radius: 6px; /* Rounded corners for the thumb */
-  }
-  
-  .template-preview::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Color of the scrollbar thumb on hover */
-  }
-  
-  .actions-container {
-    text-align: center;
-  /* Increase the bottom margin to create more space */
-  }
-  
-  .actions-title {
-    font-size: 28px; /* Increase the font size of the title */
-    font-weight: bold;
-  }
-  
-  .action-items {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .action-item {
-    display: flex;
-    align-items: center;
-    margin-right: 20px; 
-    margin-left: 20px;/* Add some right margin for spacing */
-    cursor: pointer;
-    font-size: 22px; /* Increase the font size of the action items */
-  }
-  
-  .action-item .icon {
-    margin-right: 10px; /* Increase the right margin for better spacing */
-    font-size: 28px; /* Increase the icon size */
-  }
-  
-  .action-item .separator {
-    margin: 0px 20px; /* Increase the horizontal margin for better spacing */
-    color: #ccc;
-    font-size: 28px; /* Increase the separator size */
-  }
-  .action-item:hover {
-    color: #007bff; /* Change the color on hover */
-  }
-  
-  .scroll-to-top {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-left: 5px; /* Add some left margin for spacing */
-  }
-  
-  .scroll-to-top.show {
-    opacity: 1;
-  }
-  
+  margin-top: 0;
+  border-radius: 2%;
+  width: 100%;
+  height: 100vh;
+  overflow: auto;
+  background-color: #f8f8f8;
+  padding: 20px;
+}
+
+.bg-css {
+  border-top: 1px solid #ccc;
+}
+
+.actions-title {
+  font-weight: bolder;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.template-preview::-webkit-scrollbar {
+  width: 12px;
+}
+
+.template-preview::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  border-radius: 6px;
+}
+
+.template-preview::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 6px;
+}
+
+.template-preview::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.actions-container-rv {
+  text-align: center;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.action-items-rv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.action-item-rv {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  cursor: pointer;
+  font-size: 16px;
+  background: linear-gradient(45deg, #ff6b6b, #feca57);
+  padding: 12px 20px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  width: 100%;
+}
+
+.action-item-rv:hover {
+  background: linear-gradient(45deg, #ff9ff3, #54a0ff);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.action-item-rv .icon {
+  margin-right: 10px;
+  font-size: 24px;
+  transition: transform 0.3s ease;
+}
+
+.action-item-rv:hover .icon {
+  transform: scale(1.2);
+}
+
+.scroll-to-top {
+  background: linear-gradient(45deg, #5352ed, #3742fa);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.scroll-to-top.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.separator {
+  display: none;
+}

@@ -28,7 +28,6 @@ export const GlobalLayoutUser = ({ children }) => {
     });
   }, [location]);
 
-  
   return (
     <div id="top">
       <div className="site-wrap">

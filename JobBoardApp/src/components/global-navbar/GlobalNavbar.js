@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import
@@ -15,11 +15,15 @@ import { fetchCategoryThunk } from "../../features/categorySlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
 import
 {
+   deleteNotificationThunk,
    markNotificationAsRead,
    readNotificationThunk,
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
+import { MdDelete } from "react-icons/md";
+
+import { Link } from "react-scroll";
 import categoryData from './category.json';
 import companyData from '../../page/job-listing/company_data.json';
 
@@ -32,9 +36,9 @@ export function GlobalNavbar ()
    const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
    const [dropdownOpen, setDropdownOpen] = useState(false);
    const [notificationOpen, setNotificationOpen] = useState(false);
-
    const categories = useSelector((state) => state.category.categories);
    const companies = useSelector((state) => state.company.companies);
+
    const notifications = useSelector((state) => state.notification.list);
    const user = useSelector((state) => state.auth.user);
    const roles = useSelector((state) => state.auth.roles);
@@ -46,6 +50,11 @@ export function GlobalNavbar ()
    const handleLogout = () =>
    {
       dispatch(signOut());
+   };
+
+   const handleCvManagementClick = () =>
+   {
+      navigate('/cv-management');
    };
 
    useEffect(() =>
@@ -71,6 +80,11 @@ export function GlobalNavbar ()
       }, 500),
       [dispatch]
    );
+
+   const handleDeleteNotification = (id) =>
+   {
+      dispatch(deleteNotificationThunk(id));
+   };
 
    const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
    const toggleNotification = () =>
@@ -184,7 +198,7 @@ export function GlobalNavbar ()
                            {blogCategory.map((item) => (
                               <li key={item.id}>
                                  <NavLink
-                                    to={`/blogs?type=${item.name}`}
+                                    to={`/blogs?type=${encodeURIComponent(item.name)}`}
                                     className={({ isActive }) =>
                                        isActive && searchParams.get("type") === item.name
                                           ? "active"
@@ -197,18 +211,16 @@ export function GlobalNavbar ()
                            ))}
                         </ul>
                      </li>
+
                      <li>
                         <NavLink to="/contact">Contact</NavLink>
                      </li>
-                     {user && (
-                        <li>
-                           <NavLink to="/quiz">Quiz</NavLink>
-                        </li>
-                     )}
                      <li>
                         <NavLink to="/create-cv">Create CV</NavLink>
                      </li>
-
+                     <li>
+                        <NavLink to="/quiz">Quiz</NavLink>
+                     </li>
                      {!roles.includes("ROLE_EMPLOYER") && (
                         <li>
                            <NavLink to="/EmployerSignUp">For Employer</NavLink>
@@ -242,6 +254,11 @@ export function GlobalNavbar ()
                      )}
                      {user && (
                         <div className="icon-notification" onClick={toggleNotification}>
+                           {/* <img
+                    src="https://i.imgur.com/AC7dgLA.png"
+                    alt=""
+                    className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
+                  /> */}
                            <FaBell
                               size={30}
                               color="white"
@@ -273,38 +290,56 @@ export function GlobalNavbar ()
                               notifications.map((notification) => (
                                  <div
                                     key={notification.id}
-                                    className="notifications-item"
-                                    onClick={
-                                       !notification.read
-                                          ? () =>
-                                          {
-                                             handleMarkNotification(notification.id);
-                                             navigate(notification.url);
-                                          }
-                                          : () =>
-                                          {
-                                             navigate(notification.url);
-                                          }
-                                    }
+                                    className="notification-container"
                                  >
-                                    <img src={notification.sender.imageUrl} alt="img" />
-                                    <div className="text">
-                                       <h4
-                                          className={`${notification.read ? "" : "font-weight-bold"}`}
-                                       >
-                                          {notification.sender.firstName}{" "}
-                                          {notification.sender.lastName}
-                                       </h4>
-                                       <p
-                                          className={`${notification.read ? "" : "font-weight-bold"}`}
-                                       >
-                                          {notification.message}
-                                       </p>
+                                    <div
+                                       className="notifications-item"
+                                       onClick={
+                                          !notification.read
+                                             ? () =>
+                                             {
+                                                handleMarkNotification(notification.id);
+                                                navigate(notification.url);
+                                             }
+                                             : () =>
+                                             {
+                                                navigate(notification.url);
+                                             }
+                                       }
+                                    >
+                                       <img src={notification.sender.imageUrl} alt="img" />
+                                       <div className="text">
+                                          <h4
+                                             className={`${notification.read ? "" : "font-weight-bold"
+                                                }`}
+                                          >
+                                             {notification.sender.firstName}{" "}
+                                             {notification.sender.lastName}
+                                          </h4>
+                                          <p
+                                             className={`${notification.read ? "" : "font-weight-bold"
+                                                }`}
+                                          >
+                                             {notification.message}
+                                          </p>
+                                       </div>
                                     </div>
+                                    <button
+                                       className="delete-button"
+                                       onClick={(e) =>
+                                       {
+                                          handleDeleteNotification(notification.id);
+                                       }}
+                                    >
+                                       <MdDelete />
+                                    </button>
                                  </div>
                               ))
                            ) : (
-                              <p>No new notifications</p>
+                              <div className="text-center">
+                                 <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
+                                 <p>You don't have any notifications yet.</p>
+                              </div>
                            )}
                         </div>
                      )}
@@ -313,32 +348,44 @@ export function GlobalNavbar ()
                         toggle={toggleDropdown}
                         direction="down"
                      >
-                        <DropdownToggle className="icon-person">
+                        <DropdownToggle nav caret>
                            <FaUserCircle size={30} color="white" />
                         </DropdownToggle>
-                        <DropdownMenu>
-                           <DropdownItem>
-                              <NavLink to="/profile">Profile</NavLink>
-                           </DropdownItem>
-                           <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
+                        <DropdownMenu className="custom-dropdown-menu">
+                           {user ? (
+                              <>
+                                 <DropdownItem
+                                    header
+                                    className="text-uppercase font-weight-bold"
+                                 >
+                                    {user.sub}
+                                 </DropdownItem>
+                                 <DropdownItem onClick={handleCvManagementClick}>
+                                    CV Management
+                                 </DropdownItem>
+                                 <DropdownItem onClick={handleLogout} >
+                                    Log out
+                                 </DropdownItem>
+                              </>
+                           ) : (
+                              <>
+                                 <NavLink to="/login" className="dropdown-item">
+                                    <span className="mr-2 icon-lock_outline"></span>Log In
+                                 </NavLink>
+                                 <NavLink to="/signup" className="dropdown-item">
+                                    <span className="mr-2 icon-lock_outline"></span>Sign Up
+                                 </NavLink>
+                              </>
+                           )}
                         </DropdownMenu>
                      </Dropdown>
-                     {!user && (
-                        <>
-                           <NavLink
-                              to="/login"
-                              className="btn btn-outline-white border-width-2 d-none d-lg-inline-block"
-                           >
-                              Log In
-                           </NavLink>
-                           <NavLink
-                              to="/signup"
-                              className="btn btn-primary ml-3 d-none d-lg-inline-block"
-                           >
-                              Sign Up
-                           </NavLink>
-                        </>
-                     )}
+
+                     <NavLink
+                        to="#"
+                        className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"
+                     >
+                        <span className="icon-menu h3 m-0 p-0 mt-2"></span>
+                     </NavLink>
                   </div>
                </div>
             </div>

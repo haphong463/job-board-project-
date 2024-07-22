@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../service/auth_service.dart';
-import 'resetpassword_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override
@@ -16,24 +13,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   String _errorMessage = '';
 
   void _forgotPassword() async {
-    final response = await _authService.forgotPassword(_emailController.text);
-    if (response.statusCode == 200) {
-      var responseBody = json.decode(response.body);
-      String resetToken =
-          responseBody['resetToken']; // Adjust based on your response structure
+    try {
+      String email = _emailController.text;
+      await _authService.forgotPassword(email);
 
-      Navigator.push(
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(
-          builder: (context) => ResetPasswordScreen(
-            email: _emailController.text,
-            token: resetToken,
-          ),
-        ),
+        '/verify_reset',
+        arguments: {'email': email},
       );
-    } else {
+    } catch (e) {
+      print('Error sending forgot password request: $e');
       setState(() {
-        _errorMessage = 'Email not found or request failed.';
+        _errorMessage = 'Failed to send forgot password request.';
       });
     }
   }
@@ -136,8 +128,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  Navigator.pop(
-                                      context); // Go back to login screen
+                                  Navigator.pop(context);
                                 },
                             ),
                           ],

@@ -19,10 +19,10 @@ import { JobSingle } from "../../page/job-listing/JobSingle";
 import { JobSingle1 } from "../../page/job-single/JobSingle";
 import { JobListing } from "../../page/job-listing/JobListing";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
-import CreateCV from "../../page/user-cv/CreateCv";
-import CreateTemplate from "../../page/user-cv/CreateTemplate";
 import ListTemplate from "../../page/list-template/ListTemplate";
 import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
+import MainCv from "../../page/user-cv/MainCv";
+
 
 import SetupCredentials from "../../page/signup/SetupCredentials";
 import { Quiz } from "../../page/quiz/quiz";
@@ -49,10 +49,7 @@ export const routes = [
   { path: "/viewAllSkill", component: <ViewAllSkill /> },
   { path: "/login", component: <Login /> },
   { path: "/signup", component: <SignUp /> },
-  { path: "/create-cv", component: <CreateCV /> },
-  { path: "/update-cv/:cvId", component: <UpdateCv /> },
-  { path: "/create-template", component: <CreateTemplate /> },
-
+  { path: "/cv-management", component: <MainCv /> },
   { path: "/list-template", component: <ListTemplate /> },
   { path: "/review-template/:templateName", component: <ReviewTemplate /> },
   { path: "/ResetPassword", component: <ResetPassword /> },

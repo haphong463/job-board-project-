@@ -7,6 +7,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.project4.JobBoardService.Config.ErrorDetails;
 import com.project4.JobBoardService.Config.TokenRefreshException;
 import com.project4.JobBoardService.DTO.UserDTO;
+import com.project4.JobBoardService.DTO.UserGmailAndroid;
 import com.project4.JobBoardService.Entity.Employer;
 import com.project4.JobBoardService.Entity.RefreshToken;
 import com.project4.JobBoardService.Entity.Role;
@@ -27,7 +28,8 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +39,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.*;
@@ -75,7 +78,6 @@ public class AuthController {
     private String CLIENT_ID; // Replace with your actual client ID
 
 
-    // ! Đang trong quá trin sửa, đừng ai động vào!
     @PostMapping("/google")
     public ResponseEntity<?> authenticateUserWithGoogle(@RequestBody TokenRequest tokenRequest) {
         try {
@@ -122,6 +124,8 @@ public class AuthController {
                             user.getId(),
                             user.getUsername(),
                             user.getEmail(),
+                            user.getLastName(),
+                            user.getFirstName(),
                             rolesSignIn));
 
 
@@ -158,6 +162,8 @@ public class AuthController {
                         userDetails.getId(),
                         userDetails.getUsername(),
                         userDetails.getEmail(),
+                        userDetails.getFirstName(),
+                        userDetails.getLastName(),
                         rolesSignIn));
             } else {
                 System.out.println("Invalid ID token.");
@@ -167,6 +173,109 @@ public class AuthController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+
+
+    @PostMapping("/google-mobile")
+    public ResponseEntity<?> authenticateUserWithGoogleAndroid(@RequestBody TokenRequest tokenRequest) {
+        try {
+            String token = tokenRequest.getToken();
+            String url = "https://www.googleapis.com/oauth2/v3/userinfo";
+
+            // Create headers and add the token
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // Make the request to Google's userinfo endpoint
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                Map<String, Object> payload = response.getBody();
+
+                if (payload != null) {
+                    // Extract user information from payload
+                    String userId = (String) payload.get("sub");
+                    String email = (String) payload.get("email");
+                    boolean emailVerified = (Boolean) payload.get("email_verified");
+                    String name = (String) payload.get("name");
+                    String pictureUrl = (String) payload.get("picture");
+                    String locale = (String) payload.get("locale");
+                    String familyName = (String) payload.get("family_name");
+                    String givenName = (String) payload.get("given_name");
+
+                    // Use or store profile information
+                    User user = userRepository.findByEmail(email).orElse(null);
+                    if (user != null) {
+                        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        String jwt = jwtUtils.generateJwtToken(authentication);
+
+                        List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList());
+                        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+                        return ResponseEntity.ok(new JwtResponse(jwt,
+                                refreshToken.getToken(),
+                                userDetails.getId(),
+                                userDetails.getUsername(),
+                                userDetails.getEmail(),
+                                userDetails.getFirstName(),
+                                userDetails.getLastName(),
+                                rolesSignIn));
+                    }
+
+                    // Create new user
+                    user = new User();
+                    user.setEmail(email);
+                    user.setUsername(email); // or some other unique identifier
+                    user.setFirstName(givenName);
+                    user.setLastName(familyName);
+                    user.setVerified(emailVerified);
+                    user.setPassword(encoder.encode("google-password"));
+                    user.setImageUrl(pictureUrl);
+                    Set<Role> roles = new HashSet<>();
+                    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    roles.add(userRole);
+                    user.setRoles(roles);
+                    user = userRepository.save(user);
+
+                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    String jwt = jwtUtils.generateJwtToken(authentication);
+
+                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+                    return ResponseEntity.ok(new JwtResponse(jwt,
+                            refreshToken.getToken(),
+                            userDetails.getId(),
+                            userDetails.getUsername(),
+                            userDetails.getEmail(),
+                            userDetails.getFirstName(),
+                            userDetails.getLastName(),
+                            rolesSignIn));
+                } else {
+                    return ResponseEntity.badRequest().body("Invalid token payload!");
+                }
+            } else {
+                return ResponseEntity.badRequest().body("Invalid token!");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+
+
 
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
@@ -219,9 +328,18 @@ public class AuthController {
                 .collect(Collectors.toList());
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        JwtResponse jwtResponse = new JwtResponse(
+                jwt,
+                refreshToken.getToken(),
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                userDetails.getFirstName(),
+                userDetails.getLastName(),
+                roles
+        );
 
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
-                userDetails.getUsername(), userDetails.getEmail(), roles));
+        return ResponseEntity.ok(jwtResponse);
     }
 
     @PostMapping("/signup")
@@ -432,6 +550,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
+
 //VerifyUser
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
     public void verifyEmail(
@@ -528,6 +647,147 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
 
     return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
 }
+
+
+
+    @PostMapping("/forgot-password-flutter")
+    public ResponseEntity<?> forgotPasswordFlutter(@RequestParam("email") String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String verificationCode = generateVerificationCode();
+
+            user.setVerificationCode(verificationCode);  // Save the verification code
+            userRepository.save(user);
+
+            // Send reset password email
+            emailService.sendResetPasswordEmailFlutter(user.getEmail(), user.getUsername(), verificationCode);
+
+            return ResponseEntity.ok(new MessageResponse("Reset password email sent successfully!"));
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+        }
+    }
+    @PostMapping("/set-new-passwordFlutter")
+    public ResponseEntity<?> setNewPassword(@RequestBody SetPasswordRequest request) {
+        String email = request.getEmail();
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        if (!newPassword.equals(confirmPassword)) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Passwords do not match!"));
+        }
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setPassword(encoder.encode(newPassword));
+            userRepository.save(user);
+            return ResponseEntity.ok(new MessageResponse("Password reset successfully!"));
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
+        }
+    }
+
+
+
+    @PostMapping("/signupFlutter")
+    public ResponseEntity<?> registerUserFlutter(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getGender());
+
+        Set<String> strRoles = signUpRequest.getRole();
+        Set<Role> roles = new HashSet<>();
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin":
+                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(adminRole);
+                        break;
+                    case "mod":
+                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(modRole);
+                        break;
+
+                    default:
+                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(userRole);
+                }
+            });
+        }
+
+        user.setRoles(roles);
+        user.setIsEnabled(true);
+        String verificationCode = generateVerificationCode();
+        user.setVerificationCode(verificationCode);
+
+        userRepository.save(user);
+        emailService.sendVerificationEmailFlutter(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PostMapping("/verifyFlutter")
+    public ResponseEntity<?> verifyEmailFlutter(@RequestParam("email") String email,
+                                         @RequestParam("code") String code) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String latestVerificationCode = user.getVerificationCode();
+            if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
+                user.setVerified(true);
+                userRepository.save(user);
+                return ResponseEntity.ok(new MessageResponse("Email verified successfully!"));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Invalid verification code!"));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
+        }
+    }
+
+    @PostMapping("/verifyResetPassWordFlutter")
+    public ResponseEntity<?> verifyResetPassWordFlutter(@RequestParam("email") String email,
+                                                        @RequestParam("code") String code) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String latestVerificationCode = user.getVerificationCode();
+            if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
+                String resetToken = generateResetToken();
+                user.setResetToken(resetToken);
+                userRepository.save(user);
+                return ResponseEntity.ok(new MessageResponse("Email verified successfully! Use the token to reset your password: " + resetToken));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Invalid verification code!"));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("User not found!"));
+        }
+    }
 
 
     private String generateVerificationCode() {

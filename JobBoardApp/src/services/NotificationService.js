@@ -8,3 +8,6 @@ export const sendNotificationAsync = async (data) =>
 
 export const readNotificationAsync = async (id) =>
   await axiosRequest.put(`/notifications/read/${id}`);
+
+export const deleteNotificationAsync = async (id) =>
+  await axiosRequest.delete(`/notifications/${id}`);

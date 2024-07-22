@@ -146,7 +146,7 @@ export const Quiz = () => {
       .then((response) => {
         const questions = response.data;
         localStorage.setItem(
-          `questions_${selectedQuiz.id}`,
+          `questions_${selectedQuiz.id}`, 
           JSON.stringify(questions)
         );
         navigate(`/quiz/${selectedQuiz.id}`);
