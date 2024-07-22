@@ -45,35 +45,36 @@ public class JobController {
         return jobService.getAllJobs();
     }
 
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<JobDTO>> getAllJobsByCompanyId(@PathVariable Long userId) {
-        List<JobDTO> jobs = jobService.findAllJobsByCompanyId(userId);
-        if (jobs.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
-        }
-        return ResponseEntity.ok(jobs);
-    }
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
-    @GetMapping("/{userId}/search")
-    public ResponseEntity<List<JobDTO>> searchJobsByCompanyId(@PathVariable Long userId, @RequestParam("text") String query) {
-        List<JobDTO> jobs = jobService.searchJobsByCompanyId(userId, query);
-        if (jobs.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
-        }
-        return ResponseEntity.ok(jobs);
-    }
-
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
-    @GetMapping("/{userId}/filter")
-    public ResponseEntity<List<JobDTO>> filterJobsByExpirationStatus(@PathVariable Long userId, @RequestParam boolean isExpired) {
-        List<JobDTO> jobs = jobService.filterJobsByExpirationStatus(userId, isExpired);
-        if (jobs.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
-        }
-        return ResponseEntity.ok(jobs);
-    }
-
+//    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+//    @GetMapping("/{userId}")
+//    public ResponseEntity<List<JobDTO>> getAllJobsByCompanyId(@PathVariable Long userId) {
+//        List<JobDTO> jobs = jobService.findAllJobsByCompanyId(userId);
+//        if (jobs.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
+//        }
+//        return ResponseEntity.ok(jobs);
+//    }
+//
+//    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+//    @GetMapping("/{userId}/search")
+//    public ResponseEntity<List<JobDTO>> searchJobsByCompanyId(@PathVariable Long userId, @RequestParam("text") String query) {
+//        List<JobDTO> jobs = jobService.searchJobsByCompanyId(userId, query);
+//        if (jobs.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
+//        }
+//        return ResponseEntity.ok(jobs);
+//    }
+//
+//    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+//    @GetMapping("/{userId}/filter")
+//    public ResponseEntity<List<JobDTO>> filterJobsByExpirationStatus(@PathVariable Long userId, @RequestParam boolean isExpired) {
+//        List<JobDTO> jobs = jobService.filterJobsByExpirationStatus(userId, isExpired);
+//        if (jobs.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(jobs);
+//        }
+//        return ResponseEntity.ok(jobs);
+//    }
+//
 
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
     @PostMapping("/companies/{companyId}/categories/{categoryId}")
@@ -82,11 +83,6 @@ public class JobController {
                                             @RequestBody JobDTO jobDTO) {
 
         boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
-
-        if (!createdJob) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User has reached the limit job postings this month.");
-        }
-
         return ResponseEntity.ok("Job created successfully");
     }
 

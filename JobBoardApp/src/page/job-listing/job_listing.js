@@ -7,7 +7,7 @@ import { fetchCompanyThunk } from "../../features/companySlice";
 // import jobData from './job_data.json';
 import companyData from './company_data.json';
 import categoryData from '../../components/global-navbar/category.json';
-import "./job_listing.css";
+import "./job_company.css";
 import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
@@ -555,7 +555,7 @@ export const JobList = () =>
                                  <a href='' className="h5 mb-3 d-block text-dark" onClick={() => handleCategoryClick(job.id)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</a>
                                  <div className="d-flex align-items-center mb-3">
                                     <NavLink to={''} target="_blank" rel="noopener noreferrer" onClick={() => handleCompanyClick(job.companyId)}>
-                                       <img src={company.logo} className="img-fluid rounded-sm border border-gray me-2" style={{ width: '100px', height: '80px' }} />
+                                       <img src={company.logo} className="img-fluid rounded-sm border border-gray me-2 bg-white" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
                                     </NavLink>
                                     <NavLink to={''} className="text-dark ml-2" onClick={() => handleCompanyClick(job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</NavLink>
                                  </div>

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { logout } from "../../features/authSlice";
 import companyData from './company_data.json';
-import "./listSkillAll.css";
+import "./job_company.css";
 import { useTranslation } from "react-i18next";
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 import _ from 'lodash';

@@ -2,8 +2,7 @@ import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayo
 import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import moment from 'moment';
-import './job-single.css';
-import "./job_listing.css";
+import './job_company.css';
 import { NavLink, useParams } from 'react-router-dom';
 import { fetchJobThunk } from "../../features/jobSlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
@@ -147,8 +146,8 @@ export const JobSingle = () =>
                   </div>
                </div>
             </section>
-            <section className="site-section">
-               <div className="container jb_content1">
+            <section className="site-section jb_content0">
+               <div className="container-fluid jb_content1">
                   <div className="row align-items-center mb-5">
                      <div className="col-lg-8 mb-4 mb-lg-0">
                         <div className="d-flex align-items-center">
@@ -229,7 +228,7 @@ export const JobSingle = () =>
                               <span className="icon-turned_in mr-3" />
                               Benefits for you
                            </h3>
-                           <ul className="list-unstyled m-0 p-0">
+                           <ul className="list-unstyled m-0 p-0 trf1">
                               {addIconsToListItems(jobData?.benefit)}
                            </ul>
                         </div>
@@ -277,7 +276,8 @@ export const JobSingle = () =>
                                  <img
                                     src={companyData?.logo}
                                     alt="Image"
-                                    className="w-50 h-100 border p-0 d-inline-block mr-3 rounded"
+                                    className="img-fluid border p-0 d-inline-block mr-3 rounded bg-white"
+                                    style={{ width: '8em', height: '8em', objectFit: 'contain' }}
                                  />
                                  <NavLink to={`/companyDetail/${jobData?.companyId}`} className="pt-3 pb-3 pr-3 pl-0" onClick={() => handleCompanyClick(jobData?.companyId)}>
                                     {companyData?.companyName}
@@ -295,7 +295,7 @@ export const JobSingle = () =>
                                  </li>
                                  <li className="d-flex justify-content-between mb-2">
                                     <strong className="text-black">Country</strong>
-                                    <span><i className={`fi fi-${companyData?.countryCode} border border-gray rounded-sm`}></i>&nbsp;&nbsp;{companyData?.country}</span>
+                                    <span><i className={`fi fi-${companyData?.countryCode} border border-gray rounded-sm`} style={{ width: '1.4em', lineHeight: '1em' }}></i>&nbsp;&nbsp;{companyData?.country}</span>
                                  </li>
                                  <li className="d-flex justify-content-between mb-2">
                                     <strong className="text-black">Working days</strong>{" "}
@@ -308,8 +308,8 @@ export const JobSingle = () =>
                   </div>
                </div>
             </section>
-            <section className="site-section" id="next">
-               <div className="container">
+            <section className="site-section jb_content0" id="next">
+               <div className="container-fluid">
                   <div className="row mb-5 justify-content-center">
                      <div className="col-md-7 text-center">
                         <h2 className="section-title mb-2">More jobs for you</h2>
@@ -328,12 +328,15 @@ export const JobSingle = () =>
                                     <img
                                        src={company.logo}
                                        alt="Free Website"
-                                       className="jb_custom-img rounded-sm border border-gray"
+                                       className="img-fluid rounded-sm me-2 bg-white"
                                        onClick={() =>
                                        {
                                           handleCompanyClick(job.companyId);
-                                       }} style={{ textDecoration: 'none', cursor: 'pointer' }}
+                                       }} style={{ width: '100px', height: '100px', objectFit: 'contain', cursor: 'pointer' }}
                                     />
+
+                                    {/* <img src={company.logo} className="img-fluid rounded-sm border border-gray me-2 bg-white" style={{ width: '90px', height: '90px', objectFit: 'contain' }} /> */}
+
                                  </div>
 
                                  <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
@@ -369,29 +372,6 @@ export const JobSingle = () =>
                      })}
                   </ul>
 
-                  <div className="row pagination-wrap">
-                     <div className="col-md-6 text-center text-md-left mb-4 mb-md-0">
-                        <span>Showing 1-7 Of 22,392 Jobs</span>
-                     </div>
-                     <div className="col-md-6 text-center text-md-right">
-                        <div className="custom-pagination ml-auto">
-                           <a href="#" className="prev">
-                              Prev
-                           </a>
-                           <div className="d-inline-block">
-                              <a href="#" className="active">
-                                 1
-                              </a>
-                              <a href="#">2</a>
-                              <a href="#">3</a>
-                              <a href="#">4</a>
-                           </div>
-                           <a href="#" className="next">
-                              Next
-                           </a>
-                        </div>
-                     </div>
-                  </div>
                </div>
             </section>
             <section className="bg-light pt-5 testimony-full">

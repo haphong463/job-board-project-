@@ -149,11 +149,11 @@ export const Home = () =>
                       <div className="job-listing-logo">
                         <img
                           src={company.logo}
-                          alt="Free Website Template by Free-Template.co"
-                          className="jb_custom-img" onClick={() =>
+                          alt="Free Website Template"
+                          className="img-fluid rounded-sm me-2 bg-white" onClick={() =>
                           {
                             handleCompanyClick(job.companyId);
-                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}
+                          }} style={{ width: '100px', height: '100px', objectFit: 'contain', cursor: 'pointer' }}
                         />
                       </div>
                       <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
@@ -187,30 +187,6 @@ export const Home = () =>
                 return null;
               })}
             </ul>
-
-            {/* <div className="row pagination-wrap">
-              <div className="col-md-6 text-center text-md-left mb-4 mb-md-0">
-                <span>Showing 1-7 Of 43,167 Jobs</span>
-              </div>
-              <div className="col-md-6 text-center text-md-right">
-                <div className="custom-pagination ml-auto">
-                  <a href="#" className="prev">
-                    Prev
-                  </a>
-                  <div className="d-inline-block">
-                    <a href="#" className="active">
-                      1
-                    </a>
-                    <a href="#">2</a>
-                    <a href="#">3</a>
-                    <a href="#">4</a>
-                  </div>
-                  <a href="#" className="next">
-                    Next
-                  </a>
-                </div>
-              </div>
-            </div> */}
           </div>
         </section>
         <section

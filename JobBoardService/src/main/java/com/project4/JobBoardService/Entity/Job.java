@@ -79,17 +79,13 @@ public class Job {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    @ManyToOne
-    @JoinColumn(name = "user", nullable = false)
-    private User user;
+    //    @Column(name = "expired")
+//    private LocalDateTime expired;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
-
-    @Column(name = "expired")
-    private LocalDateTime expired;
 
     public Boolean getIsSuperHot() {
         return isSuperHot;

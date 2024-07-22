@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 
 @SpringBootApplication
-@ComponentScan({"com.project4.JobBoardService", "com.project4.JobBoardService.Config"})
+@ComponentScan({"com.project4.JobBoardService"})
 public class JobBoardApplication {
 
 	public static void main(String[] args) {

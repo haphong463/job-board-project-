@@ -34,6 +34,5 @@ public class JobDTO {
     private Boolean isSuperHot;
     private Long categoryId;
     private Long companyId;
-    private Long userId;
-    private LocalDateTime expired;
+//    private LocalDateTime expired;
 }

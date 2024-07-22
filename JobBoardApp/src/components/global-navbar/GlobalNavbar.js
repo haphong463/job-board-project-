@@ -12,6 +12,7 @@ import
 import { FaBell, FaChevronRight, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
+import { fetchCompanyThunk } from "../../features/companySlice";
 import
 {
    markNotificationAsRead,
@@ -26,13 +27,14 @@ export function GlobalNavbar ()
 {
    const [searchParams] = useSearchParams();
    // const [categories, setCategories] = useState([]);
-   const [companies, setCompanies] = useState([]);
+   // const [companies, setCompanies] = useState([]);
    const [isSkillsDropdownVisible, setSkillsDropdownVisible] = useState(false);
    const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
    const [dropdownOpen, setDropdownOpen] = useState(false);
    const [notificationOpen, setNotificationOpen] = useState(false);
 
    const categories = useSelector((state) => state.category.categories);
+   const companies = useSelector((state) => state.company.companies);
    const notifications = useSelector((state) => state.notification.list);
    const user = useSelector((state) => state.auth.user);
    const roles = useSelector((state) => state.auth.roles);
@@ -49,7 +51,7 @@ export function GlobalNavbar ()
    useEffect(() =>
    {
       dispatch(fetchCategoryThunk());
-      setCompanies(companyData);
+      dispatch(fetchCompanyThunk());
    }, []);
 
    const handleCategoryClick = (categoryId) =>

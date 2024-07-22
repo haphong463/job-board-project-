@@ -56,28 +56,29 @@ public class JobServiceImpl   implements JobService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<JobDTO> findAllJobsByCompanyId(Long userId) {
-        List<Job> jobs = jobRepository.findAllByUserId(userId);
-        return jobs.stream().map(this::convertToDto).collect(Collectors.toList());
-    }
+//    @Override
+//    public List<JobDTO> findAllJobsByCompanyId(Long userId) {
+//        List<Job> jobs = jobRepository.findAllByUserId(userId);
+//        return jobs.stream().map(this::convertToDto).collect(Collectors.toList());
+//    }
+//
+//    public List<JobDTO> searchJobsByCompanyId(Long userId, String query) {
+//        List<Job> jobs = jobRepository.findByUser_IdAndTitleContaining(userId, query);
+//        return jobs.stream().map(this::convertToDto).collect(Collectors.toList());
+//    }
+//
+//
+//    public List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired) {
+//        LocalDate currentDate = LocalDate.now();
+//        if (isExpired) {
+//            List<Job> expiredJobs = jobRepository.findByUser_IdAndExpiredBefore(userId, currentDate);
+//            return expiredJobs.stream().map(this::convertToDto).collect(Collectors.toList());
+//        } else {
+//            List<Job> activeJobs = jobRepository.findByUser_IdAndExpiredAfter(userId, currentDate);
+//            return activeJobs.stream().map(this::convertToDto).collect(Collectors.toList());
+//        }
+//    }
 
-    public List<JobDTO> searchJobsByCompanyId(Long userId, String query) {
-        List<Job> jobs = jobRepository.findByUser_IdAndTitleContaining(userId, query);
-        return jobs.stream().map(this::convertToDto).collect(Collectors.toList());
-    }
-
-
-    public List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired) {
-        LocalDate currentDate = LocalDate.now();
-        if (isExpired) {
-            List<Job> expiredJobs = jobRepository.findByUser_IdAndExpiredBefore(userId, currentDate);
-            return expiredJobs.stream().map(this::convertToDto).collect(Collectors.toList());
-        } else {
-            List<Job> activeJobs = jobRepository.findByUser_IdAndExpiredAfter(userId, currentDate);
-            return activeJobs.stream().map(this::convertToDto).collect(Collectors.toList());
-        }
-    }
 
     @Override
     public Optional<JobDTO> findJobById(Long jobId) {
@@ -91,42 +92,66 @@ public class JobServiceImpl   implements JobService {
     }
 */
 
+//    public boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO) {
+//        Long userId = jobDTO.getUserId();
+//
+//        Optional<User> userOptional = userService.findById(userId);
+//        Optional<CompanyDTO> companyOptional = companyService.getCompanyById(companyId);
+//        Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
+//
+//        if (userOptional.isPresent() && categoryOptional.isPresent() && companyOptional.isPresent()) {
+//            User user = userOptional.get();
+//            Company company = companyService.convertCompanyToEntity(companyOptional.get());
+//            Category category = categoryOptional.get();
+//
+//            int jobCountThisMonth = jobRepository.countJobsByUserIdAndMonth(userId, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
+//
+//
+//            Optional<Subscription> subscriptionOptional = transactionService.findActiveSubscriptionByUser(user, LocalDate.now());
+//            int maxPosts = subscriptionOptional.map(Subscription::getPostLimit).orElse(10); // 10 nếu không có subscription
+//
+//            if (jobCountThisMonth >= maxPosts) {
+//                return false;
+//            }
+//
+//            // Tạo đối tượng Job từ DTO
+//            Job job = convertJobToEntity(jobDTO);
+//            job.setUser(user);
+//            job.setCompany(company);
+//            job.setCategory(category);
+//
+//            // Lưu job vào repository
+//            jobRepository.save(job);
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
 
     public boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO) {
-        Long userId = jobDTO.getUserId();
-
-        Optional<User> userOptional = userService.findById(userId);
         Optional<CompanyDTO> companyOptional = companyService.getCompanyById(companyId);
         Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
 
-        if (userOptional.isPresent() && categoryOptional.isPresent() && companyOptional.isPresent()) {
-            User user = userOptional.get();
-            Company company = companyService.convertCompanyToEntity(companyOptional.get());
-            Category category = categoryOptional.get();
+        if (companyOptional.isPresent() && categoryOptional.isPresent()) {
+            Company company = companyService.convertCompanyToEntity(companyOptional.get()); // Unwrap the Optional
+            Category category = categoryOptional.get(); // Unwrap the Optional
 
-            int jobCountThisMonth = jobRepository.countJobsByUserIdAndMonth(userId, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
-
-
-            Optional<Subscription> subscriptionOptional = transactionService.findActiveSubscriptionByUser(user, LocalDate.now());
-            int maxPosts = subscriptionOptional.map(Subscription::getPostLimit).orElse(10); // 10 nếu không có subscription
-
-            if (jobCountThisMonth >= maxPosts) {
-                return false;
-            }
-
-            // Tạo đối tượng Job từ DTO
+            // Tạo một đối tượng Job từ DTO
             Job job = convertJobToEntity(jobDTO);
-            job.setUser(user);
+
+            // Liên kết công ty và danh mục với công việc
             job.setCompany(company);
             job.setCategory(category);
 
-            // Lưu job vào repository
+            // Save job to the repository
             jobRepository.save(job);
+
             return true;
         } else {
             return false;
         }
     }
+
 
     public JobDTO updateJob(Long jobId, JobDTO jobDTO) {
         Optional<Job> jobOptional = jobRepository.findById(jobId);
@@ -153,13 +178,6 @@ public class JobServiceImpl   implements JobService {
             existingJob.setSlot(jobDTO.getSlot());
             existingJob.setProfileApproved(jobDTO.getProfileApproved());
             existingJob.setIsSuperHot(jobDTO.getIsSuperHot());
-
-
-//            existingJob.setKeySkills(jobDTO.getKeySkills());
-//            existingJob.setPosition(jobDTO.getPosition());
-//            existingJob.setExperience(jobDTO.getExperience());
-//            existingJob.setQuantity(jobDTO.getQuantity());
-//            existingJob.setQualification(jobDTO.getQualification());
 
             // Lưu lại công việc đã cập nhật vào cơ sở dữ liệu
             jobRepository.save(existingJob);
@@ -193,8 +211,8 @@ public class JobServiceImpl   implements JobService {
         job.setSlot(jobDTO.getSlot());
         job.setProfileApproved(jobDTO.getProfileApproved());
         job.setIsSuperHot(jobDTO.getIsSuperHot());
-        LocalDateTime createdAt = jobDTO.getCreatedAt() != null ? jobDTO.getCreatedAt() : LocalDateTime.now();
-        job.setExpired(createdAt.plusDays(7));
+//        LocalDateTime createdAt = jobDTO.getCreatedAt() != null ? jobDTO.getCreatedAt() : LocalDateTime.now();
+//        job.setExpired(createdAt.plusDays(7));
 
         Category category = new Category();
         category.setCategoryId(jobDTO.getCategoryId());
@@ -248,8 +266,8 @@ public class JobServiceImpl   implements JobService {
         dto.setIsSuperHot(job.getIsSuperHot());
         dto.setCategoryId(job.getCategory().getCategoryId());
         dto.setCompanyId(job.getCompany().getCompanyId());
-        dto.setUserId(job.getUser().getId());
-        dto.setExpired(job.getExpired());
+//        dto.setUserId(job.getUser().getId());
+//        dto.setExpired(job.getExpired());
         return dto;
     }
 

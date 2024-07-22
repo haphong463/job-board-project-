@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import moment from 'moment';
-import './company_detail.css';
-import './job-single.css';
 import { NavLink, useParams } from 'react-router-dom';
 import jobData1 from './job_data.json';
 import companyData1 from './company_data.json';
@@ -76,7 +74,7 @@ export const CompanyDetail = () =>
                               <ul className="list-unstyled">
                                  <li className="mb-2 d-flex justify-content-between align-items-start"><strong>Company Type:</strong> <span className="text-dark">{companyData?.type}</span></li>
                                  <li className="mb-2 d-flex justify-content-between align-items-start"><strong>Company Size:</strong> <span className="text-dark">{companyData?.companySize}</span></li>
-                                 <li className="mb-2 d-flex justify-content-between align-items-start"><strong>Country:</strong> <span className="text-dark"><i className={`fi fi-${companyData?.countryCode} border border-gray rounded-sm`}></i> {companyData?.country}</span></li>
+                                 <li className="mb-2 d-flex justify-content-between align-items-start"><strong>Country:</strong> <span className="text-dark"><i className={`fi fi-${companyData?.countryCode} border border-gray rounded-sm`} style={{ width: '1.4em', lineHeight: '1em' }}></i> {companyData?.country}</span></li>
                                  <li className="mb-2 d-flex justify-content-between align-items-start"><strong>Working Days:</strong> <span className="text-dark">{companyData?.workingDays}</span></li>
                               </ul>
                            </div>

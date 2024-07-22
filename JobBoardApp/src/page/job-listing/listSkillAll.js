@@ -6,7 +6,7 @@ import { fetchCategoryThunk } from "../../features/categorySlice";
 import { jwtDecode } from "jwt-decode";
 import { logout } from "../../features/authSlice";
 import categoryData from '../../components/global-navbar/category.json';
-import "./listSkillAll.css";
+import "./job_company.css";
 import { useTranslation } from "react-i18next";
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 export function ViewAllSkill ()
