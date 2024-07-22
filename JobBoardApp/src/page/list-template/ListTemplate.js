@@ -3,18 +3,18 @@ import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayo
 import axiosRequest from '../../configs/axiosConfig';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import '../../assets/css/list-template.css'; // Import CSS file for custom styles
+import '../../assets/css/list-template.css';
 import DialogBox from '../../components/dialog-box/Dialogbox';
-// import '@fontawesome/fontawesome-free/css/all.min.css';
- 
+
 const ListTemplate = () => {
   const [templates, setTemplates] = useState([]);
   const [sortOrder, setSortOrder] = useState('asc');
-  const [showFilters, setShowFilters] = useState(false); // New state for showing/hiding filters
-  const [searchQuery, setSearchQuery] = useState(''); // New state for search query
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [hasCVs, setHasCVs] = useState(false);
   const user = useSelector(state => state.auth.user);
   const navigate = useNavigate();
-  const [showDialog, setShowDialog] = useState(false); // Add a state for the dialog box
+  const [showDialog, setShowDialog] = useState(false);
 
   const fetchTemplates = async () => {
     try {
@@ -25,37 +25,52 @@ const ListTemplate = () => {
     }
   };
 
+  const checkHasCVs = async () => {
+    try {
+      const response = await axiosRequest.get(`/usercv/check-cvs/${user.id}`);
+      setHasCVs(response);
+    } catch (error) {
+      console.error('Error checking CVs:', error);
+      setHasCVs(false);
+    }
+  };
+
   useEffect(() => {
     fetchTemplates();
-  }, []);
+    if (user) {
+      checkHasCVs();
+    }
+  }, [user]);
+
   const sortTemplates = (order) => {
     const sortedTemplates = [...templates].sort((a, b) => {
       const dateA = new Date(a.createdAt);
       const dateB = new Date(b.createdAt);
-      if (order === 'asc') {
-        return dateA - dateB;
-      } else {
-        return dateB - dateA;
-      }
+      return order === 'asc' ? dateA - dateB : dateB - dateA;
     });
     setTemplates(sortedTemplates);
     setSortOrder(order);
   };
+
   const handleFilterToggle = () => {
     setShowFilters(!showFilters);
   };
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    // You can implement the search logic here
   };
+
   const handleDialogClose = () => {
-    setShowDialog(false); // Close the dialog box
+    setShowDialog(false);
   };
-  
+
   const handleTemplateClick = async (templateId, templateName) => {
     if (!user) {
-      setShowDialog(true); // Show the dialog box if the user is not logged in
+      setShowDialog(true);
+      return;
+    }
+    if (!hasCVs) {
+      alert('Please create a CV details before choosing a template');
       return;
     }
     try {
@@ -65,19 +80,20 @@ const ListTemplate = () => {
           templateId: templateId,
         }
       });
-  
       alert('Template selected successfully');
-      navigate(`/review-template/${templateName}`); // Navigate to review-template with templateName
+      navigate(`/review-template/${templateName}`);
     } catch (error) {
       console.error('Error selecting template:', error);
     }
   };
-  
+
   const filteredTemplates = templates.filter((template) =>
     template.templateName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   return (
     <GlobalLayoutUser>
+
       <section
         className="section-hero overlay inner-page bg-image"
         style={{ backgroundImage: 'url("../../../assets/images/hero_1.jpg")' }}
@@ -120,12 +136,9 @@ const ListTemplate = () => {
           </div>
         </div>
       </section>
-
-
       <section className="template-section">
         <div className="container">
           <div className="row border-css">
-
             <div className="col-md-12 mb-4">
               <h3 className="text-css">Choose your template</h3>
               <div className="filter-toggle" onClick={handleFilterToggle}>
@@ -158,7 +171,11 @@ const ListTemplate = () => {
                 </div>
               )}
             </div>
-            {filteredTemplates.length > 0 ? (
+            {!hasCVs ? (
+              <div className="col-md-12 text-center">
+                <p className="alert alert-warning">Please create a CV details before choosing a template</p>
+              </div>
+            ) : filteredTemplates.length > 0 ? (
               filteredTemplates.map((template) => (
                 <div key={template.templateId} className="col-md-4 mb-4">
                   <div className="template-card" onClick={() => handleTemplateClick(template.templateId, template.templateName)}>
@@ -189,7 +206,6 @@ const ListTemplate = () => {
             )}
           </div>
         </div>
-        
       </section>
       <DialogBox isOpen={showDialog} onClose={handleDialogClose} />
     </GlobalLayoutUser>
@@ -197,4 +213,3 @@ const ListTemplate = () => {
 };
 
 export default ListTemplate;
-

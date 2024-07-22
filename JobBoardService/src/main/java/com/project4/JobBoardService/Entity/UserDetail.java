@@ -11,6 +11,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
+import java.util.Date;
+
 @Entity
 @Data
 @Table(name = "User_Details")
@@ -25,8 +27,10 @@ public class UserDetail {
 
     private String fullName;
     private String email;
+    private Date dob;
     private String phone;
     private String address;
+    @Column(columnDefinition = "LONGTEXT")
     private String summary;
     @Column(columnDefinition = "TEXT")
     private String profileImageBase64;

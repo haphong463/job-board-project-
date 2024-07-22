@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams,useNavigate   } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import {
@@ -20,13 +20,14 @@ import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
 import { MdDelete } from "react-icons/md";
 
+import { Link } from "react-scroll";
 export function GlobalNavbar() {
   const [searchParams] = useSearchParams();
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
-
   const navigate = useNavigate();
+
   const notifications = useSelector((state) => state.notification.list);
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
@@ -37,6 +38,10 @@ export function GlobalNavbar() {
 
   const handleLogout = () => {
     dispatch(signOut());
+  };
+
+  const handleCvManagementClick = () => {
+    navigate('/cv-management');
   };
 
   useEffect(() => {
@@ -140,15 +145,12 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              {user && (
-                <li>
-                  <NavLink to="/quiz">Quiz</NavLink>
-                </li>
-              )}
               <li>
-                <NavLink to="/create-cv">Create CV</NavLink>
+                    <NavLink to="/create-cv">Create CV</NavLink>
+                  </li>
+              <li>
+                <NavLink to="/quiz">Quiz</NavLink>
               </li>
-
               {!roles.includes("ROLE_EMPLOYER") && (
                 <li>
                   <NavLink to="/EmployerSignUp">For Employer</NavLink>
@@ -287,7 +289,10 @@ export function GlobalNavbar() {
                       >
                         {user.sub}
                       </DropdownItem>
-                      <DropdownItem onClick={handleLogout}>
+                      <DropdownItem onClick={handleCvManagementClick}>
+        CV Management
+      </DropdownItem>
+                      <DropdownItem onClick={handleLogout} >
                         Log out
                       </DropdownItem>
                     </>

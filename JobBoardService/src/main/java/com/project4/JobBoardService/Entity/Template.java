@@ -18,7 +18,7 @@ public class Template {
 	private String templateFilePath;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
-	@Column(columnDefinition = "TEXT")
+	@Column(columnDefinition = "LONGTEXT")
 	private String templateImageBase64;
 
 	// Getters and setters

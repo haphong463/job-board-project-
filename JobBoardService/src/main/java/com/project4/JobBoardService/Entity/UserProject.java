@@ -1,12 +1,6 @@
 package com.project4.JobBoardService.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -22,6 +16,7 @@ public class UserProject {
     private UserCV userCV;
 
     private String projectName;
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
     private String startDate;
     private String endDate;

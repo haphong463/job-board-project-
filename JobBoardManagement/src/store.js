@@ -9,6 +9,9 @@ import persistReducer from "redux-persist/es/persistReducer";
 import quizReducer from "./features/quizSlice"; // Adjust the path as necessary
 import questionReducer from "./features/questionSlice";
 import userReducer from "./features/userSlice";
+import cvReducer from "./features/cvSlice";
+
+
 
 const persistConfig = {
   key: "root",
@@ -25,6 +28,7 @@ const reducer = combineReducers({
   quizzes: quizReducer,
   questions: questionReducer,
   user: userReducer,
+  templates: cvReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, reducer);
