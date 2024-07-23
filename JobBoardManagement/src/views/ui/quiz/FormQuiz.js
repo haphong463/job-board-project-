@@ -34,13 +34,14 @@ const setError = useState(false)[1];
     defaultValues: {
       title: '',
       description: '',
+      categoryId: '',
       imageFile: null,
     },
   });
 
   const toggleNewQuizModal = () => {
     if (newQuizModal) {
-      reset({ title: '', description: '', imageFile: null });
+      reset({ title: '', description: '',categoryId: "", imageFile: null });
       setIsEdit(null); 
     }
     setNewQuizModal(!newQuizModal);
@@ -50,6 +51,7 @@ const setError = useState(false)[1];
     if (isEdit) {
       setValue('title', isEdit.title); 
       setValue('description', isEdit.description);
+      setValue('categoryId', isEdit.categoryId);
       setNewQuizModal(true); 
     }
   }, [isEdit, setValue]);
@@ -117,6 +119,25 @@ const setError = useState(false)[1];
               />
               {errors.description && (
                 <FormText color="danger">{errors.description.message}</FormText>
+              )}
+            </FormGroup>
+            <FormGroup>
+              <Label for="categoryId">Category</Label>
+              <Controller
+                name="categoryId"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    id="categoryId"
+                    placeholder="Enter quiz categoryId"
+                    type="textarea"
+                    invalid={!!errors.categoryId}
+                  />
+                )}
+              />
+              {errors.categoryId && (
+                <FormText color="danger">{errors.categoryId.message}</FormText>
               )}
             </FormGroup>
             <FormGroup>

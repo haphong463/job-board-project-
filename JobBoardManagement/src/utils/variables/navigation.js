@@ -33,9 +33,20 @@ export const navigation = [
     ],
   },
   {
-    title: "Quiz and Questions",
-    icon: "bi bi-question-circle",
-    href: "/jobportal/quiz",
+    title: "Quiz",
+    icon: "bi bi-box",
+    children: [
+      {
+        title: "Category",
+        href: "/jobportal/quiz-category",
+        icon: "bi bi-patch-check",
+      },
+      {
+        title: "Quiz&Question",
+        href: "/jobportal/quiz",
+        icon: "bi bi-hdd-stack",
+      },
+    ],
   },
   {
     title: "Cv management",

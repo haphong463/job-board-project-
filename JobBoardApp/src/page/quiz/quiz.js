@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import "./Quiz.css"; // Import CSS
 
 export const Quiz = () => {
-  const [quizzes, setQuizzes] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -32,10 +32,10 @@ export const Quiz = () => {
       navigate("/login");
     } else {
       setLoggedIn(true);
-      fetchQuizzesAndAttempts();
+      fetchCategoriesAndQuizzes();
       fetchCompletedQuizzes();
       const intervalId = setInterval(() => {
-        fetchQuizzesAndAttempts();
+        fetchCategoriesAndQuizzes();
         fetchCompletedQuizzes();
       }, 10000); // Polling every 10 seconds
 
@@ -43,45 +43,47 @@ export const Quiz = () => {
     }
   }, [navigate, user]);
 
-  const fetchQuizzesAndAttempts = () => {
+  const fetchCategoriesAndQuizzes = () => {
     const accessToken = localStorage.getItem("accessToken");
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
+      .get(`${process.env.REACT_APP_API_ENDPOINT}/categoriesquiz`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
       .then((response) => {
-        setQuizzes(response.data);
-        response.data.forEach((quiz) => {
-          axios
-            .get(
-              `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`,
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-                params: {
-                  userId: user.id,
-                },
-              }
-            )
-            .then((response) => {
-              setAttemptsInfo((prev) => ({
-                ...prev,
-                [quiz.id]: response.data,
-              }));
-            })
-            .catch((error) => {
-              console.error(
-                "There was an error fetching the attempts info!",
-                error
-              );
-            });
+        setCategories(response.data);
+        response.data.forEach((category) => {
+          category.quizzes.forEach((quiz) => {
+            axios
+              .get(
+                `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                  params: {
+                    userId: user.id,
+                  },
+                }
+              )
+              .then((response) => {
+                setAttemptsInfo((prev) => ({
+                  ...prev,
+                  [quiz.id]: response.data,
+                }));
+              })
+              .catch((error) => {
+                console.error(
+                  "There was an error fetching the attempts info!",
+                  error
+                );
+              });
+          });
         });
       })
       .catch((error) => {
-        console.error("There was an error fetching the quizzes!", error);
+        console.error("There was an error fetching the categories!", error);
       });
   };
 
@@ -171,7 +173,7 @@ export const Quiz = () => {
         }
       )
       .then((response) => {
-        fetchQuizzesAndAttempts(); // Refresh quizzes data
+        fetchCategoriesAndQuizzes(); // Refresh quizzes data
         fetchCompletedQuizzes(); // Refresh completed quizzes data
       })
       .catch((error) => {
@@ -230,46 +232,51 @@ export const Quiz = () => {
                 <button className="btn btn-primary">Tìm hiểu ngay</button>
               </div>
             </div>
-            <div className="row mt-5">
-              {quizzes.map((quiz) => (
-                <div className="col-lg-4 mb-4" key={quiz.id}>
-                  <div className="quiz-card border rounded p-4">
-                    <img
-                      src={quiz.imageUrl}
-                      alt={quiz.title}
-                      className="img-fluid mb-3"
-                    />
-                    <h3>{quiz.title}</h3>
-                    <div className="quiz-details">
-                      <div className="quiz-candidates">
-                        {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi{" "}
+            {categories.map((category) => (
+              <div key={category.id}>
+                <h3 className="category-title">{category.name}</h3>
+                <div className="row mt-5">
+                  {category.quizzes.map((quiz) => (
+                    <div className="col-lg-4 mb-4" key={quiz.id}>
+                      <div className="quiz-card border rounded p-4">
+                        <img
+                          src={quiz.imageUrl}
+                          alt={quiz.title}
+                          className="img-fluid mb-3"
+                        />
+                        <h3>{quiz.title}</h3>
+                        <div className="quiz-details">
+                          <div className="quiz-candidates">
+                            {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi{" "}
+                          </div>
+                        </div>
+                        {completedQuizzes.includes(quiz.id) ? (
+                          <div className="alert alert-success">
+                            Bạn đã hoàn thành quiz này.
+                          </div>
+                        ) : attemptsInfo[quiz.id]?.locked ? (
+                          <div className="alert alert-warning">
+                            Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào
+                            ngày{" "}
+                            {calculateNextAttemptDate(
+                              attemptsInfo[quiz.id]?.timeLeft
+                            )}
+                            .
+                          </div>
+                        ) : (
+                          <button
+                            className="btn btn-success"
+                            onClick={() => handleStartQuiz(quiz)}
+                          >
+                            Làm bài thi
+                          </button>
+                        )}
                       </div>
                     </div>
-                    {completedQuizzes.includes(quiz.id) ? (
-                      <div className="alert alert-success">
-                        Bạn đã hoàn thành quiz này.
-                      </div>
-                    ) : attemptsInfo[quiz.id]?.locked ? (
-                      <div className="alert alert-warning">
-                        Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào
-                        ngày{" "}
-                        {calculateNextAttemptDate(
-                          attemptsInfo[quiz.id]?.timeLeft
-                        )}
-                        .
-                      </div>
-                    ) : (
-                      <button
-                        className="btn btn-success"
-                        onClick={() => handleStartQuiz(quiz)}
-                      >
-                        Làm bài thi
-                      </button>
-                    )}
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </section>
 

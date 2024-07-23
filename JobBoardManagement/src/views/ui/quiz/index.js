@@ -15,6 +15,7 @@ import {
 } from 'reactstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchQuizzesAsync, removeQuiz } from '../../../features/quizSlice';
+import { fetchCategoryQuiz } from '../../../features/quizCategorySlice';
 import FormQuiz from './FormQuiz';
 import FormQuestion from './FormQuestion';
 import axios from 'axios';
@@ -23,6 +24,8 @@ import './quiz.css';
 const Quiz = ({ quizId }) => {
   const dispatch = useDispatch();
   const quizzes = useSelector((state) => state.quizzes.quizzes || []);
+  const categories = useSelector((state) => state.categoryQuiz.categories || []);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isEdit, setIsEdit] = useState(null);
   const [newQuizModal, setNewQuizModal] = useState(false);
@@ -35,6 +38,7 @@ const Quiz = ({ quizId }) => {
   useEffect(() => {
     setLoading(true);
     dispatch(fetchQuizzesAsync())
+      .then(() => dispatch(fetchCategoryQuiz()))
       .then(() => setLoading(false))
       .catch(() => setLoading(false));
   }, [dispatch]);
@@ -168,6 +172,15 @@ const Quiz = ({ quizId }) => {
           {row.description}
         </div>
       ),
+    },
+    {
+      name: "Category Name",
+      selector: (row) => row.name,
+      sortable: true,
+      cell: (row) => {
+        const category = categories.find(cat => cat.id === row.name);
+        return <div className="categoryId-cell">{category }</div>;
+      }
     },
     {
       name: 'Actions',

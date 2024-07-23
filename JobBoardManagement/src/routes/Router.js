@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import Login from "../views/Login.js";
+import { exact } from "prop-types";
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
@@ -18,7 +19,7 @@ const Quiz = lazy(() => import("../views/ui/quiz/index"));
 const User = lazy(() => import("../views/ui/user/index"));
 const CvManagement = lazy(() => import("../views/ui/cv-management/index"));
 const Contact = lazy(() => import("../views/ui/contact/index"));
- 
+ const QuizCategory = lazy(() => import("../views/ui/quiz-category/index"));
 /*****Routes******/
 const ThemeRoutes = [
   {
@@ -48,6 +49,11 @@ const ThemeRoutes = [
         exact: true,
         element: <BlogCategory />,
       },
+      {
+        path:"/jobportal/quiz-category",
+        exact: true,
+        element: <QuizCategory />
+      }
     ],
   },
   {

@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.DTO;
 
+import com.project4.JobBoardService.Entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
