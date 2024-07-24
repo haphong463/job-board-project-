@@ -307,11 +307,13 @@ public class AuthController {
                             "The user with username " + loginRequest.getUsername() + " was not found"
                     ));
         }
-
         User user = optionalUser.get();
-        if (!user.isVerified()) {
+
+        boolean isEmployer = user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(ERole.ROLE_EMPLOYER));
+        if (!isEmployer && !user.isVerified()) {
             return ResponseEntity.ok().body(new AuthRepsonse(
-                user.getEmail(),
+                    user.getEmail(),
                     user.isVerified()
             ));
         }
@@ -633,17 +635,13 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
     roles.add(employerRole);
     user.setRoles(roles);
 
-    String verificationCode = employer.getVerificationCode();
-    user.setVerificationCode(verificationCode);
-    user.setVerified(false);
+
 
     userRepository.save(user);
 
     employer.setUser(user);
-    employer.setVerified(true);
     employerRepository.save(employer);
 
-    emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
 
     return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
 }
