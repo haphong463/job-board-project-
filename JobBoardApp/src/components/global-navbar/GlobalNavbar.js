@@ -164,9 +164,6 @@ export function GlobalNavbar() {
                 <NavLink to="/contact">Contact</NavLink>
               </li>
               <li>
-                    <NavLink to="/create-cv">Create CV</NavLink>
-                  </li>
-              <li>
                 <NavLink to="/quiz">Quiz</NavLink>
               </li>
               {!roles.includes("ROLE_EMPLOYER") && (
