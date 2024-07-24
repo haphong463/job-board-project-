@@ -1,57 +1,53 @@
-/* Custom Dialog */
 .custom-dialog {
   max-width: 600px;
   width: 100%;
   margin: auto;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .custom-dialog-title {
-  text-align: center;
-  font-size: 24px;
+  text-align: left;
+  font-size: 20px;
   font-weight: bold;
   color: #333;
-  padding: 10px 15px;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
 }
 .custom-dialog-content {
-  padding: 20px 15px;
-}
-
-.custom-dialog-content h2 {
-  text-align: center;
-  font-size: 22px;
-  margin-bottom: 20px;
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 80vh;
+  will-change: transform;
+  -webkit-overflow-scrolling: touch;
 }
 
 .quiz-info {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
   margin-bottom: 20px;
 }
 
 .info-item {
-  flex: 1 1 45%; /* Adjusted to ensure two items per row */
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: #f0fdf4;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
 }
 
 .info-item i {
   font-size: 2rem;
-  color: #34d399;
+  color: #28a745;
   margin-bottom: 10px;
 }
 
-
 .info-item p {
-  font-size: 1rem;
-  text-align: center;
+  font-size: 14px;
   color: #333;
   margin: 0;
 }
@@ -59,25 +55,35 @@
 .custom-dialog-description {
   background-color: #f0fdf4;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 5px;
   font-size: 14px;
   color: #333;
   margin-top: 20px;
 }
 
 .custom-dialog-description p {
-  margin: 5px 0;
+  margin: 10px 0;
+}
+
+.custom-dialog-description p:first-child {
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
 .custom-dialog-actions {
-  justify-content: center;
-  padding: 10px 15px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
 }
-
+.top-info {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
 .custom-dialog-button {
   font-size: 16px;
   font-weight: bold;
-  margin: 10px;
   padding: 10px 20px;
   color: #fff;
   background-color: #28a745;
@@ -256,4 +262,23 @@
   font-size: 0.9em;
   color: #666;
   margin-top: 1em;
+}
+h4.category-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+} 
+
+h4.category-title::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 40px;
+  height: 1px;
+  background-color: #28a745;
 }

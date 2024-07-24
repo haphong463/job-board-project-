@@ -11,7 +11,7 @@ import {
   Button,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import "./Quiz.css"; // Import CSS
+import "./Quiz.css"; 
 
 export const Quiz = () => {
   const [categories, setCategories] = useState([]);
@@ -269,10 +269,10 @@ export const Quiz = () => {
           <div className="container">
             <div className="row">
               <div className="col-md-12 text-center">
-                <h2 className="mb-4 font-weight-bold">
+                <h3 className="mb-4 font-weight-bold">
                   Hệ thống đánh giá chất lượng kỹ năng ứng viên
-                </h2>
-                <p className="lead">
+                </h3>
+                <p className="lead" >
                   Khẳng định năng lực nghề nghiệp thông qua các bài thi đa dạng
                   chủ đề, từ đa dạng các ngành nghề. Hệ thống sẽ xác thực kỹ
                   năng dựa vào CV, từ đó giúp CV của bạn trở nên nổi bật trong
@@ -320,7 +320,7 @@ export const Quiz = () => {
             <div className="row">
               {filteredCategories.map((category) => (
                 <div key={category.id} className="col-md-12">
-                  <h4>{category.name}</h4>
+                  <h4 className="category-title">{category.name}</h4>
                   <div className="row">
                   {category.quizzes.map((quiz) => (
                     <div className="col-lg-4 mb-4" key={quiz.id}>
@@ -405,8 +405,11 @@ export const Quiz = () => {
                       </p>
                     </div>
                   </div>
+                  <p className="top-info">
+        * Bạn sẽ nhận được chứng nhận đánh giá hoàn thành khi nằm trong Top 20% ứng viên
+      </p>
                   <div className="custom-dialog-description">
-                  <p><strong>Mô tả bài đánh giá</strong></p>
+                  <p>Mô tả bài đánh giá</p>
                   <p>{selectedQuiz.description}</p>
                     <p><strong>
                       Số lần làm bài còn lại:       </strong>  {" "}
