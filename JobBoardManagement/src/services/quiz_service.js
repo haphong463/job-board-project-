@@ -39,11 +39,15 @@ export const deleteQuiz = async (quizId) => {
 export const updateQuiz = async (id, data, imageFile) => {
   try {
     const formData = new FormData();
-    formData.append("quiz", JSON.stringify(data));
+    formData.append("title", data.title);
+    formData.append("description", data.description);
     formData.append("imageFile", imageFile);
+    formData.append("categoryId", data.categoryId);
 
     const response = await axiosRequest.put(`${URL}/${id}`, formData, {
-      headers: HEADERS_FORM_DATA,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      },
     });
 
     return response.data;

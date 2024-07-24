@@ -19,7 +19,7 @@ public interface QuizService {
 
     List<QuizDTO> getAllQuizzes();
     Quiz getQuizById(Long id);
-    Quiz updateQuiz(Long id, Quiz updatedQuiz, MultipartFile imageFile)  throws IOException;
+    Quiz updateQuiz(Long id, Quiz updatedQuiz, MultipartFile imageFile, Long categoryId)  throws IOException;
     void deleteQuiz(Long id);
     int calculateScore(QuizSubmissionDTO quizSubmission);
 

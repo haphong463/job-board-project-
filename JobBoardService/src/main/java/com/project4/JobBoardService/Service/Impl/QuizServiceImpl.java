@@ -10,6 +10,7 @@ import com.project4.JobBoardService.Repository.*;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuizService;
 import com.project4.JobBoardService.Util.FileUtils;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -77,11 +78,31 @@ public class  QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public Quiz updateQuiz(Long id, Quiz updatedQuiz, MultipartFile imageFile) throws IOException {
+    public Quiz updateQuiz(Long id, Quiz updatedQuiz, MultipartFile imageFile, Long categoryId) throws IOException {
         Quiz existingQuiz = quizRepository.findById(id).orElse(null);
         if (existingQuiz != null) {
-            updateQuizDetails(existingQuiz, updatedQuiz);
-            handleImageFile(existingQuiz, imageFile, "update");
+            existingQuiz.setTitle(updatedQuiz.getTitle());
+            existingQuiz.setDescription(updatedQuiz.getDescription());
+
+            CategoryQuiz category = categoryQuizRepository.findById(categoryId).orElse(null);
+            if (category == null) {
+                throw new IllegalArgumentException("Invalid category ID");
+            }
+            existingQuiz.setCategory(category);
+
+            if (updatedQuiz.getQuestions() != null) {
+                existingQuiz.getQuestions().clear();
+                existingQuiz.getQuestions().addAll(updatedQuiz.getQuestions());
+                for (Question question : existingQuiz.getQuestions()) {
+                    question.setQuiz(existingQuiz);
+                }
+            }
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                handleImageFile(existingQuiz, imageFile, "update");
+            }
+
+            // Save the updated quiz
             return quizRepository.save(existingQuiz);
         } else {
             logger.warning("Quiz not found: " + id);
@@ -97,7 +118,6 @@ public class  QuizServiceImpl implements QuizService {
             quizRepository.deleteById(id);
         }
     }
-
     private void handleImageFile(Quiz quiz, MultipartFile imageFile, String operationType) throws IOException {
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
@@ -192,7 +212,6 @@ public class  QuizServiceImpl implements QuizService {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
         quiz.incrementNumberOfUsers();
         quizRepository.save(quiz);
-        // Add logic to save the user's completion if needed
     }
 
 
