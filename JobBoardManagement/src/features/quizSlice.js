@@ -30,8 +30,8 @@ export const fetchQuizzesAsync = createAsyncThunk(
 export const createNewQuiz = createAsyncThunk(
   "quizzes/createQuiz",
   async (formData) => {
-    const { title, description, imageFile } = formData;
-    const data = await createQuiz(title, description, imageFile);
+    const { title, description, imageFile,categoryId } = formData;
+    const data = await createQuiz(title, description, imageFile,categoryId);
 
     return data;
   }

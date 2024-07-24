@@ -3,6 +3,7 @@ import { Modal, ModalHeader, ModalBody, Button, Form, FormGroup, Label, Input } 
 import { useDispatch } from 'react-redux';
 import axiosRequest from '../../../configs/axiosConfig';
 import { createQuestion, updateQuestion, deleteQuestion } from '../../../features/quizSlice';
+import './formquestions.css';
 
 const FormQuestion = ({ quizId, selectedQuestion, toggleModal, isOpen }) => {
     const dispatch = useDispatch();

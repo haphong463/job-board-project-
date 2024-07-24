@@ -28,6 +28,8 @@ public class Quiz {
 
     private String imageUrl;
     private String thumbnailUrl;
+
+
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Question> questions = new ArrayList<>();
@@ -36,7 +38,13 @@ public class Quiz {
     private User user;
 
 
-public Quiz(Long id) {
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private CategoryQuiz category;
+
+
+    public Quiz(Long id) {
         this.id = id;
     }
     private int numberOfUsers; // Add this field

@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../constant/endpoint.dart';
 import '../models/quiz_model.dart';
 import 'auth_service.dart';
 
 class QuizService {
-  static const String baseUrl = 'http://192.168.110.19:8080/api';
+  // static const String baseUrl = 'http://192.168.110.19:8080/api';
+  static const String baseUrl = '${Endpoint.baseUrl}';
+
   final AuthService _authService = AuthService();
 
   Future<Map<String, dynamic>> getAttemptsInfo(int quizId, int userId) async {
