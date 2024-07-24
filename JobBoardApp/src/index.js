@@ -18,6 +18,8 @@ Kommunicate.init("kommunicate-support", {
   automaticChatOpenOnNavigation: true,
   popupWidget: true,
 });
+
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 // let persistor = persistStore(store);
 root.render(

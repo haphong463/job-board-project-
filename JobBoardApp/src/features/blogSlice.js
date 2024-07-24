@@ -43,9 +43,9 @@ export const fetchAllBlog = createAsyncThunk(
 );
 export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
-  async ({ query, page, size, type }, { rejectWithValue }) => {
+  async ({ query, page, size, type, order }, { rejectWithValue }) => {
     try {
-      const response = await getAllBlogFilter(query, type, page, size);
+      const response = await getAllBlogFilter(query, type, page, size, order);
       return response;
     } catch (error) {
       console.log(error);
@@ -73,7 +73,7 @@ const blogSlice = createSlice({
     },
     updateBlogBySocket: (state, action) => {
       state.blogs = state.blogs.map((blog) =>
-        blog.id === action.payload.id ? action.payload : blog
+        blog.id === action.payload.id ? actPion.payload : blog
       );
     },
     deleteBlogBySocket: (state, action) => {
