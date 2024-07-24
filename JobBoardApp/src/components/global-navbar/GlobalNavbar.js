@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useSearchParams,useNavigate   } from "react-router-dom";
+import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import {
@@ -18,9 +18,10 @@ import {
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdMessage } from "react-icons/md";
 
 import { Link } from "react-scroll";
+import Swal from "sweetalert2";
 export function GlobalNavbar() {
   const [searchParams] = useSearchParams();
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -37,11 +38,15 @@ export function GlobalNavbar() {
   const unreadCount = useSelector((state) => state.notification.unreadCount);
 
   const handleLogout = () => {
-    dispatch(signOut());
+    dispatch(signOut()).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/login");
+      }
+    });
   };
 
   const handleCvManagementClick = () => {
-    navigate('/cv-management');
+    navigate("/cv-management");
   };
 
   useEffect(() => {
@@ -64,7 +69,20 @@ export function GlobalNavbar() {
   );
 
   const handleDeleteNotification = (id) => {
-    dispatch(deleteNotificationThunk(id));
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteNotificationThunk(id));
+        Swal.fire("Deleted!", "Your notification has been deleted.", "success");
+      }
+    });
   };
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
@@ -145,7 +163,6 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-          
               <li>
                 <NavLink to="/quiz">Quiz</NavLink>
               </li>
@@ -182,11 +199,6 @@ export function GlobalNavbar() {
               )}
               {user && (
                 <div className="icon-notification" onClick={toggleNotification}>
-                  {/* <img
-                    src="https://i.imgur.com/AC7dgLA.png"
-                    alt=""
-                    className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
-                  /> */}
                   <FaBell
                     size={30}
                     color="white"
@@ -233,7 +245,14 @@ export function GlobalNavbar() {
                                 }
                           }
                         >
-                          <img src={notification.sender.imageUrl} alt="img" />
+                          <div className="avatar-container">
+                            <img src={notification.sender.imageUrl} alt="img" />
+                            {notification.type === "COMMENT" && (
+                              <div className="icon-container">
+                                <MdMessage className="message-icon" />
+                              </div>
+                            )}
+                          </div>
                           <div className="text">
                             <h4
                               className={`${
@@ -264,12 +283,16 @@ export function GlobalNavbar() {
                     ))
                   ) : (
                     <div className="text-center">
-                      <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
+                      <img
+                        src="https://static.topcv.vn/v4/image/toppy-notification-empty.png"
+                        alt="No notifications"
+                      />
                       <p>You don't have any notifications yet.</p>
                     </div>
                   )}
                 </div>
               )}
+
               <Dropdown
                 isOpen={dropdownOpen}
                 toggle={toggleDropdown}
@@ -288,9 +311,9 @@ export function GlobalNavbar() {
                         {user.sub}
                       </DropdownItem>
                       <DropdownItem onClick={handleCvManagementClick}>
-        CV Management
-      </DropdownItem>
-                      <DropdownItem onClick={handleLogout} >
+                        CV Management
+                      </DropdownItem>
+                      <DropdownItem onClick={handleLogout}>
                         Log out
                       </DropdownItem>
                     </>

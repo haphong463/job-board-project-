@@ -14,6 +14,7 @@ import "./login.css";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { signInOAuth2Async } from "../../services/AuthService";
+import showToast from "../../utils/function/showToast";
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
   const verificationMessage = useSelector(
@@ -24,7 +25,6 @@ export const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
-  console.log(">>> show password: ", showPassword);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -33,6 +33,8 @@ export const Login = () => {
     const credential = credentialResponse.credential;
     dispatch(signInOAuth2(credential)).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
+        const fullName = res.payload.firstName + " " + res.payload.lastName;
+        showToast("You're back, " + fullName, "success");
         navigate("/");
       }
     });
@@ -41,8 +43,6 @@ export const Login = () => {
   useEffect(() => {
     dispatch(resetVerificationMessage());
   }, [dispatch]);
-
-  console.log(">>> status: ", status);
 
   if (user) return <Navigate to="/" replace={true} />;
 

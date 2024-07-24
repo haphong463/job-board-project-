@@ -1,8 +1,10 @@
 package com.project4.JobBoardService.Service.Impl;
 
 
+import com.project4.JobBoardService.Entity.Permission;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
+import com.project4.JobBoardService.Repository.PermissionRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.Util.FileUtils;
@@ -24,6 +26,25 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Override
+    public User updateUserPermissions(Long userId, List<String> permissions) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Remove existing permissions
+        user.getPermissions().clear();
+
+        // Add new permissions
+        for (String permissionName : permissions) {
+            Permission permission = permissionRepository.findByName(permissionName)
+                    .orElseThrow(() -> new RuntimeException("Permission not found: " + permissionName));
+            user.getPermissions().add(permission);
+        }
+
+        return userRepository.save(user);
+    }
 
     @Override
     public Optional<User> findByUsername(String username) {

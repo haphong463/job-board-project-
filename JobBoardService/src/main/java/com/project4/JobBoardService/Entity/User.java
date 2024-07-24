@@ -71,6 +71,12 @@ public class User   {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Subscription> subscriptions;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_permissions",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    private Set<Permission> permissions = new HashSet<>();
+
 
     public User(String username, String email, String password) {
         this.username = username;
