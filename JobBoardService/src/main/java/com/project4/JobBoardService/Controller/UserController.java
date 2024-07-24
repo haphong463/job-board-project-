@@ -62,6 +62,19 @@ public class UserController {
         }
     }
 
+
+    @PutMapping("/{id}/permissions")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> updateUserPermissions(@PathVariable Long id, @RequestBody List<String> permissions) {
+        try {
+            User updatedUser = userService.updateUserPermissions(id, permissions);
+            UserDTO userDTO = modelMapper.map(updatedUser, UserDTO.class);
+            return ResponseEntity.ok(userDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating permissions: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/search")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
     public ResponseEntity<?> getAllUser(
