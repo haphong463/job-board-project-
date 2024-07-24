@@ -15,11 +15,16 @@ import "./Quiz.css"; // Import CSS
 
 export const Quiz = () => {
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [attemptsInfo, setAttemptsInfo] = useState({});
   const [completedQuizzes, setCompletedQuizzes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
 
@@ -42,6 +47,10 @@ export const Quiz = () => {
       return () => clearInterval(intervalId);
     }
   }, [navigate, user]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [categories, searchTerm, selectedStatus, filterCategory]);
 
   const fetchCategoriesAndQuizzes = () => {
     const accessToken = localStorage.getItem("accessToken");
@@ -148,7 +157,7 @@ export const Quiz = () => {
       .then((response) => {
         const questions = response.data;
         localStorage.setItem(
-          `questions_${selectedQuiz.id}`, 
+          `questions_${selectedQuiz.id}`,
           JSON.stringify(questions)
         );
         navigate(`/quiz/${selectedQuiz.id}`);
@@ -173,8 +182,8 @@ export const Quiz = () => {
         }
       )
       .then((response) => {
-        fetchCategoriesAndQuizzes(); // Refresh quizzes data
-        fetchCompletedQuizzes(); // Refresh completed quizzes data
+        fetchCategoriesAndQuizzes(); 
+        fetchCompletedQuizzes(); 
       })
       .catch((error) => {
         console.error("There was an error completing the quiz!", error);
@@ -184,6 +193,47 @@ export const Quiz = () => {
   const calculateNextAttemptDate = (seconds) => {
     const nextAttemptDate = new Date(Date.now() + seconds * 1000);
     return nextAttemptDate.toLocaleDateString("vi-VN");
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleStatusChange = (event) => {
+    setSelectedStatus(event.target.value);
+  };
+
+  const handleCategoryChange = (event) => {
+    setFilterCategory(event.target.value);
+  };
+
+  const applyFilters = () => {
+    let filtered = categories;
+  
+    if (filterCategory !== "all") {
+      filtered = filtered.filter(
+        (category) => category.name === filterCategory
+      );
+    }
+  
+    filtered = filtered.map((category) => {
+      const filteredQuizzes = category.quizzes.filter((quiz) => {
+        const matchesSearchTerm = searchTerm === "" || 
+          quiz.title.toLowerCase().includes(searchTerm.toLowerCase());
+  
+        const matchesStatus =
+          selectedStatus === "all" ||
+          (selectedStatus === "completed" &&
+            completedQuizzes.includes(quiz.id)) ||
+          (selectedStatus === "incomplete" &&
+            !completedQuizzes.includes(quiz.id));
+  
+        return matchesSearchTerm && matchesStatus;
+      });
+      return { ...category, quizzes: filteredQuizzes };
+    });
+  
+    setFilteredCategories(filtered);
   };
 
   if (!loggedIn) {
@@ -229,13 +279,49 @@ export const Quiz = () => {
                   mắt nhà tuyển dụng và nâng cao tỷ lệ trúng tuyển tại các công
                   ty bạn mong muốn.
                 </p>
-                <button className="btn btn-primary">Tìm hiểu ngay</button>
               </div>
             </div>
-            {categories.map((category) => (
-              <div key={category.id}>
-                <h3 className="category-title">{category.name}</h3>
-                <div className="row mt-5">
+            <div className="row mb-4">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Nhập từ khóa tìm kiếm"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </div>
+              <div className="col-md-4">
+                <select
+                  className="form-control"
+                  value={selectedStatus}
+                  onChange={handleStatusChange}
+                >
+                  <option value="all">Tất cả</option>
+                  <option value="completed">Đã hoàn thành</option>
+                  <option value="incomplete">Chưa hoàn thành</option>
+                </select>
+              </div>
+              <div className="col-md-4">
+                <select
+                  className="form-control"
+                  value={filterCategory}
+                  onChange={handleCategoryChange}
+                >
+                  <option value="all">Tất cả danh mục</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="row">
+              {filteredCategories.map((category) => (
+                <div key={category.id} className="col-md-12">
+                  <h4>{category.name}</h4>
+                  <div className="row">
                   {category.quizzes.map((quiz) => (
                     <div className="col-lg-4 mb-4" key={quiz.id}>
                       <div className="quiz-card border rounded p-4">
@@ -244,11 +330,16 @@ export const Quiz = () => {
                           alt={quiz.title}
                           className="img-fluid mb-3"
                         />
-                        <h3>{quiz.title}</h3>
+                      <h3>{quiz.title}</h3>
                         <div className="quiz-details">
-                          <div className="quiz-candidates">
-                            {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi{" "}
-                          </div>
+                        <div className="quiz-categories" >
+                        {category.name|| "No Category"}
+                            </div>
+                          
+                              <div className="quiz-candidates">
+                              {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi
+                            </div>
+                         
                         </div>
                         {completedQuizzes.includes(quiz.id) ? (
                           <div className="alert alert-success">
@@ -274,9 +365,10 @@ export const Quiz = () => {
                       </div>
                     </div>
                   ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
@@ -314,12 +406,12 @@ export const Quiz = () => {
                     </div>
                   </div>
                   <div className="custom-dialog-description">
-                    <p>Mô tả bài đánh giá</p>
-                    <p>{selectedQuiz.description}</p>
-                    <p>
-                      Số lần làm bài còn lại:{" "}
+                  <p><strong>Mô tả bài đánh giá</strong></p>
+                  <p>{selectedQuiz.description}</p>
+                    <p><strong>
+                      Số lần làm bài còn lại:       </strong>  {" "}
                       {attemptsInfo[selectedQuiz.id]?.attemptsLeft}
-                    </p>
+                       </p> 
                     {attemptsInfo[selectedQuiz.id]?.timeLeft > 0 && (
                       <p>
                         Thời gian chờ: {attemptsInfo[selectedQuiz.id]?.timeLeft}{" "}

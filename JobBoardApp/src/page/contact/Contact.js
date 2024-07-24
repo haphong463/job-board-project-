@@ -178,12 +178,6 @@ export const Contact = () => {
               </div>
               <div className="col-lg-6">
                 <div className="p-4 mb-3 bg-white">
-                  <p className="mb-0 font-weight-bold">Address</p>
-                  <p className="mb-4">590 Cách Mạng Tháng Tám, Phường 11, Quận 3, HCM.</p>
-                  <p className="mb-0 font-weight-bold">Phone</p>
-                  <p className="mb-4"><a href="#">+1 232 3235 324</a></p>
-                  <p className="mb-0 font-weight-bold">Email Address</p>
-                  <p className="mb-0"><a href="mailto:jobboardfpt@gmail.com">jobboardfpt@gmail.com</a></p>
                   <div className="map-responsive">
                     <iframe 
                       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.323723220671!2d106.66137877635536!3d10.786499231606594!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752ecb37e59e33%3A0xfe7c4d9f94f9e079!2zNTkwIMSQLiBDw6FjaCBN4bqhbmcgVGjDoW5nIDgsIFBoxrDhu51uZyAxMSwgUXXhuq1uIDMsIEjhu5MgQ2jDrSBNaW5oIDcwMDAwMCwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1721632289248!5m2!1svi!2s"  allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" 

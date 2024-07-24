@@ -3,17 +3,17 @@
   max-width: 600px;
   width: 100%;
   margin: auto;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .custom-dialog-title {
   text-align: center;
   font-size: 24px;
   font-weight: bold;
-  color: #fff;
-  background: #007bff;
+  color: #333;
   padding: 10px 15px;
 }
-
 .custom-dialog-content {
   padding: 20px 15px;
 }
@@ -32,7 +32,7 @@
 }
 
 .info-item {
-  flex: 1 1 50%;
+  flex: 1 1 45%; /* Adjusted to ensure two items per row */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,13 +43,14 @@
 }
 
 .info-item i {
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: #34d399;
   margin-bottom: 10px;
 }
 
+
 .info-item p {
-  font-size: 14px;
+  font-size: 1rem;
   text-align: center;
   color: #333;
   margin: 0;
@@ -76,14 +77,20 @@
 .custom-dialog-button {
   font-size: 16px;
   font-weight: bold;
-  margin-left: auto;
+  margin: 10px;
+  padding: 10px 20px;
+  color: #fff;
+  background-color: #28a745;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 /* Quiz Card */
 .quiz-card {
   position: relative;
   overflow: hidden;
-  padding: 20px;
+  padding: 15px;
   background-color: #fff;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s;
@@ -92,25 +99,29 @@
 
 .quiz-card img {
   width: 100%;
-  height: auto;
-  margin-bottom: 20px;
+  height: 150px; /* Adjust height for smaller image size */
+  object-fit: cover;
+  margin-bottom: 10px;
 }
 
 .quiz-card h3 {
-  font-size: 1.5rem;
+  font-size: 1.2rem; /* Smaller font size */
   margin-bottom: 10px;
 }
 
 .quiz-details {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap; /* Allows wrapping of items */
+  gap: 10px; /* Adds space between items */
   margin-bottom: 10px;
 }
 
-.quiz-level,
-.quiz-candidates {
-  font-size: 1rem;
+.quiz-candidates,
+.quiz-categories {
+  flex: 1 1 100%; /* Ensures items take up full width */
+  font-size: 0.9rem; /* Smaller font size */
   color: #555;
+  min-width: 100px; /* Optional: Ensures items don't get too small */
 }
 
 .btn-success {
@@ -174,4 +185,75 @@
 .quiz-details .quiz-candidates {
   font-size: 14px;
   color: #666;
+}
+
+.section-hero {
+  padding: 2em 0;
+}
+
+.section-hero h1 {
+  font-size: 3em;
+  margin-bottom: 0.5em;
+}
+
+.section-hero .custom-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.section-hero .custom-breadcrumbs a {
+  color: #ffffff;
+}
+
+.section-hero .custom-breadcrumbs .slash {
+  margin: 0 0.5em;
+  color: #ffffff;
+}
+
+.site-section {
+  padding: 2em 0;
+}
+
+.quiz-entry {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.quiz-entry:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.quiz-title {
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.quiz-description {
+  font-size: 1em;
+  color: #666;
+  margin-bottom: 1em;
+}
+
+.quiz-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quiz-actions .btn {
+  font-size: 0.9em;
+}
+
+.quiz-completed {
+  font-size: 1em;
+  color: #28a745;
+}
+
+.attempt-info {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 1em;
 }
