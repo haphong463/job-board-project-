@@ -2,6 +2,7 @@ package com.project4.JobBoardService.Service;
 
 import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.QuestionResultDTO;
+import com.project4.JobBoardService.DTO.QuizDTO;
 import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
 import com.project4.JobBoardService.Entity.Quiz;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +17,7 @@ public interface QuizService {
 
     Quiz createQuiz(Quiz quiz, MultipartFile imageFile, Long categoryId) throws IOException;
 
-    List<Quiz> getAllQuizzes();
+    List<QuizDTO> getAllQuizzes();
     Quiz getQuizById(Long id);
     Quiz updateQuiz(Long id, Quiz updatedQuiz, MultipartFile imageFile)  throws IOException;
     void deleteQuiz(Long id);

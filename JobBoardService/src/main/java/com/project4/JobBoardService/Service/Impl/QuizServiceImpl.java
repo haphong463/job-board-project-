@@ -59,8 +59,17 @@ public class  QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public List<Quiz> getAllQuizzes() {
-        return quizRepository.findAll();
+    public List<QuizDTO> getAllQuizzes() {
+        List<Quiz> quizzes = quizRepository.findAll();
+        return quizzes.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+    private QuizDTO convertToDto(Quiz quiz) {
+        QuizDTO quizDTO = modelMapper.map(quiz, QuizDTO.class);
+        if (quiz.getCategory() != null) {
+            quizDTO.setCategoryId(quiz.getCategory().getId());
+            quizDTO.setCategoryName(quiz.getCategory().getName());
+        }
+        return quizDTO;
     }
     @Override
     public Quiz getQuizById(Long id) {

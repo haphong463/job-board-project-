@@ -22,5 +22,6 @@ public class QuizDTO {
 
     private List<QuestionDTO> questions;
     private int numberOfUsers; // Add this field
-
+    private Long categoryId; // Only ID
+    private String categoryName;
 }

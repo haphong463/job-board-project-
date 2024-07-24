@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
   Form,
@@ -16,21 +16,23 @@ import {
 import { yupResolver } from '@hookform/resolvers/yup';
 import { quizSchema } from '../../../utils/variables/schema';
 import { createNewQuiz, modifyQuiz } from '../../../features/quizSlice';
+import { fetchCategoryQuiz } from '../../../features/quizCategorySlice';
 
 const FormQuiz = ({ isEdit, setIsEdit }) => {
   const dispatch = useDispatch();
+  const categories = useSelector((state) => state.categoryQuiz.categoryQuiz || []);
+
   const [newQuizModal, setNewQuizModal] = useState(false);
-const setError = useState(false)[1]; 
+  const setError = useState(false)[1];
 
   const {
     handleSubmit,
     control,
     setValue,
-    
     reset,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(quizSchema(false)), 
+    resolver: yupResolver(quizSchema(false)),
     defaultValues: {
       title: '',
       description: '',
@@ -41,20 +43,24 @@ const setError = useState(false)[1];
 
   const toggleNewQuizModal = () => {
     if (newQuizModal) {
-      reset({ title: '', description: '',categoryId: "", imageFile: null });
-      setIsEdit(null); 
+      reset({ title: '', description: '', categoryId: '', imageFile: null });
+      setIsEdit(null);
     }
     setNewQuizModal(!newQuizModal);
   };
 
   useEffect(() => {
     if (isEdit) {
-      setValue('title', isEdit.title); 
+      setValue('title', isEdit.title);
       setValue('description', isEdit.description);
       setValue('categoryId', isEdit.categoryId);
-      setNewQuizModal(true); 
+      setNewQuizModal(true);
     }
   }, [isEdit, setValue]);
+
+  useEffect(() => {
+    dispatch(fetchCategoryQuiz());
+  }, [dispatch]);
 
   const onSubmit = (formData) => {
     if (isEdit) {
@@ -130,10 +136,16 @@ const setError = useState(false)[1];
                   <Input
                     {...field}
                     id="categoryId"
-                    placeholder="Enter quiz categoryId"
-                    type="textarea"
+                    type="select"
                     invalid={!!errors.categoryId}
-                  />
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </Input>
                 )}
               />
               {errors.categoryId && (

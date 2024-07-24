@@ -94,15 +94,8 @@ public class QuizController {
     @PreAuthorize("permitAll()")
     @GetMapping
     public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
-        try {
-            List<Quiz> quizzes = quizService.getAllQuizzes();
-            List<QuizDTO> quizDtos = quizzes.stream()
-                    .map(quiz -> modelMapper.map(quiz, QuizDTO.class))
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(quizDtos);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<QuizDTO> quizzes = quizService.getAllQuizzes();
+        return ResponseEntity.ok(quizzes);
     }
     @PreAuthorize("permitAll()")
     @GetMapping("/{id}")

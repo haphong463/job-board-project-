@@ -157,11 +157,25 @@ const QuizQuestions = () => {
     setShowExitConfirmModal(true);
   };
 
-  const handleConfirmExit = () => {
-    localStorage.removeItem(`timeLeft_${quizId}`);
-    localStorage.removeItem(`selectedAnswers_${quizId}`);
-    navigate("/quiz");
-  };
+  const handleConfirmExit = async () => {
+    try {
+        // Call the exit endpoint to decrement the attempt count
+        await axiosRequest.post(`/quizzes/submit`, {
+            quizId: quizId,
+            userId: user.id
+        });
+
+        // Remove local storage items
+        localStorage.removeItem(`timeLeft_${quizId}`);
+        localStorage.removeItem(`selectedAnswers_${quizId}`);
+
+        // Navigate to another route
+        navigate("/quiz");
+    } catch (error) {
+        console.error("Error during exit:", error);
+        // Optionally, show an error message to the user
+    }
+};
 
   const handleCancelExit = () => {
     setShowExitConfirmModal(false);
