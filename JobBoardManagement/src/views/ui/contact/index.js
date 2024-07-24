@@ -12,12 +12,14 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Button,
 } from "reactstrap";
 import axios from "axios";
 import nprogress from "nprogress";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './styles.css'
+import './styles.css';
+
 const ContactIndex = (props) => {
   const [contacts, setContacts] = useState([]);
   const [status, setStatus] = useState("idle");
@@ -121,11 +123,7 @@ const ContactIndex = (props) => {
       cell: (row) => (
         <div className="actions-cell">
           <button className="btn btn-primary btn-sm me-1" onClick={() => handleRead(row)}>Read</button>
-          <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>Delete</button>
-          <button className="btn btn-success btn-sm" onClick={() => {
-            handleRead(row);
-            setSendEmailDialogOpen(true);
-          }}>Send Email</button>
+
         </div>
       ),
     },
@@ -180,7 +178,8 @@ const ContactIndex = (props) => {
           )}
         </ModalBody>
         <ModalFooter>
-          <button className="btn btn-secondary" onClick={() => setSelectedContact(null)}>Close</button>
+          <Button color="primary" onClick={() => setSendEmailDialogOpen(true)}>Reply</Button>
+          <Button color="secondary" onClick={() => setSelectedContact(null)}>Close</Button>
         </ModalFooter>
       </Modal>
 
@@ -202,8 +201,8 @@ const ContactIndex = (props) => {
           )}
         </ModalBody>
         <ModalFooter>
-          <button className="btn btn-primary" onClick={handleSendEmail}>Send</button>
-          <button className="btn btn-secondary" onClick={handleCancelSendEmail}>Cancel</button>
+          <Button color="primary" onClick={handleSendEmail}>Send</Button>
+          <Button color="secondary" onClick={handleCancelSendEmail}>Cancel</Button>
         </ModalFooter>
       </Modal>
     </Row>

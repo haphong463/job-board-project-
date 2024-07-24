@@ -134,7 +134,15 @@
   background-color: #28a745;
   border: none;
 }
-
+.quizsuccess{
+  color: green;
+  font-size: 15px;
+  border: none;
+}
+.quizwarning{
+  color: red;
+  border: none;
+}
 /* Section Hero */
 .section-hero {
   position: relative;

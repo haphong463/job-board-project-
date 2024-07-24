@@ -342,11 +342,11 @@ export const Quiz = () => {
                          
                         </div>
                         {completedQuizzes.includes(quiz.id) ? (
-                          <div className="alert alert-success">
+                          <div className="quizsuccess">
                             Bạn đã hoàn thành quiz này.
                           </div>
                         ) : attemptsInfo[quiz.id]?.locked ? (
-                          <div className="alert alert-warning">
+                          <div className="quizwarning">
                             Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào
                             ngày{" "}
                             {calculateNextAttemptDate(

@@ -25,7 +25,8 @@ const Quiz = ({ quizId }) => {
   const dispatch = useDispatch();
   const quizzes = useSelector((state) => state.quizzes.quizzes || []);
   const categories = useSelector((state) => state.categoryQuiz.categoryQuiz);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 5;
   const [searchTerm, setSearchTerm] = useState('');
   const [isEdit, setIsEdit] = useState(null);
   const [newQuizModal, setNewQuizModal] = useState(false);
@@ -34,6 +35,10 @@ const Quiz = ({ quizId }) => {
   const [questionModal, setQuestionModal] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const indexOfLastQuestion = currentPage * questionsPerPage;
+  const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
+  const currentQuestions = selectedQuiz ? selectedQuiz.questions.slice(indexOfFirstQuestion, indexOfLastQuestion) : [];
+  const totalPages = selectedQuiz ? Math.ceil(selectedQuiz.questions.length / questionsPerPage) : 1;
 
   useEffect(() => {
     setLoading(true);
@@ -248,45 +253,48 @@ const Quiz = ({ quizId }) => {
 
       {/* Modal for showing questions */}
       <Modal isOpen={!!selectedQuiz} toggle={toggleQuestionsModal} className="questions-modal">
-        <div className="questions-modal-header">
-          <h2 className="questions-modal-title">Questions</h2>
-          <button className="questions-modal-close" onClick={toggleQuestionsModal}>&times;</button>
+  <div className="questions-modal-header">
+    <h2 className="questions-modal-title">Questions</h2>
+    <button className="questions-modal-close" onClick={toggleQuestionsModal}>&times;</button>
+  </div>
+  <div className="questions-modal-body">
+    {selectedQuiz && (
+      <>
+        <ul className="questions-list">
+          {currentQuestions.map((question) => (
+            <li key={question.id} className="question-item">
+              <input
+                type="checkbox"
+                className="question-checkbox"
+                checked={selectedQuestions.includes(question.id)}
+                onChange={() => handleSelectQuestion(question.id)}
+              />
+              <span className="question-text">{question.questionText}</span>
+              <span className="question-answer">Answer: {question.correctAnswer}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="questions-actions">
+          <button className="questions-delete-btn" onClick={handleDeleteSelectedQuestions}>
+            Delete Selected
+          </button>
+          <button className="questions-add-btn" onClick={() => setQuestionModal(true)}>
+            Add Question
+          </button>
         </div>
-        <div className="questions-modal-body">
-          {selectedQuiz && (
-            <>
-              <ul className="questions-list">
-                {(selectedQuiz.questions || []).map((question) => (
-                  <li key={question.id} className="question-item">
-                    <input
-                      type="checkbox"
-                      className="question-checkbox"
-                      checked={selectedQuestions.includes(question.id)}
-                      onChange={() => handleSelectQuestion(question.id)}
-                    />
-                    <span className="question-text">{question.questionText}</span>
-                    <span className="question-answer">Answer: {question.correctAnswer}</span>
-                    <button
-                      className="question-edit-btn"
-                      onClick={() => handleEditQuestion(question)}
-                    >
-                      Edit
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="questions-actions">
-                <button className="questions-delete-btn" onClick={handleDeleteSelectedQuestions}>
-                  Delete Selected
-                </button>
-                <button className="questions-add-btn" onClick={() => setQuestionModal(true)}>
-                  Add Question
-                </button>
-                </div>
-            </>
-          )}
+        <div className="pagination">
+          <button onClick={() => setCurrentPage(prevPage => Math.max(prevPage - 1, 1))} disabled={currentPage === 1}>
+            Previous
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button onClick={() => setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages))} disabled={currentPage === totalPages}>
+            Next
+          </button>
         </div>
-      </Modal>
+      </>
+    )}
+  </div>
+</Modal>
 
       {/* Modal for creating/updating questions */}
       <FormQuestion

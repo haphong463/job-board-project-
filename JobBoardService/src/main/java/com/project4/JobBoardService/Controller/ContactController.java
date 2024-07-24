@@ -31,7 +31,6 @@ public class ContactController {
     @PostMapping
     public ResponseEntity<ContactDTO> createContact(@RequestBody Contact contact) {
         ContactDTO createdContact = contactService.createContact(contact);
-        emailService.sendEmail(contact.getEmail(), contact.getSubject(), contact.getMessage());
         return ResponseEntity.ok(createdContact);
     }
 
@@ -60,7 +59,7 @@ public class ContactController {
     @PostMapping("/send")
     public ResponseEntity<String> sendEmail(@RequestBody EmailRequest emailRequest) {
         try {
-
+            emailService.sendEmail(emailRequest.getEmail(), emailRequest.getSubject(), emailRequest.getMessage());
             return ResponseEntity.ok("Email sent successfully!");
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email: " + ex.getMessage());
