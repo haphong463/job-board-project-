@@ -110,15 +110,29 @@ public class QuizController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<QuizDTO> updateQuiz(@PathVariable Long id,
-                                              @RequestParam("quiz") String quizStr,
-                                              @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
-        QuizDTO quizDto = new ObjectMapper().readValue(quizStr, QuizDTO.class);
+    public ResponseEntity<QuizDTO> updateQuiz(
+            @PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam("categoryId") Long categoryId) throws IOException {
+
+        // Create a QuizDTO object from request parameters
+        QuizDTO quizDto = new QuizDTO();
+        quizDto.setTitle(title);
+        quizDto.setDescription(description);
+
+        // Map QuizDTO to Quiz entity
         Quiz updatedQuiz = modelMapper.map(quizDto, Quiz.class);
-        Quiz quiz = quizService.updateQuiz(id, updatedQuiz, imageFile);
+
+        // Call service to update quiz
+        Quiz quiz = quizService.updateQuiz(id, updatedQuiz, imageFile, categoryId);
+
         if (quiz != null) {
+            // Map result to QuizDTO and return response
             return ResponseEntity.ok(modelMapper.map(quiz, QuizDTO.class));
         } else {
+            // Return response if quiz not found
             return ResponseEntity.notFound().build();
         }
     }

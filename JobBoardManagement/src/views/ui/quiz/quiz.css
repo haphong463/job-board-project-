@@ -135,3 +135,40 @@
   color: #333;
   margin: 0 10px;
 }
+
+.button-group {
+  display: flex;
+  gap: 10px; /* Khoảng cách giữa các nút */
+}
+
+.button-group .btn {
+  white-space: nowrap; /* Ngăn không cho văn bản bị xuống dòng */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px; /* Điều chỉnh padding nếu cần thiết */
+}
+
+.button-group .btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+}
+
+.button-group .btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.button-group .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.button-group .btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.button-group .btn:hover {
+  opacity: 0.8; /* Hiệu ứng hover */
+}

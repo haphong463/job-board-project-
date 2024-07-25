@@ -57,5 +57,7 @@ public class Quiz {
     @ManyToMany(mappedBy = "completedQuizzes")
     private Set<User> usersCompleted = new HashSet<>();
 
+    public void setCategoryId(Long categoryId) {
+    }
 }
 

@@ -193,7 +193,7 @@ const Quiz = ({ quizId }) => {
     {
       name: 'Actions',
       cell: (row) => (
-        <div className="d-flex">
+        <div className="d-flex button-group">
           <Button onClick={() => handleEdit(row.id)} color="info">
             Edit
           </Button>
