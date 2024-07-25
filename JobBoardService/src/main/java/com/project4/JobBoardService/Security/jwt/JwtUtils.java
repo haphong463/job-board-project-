@@ -1,8 +1,7 @@
-package com.project4.JobBoardService.security.jwt;
-import java.security.Key;
+package com.project4.JobBoardService.Security.jwt;
 import java.util.Date;
 
-import com.project4.JobBoardService.security.UserDetailsImpl;
+import com.project4.JobBoardService.Security.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;

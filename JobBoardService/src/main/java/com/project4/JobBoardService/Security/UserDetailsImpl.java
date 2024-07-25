@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.security;
+package com.project4.JobBoardService.Security;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.Gender;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

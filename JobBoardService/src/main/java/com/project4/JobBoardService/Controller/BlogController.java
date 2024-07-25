@@ -8,8 +8,7 @@ import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Service.UserService;
-import com.project4.JobBoardService.payload.PaginatedResponse;
-import jakarta.annotation.Nullable;
+import com.project4.JobBoardService.Payload.PaginatedResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,10 +22,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController

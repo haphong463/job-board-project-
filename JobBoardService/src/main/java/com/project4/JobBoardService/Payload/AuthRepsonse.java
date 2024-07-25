@@ -1,10 +1,8 @@
-package com.project4.JobBoardService.payload;
+package com.project4.JobBoardService.Payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter

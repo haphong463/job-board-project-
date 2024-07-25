@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.payload;
+package com.project4.JobBoardService.Payload;
 
 public class MessageResponse {
     private String message;

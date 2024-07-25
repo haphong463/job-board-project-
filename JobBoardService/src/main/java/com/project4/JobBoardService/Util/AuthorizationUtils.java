@@ -1,6 +1,6 @@
 package com.project4.JobBoardService.Util;
 
-import com.project4.JobBoardService.security.jwt.JwtUtils;
+import com.project4.JobBoardService.Security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

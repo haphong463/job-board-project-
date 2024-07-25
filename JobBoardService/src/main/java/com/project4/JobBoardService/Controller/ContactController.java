@@ -4,16 +4,10 @@ import com.project4.JobBoardService.DTO.ContactDTO;
 import com.project4.JobBoardService.Entity.Contact;
 import com.project4.JobBoardService.Service.ContactService;
 import com.project4.JobBoardService.Service.EmailService;
-import com.project4.JobBoardService.payload.EmailRequest;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.project4.JobBoardService.Payload.EmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

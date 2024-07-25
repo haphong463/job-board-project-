@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.Config.Annotation.CheckPermission;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.EPermissions;
@@ -34,15 +35,9 @@ public class BlogServiceImpl implements BlogService {
     private UserRepository userRepository;
 
     @Override
+    @CheckPermission(EPermissions.MANAGE_BLOG)
     public Blog createBlog(Blog blog, MultipartFile imageFile) {
-        User user = userRepository.findByUsername(blog.getUser().getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getRoles().stream().anyMatch(role -> role.getName().equals(ERole.ROLE_MODERATOR)) &&
-                !user.getPermissions().stream().anyMatch(p -> p.getName().equals("MANAGE_BLOG"))) {
-            System.out.println("You don't have permission to manage blogs.");
-            throw new RuntimeException("You do not have permission to manage blogs");
-        }
         handleImageFile(blog, imageFile, "create");
         return blogRepository.save(blog);
     }
