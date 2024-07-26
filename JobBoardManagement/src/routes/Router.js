@@ -20,6 +20,7 @@ const User = lazy(() => import("../views/ui/user/index"));
 const CvManagement = lazy(() => import("../views/ui/cv-management/index"));
 const Contact = lazy(() => import("../views/ui/contact/index"));
  const QuizCategory = lazy(() => import("../views/ui/quiz-category/index"));
+ const Employer = lazy(() => import("../views/ui/employer/index"));
 /*****Routes******/
 const ThemeRoutes = [
   {
@@ -36,6 +37,7 @@ const ThemeRoutes = [
       { path: "/jobportal/forms", exact: true, element: <Forms /> },
       { path: "/jobportal/quiz", exact: true, element: <Quiz /> },
       { path: "/jobportal/cv-management", exact: true, element: <CvManagement /> },
+      {path:"/jobportal/employer", exact: true, element: <Employer />},
       {
         path:"/jobportal/contact", exact: true, element: <Contact />
       },
