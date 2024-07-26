@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "contacts")
 @AllArgsConstructor
@@ -40,6 +42,13 @@ public class Contact {
     @NotBlank
     @Size(max = 500)
     private String message;
+    private boolean archived; // New field
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
 
 }

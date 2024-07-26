@@ -56,7 +56,6 @@ const EmployerList = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Call action to delete employer (implement delete logic if needed)
         Swal.fire("Deleted!", "The employer has been deleted.", "success");
       }
     });
@@ -94,6 +93,24 @@ const EmployerList = () => {
       sortable: true,
       cell: (row) => <div>{row.email}</div>,
       width: "300px",
+    },
+    {
+      name: "Company Name",
+      selector: (row) => row.companyName,
+      sortable: true,
+      cell: (row) => <div>{row.companyName}</div>,
+      width: "250px",
+    },
+    {
+      name: "Company Website",
+      selector: (row) => row.companyWebsite,
+      sortable: true,
+      cell: (row) => (
+        <a href={row.companyWebsite} target="_blank" rel="noopener noreferrer">
+          {row.companyWebsite}
+        </a>
+      ),
+      width: "250px",
     },
     {
       name: "Status",
