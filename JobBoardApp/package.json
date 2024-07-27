@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
+    "@kommunicate/kommunicate-chatbot-plugin": "^0.0.7",
+    "@mui/icons-material": "^5.16.4",
     "@mui/material": "^5.15.20",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.5",

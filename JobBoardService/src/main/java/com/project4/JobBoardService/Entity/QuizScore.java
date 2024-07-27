@@ -30,10 +30,11 @@ public class QuizScore {
     @Column(nullable = false)
     private double score;
 
-
     private int attempts;
 
     private boolean isLocked;
 
     private LocalDateTime lockEndTime;
+
+
 }

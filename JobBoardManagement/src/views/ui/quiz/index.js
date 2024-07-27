@@ -15,14 +15,18 @@ import {
 } from 'reactstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchQuizzesAsync, removeQuiz } from '../../../features/quizSlice';
+import { fetchCategoryQuiz } from "../../../features/quizCategorySlice";
 import FormQuiz from './FormQuiz';
 import FormQuestion from './FormQuestion';
 import axios from 'axios';
-// import axiosRequest from '../../../configs/axiosConfig';
 import './quiz.css';
+
 const Quiz = ({ quizId }) => {
   const dispatch = useDispatch();
   const quizzes = useSelector((state) => state.quizzes.quizzes || []);
+  const categories = useSelector((state) => state.categoryQuiz.categoryQuiz);
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 5;
   const [searchTerm, setSearchTerm] = useState('');
   const [isEdit, setIsEdit] = useState(null);
   const [newQuizModal, setNewQuizModal] = useState(false);
@@ -31,14 +35,22 @@ const Quiz = ({ quizId }) => {
   const [questionModal, setQuestionModal] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const indexOfLastQuestion = currentPage * questionsPerPage;
+  const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage;
+  const currentQuestions = selectedQuiz ? selectedQuiz.questions.slice(indexOfFirstQuestion, indexOfLastQuestion) : [];
+  const totalPages = selectedQuiz ? Math.ceil(selectedQuiz.questions.length / questionsPerPage) : 1;
 
   useEffect(() => {
     setLoading(true);
     dispatch(fetchQuizzesAsync())
+      .then(() => dispatch(fetchCategoryQuiz()))
       .then(() => setLoading(false))
       .catch(() => setLoading(false));
   }, [dispatch]);
-
+  useEffect(() => {
+    console.log('Categories:', categories);
+    console.log('Quizzes:', quizzes);
+  }, [categories, quizzes]);
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this quiz?')) {
       dispatch(removeQuiz(id));
@@ -93,15 +105,12 @@ const Quiz = ({ quizId }) => {
           alert("No questions selected for deletion.");
           return;
         }
-  
+
         await axios.delete(`http://localhost:8080/api/quizzes/questions`, {
           data: selectedQuestions
         });
-  
-        // Optionally reset the selectedQuestions if needed
+
         setSelectedQuestions([]);
-  
-        // Dispatch an action to fetch quizzes again or update your state as necessary
         dispatch(fetchQuizzesAsync());
       } catch (error) {
         console.error("There was an error deleting the questions:", error);
@@ -109,6 +118,7 @@ const Quiz = ({ quizId }) => {
       }
     }
   };
+
   const exportQuiz = (quizId, quizTitle) => {
     axios({
       url: `http://localhost:8080/api/quizzes/${quizId}/export`,
@@ -170,9 +180,20 @@ const Quiz = ({ quizId }) => {
       ),
     },
     {
+      name: 'Category Name',
+      selector: (row) => row.categoryId,
+      sortable: true,
+      cell: (row) => {
+        console.log('Row:', row);
+        console.log('Categories:', categories);
+        const category = categories.find(cat => cat.id === row.categoryId);
+        return <div className="categoryId-cell">{category ? category.name : 'N/A'}</div>;
+      }
+    },
+    {
       name: 'Actions',
       cell: (row) => (
-        <div className="d-flex">
+        <div className="d-flex button-group">
           <Button onClick={() => handleEdit(row.id)} color="info">
             Edit
           </Button>
@@ -231,44 +252,49 @@ const Quiz = ({ quizId }) => {
       </Col>
 
       {/* Modal for showing questions */}
-      <Modal isOpen={!!selectedQuiz} toggle={toggleQuestionsModal}>
-        <ModalHeader toggle={toggleQuestionsModal}>Questions</ModalHeader>
-        <ModalBody>
-          {selectedQuiz && (
-            <>
-              <ul>
-                {(selectedQuiz.questions || []).map((question) => (
-                  <li key={question.id}>
-                    <input
-                      type="checkbox"
-                      checked={selectedQuestions.includes(question.id)}
-                      onChange={() => handleSelectQuestion(question.id)}
-                    />
-                    {question.questionText} - Correct Answer: {question.correctAnswer}
-                    <Button
-                      color="info"
-                      size="sm"
-                      className="ms-2"
-                      onClick={() => handleEditQuestion(question)}
-                    >
-                      Edit
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-              <Button color="danger" onClick={handleDeleteSelectedQuestions}>
-                Delete Selected Questions
-              </Button>
-              <Button
-                color="primary"
-                onClick={() => setQuestionModal(true)}
-              >
-                Add Question
-              </Button>
-            </>
-          )}
-        </ModalBody>
-      </Modal>
+      <Modal isOpen={!!selectedQuiz} toggle={toggleQuestionsModal} className="questions-modal">
+  <div className="questions-modal-header">
+    <h2 className="questions-modal-title">Questions</h2>
+    <button className="questions-modal-close" onClick={toggleQuestionsModal}>&times;</button>
+  </div>
+  <div className="questions-modal-body">
+    {selectedQuiz && (
+      <>
+        <ul className="questions-list">
+          {currentQuestions.map((question) => (
+            <li key={question.id} className="question-item">
+              <input
+                type="checkbox"
+                className="question-checkbox"
+                checked={selectedQuestions.includes(question.id)}
+                onChange={() => handleSelectQuestion(question.id)}
+              />
+              <span className="question-text">{question.questionText}</span>
+              <span className="question-answer">Answer: {question.correctAnswer}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="questions-actions">
+          <button className="questions-delete-btn" onClick={handleDeleteSelectedQuestions}>
+            Delete Selected
+          </button>
+          <button className="questions-add-btn" onClick={() => setQuestionModal(true)}>
+            Add Question
+          </button>
+        </div>
+        <div className="pagination">
+          <button onClick={() => setCurrentPage(prevPage => Math.max(prevPage - 1, 1))} disabled={currentPage === 1}>
+            Previous
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button onClick={() => setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages))} disabled={currentPage === totalPages}>
+            Next
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+</Modal>
 
       {/* Modal for creating/updating questions */}
       <FormQuestion

@@ -35,4 +35,12 @@ public class Notification extends AbstractEntity {
 
     private boolean isRead;
 
+    public Notification(User sender, User recipient, ENotificationType type, String url, String message, boolean isRead) {
+        this.sender = sender;
+        this.recipient = recipient;
+        this.type = type;
+        this.url = url;
+        this.message = message;
+        this.isRead = isRead;
+    }
 }

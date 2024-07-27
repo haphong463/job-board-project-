@@ -17,4 +17,6 @@ public interface UserService {
     Page<User> getAllUsersWithQuery(String query, Pageable pageable);
     User updateUserEnableStatus(Long id, Boolean isEnabled);
     void deleteUser(Long id);
+    User updateUserPermissions(Long userId, List<String> permissions);
+
 }

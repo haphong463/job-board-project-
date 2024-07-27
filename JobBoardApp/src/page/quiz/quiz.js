@@ -11,15 +11,20 @@ import {
   Button,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import "./Quiz.css"; // Import CSS
+import "./Quiz.css"; 
 
 export const Quiz = () => {
-  const [quizzes, setQuizzes] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [attemptsInfo, setAttemptsInfo] = useState({});
   const [completedQuizzes, setCompletedQuizzes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
 
@@ -32,10 +37,10 @@ export const Quiz = () => {
       navigate("/login");
     } else {
       setLoggedIn(true);
-      fetchQuizzesAndAttempts();
+      fetchCategoriesAndQuizzes();
       fetchCompletedQuizzes();
       const intervalId = setInterval(() => {
-        fetchQuizzesAndAttempts();
+        fetchCategoriesAndQuizzes();
         fetchCompletedQuizzes();
       }, 10000); // Polling every 10 seconds
 
@@ -43,45 +48,51 @@ export const Quiz = () => {
     }
   }, [navigate, user]);
 
-  const fetchQuizzesAndAttempts = () => {
+  useEffect(() => {
+    applyFilters();
+  }, [categories, searchTerm, selectedStatus, filterCategory]);
+
+  const fetchCategoriesAndQuizzes = () => {
     const accessToken = localStorage.getItem("accessToken");
     axios
-      .get(`${process.env.REACT_APP_API_ENDPOINT}/quizzes`, {
+      .get(`${process.env.REACT_APP_API_ENDPOINT}/categoriesquiz`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
       .then((response) => {
-        setQuizzes(response.data);
-        response.data.forEach((quiz) => {
-          axios
-            .get(
-              `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`,
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-                params: {
-                  userId: user.id,
-                },
-              }
-            )
-            .then((response) => {
-              setAttemptsInfo((prev) => ({
-                ...prev,
-                [quiz.id]: response.data,
-              }));
-            })
-            .catch((error) => {
-              console.error(
-                "There was an error fetching the attempts info!",
-                error
-              );
-            });
+        setCategories(response.data);
+        response.data.forEach((category) => {
+          category.quizzes.forEach((quiz) => {
+            axios
+              .get(
+                `${process.env.REACT_APP_API_ENDPOINT}/quizzes/${quiz.id}/attempts`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                  params: {
+                    userId: user.id,
+                  },
+                }
+              )
+              .then((response) => {
+                setAttemptsInfo((prev) => ({
+                  ...prev,
+                  [quiz.id]: response.data,
+                }));
+              })
+              .catch((error) => {
+                console.error(
+                  "There was an error fetching the attempts info!",
+                  error
+                );
+              });
+          });
         });
       })
       .catch((error) => {
-        console.error("There was an error fetching the quizzes!", error);
+        console.error("There was an error fetching the categories!", error);
       });
   };
 
@@ -146,7 +157,7 @@ export const Quiz = () => {
       .then((response) => {
         const questions = response.data;
         localStorage.setItem(
-          `questions_${selectedQuiz.id}`, 
+          `questions_${selectedQuiz.id}`,
           JSON.stringify(questions)
         );
         navigate(`/quiz/${selectedQuiz.id}`);
@@ -171,8 +182,8 @@ export const Quiz = () => {
         }
       )
       .then((response) => {
-        fetchQuizzesAndAttempts(); // Refresh quizzes data
-        fetchCompletedQuizzes(); // Refresh completed quizzes data
+        fetchCategoriesAndQuizzes(); 
+        fetchCompletedQuizzes(); 
       })
       .catch((error) => {
         console.error("There was an error completing the quiz!", error);
@@ -182,6 +193,47 @@ export const Quiz = () => {
   const calculateNextAttemptDate = (seconds) => {
     const nextAttemptDate = new Date(Date.now() + seconds * 1000);
     return nextAttemptDate.toLocaleDateString("vi-VN");
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleStatusChange = (event) => {
+    setSelectedStatus(event.target.value);
+  };
+
+  const handleCategoryChange = (event) => {
+    setFilterCategory(event.target.value);
+  };
+
+  const applyFilters = () => {
+    let filtered = categories;
+  
+    if (filterCategory !== "all") {
+      filtered = filtered.filter(
+        (category) => category.name === filterCategory
+      );
+    }
+  
+    filtered = filtered.map((category) => {
+      const filteredQuizzes = category.quizzes.filter((quiz) => {
+        const matchesSearchTerm = searchTerm === "" || 
+          quiz.title.toLowerCase().includes(searchTerm.toLowerCase());
+  
+        const matchesStatus =
+          selectedStatus === "all" ||
+          (selectedStatus === "completed" &&
+            completedQuizzes.includes(quiz.id)) ||
+          (selectedStatus === "incomplete" &&
+            !completedQuizzes.includes(quiz.id));
+  
+        return matchesSearchTerm && matchesStatus;
+      });
+      return { ...category, quizzes: filteredQuizzes };
+    });
+  
+    setFilteredCategories(filtered);
   };
 
   if (!loggedIn) {
@@ -217,55 +269,102 @@ export const Quiz = () => {
           <div className="container">
             <div className="row">
               <div className="col-md-12 text-center">
-                <h2 className="mb-4 font-weight-bold">
+                <h3 className="mb-4 font-weight-bold">
                   Hệ thống đánh giá chất lượng kỹ năng ứng viên
-                </h2>
-                <p className="lead">
+                </h3>
+                <p className="lead" >
                   Khẳng định năng lực nghề nghiệp thông qua các bài thi đa dạng
                   chủ đề, từ đa dạng các ngành nghề. Hệ thống sẽ xác thực kỹ
                   năng dựa vào CV, từ đó giúp CV của bạn trở nên nổi bật trong
                   mắt nhà tuyển dụng và nâng cao tỷ lệ trúng tuyển tại các công
                   ty bạn mong muốn.
                 </p>
-                <button className="btn btn-primary">Tìm hiểu ngay</button>
               </div>
             </div>
-            <div className="row mt-5">
-              {quizzes.map((quiz) => (
-                <div className="col-lg-4 mb-4" key={quiz.id}>
-                  <div className="quiz-card border rounded p-4">
-                    <img
-                      src={quiz.imageUrl}
-                      alt={quiz.title}
-                      className="img-fluid mb-3"
-                    />
-                    <h3>{quiz.title}</h3>
-                    <div className="quiz-details">
-                      <div className="quiz-candidates">
-                        {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi{" "}
+            <div className="row mb-4">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Nhập từ khóa tìm kiếm"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </div>
+              <div className="col-md-4">
+                <select
+                  className="form-control"
+                  value={selectedStatus}
+                  onChange={handleStatusChange}
+                >
+                  <option value="all">Tất cả</option>
+                  <option value="completed">Đã hoàn thành</option>
+                  <option value="incomplete">Chưa hoàn thành</option>
+                </select>
+              </div>
+              <div className="col-md-4">
+                <select
+                  className="form-control"
+                  value={filterCategory}
+                  onChange={handleCategoryChange}
+                >
+                  <option value="all">Tất cả danh mục</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="row">
+              {filteredCategories.map((category) => (
+                <div key={category.id} className="col-md-12">
+                  <h4 className="category-title">{category.name}</h4>
+                  <div className="row">
+                  {category.quizzes.map((quiz) => (
+                    <div className="col-lg-4 mb-4" key={quiz.id}>
+                      <div className="quiz-card border rounded p-4">
+                        <img
+                          src={quiz.imageUrl}
+                          alt={quiz.title}
+                          className="img-fluid mb-3"
+                        />
+                      <h3>{quiz.title}</h3>
+                        <div className="quiz-details">
+                        <div className="quiz-categories" >
+                        {category.name|| "No Category"}
+                            </div>
+                          
+                              <div className="quiz-candidates">
+                              {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi
+                            </div>
+                         
+                        </div>
+                        {completedQuizzes.includes(quiz.id) ? (
+                          <div className="quizsuccess">
+                            Bạn đã hoàn thành quiz này.
+                          </div>
+                        ) : attemptsInfo[quiz.id]?.locked ? (
+                          <div className="quizwarning">
+                            Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào
+                            ngày{" "}
+                            {calculateNextAttemptDate(
+                              attemptsInfo[quiz.id]?.timeLeft
+                            )}
+                            .
+                          </div>
+                        ) : (
+                          <button
+                            className="btn btn-success"
+                            onClick={() => handleStartQuiz(quiz)}
+                          >
+                            Làm bài thi
+                          </button>
+                        )}
                       </div>
                     </div>
-                    {completedQuizzes.includes(quiz.id) ? (
-                      <div className="alert alert-success">
-                        Bạn đã hoàn thành quiz này.
-                      </div>
-                    ) : attemptsInfo[quiz.id]?.locked ? (
-                      <div className="alert alert-warning">
-                        Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào
-                        ngày{" "}
-                        {calculateNextAttemptDate(
-                          attemptsInfo[quiz.id]?.timeLeft
-                        )}
-                        .
-                      </div>
-                    ) : (
-                      <button
-                        className="btn btn-success"
-                        onClick={() => handleStartQuiz(quiz)}
-                      >
-                        Làm bài thi
-                      </button>
-                    )}
+                  ))}
                   </div>
                 </div>
               ))}
@@ -306,13 +405,16 @@ export const Quiz = () => {
                       </p>
                     </div>
                   </div>
+                  <p className="top-info">
+        * Bạn sẽ nhận được chứng nhận đánh giá hoàn thành khi nằm trong Top 20% ứng viên
+      </p>
                   <div className="custom-dialog-description">
-                    <p>Mô tả bài đánh giá</p>
-                    <p>{selectedQuiz.description}</p>
-                    <p>
-                      Số lần làm bài còn lại:{" "}
+                  <p>Mô tả bài đánh giá</p>
+                  <p>{selectedQuiz.description}</p>
+                    <p><strong>
+                      Số lần làm bài còn lại:       </strong>  {" "}
                       {attemptsInfo[selectedQuiz.id]?.attemptsLeft}
-                    </p>
+                       </p> 
                     {attemptsInfo[selectedQuiz.id]?.timeLeft > 0 && (
                       <p>
                         Thời gian chờ: {attemptsInfo[selectedQuiz.id]?.timeLeft}{" "}

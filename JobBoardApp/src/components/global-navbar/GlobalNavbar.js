@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useSearchParams,useNavigate   } from "react-router-dom";
+import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import {
@@ -12,12 +12,16 @@ import { FaBell, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import {
+  deleteNotificationThunk,
   markNotificationAsRead,
   readNotificationThunk,
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
+import { MdDelete, MdMessage } from "react-icons/md";
+
 import { Link } from "react-scroll";
+import Swal from "sweetalert2";
 export function GlobalNavbar() {
   const [searchParams] = useSearchParams();
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -34,11 +38,15 @@ export function GlobalNavbar() {
   const unreadCount = useSelector((state) => state.notification.unreadCount);
 
   const handleLogout = () => {
-    dispatch(signOut());
+    dispatch(signOut()).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/login");
+      }
+    });
   };
 
   const handleCvManagementClick = () => {
-    navigate('/cv-management');
+    navigate("/cv-management");
   };
 
   useEffect(() => {
@@ -59,6 +67,23 @@ export function GlobalNavbar() {
     }, 500),
     [dispatch]
   );
+
+  const handleDeleteNotification = (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteNotificationThunk(id));
+        Swal.fire("Deleted!", "Your notification has been deleted.", "success");
+      }
+    });
+  };
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
   const toggleNotification = () =>
@@ -121,7 +146,7 @@ export function GlobalNavbar() {
                   {blogCategory.map((item) => (
                     <li key={item.id}>
                       <NavLink
-                        to={`/blogs?type=${item.name}`}
+                        to={`/blogs?type=${encodeURIComponent(item.name)}`}
                         className={({ isActive }) =>
                           isActive && searchParams.get("type") === item.name
                             ? "active"
@@ -134,12 +159,10 @@ export function GlobalNavbar() {
                   ))}
                 </ul>
               </li>
+
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              <li>
-                    <NavLink to="/create-cv">Create CV</NavLink>
-                  </li>
               <li>
                 <NavLink to="/quiz">Quiz</NavLink>
               </li>
@@ -176,11 +199,6 @@ export function GlobalNavbar() {
               )}
               {user && (
                 <div className="icon-notification" onClick={toggleNotification}>
-                  {/* <img
-                    src="https://i.imgur.com/AC7dgLA.png"
-                    alt=""
-                    className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
-                  /> */}
                   <FaBell
                     size={30}
                     color="white"
@@ -212,44 +230,69 @@ export function GlobalNavbar() {
                     notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className="notifications-item"
-                        onClick={
-                          !notification.read
-                            ? () => handleMarkNotification(notification.id)
-                            : undefined
-                        }
+                        className="notification-container"
                       >
-                        <img src="https://i.imgur.com/uIgDDDd.jpg" alt="img" />
-                        <div className="text">
-                          <h4
-                            className={`${
-                              notification.read ? "" : "font-weight-bold"
-                            }`}
-                          >
-                            {notification.sender.firstName}{" "}
-                            {notification.sender.lastName}
-                          </h4>
-                          <p
-                            className={`${
-                              notification.read ? "" : "font-weight-bold"
-                            }`}
-                          >
-                            {notification.message}
-                          </p>
-                          {/* <small className="d-block">
-                          {moment(notification.createdAt).from()}
-                        </small> */}
+                        <div
+                          className="notifications-item"
+                          onClick={
+                            !notification.read
+                              ? () => {
+                                  handleMarkNotification(notification.id);
+                                  navigate(notification.url);
+                                }
+                              : () => {
+                                  navigate(notification.url);
+                                }
+                          }
+                        >
+                          <div className="avatar-container">
+                            <img src={notification.sender.imageUrl} alt="img" />
+                            {notification.type === "COMMENT" && (
+                              <div className="icon-container">
+                                <MdMessage className="message-icon" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="text">
+                            <h4
+                              className={`${
+                                notification.read ? "" : "font-weight-bold"
+                              }`}
+                            >
+                              {notification.sender.firstName}{" "}
+                              {notification.sender.lastName}
+                            </h4>
+                            <p
+                              className={`${
+                                notification.read ? "" : "font-weight-bold"
+                              }`}
+                            >
+                              {notification.message}
+                            </p>
+                          </div>
                         </div>
+                        <button
+                          className="delete-button"
+                          onClick={(e) => {
+                            handleDeleteNotification(notification.id);
+                          }}
+                        >
+                          <MdDelete />
+                        </button>
                       </div>
                     ))
                   ) : (
                     <div className="text-center">
-                      <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
+                      <img
+                        src="https://static.topcv.vn/v4/image/toppy-notification-empty.png"
+                        alt="No notifications"
+                      />
                       <p>You don't have any notifications yet.</p>
                     </div>
                   )}
                 </div>
               )}
+
               <Dropdown
                 isOpen={dropdownOpen}
                 toggle={toggleDropdown}
@@ -268,9 +311,9 @@ export function GlobalNavbar() {
                         {user.sub}
                       </DropdownItem>
                       <DropdownItem onClick={handleCvManagementClick}>
-        CV Management
-      </DropdownItem>
-                      <DropdownItem onClick={handleLogout} >
+                        CV Management
+                      </DropdownItem>
+                      <DropdownItem onClick={handleLogout}>
                         Log out
                       </DropdownItem>
                     </>

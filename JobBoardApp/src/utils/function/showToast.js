@@ -3,7 +3,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const showToast = (message, type = "success") => {
   toast[type](message, {
-    position: "bottom-right",
+    position: "bottom-left",
     autoClose: 7000,
     hideProgressBar: false,
     closeOnClick: true,

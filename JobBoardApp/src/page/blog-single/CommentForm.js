@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaPaperPlane } from "react-icons/fa";
+import { FaPaperPlane, FaTimesCircle } from "react-icons/fa"; // Import FaTimesCircle for cancel icon
 import "./CommentForm.css"; // Import CSS file
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,16 +7,23 @@ import { sendNotificationAsync } from "../../services/NotificationService";
 
 export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
   const [content, setContent] = useState("");
+  const [isEmpty, setIsEmpty] = useState(true);
   const navigate = useNavigate();
 
   const blog = useSelector((state) => state.blogs.blog);
+
+  const handleChange = (e) => {
+    setContent(e.target.value);
+    setIsEmpty(e.target.value.trim() === "");
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const temporaryCommentId = `${Date.now()}`; // Generate a temporary unique ID based on the current timestamp
+    const temporaryCommentId = `${Date.now()}`;
 
     const comment = {
-      id: temporaryCommentId, // Assign the temporary ID to the new comment
-      blog: { id: blogId },
+      id: temporaryCommentId,
+      blog: { id: blogId, user: blog.user, slug: blog.slug },
       content,
       parent: parentId ? { id: parentId } : null,
       user: {
@@ -26,21 +33,10 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
 
     console.log(comment);
     addComment(comment);
-    if (user.sub !== blog.user.username) {
-      sendNotificationAsync({
-        message: "commented on your post.",
-        sender: {
-          username: user.sub,
-        },
-        recipient: {
-          username: blog.user.username,
-        },
-        url: `/blog/${blog.slug}#comment-${temporaryCommentId}`,
-        isRead: false,
-      });
-    }
     setContent("");
+    setIsEmpty(true);
   };
+
   return (
     <form onSubmit={handleSubmit} className="comment-form">
       <div className="form-group">
@@ -50,13 +46,13 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
           rows={2}
           className="form-control"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={handleChange}
           placeholder="Write a comment..."
           required
           {...(parentId && { autoFocus: true })}
         />
         <button
-          type={user ? "submit" : "button"}
+          type={user && !isEmpty ? "submit" : "button"}
           className="post-button"
           {...(!user && {
             onClick: () => {
@@ -65,7 +61,11 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
           })}
         >
           {user ? (
-            <FaPaperPlane />
+            isEmpty ? (
+              <FaTimesCircle />
+            ) : (
+              <FaPaperPlane />
+            )
           ) : (
             <span className="font-weight-bold">Sign in</span>
           )}

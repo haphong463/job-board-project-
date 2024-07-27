@@ -2,9 +2,11 @@ package com.project4.JobBoardService.Controller;
 
 import com.project4.JobBoardService.DTO.ContactDTO;
 import com.project4.JobBoardService.Entity.Contact;
+import com.project4.JobBoardService.Repository.ContactRepository;
 import com.project4.JobBoardService.Service.ContactService;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.payload.EmailRequest;
+import com.project4.JobBoardService.payload.MessageResponse;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +19,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/contacts")
 public class ContactController {
 
 
+    @Autowired
+    private ContactRepository contactRepository;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -31,7 +36,6 @@ public class ContactController {
     @PostMapping
     public ResponseEntity<ContactDTO> createContact(@RequestBody Contact contact) {
         ContactDTO createdContact = contactService.createContact(contact);
-        emailService.sendEmail(contact.getEmail(), contact.getSubject(), contact.getMessage());
         return ResponseEntity.ok(createdContact);
     }
 
@@ -50,6 +54,11 @@ public class ContactController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("showArchive")
+    public ResponseEntity<List<ContactDTO>> getContacts(@RequestParam(defaultValue = "false") boolean archived) {
+        List<ContactDTO> contacts = archived ? contactService.getContactsByArchived(true) : contactService.getContactsByArchived(false);
+        return ResponseEntity.ok(contacts);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContact(@PathVariable Long id) {
@@ -60,11 +69,55 @@ public class ContactController {
     @PostMapping("/send")
     public ResponseEntity<String> sendEmail(@RequestBody EmailRequest emailRequest) {
         try {
-
+            emailService.sendEmail(emailRequest.getEmail(), emailRequest.getSubject(), emailRequest.getMessage());
             return ResponseEntity.ok("Email sent successfully!");
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email: " + ex.getMessage());
         }
+    }
+
+    @PostMapping("/archive/{id}")
+    public ResponseEntity<ContactDTO> archiveContact(@PathVariable Long id) {
+        Optional<Contact> contactOpt = contactRepository.findById(id);
+        if (contactOpt.isPresent()) {
+            Contact contact = contactOpt.get();
+            contact.setArchived(true);
+            contactRepository.save(contact);
+
+            ContactDTO contactDTO = new ContactDTO();
+            contactDTO.setId(contact.getId());
+            contactDTO.setFirstName(contact.getFirstName());
+            contactDTO.setLastName(contact.getLastName());
+            contactDTO.setEmail(contact.getEmail());
+            contactDTO.setSubject(contact.getSubject());
+            contactDTO.setMessage(contact.getMessage());
+
+            contactDTO.setArchived(contact.isArchived());
+
+            return ResponseEntity.ok(contactDTO);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    @PostMapping("/unarchive/{id}")
+    public ResponseEntity<ContactDTO> unarchiveContact(@PathVariable Long id) {
+        Optional<Contact> contactOpt = contactRepository.findById(id);
+        if (contactOpt.isPresent()) {
+            Contact contact = contactOpt.get();
+            contact.setArchived(false);
+            contactRepository.save(contact);
+
+            ContactDTO contactDTO = new ContactDTO();
+            contactDTO.setId(contact.getId());
+            contactDTO.setFirstName(contact.getFirstName());
+            contactDTO.setLastName(contact.getLastName());
+            contactDTO.setEmail(contact.getEmail());
+            contactDTO.setSubject(contact.getSubject());
+            contactDTO.setMessage(contact.getMessage());
+            contactDTO.setArchived(contact.isArchived());
+
+            return ResponseEntity.ok(contactDTO);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
 }

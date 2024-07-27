@@ -11,6 +11,7 @@ import { fetchAllBlog, fetchBlogs } from "../../features/blogSlice";
 import "./style.css";
 import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
 import { FaHome } from "react-icons/fa";
+import { BlogPagination } from "./BlogPagination";
 
 export const Blog = () => {
   const dispatch = useDispatch();
@@ -21,22 +22,26 @@ export const Blog = () => {
   const [searchText, setSearchText] = useState("");
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(0);
+  const [order, setOrder] = useState("desc");
+
   const postsPerPage = 9;
   const navigate = useNavigate();
+  const type = searchParams.get("type");
 
   const debouncedSearch = useCallback(
-    debounce((query) => {
-      setCurrentPage(0);
+    debounce((query, order, type, page, size) => {
+      const encodedType = type ? encodeURIComponent(type) : "ALL";
       dispatch(
         fetchBlogs({
           query,
-          page: currentPage,
-          size: postsPerPage,
-          type: searchParams.get("type") || "ALL",
+          page,
+          size,
+          type: encodedType,
+          order,
         })
       );
     }, 300),
-    [dispatch, currentPage]
+    [dispatch]
   );
 
   const handleSearchChange = (e) => {
@@ -45,16 +50,8 @@ export const Blog = () => {
   };
 
   useEffect(() => {
-    const type = searchParams.get("type");
-    dispatch(
-      fetchBlogs({
-        query: searchText,
-        size: postsPerPage,
-        page: currentPage,
-        type: type || "ALL",
-      })
-    );
-  }, [dispatch, currentPage, searchParams]);
+    debouncedSearch(searchText, order, type, currentPage, postsPerPage);
+  }, [debouncedSearch, searchText, order, type, currentPage, postsPerPage]);
 
   const paginate = (pageNumber) => {
     if (pageNumber >= 0 && pageNumber < totalPages) {
@@ -78,35 +75,46 @@ export const Blog = () => {
           <div className="container">
             <div className="row">
               <div className="col-md-10">
-                <motion.h1
+                <motion.h3
                   className="text-white font-weight-bold"
                   initial={{ x: -100, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  JobBoard Blog - Ideas to develop your IT career
-                </motion.h1>
+                  JobGrove Blog - Ideas to develop your IT career
+                </motion.h3>
 
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5 }}
+                  className="form-group row"
                 >
                   <Input
-                    className="form-control form-control-lg sticky-top"
+                    className="form-control form-control-lg col-lg-8 col-md-6 col-sm-12"
                     placeholder="Enter search keywords..."
                     onChange={handleSearchChange}
                   />
+
+                  <Input
+                    id="orderSelect"
+                    type="select"
+                    className="form-select form-control-lg col-lg-4 col-md-6 col-sm-12"
+                    value={order}
+                    onChange={(e) => {
+                      setOrder(e.target.value);
+                      debouncedSearch(searchText); // Trigger the search again with the new order
+                    }}
+                  >
+                    <option value="desc">Newest</option>
+                    <option value="asc">Oldest</option>
+                  </Input>
                 </motion.div>
               </div>
             </div>
           </div>
         </motion.section>
         <section className="site-section">
-          {/* {status === "loading" && <LoadingSpinner />} */}
-          {/* {status === "failed" && (
-            <h1 className="text-center">Error: {error}</h1>
-          )} */}
           {blogs.length > 0 && (
             <div className="container">
               {searchText && <h1>Search results for: "{searchText}"</h1>}
@@ -123,7 +131,7 @@ export const Blog = () => {
                     <div className="card h-100">
                       <NavLink to={`/blog/${blog.slug}`}>
                         <img
-                          src={blog.imageUrl}
+                          src={blog.thumbnailUrl}
                           alt="Image"
                           className="rounded mb-4 card-img-top"
                           style={{
@@ -174,43 +182,11 @@ export const Blog = () => {
                 ))}
               </div>
 
-              <div className="row pagination-wrap mt-5">
-                <div className="col-md-12 text-center ">
-                  <div className="custom-pagination ml-auto">
-                    <motion.a
-                      className={`prev ${currentPage === 0 ? "disabled" : ""}`}
-                      onClick={() => paginate(currentPage - 1)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      Prev
-                    </motion.a>
-                    <div className="d-inline-block">
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <motion.a
-                          key={i}
-                          className={`${currentPage === i ? "active" : ""}`}
-                          onClick={() => paginate(i)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          {i + 1}
-                        </motion.a>
-                      ))}
-                    </div>
-                    <motion.a
-                      className={`next ${
-                        currentPage === totalPages - 1 ? "disabled" : ""
-                      }`}
-                      onClick={() => paginate(currentPage + 1)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      Next
-                    </motion.a>
-                  </div>
-                </div>
-              </div>
+              <BlogPagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                paginate={paginate}
+              />
             </div>
           )}
           {blogs.length === 0 && (

@@ -10,8 +10,8 @@ import quizReducer from "./features/quizSlice"; // Adjust the path as necessary
 import questionReducer from "./features/questionSlice";
 import userReducer from "./features/userSlice";
 import cvReducer from "./features/cvSlice";
-
-
+import quizCategoryReducer from "./features/quizCategorySlice";
+import employerReducer from "./features/employerSlice";
 
 const persistConfig = {
   key: "root",
@@ -29,6 +29,8 @@ const reducer = combineReducers({
   questions: questionReducer,
   user: userReducer,
   templates: cvReducer,
+  categoryQuiz: quizCategoryReducer,
+  employers: employerReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, reducer);

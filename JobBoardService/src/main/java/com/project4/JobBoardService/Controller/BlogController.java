@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,9 +55,11 @@ public class BlogController {
             @RequestParam(defaultValue = "ALL") String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "2") int visibility
+            @RequestParam(defaultValue = "2") int visibility,
+            @RequestParam(defaultValue = "asc") String order
     ) {
-   Pageable pageable = PageRequest.of(page, size);
+        Sort sort = order.equalsIgnoreCase("desc") ? Sort.by("createdAt").descending() : Sort.by("createdAt").ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Blog> blogsPage;
         if(type.equals("ALL")){
             blogsPage = switch (visibility) {
@@ -88,7 +91,7 @@ public class BlogController {
 
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
         try {

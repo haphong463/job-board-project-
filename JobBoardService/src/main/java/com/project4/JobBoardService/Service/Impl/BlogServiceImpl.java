@@ -1,7 +1,11 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.Entity.Blog;
+import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Enum.EPermissions;
+import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Repository.BlogRepository;
+import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Util.FileUtils;
 import org.modelmapper.ModelMapper;
@@ -26,8 +30,19 @@ public class BlogServiceImpl implements BlogService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public Blog createBlog(Blog blog, MultipartFile imageFile) {
+        User user = userRepository.findByUsername(blog.getUser().getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRoles().stream().anyMatch(role -> role.getName().equals(ERole.ROLE_MODERATOR)) &&
+                !user.getPermissions().stream().anyMatch(p -> p.getName().equals("MANAGE_BLOG"))) {
+            System.out.println("You don't have permission to manage blogs.");
+            throw new RuntimeException("You do not have permission to manage blogs");
+        }
         handleImageFile(blog, imageFile, "create");
         return blogRepository.save(blog);
     }

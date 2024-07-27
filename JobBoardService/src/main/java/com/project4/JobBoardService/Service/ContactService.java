@@ -12,4 +12,5 @@ public interface ContactService {
     ContactDTO getContactById(Long id);
     void deleteContact(Long id);
 
+    List<ContactDTO> getContactsByArchived(boolean archived);
 }
