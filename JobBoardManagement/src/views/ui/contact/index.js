@@ -27,11 +27,12 @@ const ContactIndex = (props) => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
   const [emailMessage, setEmailMessage] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
     nprogress.start();
     axios
-      .get("http://localhost:8080/api/contacts")
+      .get(`http://localhost:8080/api/contacts/showArchive?archived=${showArchived}`)
       .then((response) => {
         setContacts(response.data);
         setStatus("succeeded");
@@ -42,7 +43,57 @@ const ContactIndex = (props) => {
         setStatus("failed");
         nprogress.done();
       });
-  }, []);
+  }, [showArchived]);
+
+  const handleArchive = (id) => {
+    if (window.confirm("Are you sure you want to archive this contact?")) {
+      nprogress.start();
+      axios
+        .post(`http://localhost:8080/api/contacts/archive/${id}`)
+        .then(() => {
+          axios.get(`http://localhost:8080/api/contacts/showArchive?archived=${showArchived}`)
+            .then((response) => {
+              setContacts(response.data);
+              toast.success("Contact archived successfully");
+            })
+            .catch((error) => {
+              console.error(`Error fetching contacts after archiving:`, error);
+              toast.error("Failed to fetch updated contacts.");
+            });
+          nprogress.done();
+        })
+        .catch((error) => {
+          console.error(`Error archiving contact with id ${id}:`, error);
+          toast.error("Failed to archive contact. Please try again later.");
+          nprogress.done();
+        });
+    }
+  };
+
+  const handleUnarchive = (id) => {
+    if (window.confirm("Are you sure you want to unarchive this contact?")) {
+      nprogress.start();
+      axios
+        .post(`http://localhost:8080/api/contacts/unarchive/${id}`)
+        .then(() => {
+          axios.get(`http://localhost:8080/api/contacts/showArchive?archived=${showArchived}`)
+            .then((response) => {
+              setContacts(response.data);
+              toast.success("Contact unarchived successfully");
+            })
+            .catch((error) => {
+              console.error(`Error fetching contacts after unarchiving:`, error);
+              toast.error("Failed to fetch updated contacts.");
+            });
+          nprogress.done();
+        })
+        .catch((error) => {
+          console.error(`Error unarchiving contact with id ${id}:`, error);
+          toast.error("Failed to unarchive contact. Please try again later.");
+          nprogress.done();
+        });
+    }
+  };
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this contact?")) {
@@ -76,8 +127,8 @@ const ContactIndex = (props) => {
     .then((response) => {
       toast.success("Email sent successfully");
       setSendEmailDialogOpen(false);
-      setSelectedContact(null); // Reset selectedContact to close Contact Details modal
-      setEmailMessage(""); // Clear email message after sending
+      setSelectedContact(null);
+      setEmailMessage("");
       nprogress.done();
     })
     .catch((error) => {
@@ -89,7 +140,11 @@ const ContactIndex = (props) => {
 
   const handleCancelSendEmail = () => {
     setSendEmailDialogOpen(false);
-    setSelectedContact(null); // Reset selectedContact to close Contact Details modal
+    setSelectedContact(null);
+  };
+
+  const toggleArchived = () => {
+    setShowArchived((prev) => !prev);
   };
 
   const columns = [
@@ -119,11 +174,36 @@ const ContactIndex = (props) => {
       sortable: true,
     },
     {
+      name: "Created At",
+      selector: (row) => new Date(row.createdAt).toLocaleString(),
+      sortable: true,
+    },
+    {
       name: "Actions",
       cell: (row) => (
         <div className="actions-cell">
-          <button className="btn btn-primary btn-sm me-1" onClick={() => handleRead(row)}>Read</button>
-
+          {!showArchived && (
+            <>
+              <button className="btn btn-primary btn-sm me-1" onClick={() => handleRead(row)}>Read</button>
+              <button
+                className="btn btn-warning btn-sm me-1"
+                onClick={() => handleArchive(row.id)}
+              >
+                Archive
+              </button>
+            </>
+          )}
+          {showArchived && (
+            <>
+              <button
+                className="btn btn-success btn-sm me-1"
+                onClick={() => handleUnarchive(row.id)}
+              >
+                Unarchive
+              </button>
+              <button className="btn btn-danger btn-sm me-1" onClick={() => handleDelete(row.id)}>Delete</button>
+            </>
+          )}
         </div>
       ),
     },
@@ -146,6 +226,9 @@ const ContactIndex = (props) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </InputGroup>
+          <Button onClick={toggleArchived} className="mb-3">
+            {showArchived ? "Show Active Contacts" : "Show Archived Contacts"}
+          </Button>
           {status === "loading" ? (
             <div>Loading...</div>
           ) : (

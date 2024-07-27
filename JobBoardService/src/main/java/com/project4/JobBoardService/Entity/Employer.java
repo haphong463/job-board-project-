@@ -55,5 +55,8 @@ public class Employer {
     @JoinColumn(name = "user_id")
     private User user;
 
+
+    private boolean approved;
+
     // Getters and Setters
 }

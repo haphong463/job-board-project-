@@ -461,10 +461,10 @@ public class AuthController {
         String verificationCode = UUID.randomUUID().toString();
         employer.setVerificationCode(verificationCode);
         employer.setVerified(false);
+        employer.setApproved(false); // Employer chưa được phê duyệt
 
         employerRepository.save(employer);
 
-        emailService.sendVerificationEmailEmployer(employer.getEmail(), employer.getName(), verificationCode);
 
         return ResponseEntity.ok(new MessageResponse("Employer registered successfully! Please check your email for verification instructions."));
     }
@@ -540,6 +540,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
+//approve
+
 
 //VerifyUser
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})

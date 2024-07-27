@@ -1,35 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axiosRequest from "../../configs/axiosConfig";
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import './css/detail.css';
 
-const DetailCv = () => {
-  const [cv, setCv] = useState(null);
-  const [error, setError] = useState(null);
+const DetailsCv = ({ cv, onClose }) => {
   const [currentSection, setCurrentSection] = useState(0);
-  const userId = useSelector(state => state.auth.user.id);
-
-  useEffect(() => {
-    const fetchCvData = async () => {
-      try {
-        const response = await axiosRequest.get(`/usercv/view-cv/${userId}`);
-        setCv(response);
-      } catch (error) {
-        console.error('No Cv to view please create one to implement this action', error);
-        setError('No Cv to view please create one to implement this action!');
-      }
-    };
-
-    fetchCvData();
-  }, [userId]);
-
-  if (error) {
-    return <div className="text-center"><h3>{error}</h3></div>;
-  }
-
-  if (!cv) {
-    return <div className="cv-loading">Loading...</div>;
-  }
 
   const sections = [
     { title: 'User Details', content: <UserDetails userDetails={cv.userDetails} /> },
@@ -56,9 +29,11 @@ const DetailCv = () => {
   const isLastSection = currentSection === sections.length - 1;
 
   return (
+    <div className='detail-bg'>
+        <button className="close-button" onClick={onClose}>Close</button>
     <div className="cv-details">
       <div className="cv-content">
-        <h2>Title: {cv.cvTitle}</h2>
+        <h2 className='cv-update-title'>Title: {cv.cvTitle}</h2>
         <div className="cv-section-container">
           {sections[currentSection].content}
         </div>
@@ -78,16 +53,14 @@ const DetailCv = () => {
         ></div>
       </div>
     </div>
+    </div>
   );
-  
 };
-
- 
 
 const UserDetails = ({ userDetails }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB'); // This will format the date as DD/MM/YYYY
+    return date.toLocaleDateString('en-GB');
   };
 
   return (
@@ -105,8 +78,6 @@ const UserDetails = ({ userDetails }) => {
     </div>
   );
 };
-
-
 
 const Education = ({ educations }) => (
   <div className="cv-section">
@@ -171,4 +142,4 @@ const Languages = ({ languages }) => (
   </div>
 );
 
-export default DetailCv;
+export default DetailsCv;

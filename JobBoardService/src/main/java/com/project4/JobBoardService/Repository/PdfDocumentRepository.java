@@ -1,0 +1,10 @@
+package com.project4.JobBoardService.Repository;
+
+import com.project4.JobBoardService.Entity.PdfDocument;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface PdfDocumentRepository extends JpaRepository<PdfDocument, Long> {
+    List<PdfDocument> findByUserId(Long userId);
+}

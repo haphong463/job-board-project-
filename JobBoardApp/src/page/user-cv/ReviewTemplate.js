@@ -6,9 +6,28 @@ import ReviewBox from '../../components/dialog-box/ReviewBox';
 import WaveLoader from '../../components/loading-spinner/LoadingSpinner';
 import '../../assets/css/review-template.css';
 
+const CVSelector = ({ cvs, currentCvId, onCVChange }) => (
+  <div className='text-center'>
+    <h3 className='text-review-css'>Click to change cv details</h3>
+    <div className="action-item-rv cv-selector-item">
+      <div className="cv-selector-container">
+        <select
+          value={currentCvId}
+          onChange={(e) => onCVChange(e.target.value)}
+          className="cv-selector"
+        >
+          <option value="" disabled selected>Select a CV</option>
+          {cvs.map(cv => (
+            <option key={cv.cvId} value={cv.cvId}>{cv.cvTitle}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  </div>
+);
 
 const TemplateViewer = () => {
-  const { templateName: key } = useParams();
+  const { templateName: key, cvId } = useParams();
   const [templateContent, setTemplateContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const userId = useSelector(state => state.auth.user.id);
@@ -16,36 +35,74 @@ const TemplateViewer = () => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const templatePreviewRef = useRef(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [cvId, setcvId] = useState('');
-  
+  const [userCVs, setUserCVs] = useState([]);
+
+  const fetchTemplate = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axiosRequest.get(`/templates/review-template/${key}/${userId}/${cvId}`);
+      setTemplateContent(response);
+    } catch (error) {
+      console.error('Error fetching template:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchUserCVs = async () => {
+    try {
+      const response = await axiosRequest.get(`/usercv/list-cvs/${userId}`);
+      setUserCVs(response);
+    } catch (error) {
+      console.error('Error fetching user CVs:', error);
+    }
+  };
   const handlePrintToPdf = async () => {
     try {
+      const cvTitle = userCVs.find(cv => cv.cvId === parseInt(cvId))?.cvTitle || 'cv_template';
+
       // Generate PDF
-      const response = await axiosRequest.get(`/templates/generate/${userId}`, {
+      const response = await axiosRequest.get(`/templates/generate/${userId}/${cvId}`, {
         responseType: 'blob',
       });
-  
+
       if (!(response instanceof Blob)) {
         throw new Error('Invalid response: expected Blob');
       }
-  
+
       // Create URL for downloading
       const pdfUrl = URL.createObjectURL(response);
       const link = document.createElement('a');
       link.href = pdfUrl;
-      link.download = 'cv_template.pdf';
+      link.download = `${cvTitle}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
-  
+
+      // Convert Blob to ArrayBuffer to byte[]
+      const pdfData = await response.arrayBuffer();
+      const byteArray = new Uint8Array(pdfData);
+
+      // Prepare FormData for saving the PDF
+      const formData = new FormData();
+      formData.append('name', `${cvTitle}.pdf`);
+      formData.append('fileData', new Blob([byteArray], { type: 'application/pdf' }));
+
+      // Save the PDF to the database
+      await axiosRequest.post(`/templates/pdf-document/save/${userId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
     } catch (error) {
       console.error('Error generating or saving PDF:', error);
       alert(`Error generating or saving PDF: ${error.message}`);
     }
   };
-  
-  
+
+
+
   const handleUpdateCV = () => {
     navigate(`/cv-management`);
   };
@@ -53,27 +110,29 @@ const TemplateViewer = () => {
   const handleGoBack = () => {
     navigate(-1);
   };
+
   const handleCloseDialog = () => {
     setShowDialog(false);
   };
 
   useEffect(() => {
     setShowDialog(true);
-    const fetchTemplate = async () => {
-      try {
-        setIsLoading(true);
-        const response = await axiosRequest.get(`/templates/review-template/${key}/${userId}`);
-        setTemplateContent(response);
-        setcvId(response.cvId);
-      } catch (error) {
-        console.error('Error fetching template:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchTemplate();
-  }, [key, userId]);
+    fetchUserCVs();
+  }, [key, userId, cvId]);
+
+  const handleCVChange = async (newCvId) => {
+    try {
+      setIsLoading(true);
+      const response = await axiosRequest.get(`/templates/review-template/${key}/${userId}/${newCvId}`);
+      setTemplateContent(response);
+      navigate(`/review-template/${key}/${userId}/${newCvId}`, { replace: true });
+    } catch (error) {
+      console.error('Error changing CV:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -112,7 +171,16 @@ const TemplateViewer = () => {
         <div className="col-md-3">
           <div className="actions-container-rv">
             <div className="actions-title text-center">Actions</div>
+            <hr className='hr-review-css m-2'/>
             <div className="action-items-rv d-flex flex-column">
+              <div className="action-item-rv cv-selector-item">
+                <CVSelector
+                  cvs={userCVs}
+                  currentCvId={cvId}
+                  onCVChange={handleCVChange}
+                />
+              </div>
+
               <div className="action-item-rv" onClick={handlePrintToPdf}>
                 <span className="icon"><i className="fas fa-print"></i></span>
                 Print to PDF
@@ -144,7 +212,6 @@ const TemplateViewer = () => {
       </div>
     </div>
   );
-  
 };
 
 export default TemplateViewer;

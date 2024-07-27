@@ -30,6 +30,7 @@ const UpdateForm = ({ toggle, isOpen, templateData }) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        console.log('Image Preview URL:', reader.result); // Check the result
         setImagePreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
