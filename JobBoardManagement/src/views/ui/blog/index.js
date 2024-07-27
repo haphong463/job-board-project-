@@ -28,6 +28,7 @@ import { FaFileExcel } from "react-icons/fa";
 import "./style.css";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import Swal from "sweetalert2";
+import { Navigate } from "react-router-dom";
 
 export function Blog(props) {
   const dispatch = useDispatch();
@@ -101,8 +102,11 @@ export function Blog(props) {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        dispatch(deleteBlog(id));
-        Swal.fire("Deleted!", "Your blog has been deleted.", "success");
+        dispatch(deleteBlog(id)).then((res) => {
+          if (res.meta.requestStatus === "fulfilled") {
+            Swal.fire("Deleted!", "Your blog has been deleted.", "success");
+          }
+        });
       }
     });
   };
@@ -190,30 +194,28 @@ export function Blog(props) {
       width: "300px",
       cell: (row) => <div>{row.user.email}</div>,
     },
-    {
-      name: "Comments Count",
-      selector: (row) => row.commentCount,
-      sortable: true,
-      cell: (row) => <div>{row.commentCount}</div>,
-    },
+
     {
       name: "Actions",
-      cell: (row) => (
-        <Dropdown
-          isOpen={dropdownOpen[row.id]}
-          toggle={() => toggleDropdown(row.id)}
-        >
-          <DropdownToggle caret color="info">
-            Actions
-          </DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem onClick={() => handleEdit(row.id)}>Edit</DropdownItem>
-            <DropdownItem onClick={() => handleDelete(row.id)}>
-              Delete
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      ),
+      cell: (row) =>
+        user.sub === row.user.username ? (
+          <Dropdown
+            isOpen={dropdownOpen[row.id]}
+            toggle={() => toggleDropdown(row.id)}
+          >
+            <DropdownToggle caret color="info">
+              Actions
+            </DropdownToggle>
+            <DropdownMenu>
+              <DropdownItem onClick={() => handleEdit(row.id)}>
+                Edit
+              </DropdownItem>
+              <DropdownItem onClick={() => handleDelete(row.id)}>
+                Delete
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        ) : null,
     },
   ];
 
@@ -244,6 +246,16 @@ export function Blog(props) {
   }));
 
   console.log(">>>status: ", status === "loading");
+
+  const user = useSelector((state) => state.auth.user);
+  const roles = user?.role.map((item) => item.authority) || [];
+  const permissions = user?.permission.map((item) => item.name) || [];
+  const isModerator = roles.includes("ROLE_MODERATOR");
+  const hasManageBlogPermission = permissions.includes("MANAGE_BLOG");
+
+  if (isModerator && !hasManageBlogPermission) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <Card>

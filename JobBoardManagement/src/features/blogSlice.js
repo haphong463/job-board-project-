@@ -45,6 +45,7 @@ export const addBlog = createAsyncThunk(
       const response = await createBlog(newBlog);
       return response;
     } catch (error) {
+      console.log(error);
       return rejectWithValue(error.message);
     }
   }
@@ -110,6 +111,7 @@ const blogsSlice = createSlice({
       })
       .addCase(addBlog.fulfilled, (state, action) => {
         state.blogs.push(action.payload);
+        state.statusSubmit = "succeeded";
       })
       .addCase(addBlog.pending, (state, action) => {
         state.statusSubmit = "loading";

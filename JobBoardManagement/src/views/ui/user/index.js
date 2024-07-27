@@ -25,11 +25,14 @@ import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import debounce from "lodash.debounce";
 import { ModeratorForm } from "./ModeratorForm";
+import PermissionForm from "./PermissionForm"; // Import the new component
 import "./style.css";
 import Swal from "sweetalert2";
+
 const UserList = () => {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.user.list);
+  const user = useSelector((state) => state.auth.user);
   const totalPages = useSelector((state) => state.user.totalPages);
   const status = useSelector((state) => state.user.status);
   const error = useSelector((state) => state.user.error);
@@ -39,6 +42,8 @@ const UserList = () => {
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const toggleDropdown = (id) => {
     setDropdownOpen((prevState) => ({
@@ -46,6 +51,7 @@ const UserList = () => {
       [id]: !prevState[id],
     }));
   };
+
   const handleStatusToggle = (userId, isEnabled) => {
     NProgress.start();
     dispatch(updateUserStatusThunk({ userId, isEnabled: !isEnabled })).finally(
@@ -75,6 +81,17 @@ const UserList = () => {
       }
     });
   };
+
+  const handleOpenPermissionModal = (user) => {
+    setSelectedUser(user);
+    setIsPermissionModalOpen(true);
+  };
+
+  const handleClosePermissionModal = () => {
+    setSelectedUser(null);
+    setIsPermissionModalOpen(false);
+  };
+
   const mapRoleName = (roleName) => {
     switch (roleName) {
       case "ROLE_ADMIN":
@@ -125,7 +142,6 @@ const UserList = () => {
       name: "Gender",
       cell: (row) => row.gender ?? "Not updated",
     },
-
     {
       name: "Status",
       selector: (row) => row.isEnabled,
@@ -165,6 +181,13 @@ const UserList = () => {
                   onClick={() => handleDeleteUser(row.id)}
                 >
                   Delete
+                </DropdownItem>
+              )}
+              {row.roles
+                .map((item) => item.name)
+                .includes("ROLE_MODERATOR") && (
+                <DropdownItem onClick={() => handleOpenPermissionModal(row)}>
+                  Assign Permissions
                 </DropdownItem>
               )}
             </DropdownMenu>
@@ -224,7 +247,9 @@ const UserList = () => {
     <Card>
       <div className="d-flex justify-content-between align-items-center p-3 gap-3">
         <h4>User List</h4>
-        <ModeratorForm />
+        {user.role.map((item) => item.authority).includes("ROLE_ADMIN") && (
+          <ModeratorForm />
+        )}
       </div>
       <div className="d-flex w-100 gap-2 p-2">
         <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
@@ -262,6 +287,16 @@ const UserList = () => {
         progressComponent={<Spinner />}
         progressPending={status === "loading"}
       />
+      {selectedUser && (
+        <PermissionForm
+          userId={selectedUser.id}
+          currentPermissions={selectedUser.permissions.map(
+            (permission) => permission.name
+          )}
+          isOpen={isPermissionModalOpen}
+          toggle={handleClosePermissionModal}
+        />
+      )}
     </Card>
   );
 };

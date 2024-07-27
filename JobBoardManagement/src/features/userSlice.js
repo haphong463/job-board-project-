@@ -3,6 +3,7 @@ import {
   createModeratorAsync,
   deleteUserAsync,
   getAllUserAsync,
+  updatePermissionModerator,
   updateUserEnableStatusAsync,
 } from "../services/user_service";
 export const getUserThunk = createAsyncThunk(
@@ -56,6 +57,20 @@ export const createModeratorThunk = createAsyncThunk(
     }
   }
 );
+
+export const updatePermissionsThunk = createAsyncThunk(
+  "user/updatePermissions",
+  async ({ userId, permissions }, { rejectWithValue }) => {
+    try {
+      const res = await updatePermissionModerator({ userId, permissions });
+      return res;
+    } catch (error) {
+      console.log("error: ", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const userSlice = createSlice({
   initialState: {
     list: [],
@@ -90,6 +105,11 @@ const userSlice = createSlice({
       })
       .addCase(deleteUserThunk.fulfilled, (state, action) => {
         state.list = state.list.filter((user) => user.id !== action.payload);
+      })
+      .addCase(updatePermissionsThunk.fulfilled, (state, action) => {
+        state.list = state.list.map((user) =>
+          user.id === action.payload.id ? action.payload : user
+        );
       }),
 });
 

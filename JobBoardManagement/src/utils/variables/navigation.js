@@ -27,7 +27,7 @@ export const navigation = [
       },
       {
         title: "List",
-        href: "/jobportal/table",
+        href: "/jobportal/blog",
         icon: "bi bi-hdd-stack",
       },
     ],
@@ -60,7 +60,7 @@ export const navigation = [
   },
   {
     title: "Contact",
-    icon: "bi bi-envelope", 
+    icon: "bi bi-envelope",
     href: "/jobportal/contact",
   },
   {

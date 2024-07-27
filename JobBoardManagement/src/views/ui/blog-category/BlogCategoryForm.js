@@ -40,7 +40,8 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
     setValue,
     setError,
     reset,
-    formState: { errors },
+
+    formState: { errors, isDirty },
   } = useForm({
     resolver: yupResolver(blogCategorySchema),
     defaultValues: {
@@ -111,7 +112,7 @@ export function BlogCategoryForm({ isEdit, setIsEdit }) {
             </FormGroup>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" type="submit">
+            <Button disabled={!isDirty} color="primary" type="submit">
               {isEdit ? "Update" : "Submit"}
             </Button>
             <Button

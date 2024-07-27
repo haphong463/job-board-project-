@@ -32,7 +32,7 @@ const ThemeRoutes = [
       { path: "/jobportal/alerts", exact: true, element: <BlogCategory /> },
       { path: "/jobportal/settings", exact: true, element: <UserSetting /> },
       { path: "/jobportal/user", exact: true, element: <User /> },
-      { path: "/jobportal/table", exact: true, element: <Blog /> },
+      { path: "/jobportal/blog", exact: true, element: <Blog /> },
       { path: "/jobportal/forms", exact: true, element: <Forms /> },
       { path: "/jobportal/quiz", exact: true, element: <Quiz /> },
       { path: "/jobportal/cv-management", exact: true, element: <CvManagement /> },
