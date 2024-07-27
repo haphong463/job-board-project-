@@ -77,6 +77,7 @@ public class WebSecurityConfig {
 
                                 .requestMatchers("/api/usercv/**").permitAll()
                                 .requestMatchers("/api/templates/**").permitAll()
+                                .requestMatchers("/api/application/**").permitAll()
                                 .requestMatchers("/api/categoriesquiz/**").permitAll()
                                 .requestMatchers("/api/quizzes/**").permitAll()
                                 .requestMatchers("/api/contacts/**").permitAll()
