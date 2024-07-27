@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchCVsAsync,
   deleteCVAsync,
+  disableCVAsync,
   selectAllCVs,
 } from '../../../features/cvSlice';
 import CreateForm from './CreateForm';
@@ -19,8 +20,9 @@ import {
   Input,
   Button,
   Alert,
+  Dropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from 'reactstrap';
-
+import './css/cvManagement.css'
 const CVManagement = () => {
   const dispatch = useDispatch();
   const cvs = useSelector(selectAllCVs);
@@ -43,7 +45,15 @@ const CVManagement = () => {
   const toggleNewCVModal = () => {
     setNewCVModal(!newCVModal);
   };
+  const [openDropdownId, setOpenDropdownId] = useState(null);
 
+  const toggleDropdown = (templateId) => {
+    if (openDropdownId === templateId) {
+      setOpenDropdownId(null);
+    } else {
+      setOpenDropdownId(templateId);
+    }
+  };
   const toggleUpdateCVModal = () => {
     setUpdateCVModal(!updateCVModal);
   };
@@ -51,7 +61,24 @@ const CVManagement = () => {
   const toggleDetailsModal = () => {
     setDetailsModal(!detailsModal);
   };
-
+  const isCVDisabled = (cv) => {
+    return cv.disabled;
+  };
+  const handleDisable = async (id) => {
+    try {
+      await dispatch(disableCVAsync(id)).unwrap();
+      setSuccessMessage('CV successfully disabled');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error disabling CV:', error);
+      setErrorMessage('Error disabling CV');
+      setTimeout(() => setErrorMessage(''), 3000);
+    }
+  };
+  const isCVInUse = (cv) => {
+    // Replace this with actual logic to determine if CV is in use
+    return cv.references && cv.references.length > 0;
+  };
   const handleEdit = (template) => {
     setSelectedTemplate(template);
     toggleUpdateCVModal();
@@ -104,17 +131,33 @@ const CVManagement = () => {
     {
       name: 'Actions',
       cell: (row) => (
-        <div className="d-flex">
-          <Button onClick={() => handleDetails(row)} color="info" className="mr-2">
-            Details
-          </Button>
-          <Button onClick={() => handleEdit(row)} color="primary" className="mr-2">
-            Edit
-          </Button>
-          <Button onClick={() => handleDelete(row.templateId)} color="danger">
-            Delete
-          </Button>
-        </div>
+        <Dropdown isOpen={openDropdownId === row.templateId} toggle={() => toggleDropdown(row.templateId)}>
+          <DropdownToggle caret className="dropdown-toggle">
+            Actions
+          </DropdownToggle>
+          <DropdownMenu className="dropdown-menu">
+            <DropdownItem className="dropdown-details" onClick={() => handleDetails(row)}>
+              Details
+            </DropdownItem>
+            <DropdownItem className="dropdown-edit" onClick={() => handleEdit(row)}>
+              Edit
+            </DropdownItem>
+            <DropdownItem
+              className="dropdown-delete"
+              onClick={() => handleDelete(row.templateId)}
+              disabled={isCVInUse(row)}
+            >
+              Delete
+            </DropdownItem>
+            <DropdownItem
+              className="dropdown-disable"
+              onClick={() => handleDisable(row.templateId)}
+              disabled={isCVDisabled(row)}
+            >
+              Disable
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       ),
     },
   ];

@@ -59,4 +59,9 @@ void deleteUserDetailsByUserId(@Param("userId") Long userId);
 	@Query("DELETE FROM UserCV cv WHERE cv.user.id = :userId")
 	void deleteByUserId(@Param("userId") Long userId);
 
+	List<UserCV> findAllByUserId(Long userId);
+	Optional<UserCV> findByCvIdAndUser(Long cvId, User user);
+	UserCV findByCvIdAndUserId(Long cvId, Long userId);
+
+
 }

@@ -5,16 +5,19 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/css/list-template.css';
 import DialogBox from '../../components/dialog-box/Dialogbox';
+import CVSelectionDialog from '../../components/dialog-box/CvSelectionDialog';
 
 const ListTemplate = () => {
   const [templates, setTemplates] = useState([]);
   const [sortOrder, setSortOrder] = useState('asc');
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [hasCVs, setHasCVs] = useState(false);
+  const [userCVs, setUserCVs] = useState([]);
   const user = useSelector(state => state.auth.user);
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
+  const [showCVSelectionDialog, setShowCVSelectionDialog] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   const fetchTemplates = async () => {
     try {
@@ -25,20 +28,20 @@ const ListTemplate = () => {
     }
   };
 
-  const checkHasCVs = async () => {
+  const fetchUserCVs = async () => {
     try {
-      const response = await axiosRequest.get(`/usercv/check-cvs/${user.id}`);
-      setHasCVs(response);
+      const response = await axiosRequest.get(`/usercv/list-cvs/${user.id}`);
+      setUserCVs(response);
     } catch (error) {
-      console.error('Error checking CVs:', error);
-      setHasCVs(false);
+      console.error('Error fetching user CVs:', error);
+      setUserCVs([]);
     }
   };
 
   useEffect(() => {
     fetchTemplates();
     if (user) {
-      checkHasCVs();
+      fetchUserCVs();
     }
   }, [user]);
 
@@ -64,36 +67,58 @@ const ListTemplate = () => {
     setShowDialog(false);
   };
 
-  const handleTemplateClick = async (templateId, templateName) => {
+  const handleTemplateClick = async (templateId, templateName, disabled) => {
+    if (disabled) {
+      alert('This template is expired and cannot be used.');
+      return;
+    }
+
     if (!user) {
       setShowDialog(true);
       return;
     }
-    if (!hasCVs) {
-      alert('Please create a CV details before choosing a template');
+
+    if (userCVs.length === 0) {
+      alert('Please create a CV before choosing a template');
       return;
     }
+
+    if (userCVs.length === 1) {
+      selectTemplateAndNavigate(templateId, templateName, userCVs[0].cvId);
+    } else {
+      setSelectedTemplate({ templateId, templateName });
+      setShowCVSelectionDialog(true);
+    }
+  };
+
+  const selectTemplateAndNavigate = async (templateId, templateName, cvId) => {
     try {
       await axiosRequest.put('/templates/select-template', null, {
         params: {
           userId: user.id,
+          cvId: cvId,
           templateId: templateId,
         }
       });
-      alert('Template selected successfully');
-      navigate(`/review-template/${templateName}`);
+      navigate(`/review-template/${templateName}/${user.id}/${cvId}`);
     } catch (error) {
       console.error('Error selecting template:', error);
     }
   };
 
+  const handleCVSelection = (cvId) => {
+    setShowCVSelectionDialog(false);
+    if (selectedTemplate) {
+      selectTemplateAndNavigate(selectedTemplate.templateId, selectedTemplate.templateName, cvId);
+    }
+  };
+
   const filteredTemplates = templates.filter((template) =>
-    template.templateName.toLowerCase().includes(searchQuery.toLowerCase())
+    template.templateName.toLowerCase().includes(searchQuery.toLowerCase()) && !template.disabled
   );
 
   return (
     <GlobalLayoutUser>
-
       <section
         className="section-hero overlay inner-page bg-image"
         style={{ backgroundImage: 'url("../../../assets/images/hero_1.jpg")' }}
@@ -142,19 +167,19 @@ const ListTemplate = () => {
             <div className="col-md-12 mb-4">
               <h3 className="text-css">Choose your template</h3>
               <div className="filter-toggle" onClick={handleFilterToggle}>
-                <i className="fas fa-filter"></i> Filters
+                <i className="fas fa-filter filter-icon"></i> Filters
               </div>
               {showFilters && (
                 <div className="filter-dropdown">
                   <div className="sort-buttons">
                     <button
-                      className={`btn btn-primary ${sortOrder === 'asc' ? 'active' : ''}`}
+                      className={`btn ${sortOrder === 'asc' ? 'active' : ''}`}
                       onClick={() => sortTemplates('asc')}
                     >
                       Oldest First
                     </button>
                     <button
-                      className={`btn btn-primary ${sortOrder === 'desc' ? 'active' : ''}`}
+                      className={`btn ${sortOrder === 'desc' ? 'active' : ''}`}
                       onClick={() => sortTemplates('desc')}
                     >
                       Latest First
@@ -171,19 +196,16 @@ const ListTemplate = () => {
                 </div>
               )}
             </div>
-            {!hasCVs ? (
-              <div className="col-md-12 text-center">
-                <p className="alert alert-warning">Please create a CV details before choosing a template</p>
-              </div>
-            ) : filteredTemplates.length > 0 ? (
+            {filteredTemplates.length > 0 ? (
               filteredTemplates.map((template) => (
                 <div key={template.templateId} className="col-md-4 mb-4">
-                  <div className="template-card" onClick={() => handleTemplateClick(template.templateId, template.templateName)}>
+                  <div
+                    className="template-card"
+                    onClick={() => handleTemplateClick(template.templateId, template.templateName, template.disabled)}
+                  >
                     {template.templateImageBase64 ? (
                       <>
                         <img
-                          width={200}
-                          height={200}
                           className="template-image"
                           src={`data:image/${template.fileExtension};base64,${template.templateImageBase64}`}
                           alt={template.templateName}
@@ -208,6 +230,12 @@ const ListTemplate = () => {
         </div>
       </section>
       <DialogBox isOpen={showDialog} onClose={handleDialogClose} />
+      <CVSelectionDialog
+        isOpen={showCVSelectionDialog}
+        onClose={() => setShowCVSelectionDialog(false)}
+        cvs={userCVs}
+        onSelect={handleCVSelection}
+      />
     </GlobalLayoutUser>
   );
 };

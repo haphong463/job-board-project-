@@ -20,6 +20,7 @@ public class Template {
 	private LocalDateTime updatedAt;
 	@Column(columnDefinition = "LONGTEXT")
 	private String templateImageBase64;
-
+	@Column(nullable = false)
+	private boolean disabled = false;
 	// Getters and setters
 }

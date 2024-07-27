@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import '../../assets/css/create-cv.css';
 import axiosRequest from "../../configs/axiosConfig";
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +9,7 @@ const CreateCV = () => {
     const [step, setStep] = useState(1);
     const navigate = useNavigate();
     const [cvTitle, setCvTitle] = useState('');
+    const [imagePreview, setImagePreview] = useState(null);
     const [userDetails, setUserDetails] = useState([{ fullName: '', address: '', email: '', phone: '', summary: '', profileImage: '', dob: '' }]);
     const [userEducations, setUserEducations] = useState([{ institution: '', degree: '', description: '', startDate: '', endDate: '' }]);
     const [userExperiences, setUserExperiences] = useState([{ jobTitle: '', company: '', description: '', startDate: '', endDate: '' }]);
@@ -18,6 +18,7 @@ const CreateCV = () => {
     const [userSkills, setUserSkills] = useState([{ skillName: '', proficiency: '' }]);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const user = useSelector(state => state.auth.user)
+    const [existingCVs, setExistingCVs] = useState([]);
     const [errors, setErrors] = useState({
         userDetails: [],
         userEducations: [],
@@ -27,76 +28,125 @@ const CreateCV = () => {
         userSkills: [],
         cvTitle: '',
     });
+    useEffect(() => {
+        const fetchExistingCVs = async () => {
+            try {
+                const response = await axiosRequest.get(`/usercv/list-cvs/${user.id}`);
+                setExistingCVs(response);
+            } catch (error) {
+                console.error('Error fetching existing CVs:', error);
+            }
+        };
 
+        fetchExistingCVs();
+    }, [user.id]);
 
     const handleInputChange = (e, index, field, section) => {
-        const value = e.target.value;
+        const { value } = e.target;
+        const updateState = (prevState) => {
+            const newState = [...prevState];
+            newState[index][field] = value;
+            return newState;
+        };
+
         switch (section) {
             case 'userDetails':
-                setUserDetails((prevDetails) => {
-                    const newDetails = [...prevDetails];
-                    if (field === 'dob') {
-                        // Format the date as ISO string
-                        newDetails[index][field] = new Date(value).toISOString().split('T')[0];
-                    } else {
-                        newDetails[index][field] = value;
-                    }
-                    return newDetails;
-                });
+                setUserDetails(updateState);
                 break;
             case 'userEducations':
-                setUserEducations((prevEducations) => {
-                    const newEducations = [...prevEducations];
-                    newEducations[index][field] = value;
-                    return newEducations;
-                });
+                setUserEducations(updateState);
                 break;
             case 'userExperiences':
-                setUserExperiences((prevExperiences) => {
-                    const newExperiences = [...prevExperiences];
-                    newExperiences[index][field] = value;
-                    return newExperiences;
-                });
+                setUserExperiences(updateState);
                 break;
             case 'userLanguages':
-                setUserLanguages((prevLanguages) => {
-                    const newLanguages = [...prevLanguages];
-                    newLanguages[index][field] = value;
-                    return newLanguages;
-                });
+                setUserLanguages(updateState);
                 break;
             case 'userProjects':
-                setUserProjects((prevProjects) => {
-                    const newProjects = [...prevProjects];
-                    newProjects[index][field] = value;
-                    return newProjects;
-                });
+                setUserProjects(updateState);
                 break;
             case 'userSkills':
-                setUserSkills((prevSkills) => {
-                    const newSkills = [...prevSkills];
-                    newSkills[index][field] = value;
-                    return newSkills;
-                });
+                setUserSkills(updateState);
                 break;
             default:
                 break;
         }
     };
 
+    const handleCloneCV = async (e) => {
+        const selectedCVId = e.target.value;
+        console.log('Selected CV ID:', selectedCVId);
 
-    const handleFileChange = (e, index) => {
-        const file = e.target.files[0];
-        setUserDetails((prevDetails) => {
-            const newDetails = [...prevDetails];
-            newDetails[index].profileImage = file;
+        if (selectedCVId) {
+            try {
+                const response = await axiosRequest.get(`/usercv/${selectedCVId}`);
+                const formattedResponse = {
+                    ...response,
+                    userDetails: response.userDetails.map(detail => ({
+                        ...detail,
+                        dob: detail.dob ? new Date(detail.dob).toISOString().split('T')[0] : ''
+                    }))
+                };
+                const cvData = formattedResponse;
+                console.log('Cloned CV Data:', cvData);
 
-            // Create a temporary URL for the selected file
-            newDetails[index].profileImageUrl = file ? URL.createObjectURL(file) : null;
+                setCvTitle(cvData.cvTitle ? cvData.cvTitle + ' (Copy)' : 'Cloned CV');
+                setUserDetails(cvData.userDetails.map(detail => ({
+                    ...detail,
+                    dob: detail.dob || '', // Keep the date as a string in 'YYYY-MM-DD' format
+                    profileImage: null,
+                    profileImageUrl: detail.profileImageBase64,
+                    profileImageBase64: detail.profileImageBase64
+                })));
 
-            return newDetails;
-        });
+                setUserEducations(Array.isArray(cvData.userEducations) ? cvData.userEducations : []);
+                setUserExperiences(Array.isArray(cvData.userExperiences) ? cvData.userExperiences : []);
+                setUserLanguages(Array.isArray(cvData.userLanguages) ? cvData.userLanguages : []);
+                setUserProjects(Array.isArray(cvData.userProjects) ? cvData.userProjects : []);
+                setUserSkills(Array.isArray(cvData.userSkills) ? cvData.userSkills : []);
+
+                // Set image preview if available
+                if (cvData.userDetails[0].profileImageUrl) {
+                    setImagePreview(cvData.userDetails[0].profileImageUrl);
+                }
+
+                // Reset the select element
+                e.target.value = '';
+
+                console.log('CV cloned successfully');
+            } catch (error) {
+                console.error('Error cloning CV:', error);
+            }
+        }
     };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+                setUserDetails(prevDetails => [{
+                    ...prevDetails[0],
+                    profileImage: file,
+                    profileImageBase64: null
+                }]);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // If no new file is selected, retain the existing image
+            setImagePreview(null);
+            setUserDetails(prevDetails => [{
+                ...prevDetails[0],
+                profileImage: null,
+                profileImageBase64: prevDetails[0].profileImageBase64
+            }]);
+        }
+    };
+
+
+
+
     const SuccessModal = ({ show, onClose, onTemplate }) => {
         const [countdown, setCountdown] = useState(10);
 
@@ -297,17 +347,36 @@ const CreateCV = () => {
             const params = new FormData();
             params.append('cvTitle', cvTitle);
             params.append('user.id', user.id);
+
+            // User Details
             userDetails.forEach((detail, index) => {
                 const prefix = `userDetails[${index}]`;
-                console.log('image: ', detail.profileImage);
                 params.append(`${prefix}.fullName`, detail.fullName);
                 params.append(`${prefix}.address`, detail.address);
-                params.append(`dob`, detail.dob); // Add this line
                 params.append(`${prefix}.email`, detail.email);
                 params.append(`${prefix}.phone`, detail.phone);
                 params.append(`${prefix}.summary`, detail.summary);
-                params.append('profileImage', detail.profileImage);
+
+                if (detail.dob) {
+                    const dobTimestamp = new Date(detail.dob).getTime();
+                    params.append('dob', dobTimestamp.toString());
+                }
+
+                if (detail.profileImage instanceof File) {
+                    params.append('profileImage', detail.profileImage);
+                } else if (detail.profileImageBase64) {
+                    const byteCharacters = atob(detail.profileImageBase64);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'image/jpeg' });
+                    params.append('profileImage', blob, 'profile.jpg');
+                }
             });
+
+
             userEducations.forEach((education, index) => {
                 const prefix = `userEducations[${index}]`;
                 params.append(`${prefix}.institution`, education.institution);
@@ -366,53 +435,71 @@ const CreateCV = () => {
             <div className="step-indicator">
                 <div className={`step ${step >= 1 ? 'active' : ''}`}>
                     <span className="circle"></span>
-                    <div>CV Title</div>
+                    <div className='text-indicator'>CV Title</div>
                 </div>
                 <div className={`step ${step >= 2 ? 'active' : ''}`}>
                     <span className="circle"></span>
-                    <div>User Details</div>
+                    <div className='text-indicator'>User Details</div>
                 </div>
                 <div className={`step ${step >= 3 ? 'active' : ''}`}>
                     <span className="circle"></span>
-                    <div>Education</div>
+                    <div className='text-indicator'>Education</div>
                 </div>
                 <div className={`step ${step >= 4 ? 'active' : ''}`}>
                     <span className="circle"></span>
-                    <div>Experiences</div>
+                    <div className='text-indicator'>Experiences</div>
                 </div>
                 <div className={`step ${step >= 5 ? 'active' : ''}`}>
                     <span className="circle"></span>
-                    <div>Languages</div>
+                    <div className='text-indicator'>Languages</div>
                 </div>
                 <div className={`step ${step >= 6 ? 'active' : ''}`}>
                     <span className="circle"></span>
-                    <div>Projects</div>
+                    <div className='text-indicator'>Projects</div>
                 </div>
                 <div className={`step ${step >= 7 ? 'active' : ''}`}>
                     <span className="circle"></span>
-                    <div>Skills</div>
+                    <div className='text-indicator'>Skills</div>
                 </div>
             </div>
             <div className='cv-bg'>
                 <h2 className='text-center'>
-                    <span className='text-effect' style={{ '--animation-order': 0 }}>Please</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 1 }}>fill</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 2 }}>out</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 3 }}>these</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 4 }}>form</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 5 }}>before</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 6 }}>choose</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 7 }}>a</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 8 }}>CV</span>{' '}
-                    <span className='text-effect' style={{ '--animation-order': 9 }}>template</span>
+                    <span className='text-effect-css-create' style={{ '--animation-order': 0 }}>Please</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 1 }}>fill</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 2 }}>out</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 3 }}>these</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 4 }}>form</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 5 }}>before</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 6 }}>choose</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 7 }}>a</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 8 }}>CV</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 9 }}>template</span>
                 </h2>
 
                 <form onSubmit={handleSubmit} className="cv-form">
+                    {/* Clone CV Dropdown */}
+                    <div className="clone-cv-section">
+                        <label htmlFor="cloneCV" className="clone-cv-label">
+                            <i className="icon-copy i-cp-css"></i> <i>Clone existing CV:</i> 
+                        </label>
+
+                        <select
+                            id="cloneCV"
+                            onChange={handleCloneCV}
+                            className="clone-cv-select"
+                        >
+                            <option value="">Select a CV to clone</option>
+                            {existingCVs.map(cv => (
+                                <option key={cv.cvId} value={cv.cvId}>{cv.cvTitle}</option>
+                            ))}
+                        </select>
+                    </div>
 
                     {/* CV Title */}
                     {step === 1 && (
                         <>
-                            <h1 className="cv-section-title">Section 1: CV Title</h1>
+                            <h1 className="cv-section-title-create-css
+                            ">Section 1: CV Title</h1>
                             <div className="cv-section">
                                 <label htmlFor="cvTitle" className="cv-label">CV Title:</label>
                                 <input
@@ -423,7 +510,7 @@ const CreateCV = () => {
                                     required
                                     className="cv-input"
                                 />
-                                {errors.cvTitle && <div className="cv-error-message">{errors.cvTitle.join(', ')}</div>}
+                                {errors.cvTitle && <div className="cv-error-message text-danger">{errors.cvTitle.join(', ')}</div>}
                             </div>
                             <div className="cv-button-group">
                                 <button type="button" onClick={handleContinue} className="cv-continue-btn">
@@ -437,11 +524,11 @@ const CreateCV = () => {
                     {step === 2 && (
                         <>
 
-                            <h2 className="cv-section-title">Section 2: User Details</h2>
+                            <h2 className="cv-section-title-create-css">Section 2: User Details</h2>
                             {errors.userDetails.length > 0 && (
                                 <div className="cv-validation-errors">
                                     {errors.userDetails.map((error, index) => (
-                                        <p key={index} className="cv-error-message">{error}</p>
+                                        <p key={index} className="cv-error-message text-danger">{error}</p>
                                     ))}
                                 </div>
                             )}
@@ -472,9 +559,10 @@ const CreateCV = () => {
                                         className="cv-input"
                                     />
 
+
                                     <input
                                         type="email"
-                                        placeholder="Email"
+                                        placeholder="Email (Exp: your-email-prefix@gmail.com)"
                                         value={detail.email}
                                         onChange={(e) => handleInputChange(e, index, 'email', 'userDetails')}
                                         required
@@ -483,7 +571,7 @@ const CreateCV = () => {
 
                                     <input
                                         type="tel"
-                                        placeholder="Phone"
+                                        placeholder="Phone (Accept format: (123) 456-7890 || 123-456-7890 || 123.456.7890 || 1234567890)"
                                         value={detail.phone}
                                         onChange={(e) => handleInputChange(e, index, 'phone', 'userDetails')}
                                         required
@@ -499,25 +587,25 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
-
-
                                     <label htmlFor={`profileImage-${index}`} className="cv-label">
                                         Profile Image
                                     </label>
+                                    <div className="cv-image-preview">
+                                        {imagePreview ? (
+                                            <img src={imagePreview} alt="Profile Preview" className="cv-preview-image" width={300} height={200} />
+                                        ) : detail.profileImageBase64 ? (
+                                            <img src={`data:image/jpeg;base64,${detail.profileImageBase64}`} alt="Current Profile" className="cv-preview-image" width={300} height={300} />
+                                        ) : (
+                                            <p>No image uploaded</p>
+                                        )}
+                                    </div>
                                     <input
                                         type="file"
-                                        id={`profileImage-${index}`}
+                                        onChange={handleFileChange}
                                         accept="image/*"
-                                        onChange={(e) => handleFileChange(e, index)}
                                         className="cv-file-input"
                                     />
-                                    {detail.profileImageUrl && (
-                                        <img
-                                            src={detail.profileImageUrl}
-                                            alt="Profile"
-                                            className="cv-profile-image"
-                                        />
-                                    )}
+
                                     {userDetails.length > 1 && (
                                         <button type="button" onClick={() => removeEntry(index, 'userDetails')} className="cv-remove-btn">
                                             Remove
@@ -540,11 +628,11 @@ const CreateCV = () => {
                     {/* Education Section */}
                     {step === 3 && (
                         <>
-                            <h2 className="cv-section-title">Section 3: Education</h2>
+                            <h2 className="cv-section-title-create-css">Section 3: Education</h2>
                             {errors.userEducations.length > 0 && (
                                 <div className="cv-validation-errors">
                                     {errors.userEducations.map((error, index) => (
-                                        <p key={index} className="cv-error-message">{error}</p>
+                                        <p key={index} className="cv-error-message text-danger">{error}</p>
                                     ))}
                                 </div>
                             )}
@@ -616,11 +704,11 @@ const CreateCV = () => {
                     {/* Experience Section */}
                     {step === 4 && (
                         <>
-                            <h2 className="cv-section-title">Section 4: Experience</h2>
+                            <h2 className="cv-section-title-create-css">Section 4: Experience</h2>
                             {errors.userExperiences.length > 0 && (
                                 <div className="cv-validation-errors">
                                     {errors.userExperiences.map((error, index) => (
-                                        <p key={index} className="cv-error-message">{error}</p>
+                                        <p key={index} className="cv-error-message text-danger">{error}</p>
                                     ))}
                                 </div>
                             )}
@@ -692,11 +780,11 @@ const CreateCV = () => {
                     {/* Language Section */}
                     {step === 5 && (
                         <>
-                            <h2 className="cv-section-title">Section 5: Languages</h2>
+                            <h2 className="cv-section-title-create-css">Section 5: Languages</h2>
                             {errors.userLanguages.length > 0 && (
                                 <div className="cv-validation-errors">
                                     {errors.userLanguages.map((error, index) => (
-                                        <p key={index} className="cv-error-message">{error}</p>
+                                        <p key={index} className="cv-error-message text-danger">{error}</p>
                                     ))}
                                 </div>
                             )}
@@ -743,11 +831,11 @@ const CreateCV = () => {
                     {/* Project Section */}
                     {step === 6 && (
                         <>
-                            <h2 className="cv-section-title">Section 6: Projects</h2>
+                            <h2 className="cv-section-title-create-css">Section 6: Projects</h2>
                             {errors.userProjects.length > 0 && (
                                 <div className="cv-validation-errors">
                                     {errors.userProjects.map((error, index) => (
-                                        <p key={index} className="cv-error-message">{error}</p>
+                                        <p key={index} className="cv-error-message text-danger">{error}</p>
                                     ))}
                                 </div>
                             )}
@@ -811,11 +899,11 @@ const CreateCV = () => {
                     {/* Skill Section */}
                     {step === 7 && (
                         <>
-                            <h2 className="cv-section-title">Section 7: Skills</h2>
+                            <h2 className="cv-section-title-create-css">Section 7: Skills</h2>
                             {errors.userSkills.length > 0 && (
                                 <div className="cv-validation-errors">
                                     {errors.userSkills.map((error, index) => (
-                                        <p key={index} className="cv-error-message">{error}</p>
+                                        <p key={index} className="cv-error-message text-danger">{error}</p>
                                     ))}
                                 </div>
                             )}

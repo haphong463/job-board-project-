@@ -13,6 +13,15 @@ export const fetchCVs = async () => {
     throw error;
   }
 };
+export const disableCV = async (id) => {
+  try {
+    await axiosRequest.patch(`${baseURL}/disable/${id}`);
+  } catch (error) {
+    console.error(`Error disabling CV with id ${id}:`, error);
+    throw error;
+  }
+};
+
 export const fetchCVById = async (id) => {
   try {
     return await axiosRequest.get(`${baseURL}/${id}`);

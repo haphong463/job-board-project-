@@ -2,13 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosRequest from '../../configs/axiosConfig';
-import '../../assets/css/create-cv.css';
+import '../../assets/css/update-cv.css';
 import { useSelector } from 'react-redux';
 
-const UpdateCV = () => {
+const UpdateCV = ({userId, cvId, onClose}) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const userId = useSelector(state => state.auth.user.id);
   const [cv, setCv] = useState(null);
   const [currentSection, setCurrentSection] = useState('cvTitle');
   const [imagePreview, setImagePreview] = useState(null);
@@ -19,7 +18,7 @@ const UpdateCV = () => {
   useEffect(() => {
     const fetchCvData = async () => {
       try {
-        const response = await axiosRequest.get(`/usercv/view-cv/${userId}`);
+        const response = await axiosRequest.get(`/usercv/view-cv/${cvId}`);
         const formattedResponse = {
           ...response,
           userDetails: response.userDetails.map(detail => ({
@@ -36,7 +35,7 @@ const UpdateCV = () => {
     };
 
     fetchCvData();
-  }, [userId]);
+  }, [cvId]);
 
   const goBack = () => {
     const sections = ['cvTitle', 'userDetails', 'education', 'experiences', 'languages', 'projects', 'skills'];
@@ -203,7 +202,7 @@ const UpdateCV = () => {
         });
       });
 
-      const response = await axiosRequest.put(`/usercv/update-cv/${userId}`, params, {
+      const response = await axiosRequest.put(`/usercv/update-cv/${cvId}`, params, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -567,19 +566,24 @@ const UpdateCV = () => {
   }
 
   return (
+    <div className='detail-bg'>
+        <button className="close-button" onClick={onClose}>Close</button>
     <div className="container py-5">
+       
      <CustomModal 
       show={showModal}
       onClose={() => setShowModal(false)}
       onStay={() => handleUserChoice('stay')}
       onTemplate={() => handleUserChoice('template')}
     />
+    
       <div className='cv-bg'>
-        <h1 className="text-update">Update CV</h1>
+        <h1 className="text-update-css">Update CV</h1>
         <form onSubmit={handleSubmit} className="cv-form">
           {renderSection()}
         </form>
       </div>
+    </div>
     </div>
   );
 };

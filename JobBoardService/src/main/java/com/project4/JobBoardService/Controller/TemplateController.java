@@ -14,6 +14,9 @@ import java.util.zip.GZIPOutputStream;
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.project4.JobBoardService.Config.ResourceNotFoundException;
+import com.project4.JobBoardService.Entity.PdfDocument;
+import com.project4.JobBoardService.Repository.PdfDocumentRepository;
 import com.project4.JobBoardService.Service.CloudflareConfig;
 //import com.project4.JobBoardService.Util.PdfUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.TemplateEngine;
@@ -59,6 +54,8 @@ public class TemplateController {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private PdfDocumentRepository pdfDocumentRepository;
 
 	private final TemplateService templateService;
 	private final TemplateEngine templateEngine;
@@ -70,7 +67,22 @@ public class TemplateController {
 		this.templateEngine = templateEngine;
 
 	}
+	@PatchMapping("/disable/{id}")
+	public ResponseEntity<String> disableTemplate(@PathVariable Long id) {
+		try {
+			Template template = templateRepository.findById(id)
+					.orElseThrow(() -> new ResourceNotFoundException("Template not found"));
 
+			template.setDisabled(true);
+			templateRepository.save(template);
+
+			return ResponseEntity.noContent().build();
+		} catch (ResourceNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		} catch (Exception ex) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
+		}
+	}
 	@GetMapping
 	public ResponseEntity<List<Template>> getAllTemplate() {
 		List<Template> templates = templateRepository.findAll();
@@ -224,10 +236,10 @@ public class TemplateController {
 		return templateRepository.findAll();
 	}
 
-
 	@PutMapping("/select-template")
-	public ResponseEntity<String> selectTemplate(@RequestParam("userId") Long userId,
-												 @RequestParam("templateId") Long templateId) {
+	public ResponseEntity selectTemplate(@RequestParam("userId") Long userId,
+										 @RequestParam("cvId") Long cvId,
+										 @RequestParam("templateId") Long templateId) {
 		try {
 			// Find User by userId
 			User user = userRepository.findById(userId).orElse(null);
@@ -241,8 +253,8 @@ public class TemplateController {
 				return ResponseEntity.badRequest().body("Invalid template ID");
 			}
 
-			// Find UserCV by user
-			UserCV userCV = userCvRepository.findByUser(user);
+			// Find UserCV by cvId and user
+			UserCV userCV = userCvRepository.findByCvIdAndUser(cvId, user).orElse(null);
 			if (userCV == null) {
 				return ResponseEntity.notFound().build();
 			}
@@ -259,171 +271,118 @@ public class TemplateController {
 		}
 	}
 
-	@GetMapping("/review-template/{key}/{userId}")
-	public Mono<ResponseEntity<String>> getTemplate(@PathVariable("key") String key, @PathVariable("userId") Long userId, Model model) {
-		return Mono.justOrEmpty(userCvRepository.findByUserId(userId))
-				.switchIfEmpty(Mono.just(new UserCV())) // Return empty UserCV if not found (optional)
+	@GetMapping("/review-template/{key}/{userId}/{cvId}")
+	public Mono<ResponseEntity<String>> getTemplate(@PathVariable("key") String key, @PathVariable("userId") Long userId, @PathVariable("cvId") Long cvId) {
+		return Mono.fromSupplier(() -> userCvRepository.findByCvIdAndUserId(cvId, userId))
 				.flatMap(userCV -> {
-					// Add UserCV to the model
-					model.addAttribute("userCV", userCV);
+					if (userCV == null) {
+						return Mono.just(ResponseEntity.notFound().build());
+					}
 
-					// Retrieve the template
 					return templateService.retrieveTemplate(key)
-							.flatMap(template -> {
-								// Create Thymeleaf context and add the model attributes
-								Context context = new Context();
-								model.asMap().forEach(context::setVariable);
-
-								// Render the template with Thymeleaf
-								String renderedHtml = templateEngine.process(template, context);
-
-								// Return the rendered HTML as the response
-								return Mono.just(ResponseEntity.ok(renderedHtml));
-							})
-							.defaultIfEmpty(ResponseEntity.notFound().build())
-							.onErrorResume(e -> Mono.just(ResponseEntity.status(500).body("Error retrieving template: " + e.getMessage())));
-				});
-	}
-
-//	@GetMapping("/generate/{userId}")
-//	public Mono<ResponseEntity<byte[]>> generatePDF(@PathVariable Long userId) {
-//		return Mono.justOrEmpty(userCvRepository.findByUserId(userId))
-//				.switchIfEmpty(Mono.error(new RuntimeException("UserCV not found")))
-//				.flatMap(userCV -> {
-//					String templateKey = userCV.getTemplate().getTemplateName();
-//					return templateService.retrieveTemplate(templateKey)
-//							.flatMap(template -> {
-//								Context context = new Context();
-//								context.setVariable("userCV", userCV);
-//
-//								String renderedHtml = templateEngine.process(template, context);
-//
-//								ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//
-//								ConverterProperties props = new ConverterProperties();
-//								props.setBaseUri("classpath:/static/");
-//
-//								HtmlConverter.convertToPdf(renderedHtml, outputStream, props);
-//
-//								byte[] pdfBytes = outputStream.toByteArray();
-//
-//								// Compress the PDF data
-//								ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//								try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
-//									gzipOutputStream.write(pdfBytes);
-//								} catch (IOException e) {
-//									return Mono.error(new RuntimeException("Error compressing PDF", e));
-//								}
-//								byte[] compressedBytes = baos.toByteArray();
-//
-//								// Save the compressed PDF
-//								try {
-//									pdfDocumentService.savePdf(compressedBytes, "generated_cv.pdf", userId);
-//								} catch (IOException e) {
-//									return Mono.error(new RuntimeException("Error saving compressed PDF", e));
-//								}
-//
-//								HttpHeaders headers = new HttpHeaders();
-//								headers.setContentType(MediaType.APPLICATION_PDF);
-//								headers.setContentDispositionFormData("filename", "cv.pdf");
-//
-//								return Mono.just(new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK));
-//							});
-//				})
-//				.onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//						.body(("Error generating PDF: " + e.getMessage()).getBytes())));
-//	}
-	@GetMapping("/generate/{userId}")
-	public Mono<ResponseEntity<byte[]>> generatePDF(@PathVariable Long userId) {
-		return Mono.justOrEmpty(userCvRepository.findByUserId(userId))
-				.switchIfEmpty(Mono.error(new RuntimeException("UserCV not found")))
-				.flatMap(userCV -> {
-					String templateKey = userCV.getTemplate().getTemplateName();
-					return templateService.retrieveTemplate(templateKey)
-							.flatMap(template -> {
+							.map(template -> {
 								Context context = new Context();
 								context.setVariable("userCV", userCV);
 
+								// Add any other necessary variables to the context
+								// context.setVariable("otherVar", otherValue);
+
 								String renderedHtml = templateEngine.process(template, context);
-
-								ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-								ConverterProperties props = new ConverterProperties();
-								props.setBaseUri("classpath:/static/");
-
-								HtmlConverter.convertToPdf(renderedHtml, outputStream, props);
-
-								byte[] pdfBytes = outputStream.toByteArray();
-
-								HttpHeaders headers = new HttpHeaders();
-								headers.setContentType(MediaType.APPLICATION_PDF);
-								headers.setContentDispositionFormData("filename", "cv.pdf");
-
-								return Mono.just(new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK));
-							});
-				})
-				.onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body(("Error generating PDF: " + e.getMessage()).getBytes())));
+								return ResponseEntity.ok(renderedHtml);
+							})
+							.onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+									.body("Error retrieving template: " + e.getMessage())));
+				});
 	}
-//	@PostMapping("/pdf-documents/save/{userId}")
-//	public ResponseEntity<?> savePdfDocument(
-//			@PathVariable Long userId,
-//			@RequestParam("name") String name,
-//			@RequestParam("fileData") MultipartFile fileData) {
-//		try {
-//			byte[] fileBytes = fileData.getBytes();
-//			pdfDocumentService.savePdf(fileBytes, name, userId);
-//
-//			return ResponseEntity.ok().body("PDF saved successfully");
-//		} catch (Exception e) {
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("Error saving PDF: " + e.getMessage());
-//		}
-//	}
-//	bo cai nay
-//	@GetMapping("/generate/{userId}")
-//	public Mono<ResponseEntity<byte[]>> generatePDF(@PathVariable Long userId) {
-//		return Mono.justOrEmpty(userCvRepository.findByUserId(userId))
-//				.switchIfEmpty(Mono.error(new RuntimeException("UserCV not found")))
-//				.flatMap(userCV -> {
-//					String templateKey = userCV.getTemplate().getTemplateName();
-//					return templateService.retrieveTemplate(templateKey)
-//							.flatMap(template -> {
-//								Context context = new Context();
-//								context.setVariable("userCV", userCV);
-//
-//								String renderedHtml = templateEngine.process(template, context);
-//
-//								ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//
-//								ConverterProperties props = new ConverterProperties();
-//								props.setBaseUri("classpath:/static/");
-//								props.setMediaDeviceDescription(new MediaDeviceDescription(MediaType.PRINT));
-//								FontProvider fontProvider = new DefaultFontProvider(false, false, false);
-//								fontProvider.addStandardPdfFonts();
-//								fontProvider.addSystemFonts();
-//								props.setFontProvider(fontProvider);
-//
-//								PdfWriter writer = new PdfWriter(outputStream);
-//								PdfDocument pdf = new PdfDocument(writer);
-//								pdf.setDefaultPageSize(PageSize.A4);
-//
-//								// Create a Document with margins
-//								Document document = new Document(pdf);
-//								document.setMargins(20, 20, 20, 20); // top, right, bottom, left
-//
-//								HtmlConverter.convertToPdf(renderedHtml, pdf, props);
-//
-//								byte[] pdfBytes = outputStream.toByteArray();
-//
-//								HttpHeaders headers = new HttpHeaders();
-//								headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
-//								headers.setContentDispositionFormData("filename", "cv.pdf");
-//
-//								return Mono.just(new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK));
-//							});
-//				})
-//				.onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//						.body(("Error generating PDF: " + e.getMessage()).getBytes())));
-//	}
+
+	@GetMapping("/generate/{userId}/{cvId}")
+	public Mono<ResponseEntity<byte[]>> generatePDF(@PathVariable Long userId, @PathVariable Long cvId) {
+		// Log input parameters for debugging
+		System.out.println("Generating PDF for userId: " + userId + " and cvId: " + cvId);
+
+		return Mono.fromCallable(() -> userCvRepository.findByCvIdAndUserId(cvId, userId))
+				.flatMap(userCVOptional -> {
+					if (userCVOptional != null) {
+						UserCV userCV = userCVOptional;
+						String templateKey = userCV.getTemplate().getTemplateName();
+						return templateService.retrieveTemplate(templateKey)
+								.flatMap(template -> {
+									Context context = new Context();
+									context.setVariable("userCV", userCV);
+
+									String renderedHtml = templateEngine.process(template, context);
+
+									ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+									ConverterProperties props = new ConverterProperties();
+									props.setBaseUri("classpath:/static/");
+
+									try {
+										HtmlConverter.convertToPdf(renderedHtml, outputStream, props);
+										byte[] pdfBytes = outputStream.toByteArray();
+
+										HttpHeaders headers = new HttpHeaders();
+										headers.setContentType(MediaType.APPLICATION_PDF);
+										headers.setContentDispositionFormData("filename", "cv.pdf");
+
+										return Mono.just(new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK));
+									} catch (Exception e) {
+										System.err.println("PDF generation failed: " + e.getMessage());
+										e.printStackTrace();
+										return Mono.error(new RuntimeException("PDF generation failed", e));
+									}
+								});
+					} else {
+						// Log error message when UserCV is not found
+						System.err.println("UserCV not found for userId: " + userId + " and cvId: " + cvId);
+						return Mono.error(new RuntimeException("UserCV not found for userId: " + userId + " and cvId: " + cvId));
+					}
+				})
+				.onErrorResume(e -> {
+					System.err.println("Error generating PDF: " + e.getMessage());
+					e.printStackTrace();
+					return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+							.body(("Error generating PDF: " + e.getMessage()).getBytes()));
+				});
+	}
+
+	@PostMapping("/pdf-document/save/{userId}")
+	public ResponseEntity<String> savePdfDocument(
+			@PathVariable Long userId,
+			@RequestParam("name") String name,
+			@RequestParam("fileData") MultipartFile fileData) {
+
+		try {
+			PdfDocument pdfDocument = new PdfDocument();
+			pdfDocument.setUserId(userId);
+			pdfDocument.setFileName(name);
+			pdfDocument.setPdfContent(fileData.getBytes()); // Directly use fileData.getBytes()
+
+			pdfDocumentRepository.save(pdfDocument);
+
+			return ResponseEntity.ok("PDF document saved successfully.");
+		} catch (IOException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error saving PDF document: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/list-document/{userId}")
+	public ResponseEntity<List<PdfDocument>> getPdfsByUserId(@PathVariable Long userId) {
+		List<PdfDocument> pdfs = pdfDocumentRepository.findByUserId(userId);
+		if (pdfs.isEmpty()) {
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.ok(pdfs);
+	}
+	@GetMapping("/document/{id}")
+	public ResponseEntity<PdfDocument> getPdfById(@PathVariable Long id) {
+		Optional<PdfDocument> optionalPdfDocument = pdfDocumentRepository.findById(id);
+		if (optionalPdfDocument.isPresent()) {
+			return ResponseEntity.ok(optionalPdfDocument.get());
+		} else {
+			return ResponseEntity.notFound().build();
+		}
+	}
 }

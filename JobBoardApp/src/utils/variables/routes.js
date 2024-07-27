@@ -18,8 +18,8 @@ import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import ListTemplate from "../../page/list-template/ListTemplate";
 import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
 import MainCv from "../../page/user-cv/MainCv";
-
-
+import ListPdf from "../../page/pdf-management/ListPdf";
+import PdfDetail from "../../page/pdf-management/PdfDetail";
 
 import SetupCredentials from "../../page/signup/SetupCredentials";
 import { Quiz } from "../../page/quiz/quiz";
@@ -39,7 +39,9 @@ export const routes = [
   { path: "/signup", component: <SignUp /> },
   { path: "/cv-management",  component: <MainCv /> },
   { path: "/list-template", component: <ListTemplate /> },
-  { path: "/review-template/:templateName", component: <ReviewTemplate /> },
+  { path: "/list-pdf", component: <ListPdf /> },
+  { path: "/pdf-cv/:id", component: <PdfDetail /> },
+  { path: "/review-template/:templateName/:userId/:cvId", component: <ReviewTemplate /> },
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
   { path: "/job-listings", component: <JobListing /> },

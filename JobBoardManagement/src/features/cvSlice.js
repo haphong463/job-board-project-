@@ -3,6 +3,7 @@ import {
   fetchCVs,
   createCV,
   deleteCV as deleteCVApi,
+  disableCV,
   updateCV,
   uploadCV,
   fetchCVById,
@@ -11,6 +12,10 @@ import {
 export const fetchCVsAsync = createAsyncThunk('templates/fetchCVs', async () => {
   const response = await fetchCVs();
   return response;
+});
+export const disableCVAsync = createAsyncThunk('templates/disableCV', async (id) => {
+  await disableCV(id);
+  return id;
 });
 export const fetchCVByIdAsync = createAsyncThunk('templates/fetchCVById', async () => {
   const response = await fetchCVById();
