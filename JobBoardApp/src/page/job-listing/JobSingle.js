@@ -414,11 +414,7 @@ export const JobSingle = () =>
                                           handleCompanyClick(job.companyId);
                                        }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
                                     />
-
-                                    {/* <img src={company.logo} className="img-fluid rounded-sm border border-gray me-2 bg-white" style={{ width: '90px', height: '90px', objectFit: 'contain' }} /> */}
-
                                  </div>
-
                                  <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
                                     <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
                                        <h2 className="mb-2" onClick={() =>

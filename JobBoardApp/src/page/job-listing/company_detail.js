@@ -5,6 +5,8 @@ import { NavLink, useParams } from 'react-router-dom';
 import jobData1 from './job_data.json';
 import companyData1 from './company_data.json';
 import { fetchCompanyThunk } from "../../features/companySlice";
+import { fetchJobThunk } from "../../features/jobSlice";
+import { fetchCategoryThunk } from "../../features/categorySlice";
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import 'flag-icons/css/flag-icons.min.css';
@@ -16,16 +18,50 @@ export const CompanyDetail = () =>
    const companyId = parseInt(id ?? '0', 10);
    const dispatch = useDispatch();
    const companies = useSelector((state) => state.company.companies);
+   const jobs = useSelector((state) => state.job.jobs);
+   const categories = useSelector((state) => state.category.categories);
 
    useEffect(() =>
    {
-      if (companies.length === 0)
-      {
-         dispatch(fetchCompanyThunk());
-      }
-   }, [dispatch, companies.length]);
+      dispatch(fetchCompanyThunk());
+      dispatch(fetchJobThunk());
+      dispatch(fetchCategoryThunk());
+   }, []);
 
    const companyData = companies.find(company => company.companyId === companyId);
+   const companyJobs = jobs.filter(job => job.companyId === companyId);
+
+   const getLocation1String = (address) =>
+   {
+      if (typeof address !== 'string')
+      {
+         return '';
+      }
+      const parts = address.split(", ");
+      const len = parts.length;
+      if (len >= 2)
+      {
+         return parts.slice(-2).join(", ");
+      }
+      return address;
+   };
+
+   const handleCompanyClick = (companyId) =>
+   {
+      window.location.href = `/companyDetail/${companyId}`;
+   };
+
+   const handleJobDetailClick = (jobId, companyId) =>
+   {
+      window.location.href = `/jobDetail/${jobId}/${companyId}`;
+   };
+
+   const categoryArray = Array.isArray(categories) ? categories : [];
+   const handleCategoryClick = (categoryId) =>
+   {
+      window.location.href = `/jobList/${categoryId}`;
+   };
+   const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
 
    return (
       <GlobalLayoutUser>
@@ -98,7 +134,83 @@ export const CompanyDetail = () =>
                   </div>
                </div>
             </div>
+
+            <div className="col-xl-8 col-lg-12 mb-4">
+               <div className="p-4 ml-5">
+                  <div className="row mb-5 justify-content-center">
+                     <div className="col-md-7 text-center">
+                        <h2 className="section-title mb-2">{companyJobs.length} job openings</h2>
+                     </div>
+                  </div>
+                  <ul className="job-listings mb-5">
+                     {companyJobs.length === 0 ? (
+                        <li className="text-center">No jobs for this company.</li>
+                     ) : (
+                        companyJobs.map(job =>
+                        {
+                           const company = companies.find(company => company.companyId === job.companyId);
+                           const address = getLocation1String(company?.location);
+                           if (company)
+                           {
+                              return (
+                                 <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
+                                    <div className="job-listing-logo">
+                                       <img
+                                          src={company.logo}
+                                          alt="Free Website"
+                                          className="img-fluid p-0 d-inline-block rounded-sm me-2 bg-white"
+                                          onClick={() =>
+                                          {
+                                             handleCompanyClick(job.companyId);
+                                          }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
+                                       />
+
+                                       {/* <img src={company.logo} className="img-fluid rounded-sm border border-gray me-2 bg-white" style={{ width: '90px', height: '90px', objectFit: 'contain' }} /> */}
+
+                                    </div>
+
+                                    <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
+                                       <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
+                                          <h2 className="mb-2" onClick={() =>
+                                          {
+                                             handleJobDetailClick(job.id, job.companyId);
+                                             console.log(job.companyId);
+                                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
+                                          <strong onClick={() =>
+                                          {
+                                             handleCompanyClick(job.companyId);
+                                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
+                                          <div className="m-0 mt-3">
+                                             {job.categoryId.map((id) =>
+                                             {
+                                                return categoryName ? (
+                                                   <span key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">
+                                                      {categoryName}
+                                                   </span>
+                                                ) : null;
+                                             })}
+                                          </div>
+                                       </div>
+                                       <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">
+                                          <div className="justify-content-start me-3">
+                                             <span className="icon-room me-2" /> {address}
+                                          </div>
+                                       </div>
+                                       <div className="job-listing-meta ">
+                                          <span className="badge bg-danger">{job.contractType}</span>
+                                       </div>
+                                    </div>
+
+                                 </li>
+                              );
+                           }
+                           return null;
+                        })
+                     )}
+                  </ul>
+               </div>
+            </div>
          </>
-      </GlobalLayoutUser>
+      </GlobalLayoutUser >
    );
 }

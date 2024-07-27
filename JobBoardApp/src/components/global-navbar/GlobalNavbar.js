@@ -65,7 +65,7 @@ export function GlobalNavbar ()
 
    const handleCategoryClick = (categoryId) =>
    {
-      window.location.href = `/jobSkillList/${categoryId}`;
+      window.location.href = `/jobList/${categoryId}`;
    };
 
    const handleCompanyClick = (companyId) =>

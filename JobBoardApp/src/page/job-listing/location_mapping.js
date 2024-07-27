@@ -1,3 +1,4 @@
+// JobMappingFilter.js
 const locationMapping = {
     'thanh pho ho chi minh': 'Ho Chi Minh',
     'ho chi minh': 'Ho Chi Minh',
@@ -16,4 +17,56 @@ const locationMapping = {
     'đà nẵng': 'Da Nang'
 };
 
-export default locationMapping;
+// const locations = [
+//     { value: 'Ho Chi Minh', label: 'Ho Chi Minh' },
+//     { value: 'Ha Noi', label: 'Ha Noi' },
+//     { value: 'Da Nang', label: 'Da Nang' }
+// ];
+
+// const position = [
+//     { value: 'Intern', label: 'Intern' },
+//     { value: 'Fresher', label: 'Fresher' },
+//     { value: 'Junior', label: 'Junior' },
+//     { value: 'Middle', label: 'Middle' },
+//     { value: 'Senior', label: 'Senior' },
+//     { value: 'Leader', label: 'Leader' },
+//     { value: 'Manager', label: 'Manager' }
+// ];
+
+// const jobTypes = [
+//     { value: 'In Office', label: 'In Office' },
+//     { value: 'Hybrid', label: 'Hybrid' },
+//     { value: 'Remote', label: 'Remote' },
+//     { value: 'Oversea', label: 'Oversea' }
+// ];
+
+// const contractTypes = [
+//     { value: 'Fulltime', label: 'Fulltime' },
+//     { value: 'Freelance', label: 'Freelance' },
+//     { value: 'Part-time', label: 'Part-time' }
+// ];
+
+// const companyTypes = [
+//     { value: 'IT Outsourcing', label: 'IT Outsourcing' },
+//     { value: 'IT Product', label: 'IT Product' },
+//     { value: 'Headhunt', label: 'Headhunt' },
+//     { value: 'IT Service and IT Consulting', label: 'IT Service and IT Consulting' },
+//     { value: 'Non-IT', label: 'Non-IT' }
+// ];
+
+// const normalizeLocation = (location) =>
+// {
+//     return location.trim().toLowerCase();
+// };
+
+// const JobMappingFilter = {
+//     locationMapping,
+//     locations,
+//     normalizeLocation,
+//     position,
+//     jobTypes,
+//     contractTypes,
+//     companyTypes
+// };
+
+// export default JobMappingFilter;

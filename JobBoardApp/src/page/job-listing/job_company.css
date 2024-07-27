@@ -87,6 +87,11 @@ ul.trf1 li {
     margin-right: 50px;
 }
 
+.jb_content_for_company {
+    margin-left: 60px;
+    margin-right: 1px;
+}
+
 .jb_bg-light {
     background-color: #ffedf9;
 }

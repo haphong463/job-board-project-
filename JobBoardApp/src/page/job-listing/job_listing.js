@@ -15,8 +15,7 @@ import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayo
 // import { Select } from 'antd';
 import { MenuItem, Checkbox, FormControl, Select, FormGroup, FormControlLabel, InputLabel, OutlinedInput, Chip, ListItemText, TextField, Autocomplete } from '@mui/material';
 import axios from 'axios';
-import locationMapping from './location_mapping';
-
+import './location_mapping';
 import debounce from 'lodash/debounce';
 
 export const JobList = () =>
@@ -36,19 +35,12 @@ export const JobList = () =>
    const dispatch = useDispatch();
    const navigate = useNavigate();
    const { searchTerm } = useParams();
-   // const normalizeString = str => (typeof str === 'string' ? str.toLowerCase().trim() : '');
-   // const normalizeString = (str) =>
-   // {
-   //    return str.toLowerCase().trim();
-   // };
-   // const normalizeString = (str) => str.toLowerCase().trim();
    const normalizeString = (str) => str.trim().toLowerCase();
+   // const { locationMapping, position, jobTypes, contractTypes, companyTypes } = JobMappingFilter;
 
    const [searchTerms, setSearchTerms] = useState('');
    const decodedSearchTerm = decodeURIComponent(searchTerms || '');
-   const [inputValue, setInputValue] = useState('');
    const [open, setOpen] = useState(false);
-
    // function useDebounce (value, delay)
    // {
    //    const [debouncedValue, setDebouncedValue] = useState(value);
@@ -80,14 +72,13 @@ export const JobList = () =>
       categoryNames: []
    });
 
-   // const debouncedSearchTerm = useDebounce(decodedSearchTerm, 300);
 
    useEffect(() =>
    {
       dispatch(fetchCategoryThunk());
       dispatch(fetchCompanyThunk());
       dispatch(fetchJobThunk());
-   }, [dispatch]);
+   }, []);
 
    useEffect(() =>
    {
@@ -100,8 +91,12 @@ export const JobList = () =>
    {
       const { title, offeredSalary, position, location, categoryNames, jobType, contractType, companyType } = filters;
 
+      // const normalizedTitle = normalizeString(title);
+      // const titleMatch = normalizedTitle ? normalizeString(job.title).includes(normalizedTitle) : true;
+
       const normalizedTitle = normalizeString(title);
-      const titleMatch = normalizedTitle ? normalizeString(job.title).includes(normalizedTitle) : true;
+      const normalizedJobTitle = normalizeString(job.title);
+      const titleMatch = normalizedTitle ? normalizedJobTitle.includes(normalizedTitle) : true;
 
       const jobCategoryNames = job.categoryId.map(id =>
       {
@@ -120,8 +115,6 @@ export const JobList = () =>
          return Object.keys(locationMapping).some(key =>
          {
             const normalizedKey = normalizeLocation(key);
-            console.log('Normalized Key:', normalizedKey); // Kiểm tra giá trị
-            console.log('Location Mapping Value:', locationMapping[normalizedKey]); // Kiểm tra giá trị
             return locationString.includes(normalizedKey) && locationMapping[normalizedKey] === loc.value;
          });
       });
@@ -147,12 +140,18 @@ export const JobList = () =>
 
    const handleCategoryClick = (categoryId) =>
    {
-      window.location.href = `/jobSkillList/${categoryId}`;
+      window.location.href = `/jobList/${categoryId}`;
    };
 
    const handleCompanyClick = (companyId) =>
    {
       window.location.href = `/companyDetail/${companyId}`;
+   };
+
+   const handleJobDetailClick = (e, jobId, companyId) =>
+   {
+      e.preventDefault();
+      window.location.href = `/jobDetail/${jobId}/${companyId}`;
    };
 
    const getLocation1String = (address) =>
@@ -404,12 +403,7 @@ export const JobList = () =>
          const matchesCategory = job.categoryId.some(id =>
          {
             const category = categories.find(cat => cat.categoryId === id);
-            if (category)
-            {
-               const categoryNameNormalized = normalizeString(category.categoryName);
-               return categoryNameNormalized === searchTermNormalized;
-            }
-            return false;
+            return category ? normalizeString(category.categoryName) === searchTermNormalized : false;
          });
          return matchesTitle || matchesCategory;
       });
@@ -418,7 +412,7 @@ export const JobList = () =>
       setJobCount(updatedFilteredJobs.length);
 
       return updatedFilteredJobs;
-   }, [jobs, categoryId, location.pathname, filters, categories, applyFilters, searchTerms]);
+   }, [jobs, categoryId, location.pathname, categories, applyFilters, searchTerms]);
 
    const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
    // Calculate the jobs to display based on the current page
@@ -444,32 +438,9 @@ export const JobList = () =>
       ];
    }, [titleOptions, categoryOptions]);
 
-   // const filteredOptions = useMemo(() =>
-   // {
-   //    const searchTermNormalized = normalizeString(searchTerms);
-   //    return combinedOptions.filter(option =>
-   //       normalizeString(option.value).includes(searchTermNormalized)
-   //    );
-   // }, [searchTerms, combinedOptions]);
-
    const filteredOptions = useMemo(() =>
    {
       const searchTermNormalized = normalizeString(searchTerms);
-
-      // Kiểm tra xem tìm kiếm có phải là từ khóa category không
-      const isCategorySearch = combinedOptions.some(option =>
-         option.type === 'category' && normalizeString(option.value).includes(searchTermNormalized)
-      );
-
-      // Nếu là tìm kiếm category, chỉ lọc các loại 'category'
-      if (isCategorySearch)
-      {
-         return combinedOptions.filter(option =>
-            option.type === 'category' && normalizeString(option.value).includes(searchTermNormalized)
-         );
-      }
-
-      // Nếu không, lọc cả title và category
       return combinedOptions.filter(option =>
          normalizeString(option.value).includes(searchTermNormalized)
       );
@@ -510,7 +481,6 @@ export const JobList = () =>
 
    const handleSearch = () =>
    {
-
       navigate(`/viewAllJobs/${encodeURIComponent(searchTerms.trim())}`);
    };
 
@@ -564,7 +534,7 @@ export const JobList = () =>
                         <div className="mb-3">
                            <label>Location</label>
                            <FormGroup>
-                              {locations.map((location) => (
+                              {locationMapping.locations.map((location) => (
                                  <FormControlLabel
                                     key={location.value}
                                     control={
@@ -676,6 +646,8 @@ export const JobList = () =>
                            </FormGroup>
                         </div>
                      </div>
+
+
                   </div>
 
                   <div className="col-md-9">
@@ -705,13 +677,10 @@ export const JobList = () =>
                                  onClick={() => handleJobClick(job.id)}
                               >
                                  <div className="text-dark mb-2">{timeAgo}</div>
-                                 <a href='' className="h5 mb-3 d-block text-dark" onClick={() => handleJobDetailClick(job.id, job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</a>
+                                 <a href='' className="h5 mb-3 d-block text-dark" onClick={(e) => handleJobDetailClick(e, job.id, job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</a>
                                  <div className="d-flex align-items-center mb-3">
                                     <NavLink to={''} target="_blank" rel="noopener noreferrer" onClick={() => handleCompanyClick(job.companyId)}>
                                        <img src={company.logo} className="img-fluid p-0 d-inline-block rounded-sm border border-gray me-2 bg-white" style={{ width: '4em', height: '4em', objectFit: 'contain' }} />
-                                       {/* 
-                                       className="img-fluid border p-0 d-inline-block mr-3 rounded bg-white"
-                                       style={{ width: '8em', height: '8em', objectFit: 'contain' }} */}
 
                                     </NavLink>
                                     <NavLink to={''} className="text-dark ml-2" onClick={() => handleCompanyClick(job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</NavLink>
@@ -720,12 +689,6 @@ export const JobList = () =>
                                  <div className="mb-2">
                                     <FaMapMarkerAlt className="text-dark" /> {address}
                                  </div>
-                                 {/* <div className='d-flex flex-wrap'>
-                                    {job.keySkills.split(',').map((skill, index) => (
-                                       <span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
-                                    ))}
-                                 </div> */}
-
                                  <div className="m-0 mt-3">
                                     {job.categoryId.map((id) =>
                                     {
