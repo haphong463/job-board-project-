@@ -4,7 +4,7 @@ import com.project4.JobBoardService.DTO.ContactDTO;
 import com.project4.JobBoardService.Entity.Contact;
 import com.project4.JobBoardService.Service.ContactService;
 import com.project4.JobBoardService.Service.EmailService;
-import com.project4.JobBoardService.Payload.EmailRequest;
+import com.project4.JobBoardService.payload.EmailRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

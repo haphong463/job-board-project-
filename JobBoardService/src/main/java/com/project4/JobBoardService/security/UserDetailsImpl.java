@@ -1,10 +1,12 @@
-package com.project4.JobBoardService.Security;
+package com.project4.JobBoardService.security;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project4.JobBoardService.Entity.Permission;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.Gender;
 import lombok.Getter;
@@ -35,6 +37,9 @@ public class UserDetailsImpl implements UserDetails {
     @Getter
     private Gender gender;
 
+    @Getter
+    private Set<Permission> permissions;
+
     private Collection<? extends GrantedAuthority> authorities;
 
 
@@ -64,7 +69,7 @@ public class UserDetailsImpl implements UserDetails {
         userDetails.bio = user.getBio();
         userDetails.imageUrl = user.getImageUrl();
         userDetails.gender = user.getGender();
-
+        userDetails.permissions = user.getPermissions();
         return userDetails;
     }
 

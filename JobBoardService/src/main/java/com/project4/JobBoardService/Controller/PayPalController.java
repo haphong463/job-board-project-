@@ -8,7 +8,7 @@ import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.PayPalService;
 import com.project4.JobBoardService.Service.TransactionService;
 import com.project4.JobBoardService.Service.UserService;
-import com.project4.JobBoardService.Security.jwt.JwtUtils;
+import com.project4.JobBoardService.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

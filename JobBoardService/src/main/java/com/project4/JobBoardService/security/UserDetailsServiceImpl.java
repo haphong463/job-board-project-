@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.Security;
+package com.project4.JobBoardService.security;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
-package com.project4.JobBoardService.Security.jwt;
+package com.project4.JobBoardService.security.jwt;
 import java.util.Date;
 
-import com.project4.JobBoardService.Security.UserDetailsImpl;
+import com.project4.JobBoardService.security.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +35,7 @@ public class JwtUtils {
                 .claim("imageUrl", userPrincipal.getImageUrl())
                 .claim("bio", userPrincipal.getBio())
                 .claim("gender", userPrincipal.getGender())
+                .claim("permission", userPrincipal.getPermissions())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS512)

@@ -35,9 +35,7 @@ public class BlogServiceImpl implements BlogService {
     private UserRepository userRepository;
 
     @Override
-    @CheckPermission(EPermissions.MANAGE_BLOG)
     public Blog createBlog(Blog blog, MultipartFile imageFile) {
-
         handleImageFile(blog, imageFile, "create");
         return blogRepository.save(blog);
     }

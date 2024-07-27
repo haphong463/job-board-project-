@@ -1,14 +1,16 @@
 package com.project4.JobBoardService.Controller;
 
+import com.project4.JobBoardService.Config.Annotation.CheckPermission;
 import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Enum.EPermissions;
 import com.project4.JobBoardService.Service.BlogCategoryService;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Service.UserService;
-import com.project4.JobBoardService.Payload.PaginatedResponse;
+import com.project4.JobBoardService.payload.PaginatedResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -88,6 +92,7 @@ public class BlogController {
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    @CheckPermission(EPermissions.MANAGE_BLOG)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
         try {
@@ -108,19 +113,21 @@ public class BlogController {
                 return ResponseEntity.badRequest().build(); // Nếu không tìm thấy User, trả về lỗi BadRequest
             }
 
-            // Map BlogDTO thành Blog
-            Blog blog = modelMapper.map(blogDTO, Blog.class);
-            blog.setUser(user);
-            blog.setCategories(categories);
+            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+            if(username.equals(user.getUsername())){
+                Blog blog = modelMapper.map(blogDTO, Blog.class);
+                blog.setUser(user);
+                blog.setCategories(categories);
 
-            // Gọi phương thức trong service để xử lý logic tạo Blog, bao gồm xử lý hình ảnh nếu cần
-            Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage());
+                // Gọi phương thức trong service để xử lý logic tạo Blog, bao gồm xử lý hình ảnh nếu cần
+                Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage());
 
-            // Map Blog đã tạo thành BlogResponseDTO và gửi thông báo WebSocket
-            BlogResponseDTO responseDto = modelMapper.map(createdBlog, BlogResponseDTO.class);
-//            simpMessagingTemplate.convertAndSend("/topic/new-blog", responseDto);
+                // Map Blog đã tạo thành BlogResponseDTO và gửi thông báo WebSocket
+                BlogResponseDTO responseDto = modelMapper.map(createdBlog, BlogResponseDTO.class);
 
-            return ResponseEntity.ok(responseDto);
+                return ResponseEntity.ok(responseDto);
+            }
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -161,6 +168,7 @@ public class BlogController {
 
     // Update a blog
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    @CheckPermission(EPermissions.MANAGE_BLOG)
     @PutMapping("/{id}")
     public ResponseEntity<BlogResponseDTO> updateBlog(@PathVariable Long id,
                                                       @ModelAttribute BlogDTO blogDTO) {
@@ -183,12 +191,14 @@ public class BlogController {
 
             // Update blog
             Blog updatedBlog = blogService.updateBlog(id, blog, blogDTO.getImage());
+            if(updatedBlog != null){
+                BlogResponseDTO responseDto = modelMapper.map(updatedBlog, BlogResponseDTO.class);
+                return ResponseEntity.ok(responseDto);
+            }
+
+            return ResponseEntity.notFound().build();
 
             // Map Blog đã cập nhật thành BlogResponseDTO và gửi thông báo WebSocket
-            BlogResponseDTO responseDto = modelMapper.map(updatedBlog, BlogResponseDTO.class);
-            simpMessagingTemplate.convertAndSend("/topic/edit-blog", responseDto);
-
-            return ResponseEntity.ok(responseDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -196,11 +206,11 @@ public class BlogController {
 
     // Delete a blog
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    @CheckPermission(EPermissions.MANAGE_BLOG)
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> deleteBlog(@PathVariable Long id) {
         try {
             blogService.deleteBlog(id);
-            simpMessagingTemplate.convertAndSend("/topic/delete-blog", id);
             return ResponseEntity.ok().body(id);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();

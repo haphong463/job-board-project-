@@ -1,7 +1,7 @@
-package com.project4.JobBoardService.Security.jwt;
+package com.project4.JobBoardService.security.jwt;
 import java.io.IOException;
 
-import com.project4.JobBoardService.Security.UserDetailsServiceImpl;
+import com.project4.JobBoardService.security.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

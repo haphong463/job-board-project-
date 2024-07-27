@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.Payload;
+package com.project4.JobBoardService.payload;
 
 import jakarta.validation.constraints.NotBlank;
 

@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.Security.jwt;
+package com.project4.JobBoardService.security.jwt;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

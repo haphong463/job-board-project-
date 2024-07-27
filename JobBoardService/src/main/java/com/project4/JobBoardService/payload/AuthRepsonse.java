@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.Payload;
+package com.project4.JobBoardService.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

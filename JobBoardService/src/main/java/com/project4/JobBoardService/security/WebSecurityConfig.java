@@ -1,6 +1,6 @@
-package com.project4.JobBoardService.Security;
-import com.project4.JobBoardService.Security.jwt.AuthEntryPointJwt;
-import com.project4.JobBoardService.Security.jwt.AuthTokenFilter;
+package com.project4.JobBoardService.security;
+import com.project4.JobBoardService.security.jwt.AuthEntryPointJwt;
+import com.project4.JobBoardService.security.jwt.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

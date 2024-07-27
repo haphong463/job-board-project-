@@ -12,6 +12,7 @@ import com.project4.JobBoardService.Entity.RefreshToken;
 import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
+import com.project4.JobBoardService.payload.*;
 import com.project4.JobBoardService.Repository.EmployerRepository;
 import com.project4.JobBoardService.Repository.RoleRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
@@ -19,9 +20,8 @@ import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.RefreshTokenService;
 import com.project4.JobBoardService.Util.HTMLContentProvider;
 import com.project4.JobBoardService.Util.Variables.TokenRequest;
-import com.project4.JobBoardService.Payload.*;
-import com.project4.JobBoardService.Security.UserDetailsImpl;
-import com.project4.JobBoardService.Security.jwt.JwtUtils;
+import com.project4.JobBoardService.security.UserDetailsImpl;
+import com.project4.JobBoardService.security.jwt.JwtUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -173,8 +173,6 @@ public class AuthController {
         }
     }
 
-
-
     @PostMapping("/google-mobile")
     public ResponseEntity<?> authenticateUserWithGoogleAndroid(@RequestBody TokenRequest tokenRequest) {
         try {
@@ -272,9 +270,6 @@ public class AuthController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
-
-
-
 
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
@@ -403,8 +398,6 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-
-
     @PostMapping("/add-moderator")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> registerModerator(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -446,10 +439,6 @@ public class AuthController {
 
         return ResponseEntity.ok(userCreatedDto);
     }
-
-
-
-
 
     //Employer
     @PostMapping("/registerEmployer")
