@@ -27,7 +27,6 @@ public class Company {
     @Column(length = 255)
     private String logo;
 
-
     @Column(name = "website_link", length = 255)
     private String websiteLink;
 
@@ -37,8 +36,23 @@ public class Company {
     @Column(length = 100)
     private String location;
 
+    @Column(length = 100)
+    private String keySkills;
+
     @Column(length = 50)
     private String type;
+
+    @Column(length = 100)
+    private String companySize;
+
+    @Column(length = 50)
+    private String country;
+
+    @Column(length = 20)
+    private String countryCode;
+
+    @Column(length = 100)
+    private String workingDays;
 
     @Column(name = "membership_required", nullable = false)
     private Boolean membershipRequired = false;

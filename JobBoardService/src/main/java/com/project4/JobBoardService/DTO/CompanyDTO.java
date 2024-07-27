@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.DTO;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,18 +25,15 @@ public class CompanyDTO {
 
 
     private String websiteLink;
-
-
     private String description;
-
-
-
-
     private String location;
+    private String keySkills;
     private String type;
+    private String companySize;
+    private String country;
+    private String countryCode;
+    private String workingDays;
     private List<ReviewDTO> reviews;  // List of ReviewDTO
-
-
     private Boolean membershipRequired = false;
     public void setReviews(List<ReviewDTO> reviews) {
         this.reviews = reviews;

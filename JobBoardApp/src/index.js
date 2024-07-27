@@ -6,8 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store";
-import persistStore from "redux-persist/es/persistStore";
-import { PersistGate } from "redux-persist/integration/react";
+// import persistStore from "redux-persist/es/persistStore";
 import LoadingSpinner from "./components/loading-spinner/LoadingSpinner";
 // import { I18nextProvider } from "react-i18next";
 // import i18n from "./translation/translatetion";
@@ -21,7 +20,7 @@ Kommunicate.init("kommunicate-support", {
 
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-// let persistor = persistStore(store);
+// const persistor = persistStore(store);
 root.render(
   <Router>
     <Provider store={store}>

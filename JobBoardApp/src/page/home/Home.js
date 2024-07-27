@@ -1,16 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import CountUp from "react-countup";
 import { JobBoardStats } from "../../components/job-board-stats/JobBoardStats";
 import { JobFilter } from "../../components/job-filter/JobFIlter";
+import { fetchJobThunk } from "../../features/jobSlice";
+import { fetchCompanyThunk } from "../../features/companySlice";
+import { fetchCategoryThunk } from "../../features/categorySlice";
+import { useDispatch, useSelector } from "react-redux";
+import "../job-listing/listSkillAll"
+import jobData from '../job-listing/job_data.json';
+import companyData from '../job-listing/company_data.json';
 
-export const Home = () => {
+export const Home = () =>
+{
   const location = useLocation();
   const navigate = useNavigate(); // Correct usage of useNavigate
   const [message, setMessage] = useState("");
+  const dispatch = useDispatch();
+  const jobs = useSelector((state) => state.job.jobs);
+  const companies = useSelector((state) => state.company.companies);
+  const categories = useSelector((state) => state.category.categories);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
+    dispatch(fetchCategoryThunk());
+    if (companies.length === 0)
+    {
+      dispatch(fetchCompanyThunk());
+    }
+    if (jobs.length === 0)
+    {
+      dispatch(fetchJobThunk());
+    }
+  }, [dispatch, jobs.length, companies.length]);
+
+  useEffect(() =>
+  {
     // Ensure selectpicker is initialized
     $(".selectpicker").selectpicker("refresh");
 
@@ -18,9 +44,11 @@ export const Home = () => {
     const searchParams = new URLSearchParams(location.search);
     const message = searchParams.get("message");
 
-    if (message) {
+    if (message)
+    {
       setMessage(message);
-      setTimeout(() => {
+      setTimeout(() =>
+      {
         setMessage("");
         // Remove the message parameter from the URL
         navigate(location.pathname, { replace: true });
@@ -28,7 +56,47 @@ export const Home = () => {
         window.location.reload();
       }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
     }
+
+    // const superHotJobs = jobs.filter(job => job.isSuperHot);
+    // setJobs(superHotJobs);
   }, [location, navigate]);
+
+  const filteredJobs = useMemo(() =>
+  {
+    return jobs.filter(job => job.isSuperHot == 1);
+  }, [jobs]);
+
+  const getLocation1String = (address) =>
+  {
+    if (typeof address !== 'string')
+    {
+      return '';
+    }
+
+    const parts = address.split(", ");
+    const len = parts.length;
+    if (len >= 2)
+    {
+      return parts.slice(-2).join(", ");
+    }
+    return address;
+  };
+
+  const handleCompanyClick = (companyId) =>
+  {
+    window.location.href = `/companyDetail/${companyId}`;
+  };
+
+  const handleCategoryClick = (categoryId) =>
+  {
+    window.location.href = `/jobList/${categoryId}`;
+  };
+
+  const handleJobClick = (jobId) =>
+  {
+    window.location.href = `/jobDetail/${jobId}`;
+  };
+
   return (
     <GlobalLayoutUser>
       <>
@@ -72,188 +140,67 @@ export const Home = () => {
           <div className="container">
             <div className="row mb-5 justify-content-center">
               <div className="col-md-7 text-center">
-                <h2 className="section-title mb-2">43,167 Job Listed</h2>
+                <h2 className="section-title mb-2">Super Hot Jobs Today</h2>
               </div>
             </div>
             <ul className="job-listings mb-5">
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_1.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Product Designer</h2>
-                    <strong>Adidas</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> New York, New York
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-danger">Part Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_2.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Digital Marketing Director</h2>
-                    <strong>Sprint</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Overland Park, Kansas
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_3.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Back-end Engineer (Python)</h2>
-                    <strong>Amazon</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Overland Park, Kansas
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_4.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Senior Art Director</h2>
-                    <strong>Microsoft</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Anywhere
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_5.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Product Designer</h2>
-                    <strong>Puma</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> San Mateo, CA
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_1.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Product Designer</h2>
-                    <strong>Adidas</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> New York, New York
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-danger">Part Time</span>
-                  </div>
-                </div>
-              </li>
-              <li className="job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center">
-                <a href="job-single.html" />
-                <div className="job-listing-logo">
-                  <img
-                    src="../../../assets/images/job_logo_2.jpg"
-                    alt="Free Website Template by Free-Template.co"
-                    className="img-fluid"
-                  />
-                </div>
-                <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4">
-                  <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                    <h2>Digital Marketing Director</h2>
-                    <strong>Sprint</strong>
-                  </div>
-                  <div className="job-listing-location mb-3 mb-sm-0 custom-width w-25">
-                    <span className="icon-room" /> Overland Park, Kansas
-                  </div>
-                  <div className="job-listing-meta">
-                    <span className="badge badge-success">Full Time</span>
-                  </div>
-                </div>
-              </li>
+              {filteredJobs.map(job =>
+              {
+                const company = companies.find(company => company.companyId === job.companyId);
+                const categoryArray = Array.isArray(categories) ? categories : [];
+                const address = getLocation1String(company?.location);
+                if (company)
+                {
+                  return (
+                    <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
+                      {/* <a href={`/jobDetail/${job.id}`} /> */}
+                      <div className="job-listing-logo">
+                        <img
+                          src={company.logo}
+                          alt="Free Website Template"
+                          className="img-fluid p-0 d-inline-block rounded-sm bg-white" onClick={() =>
+                          {
+                            handleCompanyClick(job.companyId);
+                          }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
+                        />
+                      </div>
+                      <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
+                        <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
+                          <h2 className="mb-2" onClick={() =>
+                          {
+                            handleJobClick(job.id);
+                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
+                          <strong onClick={() =>
+                          {
+                            handleCompanyClick(job.companyId);
+                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
+                          <div className="m-0 mt-3">
+                            {job.categoryId.map((id) =>
+                            {
+                              const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
+                              return categoryName ? (
+                                <span key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">
+                                  {categoryName}
+                                </span>
+                              ) : null;
+                            })}
+                          </div>
+                        </div>
+                        <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">
+                          <div className="justify-content-start me-3">
+                            <span className="icon-room me-2" /> {address}
+                          </div>
+                        </div>
+                        <div className="job-listing-meta ">
+                          <span className="badge bg-danger">{job.contractType}</span>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                }
+                return null;
+              })}
             </ul>
-            <div className="row pagination-wrap">
-              <div className="col-md-6 text-center text-md-left mb-4 mb-md-0">
-                <span>Showing 1-7 Of 43,167 Jobs</span>
-              </div>
-              <div className="col-md-6 text-center text-md-right">
-                <div className="custom-pagination ml-auto">
-                  <a href="#" className="prev">
-                    Prev
-                  </a>
-                  <div className="d-inline-block">
-                    <a href="#" className="active">
-                      1
-                    </a>
-                    <a href="#">2</a>
-                    <a href="#">3</a>
-                    <a href="#">4</a>
-                  </div>
-                  <a href="#" className="next">
-                    Next
-                  </a>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
         <section

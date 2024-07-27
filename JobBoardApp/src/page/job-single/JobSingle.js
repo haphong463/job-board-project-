@@ -1,7 +1,9 @@
 import React from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 
-export const JobSingle = () => {
+
+export const JobSingle1 = () =>
+{
   return (
     <GlobalLayoutUser>
       <>
@@ -568,4 +570,4 @@ export const JobSingle = () => {
   );
 };
 
-export default JobSingle;
+export default JobSingle1;

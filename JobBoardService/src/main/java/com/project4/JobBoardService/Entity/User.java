@@ -1,6 +1,5 @@
 package com.project4.JobBoardService.Entity;
 
-
 import com.project4.JobBoardService.Enum.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;

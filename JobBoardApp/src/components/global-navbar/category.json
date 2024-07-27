@@ -1,0 +1,254 @@
+[
+    {
+        "categoryId": 1,
+        "categoryName": "Java"
+    },
+    {
+        "categoryId": 2,
+        "categoryName": "NodeJS"
+    },
+    {
+        "categoryId": 3,
+        "categoryName": "Python"
+    },
+    {
+        "categoryId": 4,
+        "categoryName": "C"
+    },
+    {
+        "categoryId": 5,
+        "categoryName": "SQL"
+    },
+    {
+        "categoryId": 6,
+        "categoryName": "MySQL"
+    },
+    {
+        "categoryId": 7,
+        "categoryName": "Jenkins"
+    },
+    {
+        "categoryId": 8,
+        "categoryName": "Spring"
+    },
+    {
+        "categoryId": 9,
+        "categoryName": "React"
+    },
+    {
+        "categoryId": 10,
+        "categoryName": "Angular"
+    },
+    {
+        "categoryId": 11,
+        "categoryName": "Vue"
+    },
+    {
+        "categoryId": 12,
+        "categoryName": "HTML"
+    },
+    {
+        "categoryId": 13,
+        "categoryName": "CSS"
+    },
+    {
+        "categoryId": 14,
+        "categoryName": "JavaScript"
+    },
+    {
+        "categoryId": 15,
+        "categoryName": "TypeScript"
+    },
+    {
+        "categoryId": 16,
+        "categoryName": "PHP"
+    },
+    {
+        "categoryId": 17,
+        "categoryName": "Ruby"
+    },
+    {
+        "categoryId": 18,
+        "categoryName": "Go"
+    },
+    {
+        "categoryId": 19,
+        "categoryName": "Swift"
+    },
+    {
+        "categoryId": 20,
+        "categoryName": "Kotlin"
+    },
+    {
+        "categoryId": 21,
+        "categoryName": "Rust"
+    },
+    {
+        "categoryId": 22,
+        "categoryName": "Perl"
+    },
+    {
+        "categoryId": 23,
+        "categoryName": "Scala"
+    },
+    {
+        "categoryId": 24,
+        "categoryName": "Shell"
+    },
+    {
+        "categoryId": 25,
+        "categoryName": "Dart"
+    },
+    {
+        "categoryId": 26,
+        "categoryName": "AWS"
+    },
+    {
+        "categoryId": 27,
+        "categoryName": "Azure"
+    },
+    {
+        "categoryId": 28,
+        "categoryName": "Google Cloud Platform"
+    },
+    {
+        "categoryId": 29,
+        "categoryName": "Heroku"
+    },
+    {
+        "categoryId": 30,
+        "categoryName": "Docker"
+    },
+    {
+        "categoryId": 31,
+        "categoryName": "Kubernetes"
+    },
+    {
+        "categoryId": 32,
+        "categoryName": "Terraform"
+    },
+    {
+        "categoryId": 33,
+        "categoryName": "Ansible"
+    },
+    {
+        "categoryId": 34,
+        "categoryName": "Hadoop"
+    },
+    {
+        "categoryId": 35,
+        "categoryName": "Spark"
+    },
+    {
+        "categoryId": 36,
+        "categoryName": "Kafka"
+    },
+    {
+        "categoryId": 37,
+        "categoryName": "TensorFlow"
+    },
+    {
+        "categoryId": 38,
+        "categoryName": "PyTorch"
+    },
+    {
+        "categoryId": 39,
+        "categoryName": "Scikit-learn"
+    },
+    {
+        "categoryId": 40,
+        "categoryName": "R"
+    },
+    {
+        "categoryId": 41,
+        "categoryName": "MATLAB"
+    },
+    {
+        "categoryId": 42,
+        "categoryName": "MongoDB"
+    },
+    {
+        "categoryId": 43,
+        "categoryName": "PostgreSQL"
+    },
+    {
+        "categoryId": 44,
+        "categoryName": "Redis"
+    },
+    {
+        "categoryId": 45,
+        "categoryName": "Cassandra"
+    },
+    {
+        "categoryId": 46,
+        "categoryName": "React Native"
+    },
+    {
+        "categoryId": 47,
+        "categoryName": "Flutter"
+    },
+    {
+        "categoryId": 48,
+        "categoryName": "Cybersecurity"
+    },
+    {
+        "categoryId": 49,
+        "categoryName": "Penetration Testing"
+    },
+    {
+        "categoryId": 50,
+        "categoryName": "Network Security"
+    },
+    {
+        "categoryId": 51,
+        "categoryName": "Git"
+    },
+    {
+        "categoryId": 52,
+        "categoryName": "SVN"
+    },
+    {
+        "categoryId": 53,
+        "categoryName": "Django"
+    },
+    {
+        "categoryId": 54,
+        "categoryName": "Flask"
+    },
+    {
+        "categoryId": 55,
+        "categoryName": "Laravel"
+    },
+    {
+        "categoryId": 56,
+        "categoryName": "ASP.NET"
+    },
+    {
+        "categoryId": 57,
+        "categoryName": "Objective-C"
+    },
+    {
+        "categoryId": 58,
+        "categoryName": "Agile Methodologies"
+    },
+    {
+        "categoryId": 59,
+        "categoryName": "Project Management"
+    },
+    {
+        "categoryId": 60,
+        "categoryName": "UI/UX Design"
+    },
+    {
+        "categoryId": 61,
+        "categoryName": "Selenium"
+    },
+    {
+        "categoryId": 62,
+        "categoryName": "GraphQL"
+    },
+    {
+        "categoryId": 63,
+        "categoryName": "Elasticsearch"
+    }
+]

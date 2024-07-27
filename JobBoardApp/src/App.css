@@ -6,17 +6,20 @@
   height: 40vmin;
   pointer-events: none;
 }
+
 ul.dropdown ul li {
-  width: 200px; /* Điều chỉnh kích thước theo ý muốn */
+  width: 200px;
+  /* Điều chỉnh kích thước theo ý muốn */
   text-align: left;
 }
+
 /* Categrory */
 /* Định dạng cho dropdown */
 .site-navbar .dropdown {
   position: relative;
 }
 
-.site-navbar .dropdown > div {
+.site-navbar .dropdown>div {
   display: none;
   position: absolute;
   left: 100%;
@@ -29,7 +32,7 @@ ul.dropdown ul li {
   width: 600px;
 }
 
-.site-navbar .dropdown:hover > div {
+.site-navbar .dropdown:hover>div {
   display: block;
 }
 
@@ -60,7 +63,8 @@ ul.dropdown ul li {
 
 /* Tạo hiệu ứng khi rê chuột vào danh mục */
 ul.dropdown ul li:hover {
-  background-color: #f0f0f0; /* Màu nền khi rê chuột vào */
+  background-color: #f0f0f0;
+  /* Màu nền khi rê chuột vào */
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -68,18 +72,24 @@ ul.dropdown ul li:hover {
     animation: App-logo-spin infinite 20s linear;
   }
 }
+
 .dropdown {
-  position: relative; /* Đảm bảo phần tử cha có vị trí tương đối */
+  position: relative;
+  /* Đảm bảo phần tử cha có vị trí tương đối */
 }
 
 .dropdown ul {
-  position: absolute; /* Hiển thị phần tử con ở vị trí tuyệt đối */
-  right: 0; /* Đẩy nó ra bên phải */
-  display: none; /* Ẩn danh sách khi không được hover */
+  position: absolute;
+  /* Hiển thị phần tử con ở vị trí tuyệt đối */
+  right: 0;
+  /* Đẩy nó ra bên phải */
+  display: none;
+  /* Ẩn danh sách khi không được hover */
 }
 
 .dropdown:hover ul {
-  display: block; /* Hiển thị danh sách khi dropdown được hover */
+  display: block;
+  /* Hiển thị danh sách khi dropdown được hover */
 }
 
 .App-header {
@@ -101,10 +111,12 @@ ul.dropdown ul li:hover {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
+
 .password-requirements {
   list-style: none;
   padding: 0;

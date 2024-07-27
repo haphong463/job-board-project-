@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,9 +17,8 @@ import java.time.LocalDateTime;
 public class JobDTO {
     private Long id;
     private String title;
-    private Integer offeredSalary;
+    private String offeredSalary;
     private String description;
-    private String city;
     private String responsibilities;
     private String requiredSkills;
     private String workSchedule;
@@ -25,10 +26,14 @@ public class JobDTO {
     private String position;
     private String experience;
     private String qualification;
-    private int quantity;
+    private String jobType;
+    private String contractType;
+    private String benefit;
     private LocalDateTime createdAt;
-    private LocalDateTime expired;
-    private Long categoryId;
-    private Long userId;
-
+    private Integer slot;
+    private Integer profileApproved = 0;
+    private Boolean isSuperHot;
+    private List<Long> categoryId;
+    private Long companyId;
+    private String expire;
 }
