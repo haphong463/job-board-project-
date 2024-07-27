@@ -13,7 +13,7 @@ public interface JobService {
 //    List<JobDTO> findAllJobsByCompanyId(Long userId);
 //    List<JobDTO> searchJobsByCompanyId(Long userId, String query);
 //    List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired);
-    boolean createJob(Long companyId, Long categoryId, JobDTO jobDTO);
+    boolean createJob(Long companyId, List<Long> categoryId, JobDTO jobDTO);
     JobDTO updateJob(Long jobId, JobDTO jobDTO);
     void deleteJob(Long jobId);
     Optional<JobDTO> findJobById(Long jobId);

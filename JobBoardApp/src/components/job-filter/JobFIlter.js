@@ -1,4 +1,23 @@
-export const JobFilter = () => {
+import { Button, TextField } from "@mui/material";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+export const JobFilter = () =>
+{
+  const [searchTerm, setSearchTerm] = useState("");
+  const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [jobType, setJobType] = useState('');
+  const [category, setCategory] = useState('');
+  const navigate = useNavigate();
+
+
+  // const handleSearch = (searchText) =>
+  // {
+  //   // Redirect to the job list page with query parameter
+  //   history.push(`/viewAllJobs?title=${encodeURIComponent(searchText)}`);
+  // };
+
   return (
     <div className="container">
       <div className="row align-items-center justify-content-center">
@@ -15,6 +34,15 @@ export const JobFilter = () => {
           <form method="post" className="search-jobs-form">
             <div className="row mb-5">
               <div className="col-12 col-sm-6 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                {/* <TextField
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by Skills, Job title"
+                  variant="outlined"
+                  fullWidth
+                />
+                <Button onClick={handleSearch}>Search</Button> */}
+
                 <input
                   type="text"
                   className="form-control form-control-lg"

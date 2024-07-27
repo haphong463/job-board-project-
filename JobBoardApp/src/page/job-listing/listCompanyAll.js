@@ -4,7 +4,8 @@ import axiosRequest from "../../configs/axiosConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { logout } from "../../features/authSlice";
-import companyData from './company_data.json';
+// import companyData from './company_data.json';
+import { fetchCompanyThunk } from "../../features/companySlice";
 import "./job_company.css";
 import { useTranslation } from "react-i18next";
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
@@ -12,7 +13,8 @@ import _ from 'lodash';
 
 export function ViewAllCompany ()
 {
-    const [companies, setCompanies] = useState([]);
+    // const [companies, setCompanies] = useState([]);
+    const companies = useSelector((state) => state.company.companies);
     const [selectedGroup, setSelectedGroup] = useState('ABC');
     const { t, i18n } = useTranslation(); // Initialize the useTranslation hook
     const user = useSelector((state) => state.auth.user);
@@ -26,20 +28,20 @@ export function ViewAllCompany ()
 
     useEffect(() =>
     {
-        fetchCompanies();
+        dispatch(fetchCompanyThunk());
     }, []);
 
-    const fetchCompanies = async () =>
-    {
-        try
-        {
-            //const response = await axiosRequest.get("/categories");
-            setCompanies(companyData);
-        } catch (error)
-        {
-            console.error("Error fetching categories:", error);
-        }
-    };
+    // const fetchCompanies = async () =>
+    // {
+    //     try
+    //     {
+    //         //const response = await axiosRequest.get("/categories");
+    //         setCompanies(companyData);
+    //     } catch (error)
+    //     {
+    //         console.error("Error fetching categories:", error);
+    //     }
+    // };
 
     const handleCompanyClick = (companyId) =>
     {

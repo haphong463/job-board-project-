@@ -1,10 +1,17 @@
 package com.project4.JobBoardService.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.project4.JobBoardService.Enum.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -12,6 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 @Table(name = "job")
 public class Job {
     @Id
@@ -61,7 +69,6 @@ public class Job {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    private String expire;
     private Integer slot;
 
     @Builder.Default
@@ -71,16 +78,20 @@ public class Job {
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isSuperHot;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @ManyToMany
+    @JoinTable(
+            name = "job_category",
+            joinColumns = @JoinColumn(name = "job_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Builder.Default
+    private Set<Category> categories = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
 
-    //    @Column(name = "expired")
-//    private LocalDateTime expired;
+    private String expire;
 
     @PrePersist
     protected void onCreate() {

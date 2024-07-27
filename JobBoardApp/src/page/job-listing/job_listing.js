@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import moment from 'moment';
 import { fetchCategoryThunk } from "../../features/categorySlice";
@@ -8,14 +8,16 @@ import { fetchCompanyThunk } from "../../features/companySlice";
 import companyData from './company_data.json';
 import categoryData from '../../components/global-navbar/category.json';
 import "./job_company.css";
-import { NavLink, useLocation, useParams } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
 // import Select, { components } from 'react-select';
 // import { Select } from 'antd';
-import { MenuItem, Checkbox, FormControl, Select, FormGroup, FormControlLabel, InputLabel, OutlinedInput, Chip, ListItemText, TextField } from '@mui/material';
+import { MenuItem, Checkbox, FormControl, Select, FormGroup, FormControlLabel, InputLabel, OutlinedInput, Chip, ListItemText, TextField, Autocomplete } from '@mui/material';
 import axios from 'axios';
 import locationMapping from './location_mapping';
+
+import debounce from 'lodash/debounce';
 
 export const JobList = () =>
 {
@@ -23,7 +25,6 @@ export const JobList = () =>
    const categoryId = parseInt(id ?? '0', 10);
    const location = useLocation();
    const jobsPerPage = 3; // Number of jobs per page
-
    // const [jobs, setJobs] = useState([]);
    const [jobCount, setJobCount] = useState(0);
    const [selectedJobId, setSelectedJobId] = useState(null);
@@ -33,6 +34,41 @@ export const JobList = () =>
    const jobs = useSelector((state) => state.job.jobs);
    const companies = useSelector((state) => state.company.companies);
    const dispatch = useDispatch();
+   const navigate = useNavigate();
+   const { searchTerm } = useParams();
+   // const normalizeString = str => (typeof str === 'string' ? str.toLowerCase().trim() : '');
+   // const normalizeString = (str) =>
+   // {
+   //    return str.toLowerCase().trim();
+   // };
+   // const normalizeString = (str) => str.toLowerCase().trim();
+   const normalizeString = (str) => str.trim().toLowerCase();
+
+   const [searchTerms, setSearchTerms] = useState('');
+   const decodedSearchTerm = decodeURIComponent(searchTerms || '');
+   const [inputValue, setInputValue] = useState('');
+   const [open, setOpen] = useState(false);
+
+   // function useDebounce (value, delay)
+   // {
+   //    const [debouncedValue, setDebouncedValue] = useState(value);
+
+   //    useEffect(() =>
+   //    {
+   //       const handler = setTimeout(() =>
+   //       {
+   //          setDebouncedValue(value);
+   //       }, delay);
+
+   //       return () =>
+   //       {
+   //          clearTimeout(handler);
+   //       };
+   //    }, [value, delay]);
+
+   //    return debouncedValue;
+   // };
+
    const [filters, setFilters] = useState({
       title: '',
       // offeredSalary: '',
@@ -40,47 +76,42 @@ export const JobList = () =>
       position: [],
       jobType: [],
       contractType: [],
-      companyType: []
+      companyType: [],
+      categoryNames: []
    });
+
+   // const debouncedSearchTerm = useDebounce(decodedSearchTerm, 300);
 
    useEffect(() =>
    {
-      if (categories.length === 0)
-      {
-         dispatch(fetchCategoryThunk());
-      }
-      if (companies.length === 0)
-      {
-         dispatch(fetchCompanyThunk());
-      }
-      if (jobs.length === 0)
-      {
-         dispatch(fetchJobThunk());
-      }
-   }, [categories.length, jobs.length, companies.length]);
+      dispatch(fetchCategoryThunk());
+      dispatch(fetchCompanyThunk());
+      dispatch(fetchJobThunk());
+   }, [dispatch]);
 
    useEffect(() =>
    {
       const categoryInfo = categories.find(cat => cat.categoryId === categoryId);
-      if (categoryInfo)
-      {
-         setCategoryName(categoryInfo.categoryName);
-      } else
-      {
-         setCategoryName("");
-      }
+      if (categoryInfo) setCategoryName(categoryInfo.categoryName);
+      else setCategoryName("");
    }, [categories, categoryId]);
 
-   const applyFilters = (job) =>
+   const applyFilters = useCallback((job) =>
    {
-      const { title, offeredSalary, position, location, keySkills, jobType, contractType, companyType } = filters;
+      const { title, offeredSalary, position, location, categoryNames, jobType, contractType, companyType } = filters;
 
-      const searchTextArray = title.toLowerCase().split(' ');
-      // Tìm kiếm theo tiêu đề công việc và kỹ năng chính
-      const titleMatch = searchTextArray.some(searchText => job.title.toLowerCase().includes(searchText));
-      const keySkillsMatch = searchTextArray.some(searchText => job.keySkills.toLowerCase().includes(searchText));
-      // Kiểm tra sự phù hợp với tiêu chí tìm kiếm
-      const isSearchTextMatch = titleMatch || keySkillsMatch;
+      const normalizedTitle = normalizeString(title);
+      const titleMatch = normalizedTitle ? normalizeString(job.title).includes(normalizedTitle) : true;
+
+      const jobCategoryNames = job.categoryId.map(id =>
+      {
+         const category = categories.find(cat => cat.categoryId === id);
+         return category ? category.categoryName.toLowerCase() : '';
+      });
+
+      const categoryMatch = categoryNames.length === 0 || categoryNames.some(catName =>
+         jobCategoryNames.includes(normalizeString(catName))
+      );
 
       const locationMatch = location.length === 0 || location.some(loc =>
       {
@@ -101,23 +132,27 @@ export const JobList = () =>
       const company = companies.find(company => company.companyId === job.companyId);
       const companyTypeMatch = companyType.length === 0 || companyType.some(type => company.type?.toLowerCase() === type.value.toLowerCase());
 
-      return isSearchTextMatch && locationMatch && positionMatch && jobTypeMatch && contractTypeMatch && companyTypeMatch;
-   };
+      return titleMatch && categoryMatch && locationMatch && positionMatch && jobTypeMatch && contractTypeMatch && companyTypeMatch;
+   }, [filters, categories, companies, locationMapping]);
 
-   const handleJobClick = (jobId) =>
+   const handleJobClick = useCallback((jobId) =>
    {
       setSelectedJobId(jobId);
-   };
+   }, []);
 
-   const handlePageChange = (pageNumber) =>
+   const handlePageChange = useCallback((pageNumber) =>
    {
       setCurrentPage(pageNumber);
+   }, []);
+
+   const handleCategoryClick = (categoryId) =>
+   {
+      window.location.href = `/jobSkillList/${categoryId}`;
    };
 
-   const handleCategoryClick = (jobId) =>
+   const handleCompanyClick = (companyId) =>
    {
-      const jobDetailUrl = `/jobDetail/${jobId}`;
-      window.open(jobDetailUrl, '_blank');
+      window.location.href = `/companyDetail/${companyId}`;
    };
 
    const getLocation1String = (address) =>
@@ -333,11 +368,6 @@ export const JobList = () =>
       setFilters({ ...filters, companyType: newSelection });
    };
 
-   const handleCompanyClick = (companyId) =>
-   {
-      window.location.href = `/companyDetail/${companyId}`;
-   };
-
    const handleLocationItemClick = (event, location) =>
    {
       const newSelection = filters.location.some((item) => item.value === location.value)
@@ -347,29 +377,142 @@ export const JobList = () =>
       setFilters({ ...filters, location: newSelection });
    };
 
-   const filteredJobs = useMemo(() =>
+   useEffect(() =>
    {
-      let updatedFilteredJobs = [];
-      if (location.pathname === "/viewAllJobs")
+      if (searchTerm)
       {
-         updatedFilteredJobs = jobs;
+         setSearchTerms(decodeURIComponent(searchTerm));
       } else
       {
-         updatedFilteredJobs = jobs.filter(job => job.categoryId === categoryId);
+         setSearchTerms('');
       }
-      updatedFilteredJobs = updatedFilteredJobs.filter(applyFilters); // Apply filters
-      setJobCount(updatedFilteredJobs.length); // Update the job count
+   }, [searchTerm]);
+
+   const filteredJobs = useMemo(() =>
+   {
+      let updatedFilteredJobs = location.pathname.includes("/viewAllJobs")
+         ? jobs
+         : jobs.filter(job => Array.isArray(job.categoryId) && job.categoryId.includes(categoryId));
+
+      const searchTermNormalized = normalizeString(searchTerms);
+
+      updatedFilteredJobs = updatedFilteredJobs.filter(job =>
+      {
+         const jobTitleNormalized = normalizeString(job.title);
+         const matchesTitle = jobTitleNormalized.includes(searchTermNormalized);
+
+         const matchesCategory = job.categoryId.some(id =>
+         {
+            const category = categories.find(cat => cat.categoryId === id);
+            if (category)
+            {
+               const categoryNameNormalized = normalizeString(category.categoryName);
+               return categoryNameNormalized === searchTermNormalized;
+            }
+            return false;
+         });
+         return matchesTitle || matchesCategory;
+      });
+
+      updatedFilteredJobs = updatedFilteredJobs.filter(applyFilters);
+      setJobCount(updatedFilteredJobs.length);
 
       return updatedFilteredJobs;
-   }, [jobs, categoryId, location.pathname, filters]);
+   }, [jobs, categoryId, location.pathname, filters, categories, applyFilters, searchTerms]);
 
-   // Calculate total number of pages
    const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
    // Calculate the jobs to display based on the current page
    const indexOfLastJob = currentPage * jobsPerPage;
    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
 
-   const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+   // const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+
+   const currentJobs = useMemo(() =>
+   {
+      return filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+   }, [filteredJobs, currentPage, jobsPerPage]);
+
+   const titleOptions = [...new Set(jobs.map(job => job.title))];
+   const categoryOptions = [...new Set(categories.map(cat => cat.categoryName))];
+
+   // Kết hợp tất cả các tùy chọn thành một danh sách duy nhất
+   const combinedOptions = useMemo(() =>
+   {
+      return [
+         ...titleOptions.map(title => ({ type: 'title', value: title })),
+         ...categoryOptions.map(category => ({ type: 'category', value: category }))
+      ];
+   }, [titleOptions, categoryOptions]);
+
+   // const filteredOptions = useMemo(() =>
+   // {
+   //    const searchTermNormalized = normalizeString(searchTerms);
+   //    return combinedOptions.filter(option =>
+   //       normalizeString(option.value).includes(searchTermNormalized)
+   //    );
+   // }, [searchTerms, combinedOptions]);
+
+   const filteredOptions = useMemo(() =>
+   {
+      const searchTermNormalized = normalizeString(searchTerms);
+
+      // Kiểm tra xem tìm kiếm có phải là từ khóa category không
+      const isCategorySearch = combinedOptions.some(option =>
+         option.type === 'category' && normalizeString(option.value).includes(searchTermNormalized)
+      );
+
+      // Nếu là tìm kiếm category, chỉ lọc các loại 'category'
+      if (isCategorySearch)
+      {
+         return combinedOptions.filter(option =>
+            option.type === 'category' && normalizeString(option.value).includes(searchTermNormalized)
+         );
+      }
+
+      // Nếu không, lọc cả title và category
+      return combinedOptions.filter(option =>
+         normalizeString(option.value).includes(searchTermNormalized)
+      );
+   }, [searchTerms, combinedOptions]);
+
+
+   const handleInputChange = (event, newInputValue) =>
+   {
+      setInputValue(newInputValue);
+      setOpen(newInputValue.length > 0); // Open dropdown only if inputValue is not empty
+   };
+
+   const handleOptionChange = (event, newValue) =>
+   {
+      if (newValue)
+      {
+         const { type, value } = newValue;
+         if (type === 'title' || type === 'category')
+         {
+            // Xử lý điều hướng hoặc logic khác dựa trên tùy chọn được chọn
+            console.log(`Selected ${type}: ${value}`);
+            // Ví dụ điều hướng đến trang kết quả tìm kiếm
+            navigate(`/viewAllJobs/${encodeURIComponent(value)}`);
+         }
+      }
+      setOpen(false); // Đóng dropdown sau khi chọn
+   };
+
+   const handleKeyDown = (event) =>
+   {
+      if (event.key === 'Enter')
+      {
+         event.preventDefault(); // Ngăn chặn hành vi mặc định của Enter
+         handleSearch(); // Thực hiện tìm kiếm
+         setOpen(false); // Đóng dropdown sau khi nhấn Enter
+      }
+   };
+
+   const handleSearch = () =>
+   {
+
+      navigate(`/viewAllJobs/${encodeURIComponent(searchTerms.trim())}`);
+   };
 
    return (
       <GlobalLayoutUser>
@@ -396,16 +539,25 @@ export const JobList = () =>
                      <div className="border p-3" style={{ borderColor: '#cccccc', fontSize: '14px' }}>
                         <div className="mb-3">
                            <label>Search</label>
-                           <TextField
-                              type="text"
-                              name="title"
-                              placeholder="Search by Skills, Job title"
-                              variant="outlined"
-                              fullWidth
-                              className="form-control"
-                              value={filters.title}
-                              onChange={(e) => setFilters({ ...filters, title: e.target.value })}
+                           <Autocomplete
+                              freeSolo
+                              open={open}
+                              // onOpen={() => setOpen(true)}
+                              onClose={() => setOpen(false)}
+                              onInputChange={(event, newInputValue) => setSearchTerms(newInputValue)}
+                              inputValue={searchTerms}
+                              options={filteredOptions}
+                              getOptionLabel={(option) => option.value}
+                              filterOptions={(options) => options}
+                              renderInput={(params) => (
+                                 <TextField
+                                    {...params}
+                                    label="Search"
+                                    onKeyDown={handleKeyDown}
+                                 />
+                              )}
                            />
+
                         </div>
                         <br></br>
 
@@ -540,6 +692,7 @@ export const JobList = () =>
                      {currentJobs.map(job =>
                      {
                         const company = companies.find(company => company.companyId === job.companyId);
+                        const categoryArray = Array.isArray(categories) ? categories : [];
                         const address = getLocation1String(company?.location);
                         let timeAgo = job.createdAt ? formatJobPostedTime(job.createdAt) : '';
 
@@ -552,10 +705,14 @@ export const JobList = () =>
                                  onClick={() => handleJobClick(job.id)}
                               >
                                  <div className="text-dark mb-2">{timeAgo}</div>
-                                 <a href='' className="h5 mb-3 d-block text-dark" onClick={() => handleCategoryClick(job.id)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</a>
+                                 <a href='' className="h5 mb-3 d-block text-dark" onClick={() => handleJobDetailClick(job.id, job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</a>
                                  <div className="d-flex align-items-center mb-3">
                                     <NavLink to={''} target="_blank" rel="noopener noreferrer" onClick={() => handleCompanyClick(job.companyId)}>
-                                       <img src={company.logo} className="img-fluid rounded-sm border border-gray me-2 bg-white" style={{ width: '90px', height: '90px', objectFit: 'contain' }} />
+                                       <img src={company.logo} className="img-fluid p-0 d-inline-block rounded-sm border border-gray me-2 bg-white" style={{ width: '4em', height: '4em', objectFit: 'contain' }} />
+                                       {/* 
+                                       className="img-fluid border p-0 d-inline-block mr-3 rounded bg-white"
+                                       style={{ width: '8em', height: '8em', objectFit: 'contain' }} */}
+
                                     </NavLink>
                                     <NavLink to={''} className="text-dark ml-2" onClick={() => handleCompanyClick(job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</NavLink>
                                  </div>
@@ -563,10 +720,22 @@ export const JobList = () =>
                                  <div className="mb-2">
                                     <FaMapMarkerAlt className="text-dark" /> {address}
                                  </div>
-                                 <div className='d-flex flex-wrap'>
+                                 {/* <div className='d-flex flex-wrap'>
                                     {job.keySkills.split(',').map((skill, index) => (
                                        <span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
                                     ))}
+                                 </div> */}
+
+                                 <div className="m-0 mt-3">
+                                    {job.categoryId.map((id) =>
+                                    {
+                                       const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
+                                       return categoryName ? (
+                                          <NavLink key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={''}>
+                                             {categoryName}
+                                          </NavLink>
+                                       ) : null;
+                                    })}
                                  </div>
                               </div>
                            );

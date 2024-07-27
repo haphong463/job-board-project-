@@ -27,8 +27,9 @@ public class CategoryController {
     private CategoryRepository categoryRepository;
 
     @GetMapping
-    public List<Category> getAllCategory() {
-        return categoryRepository.findAll();
+    public List<CategoryDTO> getAllCategory() {
+//        return categoryRepository.findAll();
+        return categoryService.getAllCategories();
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

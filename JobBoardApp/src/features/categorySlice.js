@@ -26,13 +26,20 @@ const categorySlice = createSlice({
   initialState,
   extraReducers: (builder) =>
     builder
-      .addCase(fetchCategoryThunk.pending, (state, action) =>
+      .addCase(fetchCategoryThunk.pending, (state) =>
       {
         state.state = "Loading...";
       })
       .addCase(fetchCategoryThunk.fulfilled, (state, action) =>
       {
-        state.categories = action.payload;
+        // Đảm bảo rằng action.payload là mảng
+        if (Array.isArray(action.payload))
+        {
+          state.categories = action.payload;
+        } else
+        {
+          state.categories = [];
+        }
         state.state = "Fetch ok!";
       })
       .addCase(fetchCategoryThunk.rejected, (state, action) =>

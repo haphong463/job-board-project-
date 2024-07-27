@@ -6,6 +6,7 @@ import { JobBoardStats } from "../../components/job-board-stats/JobBoardStats";
 import { JobFilter } from "../../components/job-filter/JobFIlter";
 import { fetchJobThunk } from "../../features/jobSlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
+import { fetchCategoryThunk } from "../../features/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import "../job-listing/listSkillAll"
 import jobData from '../job-listing/job_data.json';
@@ -19,9 +20,11 @@ export const Home = () =>
   const dispatch = useDispatch();
   const jobs = useSelector((state) => state.job.jobs);
   const companies = useSelector((state) => state.company.companies);
+  const categories = useSelector((state) => state.category.categories);
 
   useEffect(() =>
   {
+    dispatch(fetchCategoryThunk());
     if (companies.length === 0)
     {
       dispatch(fetchCompanyThunk());
@@ -31,7 +34,6 @@ export const Home = () =>
       dispatch(fetchJobThunk());
     }
   }, [dispatch, jobs.length, companies.length]);
-
 
   useEffect(() =>
   {
@@ -83,6 +85,11 @@ export const Home = () =>
   const handleCompanyClick = (companyId) =>
   {
     window.location.href = `/companyDetail/${companyId}`;
+  };
+
+  const handleCategoryClick = (categoryId) =>
+  {
+    window.location.href = `/jobList/${categoryId}`;
   };
 
   const handleJobClick = (jobId) =>
@@ -140,7 +147,8 @@ export const Home = () =>
               {filteredJobs.map(job =>
               {
                 const company = companies.find(company => company.companyId === job.companyId);
-                const address = getLocation1String(company.location);
+                const categoryArray = Array.isArray(categories) ? categories : [];
+                const address = getLocation1String(company?.location);
                 if (company)
                 {
                   return (
@@ -150,10 +158,10 @@ export const Home = () =>
                         <img
                           src={company.logo}
                           alt="Free Website Template"
-                          className="img-fluid rounded-sm me-2 bg-white" onClick={() =>
+                          className="img-fluid p-0 d-inline-block rounded-sm bg-white" onClick={() =>
                           {
                             handleCompanyClick(job.companyId);
-                          }} style={{ width: '100px', height: '100px', objectFit: 'contain', cursor: 'pointer' }}
+                          }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
                         />
                       </div>
                       <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
@@ -166,10 +174,16 @@ export const Home = () =>
                           {
                             handleCompanyClick(job.companyId);
                           }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
-                          <div className='d-flex flex-wrap mt-2'>
-                            {job.keySkills.split(',').map((skill, index) => (
-                              <span key={index} className="bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
-                            ))}
+                          <div className="m-0 mt-3">
+                            {job.categoryId.map((id) =>
+                            {
+                              const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
+                              return categoryName ? (
+                                <span key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">
+                                  {categoryName}
+                                </span>
+                              ) : null;
+                            })}
                           </div>
                         </div>
                         <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">

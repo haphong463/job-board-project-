@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,11 +30,10 @@ public class JobDTO {
     private String contractType;
     private String benefit;
     private LocalDateTime createdAt;
-    private String expire;
     private Integer slot;
     private Integer profileApproved = 0;
     private Boolean isSuperHot;
-    private Long categoryId;
+    private List<Long> categoryId;
     private Long companyId;
-//    private LocalDateTime expired;
+    private String expire;
 }
