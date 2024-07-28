@@ -15,14 +15,12 @@ import java.util.Optional;
 
 public interface BlogService {
     List<Blog> getAllBlog();
-    Blog createBlog(Blog blog, MultipartFile imageFile);
-    Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile);
+    Blog createBlog(Blog blog, MultipartFile imageFile, List<String> hashtagNames);
+    Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile, List<String> hashtagNames);
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
     Blog getBlogBySlug(String slug);
-    Page<Blog> searchBlogs(String query, String type, Pageable pageable);//    int getCommentCount();
-    Page<Blog> searchBlogs(String query, String type, Pageable pageable, boolean visibility);//    int getCommentCount();
-    Page<Blog> searchBlogs(String query, Pageable pageable);
-    Page<Blog> searchBlogs(String query, Pageable pageable, boolean visibility);
+    Page<Blog> searchBlogs(String query, String type, Pageable pageable, Boolean visibility);//    int getCommentCount();
+
 
 }

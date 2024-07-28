@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserService {
@@ -18,5 +19,6 @@ public interface UserService {
     User updateUserEnableStatus(Long id, Boolean isEnabled);
     void deleteUser(Long id);
     User updateUserPermissions(Long userId, List<String> permissions);
+    List<Map<String, Object>> getUserRegistrationCountsForYear(int year);
 
-}
+    }

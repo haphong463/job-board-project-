@@ -38,5 +38,8 @@ public class BlogDTO {
     @Nullable
     private MultipartFile image;
 
+    private List<String> hashtags;
+
+
     // Getters and setters
 }

@@ -5,6 +5,7 @@ import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
+import com.project4.JobBoardService.Entity.HashTag;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.EPermissions;
 import com.project4.JobBoardService.Service.BlogCategoryService;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,25 +57,17 @@ public class BlogController {
             @RequestParam(defaultValue = "ALL") String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "2") int visibility,
+            @RequestParam(required = false) Integer visibility,
             @RequestParam(defaultValue = "asc") String order
     ) {
         Sort sort = order.equalsIgnoreCase("desc") ? Sort.by("createdAt").descending() : Sort.by("createdAt").ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Blog> blogsPage;
-        if(type.equals("ALL")){
-            blogsPage = switch (visibility) {
-                case 0 -> blogService.searchBlogs(query, pageable, true);
-                case 1 -> blogService.searchBlogs(query, pageable, false);
-                default -> blogService.searchBlogs(query, pageable);
-            };
-        }else{
-            blogsPage = switch (visibility) {
-                case 0 -> blogService.searchBlogs(query, type, pageable, true);
-                case 1 -> blogService.searchBlogs(query, type, pageable, false);
-                default -> blogService.searchBlogs(query, type, pageable);
-            };
-        }
+
+        Boolean visibilityFlag = visibility == 0 ? Boolean.TRUE : visibility == 1 ? Boolean.FALSE : null;
+
+
+        Page<Blog> blogsPage = blogService.searchBlogs(query, "ALL".equals(type) ? null : type, pageable, visibilityFlag);
+
         List<BlogResponseDTO> blogResponseDTOs = blogsPage.stream()
                 .map(blog -> modelMapper.map(blog, BlogResponseDTO.class))
                 .collect(Collectors.toList());
@@ -90,41 +84,31 @@ public class BlogController {
 
 
 
-
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
     @CheckPermission(EPermissions.MANAGE_BLOG)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponseDTO> createBlog(@ModelAttribute BlogDTO blogDTO) {
         try {
-            // Lấy danh sách id của BlogCategory từ BlogDTO
             List<Long> categoryIds = blogDTO.getCategoryIds();
             List<BlogCategory> categories = categoryIds.stream()
                     .map(id -> blogCategoryService.getBlogCategoryById(id))
                     .collect(Collectors.toList());
 
-            // Kiểm tra xem tất cả các BlogCategory có tồn tại không
             if (categories.stream().anyMatch(category -> category == null)) {
-                return ResponseEntity.badRequest().build(); // Nếu một trong các BlogCategory không tồn tại, trả về lỗi BadRequest
+                return ResponseEntity.badRequest().build();
             }
-
-            // Tìm User từ username trong BlogDTO
             User user = userService.findByUsername(blogDTO.getUsername()).orElse(null);
             if (user == null) {
-                return ResponseEntity.badRequest().build(); // Nếu không tìm thấy User, trả về lỗi BadRequest
+                return ResponseEntity.badRequest().build();
             }
 
             String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-            if(username.equals(user.getUsername())){
+            if (username.equals(user.getUsername())) {
                 Blog blog = modelMapper.map(blogDTO, Blog.class);
                 blog.setUser(user);
                 blog.setCategories(categories);
-
-                // Gọi phương thức trong service để xử lý logic tạo Blog, bao gồm xử lý hình ảnh nếu cần
-                Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage());
-
-                // Map Blog đã tạo thành BlogResponseDTO và gửi thông báo WebSocket
+                Blog createdBlog = blogService.createBlog(blog, blogDTO.getImage(), blogDTO.getHashtags());
                 BlogResponseDTO responseDto = modelMapper.map(createdBlog, BlogResponseDTO.class);
-
                 return ResponseEntity.ok(responseDto);
             }
             return ResponseEntity.badRequest().build();
@@ -190,7 +174,7 @@ public class BlogController {
 
 
             // Update blog
-            Blog updatedBlog = blogService.updateBlog(id, blog, blogDTO.getImage());
+            Blog updatedBlog = blogService.updateBlog(id, blog, blogDTO.getImage(), blogDTO.getHashtags());
             if(updatedBlog != null){
                 BlogResponseDTO responseDto = modelMapper.map(updatedBlog, BlogResponseDTO.class);
                 return ResponseEntity.ok(responseDto);

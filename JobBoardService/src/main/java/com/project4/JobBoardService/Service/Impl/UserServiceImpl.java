@@ -16,8 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -44,6 +44,26 @@ public class UserServiceImpl implements UserService {
         }
 
         return userRepository.save(user);
+    }
+
+    @Override
+    public List<Map<String, Object>> getUserRegistrationCountsForYear(int year) {
+        List<Map<String, Object>> registrationCounts = new ArrayList<>();
+        LocalDate startOfYear = LocalDate.of(year, 1, 1);
+        LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+        for (int month = 1; month <= 12; month++) {
+            LocalDate startOfMonth = LocalDate.of(year, month, 1);
+            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+            long count = userRepository.countByCreatedAtBetween(startOfMonth.atStartOfDay(), endOfMonth.atTime(23, 59, 59));
+            Map<String, Object> countMap = new HashMap<>();
+            countMap.put("month", startOfMonth.getMonth().toString());
+            countMap.put("count", count);
+            registrationCounts.add(countMap);
+        }
+
+        return registrationCounts;
     }
 
     @Override

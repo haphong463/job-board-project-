@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
@@ -34,6 +35,12 @@ public class UserController {
     @Autowired
     private JwtUtils jwtUtils;
 
+
+    @GetMapping("/registration-count/year")
+    public ResponseEntity<List<Map<String, Object>>> getUserRegistrationCountsForYear(@RequestParam int year) {
+        List<Map<String, Object>> registrationCounts = userService.getUserRegistrationCountsForYear(year);
+        return ResponseEntity.ok(registrationCounts);
+    }
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_EMPLOYER')")
     public ResponseEntity<?> updateUser(@PathVariable Long id,

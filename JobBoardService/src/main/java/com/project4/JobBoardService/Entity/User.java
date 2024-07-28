@@ -20,7 +20,7 @@ import java.util.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User   {
+public class User  extends  AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
