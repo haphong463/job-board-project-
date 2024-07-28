@@ -41,7 +41,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
   const user = useSelector((state) => state.auth.user);
   const [modal, setModal] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
-
+  const [tags, setTags] = useState([]);
   const {
     handleSubmit,
     control,
@@ -60,6 +60,11 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     },
   });
 
+  const handleChangeTags = (newTags) => {
+    setTags(newTags);
+    setValue("hashtags", newTags, { shouldDirty: true });
+  };
+
   const toggle = () => {
     setModal(!modal);
     setIsEdit(null);
@@ -71,6 +76,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       ...data,
       slug: slugify(data.title),
       username: user.sub,
+      hashtags: tags,
     };
 
     if (!newData.image || newData.image.length === 0) {
@@ -113,6 +119,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       );
       setValue("visibility", isEdit.visibility);
       setValue("citation", isEdit.citation);
+      setTags(isEdit.hashtags.map((item) => item.name));
     }
   }, [isEdit, setValue]);
 
@@ -187,6 +194,8 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
                 getInputProps={getInputProps}
                 categoryList={categoryList}
                 defaultValue={defaultValue}
+                tags={tags}
+                onChangeTags={handleChangeTags}
               />
             </Row>
           </ModalBody>

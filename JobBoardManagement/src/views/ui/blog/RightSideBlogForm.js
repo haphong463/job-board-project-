@@ -1,8 +1,11 @@
+import React, { useState } from "react";
 import { Controller } from "react-hook-form";
-import { Col, FormGroup, FormText, Input, Label, Row } from "reactstrap";
+import { Col, FormGroup, Label, Input, FormText, Row } from "reactstrap";
 import Select from "react-select";
+import TagsInput from "react-tagsinput";
+import "react-tagsinput/react-tagsinput.css";
 
-export function RightSideBlogForm(props) {
+export const RightSideBlogForm = (props) => {
   return (
     <Col lg={4}>
       <Row>
@@ -111,7 +114,22 @@ export function RightSideBlogForm(props) {
             )}
           </FormGroup>
         </Col>
+        <Col md={12}>
+          <FormGroup>
+            <Label for="hashtags">
+              Hashtags <span className="text-danger">*</span>
+            </Label>
+            <TagsInput value={props.tags} onChange={props.onChangeTags} />
+            {props.errors.hashtags && (
+              <FormText color="danger">
+                {props.errors.hashtags.message}
+              </FormText>
+            )}
+          </FormGroup>
+        </Col>
       </Row>
     </Col>
   );
-}
+};
+
+export default RightSideBlogForm;

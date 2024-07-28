@@ -297,7 +297,7 @@ export function Blog(props) {
             value={selectedCategory}
             className="form-select"
           >
-            <option value="ALL">All</option>
+            <option value="">All</option>
             {blogCategoryData.map((category) => (
               <option key={category.id} value={category.name}>
                 {category.name}

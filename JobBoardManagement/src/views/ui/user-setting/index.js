@@ -89,6 +89,8 @@ const User = () => {
     }
   }, [userEdit]);
 
+  console.log(">>>userEdit: ", userEdit);
+
   return (
     user && (
       <Row>
@@ -104,6 +106,7 @@ const User = () => {
               <CardTitle tag="h5" className="mt-3">
                 {`${userEdit?.firstName} ${userEdit?.lastName}`}
               </CardTitle>
+              <CardText>{userEdit?.roles.map((item) => item.name)}</CardText>
               <CardText className="text-truncate-multiline">
                 {userEdit?.bio}
               </CardText>
