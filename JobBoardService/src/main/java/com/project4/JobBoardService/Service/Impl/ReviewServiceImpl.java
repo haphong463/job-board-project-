@@ -9,6 +9,7 @@ import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.CompanyService;
 import com.project4.JobBoardService.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -22,6 +23,8 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final CompanyService companyService;
     private final UserRepository userRepository;
+
+
     @Autowired
     public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService, UserRepository userRepository) {
         this.reviewRepository = reviewRepository;
@@ -97,5 +100,14 @@ public class ReviewServiceImpl implements ReviewService {
         company.setLocation(companyDTO.getLocation());
         company.setType(companyDTO.getType());
         return company;
+    }
+
+    public boolean hasUserReviewedCompany(Long companyId, String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return reviewRepository.findByCompany_CompanyIdAndUserId(companyId, user.getId()).size() > 0;
+        }
+        return false;
     }
 }

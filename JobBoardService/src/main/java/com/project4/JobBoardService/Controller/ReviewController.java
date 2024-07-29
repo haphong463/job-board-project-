@@ -2,6 +2,7 @@ package com.project4.JobBoardService.Controller;
 
 import com.project4.JobBoardService.DTO.ReviewDTO;
 import com.project4.JobBoardService.Entity.Review;
+import com.project4.JobBoardService.Service.CompanyService;
 import com.project4.JobBoardService.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,13 +19,14 @@ import java.util.Map;
 @RequestMapping("/api/companies/{companyId}/reviews")
 public class ReviewController {
     private final ReviewService reviewService;
+    private final CompanyService companyService;
 
     @Autowired
-    public ReviewController(ReviewService reviewService) {
+    public ReviewController(ReviewService reviewService, CompanyService companyService) {
         this.reviewService = reviewService;
+        this.companyService = companyService;
     }
 
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping()
     public ResponseEntity<List<Review>> getAllReviews(@PathVariable("companyId") Long companyId) {
         return new ResponseEntity<>(reviewService.getAllReviews(companyId), HttpStatus.OK);
@@ -74,5 +76,14 @@ public class ReviewController {
         } else {
             return ResponseEntity.badRequest().body("Failed to update review. Company or user not found.");
         }
+    }
+
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @GetMapping("/hasReviewed")
+    public ResponseEntity<?> hasUserReviewedCompany(@PathVariable Long companyId,
+                                                    @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        boolean hasReviewed = reviewService.hasUserReviewedCompany(companyId, username);
+        return ResponseEntity.ok(hasReviewed);
     }
 }
