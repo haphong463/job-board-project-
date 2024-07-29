@@ -1,16 +1,10 @@
 package com.project4.JobBoardService.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.project4.JobBoardService.Enum.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -46,8 +40,7 @@ public class Job {
     @Column(name = "keySkills")
     private String keySkills;
 
-    @Enumerated(EnumType.STRING)
-    private Position position;
+
 
     @Column(columnDefinition = "text")
     private String experience;
@@ -55,13 +48,11 @@ public class Job {
     @Column(columnDefinition = "text")
     private String qualification;
 
-    @Column(name = "job_type")
-    @Enumerated(EnumType.STRING)
-    private JobType jobType;
 
-    @Column(name = "contract_type")
-    @Enumerated(EnumType.STRING)
+    @ManyToMany
+    @JoinColumn(name = "contract_type_id")
     private ContractType contractType;
+
 
     @Column(columnDefinition = "text")
     private String benefit;
@@ -86,6 +77,17 @@ public class Job {
     )
     @Builder.Default
     private Set<Category> categories = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "job_job_type",
+            joinColumns = @JoinColumn(name = "job_id"),
+            inverseJoinColumns = @JoinColumn(name = "job_type_id")
+    )
+    private Set<JobType> jobTypes = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "job_position_id")
+    private JobPosition jobPosition;
 
     @ManyToOne
     @JoinColumn(name = "company_id")

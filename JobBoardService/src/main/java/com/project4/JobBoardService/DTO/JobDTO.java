@@ -26,8 +26,10 @@ public class JobDTO {
     private String position;
     private String experience;
     private String qualification;
-    private String jobType;
-    private String contractType;
+    private Set<JobTypeDTO> jobTypes; // Assuming you want to include jobTypes
+    private ContractTypeDTO contractType; // Assuming you want to include contractType
+    private JobPositionDTO jobPosition; // Assuming you want to include jobPosition
+
     private String benefit;
     private LocalDateTime createdAt;
     private Integer slot;
