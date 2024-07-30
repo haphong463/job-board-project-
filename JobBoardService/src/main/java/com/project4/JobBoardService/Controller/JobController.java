@@ -78,11 +78,10 @@ public class JobController {
     }
 
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
-    @PostMapping("/companies/{companyId}/categories/{categoryId}")
+    @PostMapping("/companies/{companyId}/categories")
     public ResponseEntity<String> createJob(@PathVariable("companyId") Long companyId,
-                                            @PathVariable("categoryId") List<Long> categoryId,
+                                            @RequestParam List<Long> categoryId,
                                             @RequestBody JobDTO jobDTO) {
-
         boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
         return ResponseEntity.ok("Job created successfully");
     }

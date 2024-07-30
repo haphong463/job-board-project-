@@ -15,7 +15,7 @@ import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayo
 // import { Select } from 'antd';
 import { MenuItem, Checkbox, FormControl, Select, FormGroup, FormControlLabel, InputLabel, OutlinedInput, Chip, ListItemText, TextField, Autocomplete } from '@mui/material';
 import axios from 'axios';
-import './location_mapping';
+import JobMappingFilter from './location_mapping';
 import debounce from 'lodash/debounce';
 
 export const JobList = () =>
@@ -23,7 +23,7 @@ export const JobList = () =>
    const { id } = useParams();
    const categoryId = parseInt(id ?? '0', 10);
    const location = useLocation();
-   const jobsPerPage = 3; // Number of jobs per page
+   const jobsPerPage = 5; // Number of jobs per page
    // const [jobs, setJobs] = useState([]);
    const [jobCount, setJobCount] = useState(0);
    const [selectedJobId, setSelectedJobId] = useState(null);
@@ -36,7 +36,7 @@ export const JobList = () =>
    const navigate = useNavigate();
    const { searchTerm } = useParams();
    const normalizeString = (str) => str.trim().toLowerCase();
-   // const { locationMapping, position, jobTypes, contractTypes, companyTypes } = JobMappingFilter;
+   const { locationMapping } = JobMappingFilter;
 
    const [searchTerms, setSearchTerms] = useState('');
    const decodedSearchTerm = decodeURIComponent(searchTerms || '');
@@ -419,17 +419,14 @@ export const JobList = () =>
    const indexOfLastJob = currentPage * jobsPerPage;
    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
 
-   // const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
-
    const currentJobs = useMemo(() =>
    {
       return filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
    }, [filteredJobs, currentPage, jobsPerPage]);
 
-   const titleOptions = [...new Set(jobs.map(job => job.title))];
-   const categoryOptions = [...new Set(categories.map(cat => cat.categoryName))];
+   const titleOptions = useMemo(() => [...new Set(jobs.map(job => job.title))], [jobs]);
+   const categoryOptions = useMemo(() => [...new Set(categories.map(cat => cat.categoryName))], [categories]);
 
-   // Kết hợp tất cả các tùy chọn thành một danh sách duy nhất
    const combinedOptions = useMemo(() =>
    {
       return [
@@ -440,34 +437,21 @@ export const JobList = () =>
 
    const filteredOptions = useMemo(() =>
    {
+      if (!searchTerms.trim()) return []; // Không hiển thị gợi ý khi không có giá trị tìm kiếm
+
       const searchTermNormalized = normalizeString(searchTerms);
       return combinedOptions.filter(option =>
          normalizeString(option.value).includes(searchTermNormalized)
       );
    }, [searchTerms, combinedOptions]);
 
-
-   const handleInputChange = (event, newInputValue) =>
-   {
-      setInputValue(newInputValue);
-      setOpen(newInputValue.length > 0); // Open dropdown only if inputValue is not empty
-   };
-
-   const handleOptionChange = (event, newValue) =>
-   {
-      if (newValue)
-      {
-         const { type, value } = newValue;
-         if (type === 'title' || type === 'category')
-         {
-            // Xử lý điều hướng hoặc logic khác dựa trên tùy chọn được chọn
-            console.log(`Selected ${type}: ${value}`);
-            // Ví dụ điều hướng đến trang kết quả tìm kiếm
-            navigate(`/viewAllJobs/${encodeURIComponent(value)}`);
-         }
-      }
-      setOpen(false); // Đóng dropdown sau khi chọn
-   };
+   // const filteredOptions = useMemo(() =>
+   // {
+   //    const searchTermNormalized = normalizeString(searchTerms);
+   //    return combinedOptions.filter(option =>
+   //       normalizeString(option.value).includes(searchTermNormalized)
+   //    );
+   // }, [searchTerms, combinedOptions]);
 
    const handleKeyDown = (event) =>
    {
@@ -512,7 +496,6 @@ export const JobList = () =>
                            <Autocomplete
                               freeSolo
                               open={open}
-                              // onOpen={() => setOpen(true)}
                               onClose={() => setOpen(false)}
                               onInputChange={(event, newInputValue) => setSearchTerms(newInputValue)}
                               inputValue={searchTerms}
@@ -526,15 +509,15 @@ export const JobList = () =>
                                     onKeyDown={handleKeyDown}
                                  />
                               )}
+                              onOpen={() => setOpen(true)}
                            />
-
                         </div>
                         <br></br>
 
                         <div className="mb-3">
                            <label>Location</label>
                            <FormGroup>
-                              {locationMapping.locations.map((location) => (
+                              {locations.map((location) => (
                                  <FormControlLabel
                                     key={location.value}
                                     control={
@@ -651,7 +634,7 @@ export const JobList = () =>
                   </div>
 
                   <div className="col-md-9">
-                     <h3 className="text-center mt-5 mb-4">
+                     <h3 className="text-center mt-0 mb-4">
                         {jobCount}{" "}
                         {location.pathname === "/viewAllJobs" ? (
                            "IT"
@@ -660,7 +643,6 @@ export const JobList = () =>
                         )}{" "}
                         jobs in Vietnam
                      </h3>
-
                      {currentJobs.map(job =>
                      {
                         const company = companies.find(company => company.companyId === job.companyId);
