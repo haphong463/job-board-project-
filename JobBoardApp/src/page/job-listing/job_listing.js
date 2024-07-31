@@ -630,11 +630,10 @@ export const JobList = () =>
                         </div>
                      </div>
 
-
                   </div>
 
                   <div className="col-md-9">
-                     <h3 className="text-center mt-0 mb-4">
+                     <h3 className="text-center mt-0 mb-4" style={{ fontSize: '25px', fontWeight: 'bold' }}>
                         {jobCount}{" "}
                         {location.pathname === "/viewAllJobs" ? (
                            "IT"
