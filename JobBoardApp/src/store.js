@@ -13,6 +13,7 @@ import jobReducer from './features/jobSlice';
 import companyReducer from './features/companySlice';
 import contactsReducer from './features/contactsSlice'; // Import the contacts slice
 import UserReducer from './features/userSlice'; // Import the user slice
+import certificateReducer from './features/certificateSlice'; // Import the certificate slice
 // Cấu hình persist với whitelist
 // const persistConfig = {
 //   key: "root",
@@ -43,6 +44,8 @@ export const store = configureStore({
     company: companyReducer,
     contacts: contactsReducer,
     user: UserReducer,
+    certificates: certificateReducer,
+
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({

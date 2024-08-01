@@ -24,6 +24,9 @@ export const signIn = createAsyncThunk(
       if (res.username) {
         localStorage.setItem('username', res.username);
       }
+      if (res.userId) {
+        localStorage.setItem('userId', res.userId.toString()); // Ensure userId is stored as a string
+      }
       return res;
     } catch (error) {
       if (typeof error.response.data.message === "string") {
