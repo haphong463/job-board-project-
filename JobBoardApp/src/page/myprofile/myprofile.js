@@ -5,7 +5,6 @@ import { fetchUserThunk, updateUserThunk } from "../../features/userSlice";
 import Swal from "sweetalert2";
 import { Form, FormGroup, Label, Input, Button, Col, Row, Card, CardBody, CardTitle, CardText } from "reactstrap";
 import { FaCamera } from 'react-icons/fa'; // Font Awesome camera icon
-import "./css.css";
 
 export const UserProfile = () => {
   const dispatch = useDispatch();
