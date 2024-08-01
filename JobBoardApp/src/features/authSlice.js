@@ -20,6 +20,9 @@ export const signIn = createAsyncThunk(
           email: res.email,
           message: "Please check your email to verify your account.",
         });
+      }      
+      if (res.username) {
+        localStorage.setItem('username', res.username);
       }
       return res;
     } catch (error) {
