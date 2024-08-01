@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import axiosRequest from "../../configs/axiosConfig";
-import CreateCv from './CreateCv';
-import CvList from './CvList';
-import ListPdf from '../pdf-management/ListPdf';
-import DetailsCv from './DetailsCv';
-import ApplyBox from '../../components/dialog-box/Applybox';
-import { useSelector } from 'react-redux';
-import './css/main.css';
-import { Link } from 'react-router-dom';
+import CreateCv from "./CreateCv";
+import CvList from "./CvList";
+import ListPdf from "../pdf-management/ListPdf";
+import DetailsCv from "./DetailsCv";
+import ApplyBox from "../../components/dialog-box/Applybox";
+import { useSelector } from "react-redux";
+import "./css/main.css";
+import { Link } from "react-router-dom";
+import DeleteCv from "./DeleteCv";
 function MainCv() {
-  const [currentAction, setCurrentAction] = useState('default');
-  const user = useSelector(state => state.auth.user);
+  const [currentAction, setCurrentAction] = useState("default");
+  const user = useSelector((state) => state.auth.user);
   const [notification, setNotification] = useState(null);
   const [hasCVs, setHasCVs] = useState(false);
   const [deleteQuestion, setDeleteQuestion] = useState(null);
@@ -31,12 +32,6 @@ function MainCv() {
   //     setHasCVs(false); // Set to false by default or handle error state
   //   }
   // };
-
-
-
-
-
-
 
   useEffect(() => {
     if (notification) {
@@ -65,27 +60,31 @@ function MainCv() {
         {renderNotification()}
         {(() => {
           switch (currentAction) {
-            case 'create':
+            case "create":
               return <CreateCv />;
-            case 'cvHis':
+            case "cvHis":
               return <ListPdf />;
-            case 'cvDetails':
+            case "cvDetails":
               return <CvList />;
-            case 'box':
+            case "box":
               return <ApplyBox />;
-            case 'delete':
+            case "delete":
               return (
                 <DeleteCv
                   userId={user.id}
-                  onDelete={(message, type = 'success') => setNotification({ type, message })}
-                  onCancel={() => setCurrentAction('default')}
+                  onDelete={(message, type = "success") =>
+                    setNotification({ type, message })
+                  }
+                  onCancel={() => setCurrentAction("default")}
                 />
               );
             default:
               return (
                 <div className="default-info">
                   <div className="welcome-overlay">
-                    <h2 className='welcome fade-in'>Welcome back <i className='userName'>{user.lastName}</i>!</h2>
+                    <h2 className="welcome fade-in">
+                      Welcome back <i className="userName">{user.lastName}</i>!
+                    </h2>
                   </div>
                 </div>
               );
@@ -97,7 +96,7 @@ function MainCv() {
 
   return (
     <div className="main-cv-wrapper">
-      <section className='p-4'>
+      <section className="p-4">
         <div className="container">
           <div className="row">
             <div className="col-md-7">
@@ -115,31 +114,52 @@ function MainCv() {
       <div className="main-cv-container">
         <div className="actions-container">
           <h2>Local Actions</h2>
-          <div className={`action-item ${currentAction === 'create' ? 'active' : ''}`} onClick={() => setCurrentAction('create')}>
+          <div
+            className={`action-item ${
+              currentAction === "create" ? "active" : ""
+            }`}
+            onClick={() => setCurrentAction("create")}
+          >
             <i className="fas fa-plus mr-2"></i> Create CV
           </div>
-          <div className={`action-item ${currentAction === 'cv details' ? 'active' : ''}`} onClick={() => setCurrentAction('cvDetails')}>
+          <div
+            className={`action-item ${
+              currentAction === "cv details" ? "active" : ""
+            }`}
+            onClick={() => setCurrentAction("cvDetails")}
+          >
             <i className="fas fa-info-circle mr-2"></i> CV Details
           </div>
-          <div className={`action-item ${currentAction === 'cv history' ? 'active' : ''}`} onClick={() => setCurrentAction('cvHis')}>
+          <div
+            className={`action-item ${
+              currentAction === "cv history" ? "active" : ""
+            }`}
+            onClick={() => setCurrentAction("cvHis")}
+          >
             <i className="fas fa-history mr-2"></i> CV History
           </div>
-          <div className={`action-item ${currentAction === 'view' ? 'active' : ''}`} onClick={() => setCurrentAction('box')}>
+          <div
+            className={`action-item ${
+              currentAction === "view" ? "active" : ""
+            }`}
+            onClick={() => setCurrentAction("box")}
+          >
             <i className="fas fa-box mr-2"></i> Box
           </div>
 
-          <hr style={{
-            backgroundColor: 'black',
-            width: '100%',
-
-          }} />
-          <h2 className='mt-3'>Global Actions</h2>
-          <Link to="/list-template" >
+          <hr
+            style={{
+              backgroundColor: "black",
+              width: "100%",
+            }}
+          />
+          <h2 className="mt-3">Global Actions</h2>
+          <Link to="/list-template">
             <div className="global-action-item">
               <i className="fas fa-list mr-2"></i> To List Template
             </div>
           </Link>
-          <Link to="/quiz" >
+          <Link to="/quiz">
             <div className="global-action-item">
               <i className="fas fa-question-circle mr-2"></i> To Quiz
             </div>
@@ -149,17 +169,14 @@ function MainCv() {
               <i className="fas fa-blog mr-2"></i> To Blog
             </div>
           </Link>
-          <Link to="/jobs" >
+          <Link to="/jobs">
             <div className="global-action-item">
               <i className="fas fa-list-ul mr-2"></i> To Job List
             </div>
           </Link>
-
         </div>
 
-        <div className="display-area">
-          {renderDisplayArea()}
-        </div>
+        <div className="display-area">{renderDisplayArea()}</div>
       </div>
     </div>
   );

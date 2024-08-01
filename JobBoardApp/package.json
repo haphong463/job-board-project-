@@ -18,6 +18,7 @@
     "@types/lodash": "^4.17.6",
     "antd": "^5.19.1",
     "axios": "^1.6.8",
+    "bad-words": "^3.0.4",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
@@ -28,7 +29,6 @@
     "framer-motion": "^11.2.10",
     "html-react-parser": "^5.1.10",
     "html-to-text": "^9.0.5",
-    "i18next": "^23.11.5",
     "jquery": "^3.7.1",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
@@ -51,7 +51,6 @@
     "react-scripts": "5.0.1",
     "react-scroll": "^1.9.0",
     "react-select": "^5.8.0",
-    "react-star-rating-component": "^1.4.1",
     "react-toastify": "^10.0.5",
     "reactstrap": "^9.2.2",
     "redux": "^5.0.1",
@@ -71,6 +70,12 @@
     "clean": "rm -rf node_modules",
     "reinstall": "npm run clean && npm install",
     "rebuild": "npm run clean && npm install && npm run build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [

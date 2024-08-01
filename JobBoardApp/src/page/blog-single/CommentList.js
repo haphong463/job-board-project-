@@ -11,7 +11,7 @@ export const CommentList = ({
     <ul
       className="comment-list"
       style={{
-        maxHeight: "40vh",
+        maxHeight: "50vh",
         overflow: "auto",
       }}
     >

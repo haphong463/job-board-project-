@@ -67,22 +67,7 @@ const blogSlice = createSlice({
     lastUpdated: null,
     totalPages: 0,
   },
-  reducers: {
-    addBlogBySocket: (state, action) => {
-      state.blogs.push(action.payload);
-    },
-    updateBlogBySocket: (state, action) => {
-      state.blogs = state.blogs.map((blog) =>
-        blog.id === action.payload.id ? actPion.payload : blog
-      );
-    },
-    deleteBlogBySocket: (state, action) => {
-      state.blogs = state.blogs.filter((blog) => blog.id !== action.payload);
-    },
-    updateLastUpdated: (state, action) => {
-      state.lastUpdated = action.payload;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchBlogById.pending, (state) => {
@@ -116,7 +101,7 @@ const blogSlice = createSlice({
       })
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
         state.status = "succeeded";
-        3;
+
         state.categories = action.payload.slice(0, 3);
         state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
       })

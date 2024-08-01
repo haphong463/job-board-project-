@@ -15,6 +15,7 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { signInOAuth2Async } from "../../services/AuthService";
 import showToast from "../../utils/function/showToast";
+import { Divider } from "antd";
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
   const verificationMessage = useSelector(
@@ -59,18 +60,16 @@ export const Login = () => {
           <div className="container">
             <div className="row">
               <div className="col-md-7">
-                <h1 className="text-white font-weight-bold">Sign Up/Login</h1>
+                <h1 className="text-white font-weight-bold">Login</h1>
                 <div className="custom-breadcrumbs">
                   <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                  <span className="text-white">
-                    <strong>Log In</strong>
-                  </span>
+                  <span className="text-white">Log In</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        <section className="site-section">
+        <section className="site-section section is-medium">
           <div className="container">
             <div className="row">
               <div className="col-lg-6">
@@ -140,20 +139,27 @@ export const Login = () => {
                       <NavLink to="/signup">Register now</NavLink>
                     </p>
                   </div>
-                  <GoogleOAuthProvider
-                    clientId={process.env.REACT_APP_GOOGLE_CLIENTID}
-                  >
-                    <GoogleLogin
-                      onSuccess={handleSuccess}
-                      onError={(err) => {
-                        console.log(err);
-                      }}
-                    />
-                  </GoogleOAuthProvider>
+                  <Divider className="text-secondary">OR</Divider>
+                  <div className="d-flex justify-content-center">
+                    <GoogleOAuthProvider
+                      clientId={process.env.REACT_APP_GOOGLE_CLIENTID}
+                    >
+                      <GoogleLogin
+                        onSuccess={handleSuccess}
+                        onError={(err) => {
+                          console.log(err);
+                        }}
+                        shape="pill"
+                        size="large"
+                        text="signin_with"
+                        type="standard"
+                      />
+                    </GoogleOAuthProvider>
+                  </div>
                 </form>
               </div>
               <div className="col-lg-6 d-none d-lg-block">
-                <div className="info-box">
+                <div className="info-box content">
                   <h4>Welcome Back!</h4>
                   <p>
                     By logging in, you gain access to all the features and

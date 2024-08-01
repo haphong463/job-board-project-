@@ -6,6 +6,7 @@ import "./Comment.css";
 import Swal from "sweetalert2";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
+import Filter from "bad-words";
 import {
   toggleShowReplies,
   toggleShowReplyForm,
@@ -23,7 +24,10 @@ export const Comment = ({
   level = 0,
   maxLevel = 2,
 }) => {
+  const filter = new Filter();
+  const cleanContent = filter.clean(comment.content);
   const dispatch = useDispatch();
+  const blog = useSelector((state) => state.blogs.blog);
   const showReplies = useSelector(
     (state) => state.comments.showReplies[comment.id]
   );
@@ -111,6 +115,8 @@ export const Comment = ({
       }
     }
   };
+  const isCommentOwner = user && user.sub === comment.user.username;
+  const isPostOwner = user && user.sub === comment.blog.user.username;
 
   return (
     <li className={`comment level-${level}`} id={`comment-${comment.id}`}>
@@ -120,28 +126,41 @@ export const Comment = ({
       <div className="comment-body">
         <div className="d-flex justify-content-between">
           <h3>{`${comment.user.firstName} ${comment.user.lastName}`}</h3>
-          {user && user.sub === comment.user.username && (
-            <div className="comment-actions" style={{ cursor: "pointer" }}>
-              <Dropdown>
-                <Dropdown.Toggle as="a" className="options-toggle">
-                  <FaEllipsisH />
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item
-                    onClick={() =>
-                      dispatch(
-                        toggleShowEditForm({
-                          commentId: comment.id,
-                          content: comment.content,
-                        })
-                      )
-                    }
-                  >
-                    {showEditForm ? "Cancel" : "Edit"}
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={confirmDelete}>Delete</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+          {user && (
+            <div className="comment-actions">
+              {(isPostOwner || isCommentOwner) && (
+                <Dropdown>
+                  <Dropdown.Toggle as="a" className="options-toggle">
+                    <FaEllipsisH />
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    {isCommentOwner && (
+                      <>
+                        <Dropdown.Item
+                          onClick={() =>
+                            dispatch(
+                              toggleShowEditForm({
+                                commentId: comment.id,
+                                content: comment.content,
+                              })
+                            )
+                          }
+                        >
+                          {showEditForm ? "Cancel" : "Edit"}
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={confirmDelete}>
+                          Delete
+                        </Dropdown.Item>
+                      </>
+                    )}
+                    {isPostOwner && !isCommentOwner && (
+                      <Dropdown.Item onClick={confirmDelete}>
+                        Delete
+                      </Dropdown.Item>
+                    )}
+                  </Dropdown.Menu>
+                </Dropdown>
+              )}
             </div>
           )}
         </div>
@@ -175,7 +194,7 @@ export const Comment = ({
             <small>Press ESC to cancel.</small>
           </form>
         ) : (
-          <p style={{ whiteSpace: "pre-line" }}>{comment.content}</p>
+          <p style={{ whiteSpace: "pre-line" }}>{cleanContent}</p>
         )}
         {level < maxLevel && (
           <p>

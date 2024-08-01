@@ -33,6 +33,10 @@ export const signIn = createAsyncThunk(
             return rejectWithValue({
               message: "User not found",
             });
+          default:
+            return rejectWithValue({
+              message: "Oops! Something went wrong.",
+            });
         }
       }
       return rejectWithValue(error.message);
@@ -48,6 +52,19 @@ export const signInOAuth2 = createAsyncThunk(
       return res;
     } catch (error) {
       console.log(error);
+      if (typeof error.response.data === "string") {
+        switch (error.response.data) {
+          case "Your account is deactivate.":
+            return rejectWithValue({
+              message:
+                "Your account has been deactivated. Please contact support for more information.",
+            });
+          default:
+            return rejectWithValue({
+              message: "Oops! Something went wrong.",
+            });
+        }
+      }
       return rejectWithValue(error.message);
     }
   }
@@ -252,6 +269,9 @@ const authSlice = createSlice({
         state.roles = state.user.role.map((r) => r.authority);
         localStorage.setItem("accessToken", action.payload.accessToken);
         localStorage.setItem("refreshToken", action.payload.refreshToken);
+      })
+      .addCase(signInOAuth2.rejected, (state, action) => {
+        state.verificationMessage = action.payload.message;
       })
       .addCase(signOut.fulfilled, (state) => {
         state.user = null;

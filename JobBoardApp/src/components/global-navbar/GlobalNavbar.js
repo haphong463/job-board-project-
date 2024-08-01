@@ -2,42 +2,40 @@ import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
-import
-{
-   Dropdown,
-   DropdownToggle,
-   DropdownMenu,
-   DropdownItem,
+import {
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 import { FaBell, FaChevronRight, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
-import
-{
-   deleteNotificationThunk,
-   markNotificationAsRead,
-   readNotificationThunk,
+import {
+  deleteNotificationThunk,
+  markNotificationAsRead,
+  readNotificationThunk,
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
 import { MdDelete, MdMessage } from "react-icons/md";
 
 import { Link } from "react-scroll";
-import categoryData from './category.json';
-import companyData from '../../page/job-listing/company_data.json';
+import categoryData from "./category.json";
+import companyData from "../../page/job-listing/company_data.json";
+import Swal from "sweetalert2";
 
-export function GlobalNavbar ()
-{
-   const [searchParams] = useSearchParams();
-   // const [categories, setCategories] = useState([]);
-   // const [companies, setCompanies] = useState([]);
-   const [isSkillsDropdownVisible, setSkillsDropdownVisible] = useState(false);
-   const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
-   const [dropdownOpen, setDropdownOpen] = useState(false);
-   const [notificationOpen, setNotificationOpen] = useState(false);
-   const categories = useSelector((state) => state.category.categories);
-   const companies = useSelector((state) => state.company.companies);
+export function GlobalNavbar() {
+  const [searchParams] = useSearchParams();
+  // const [categories, setCategories] = useState([]);
+  // const [companies, setCompanies] = useState([]);
+  const [isSkillsDropdownVisible, setSkillsDropdownVisible] = useState(false);
+  const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const categories = useSelector((state) => state.category.categories);
+  const companies = useSelector((state) => state.company.companies);
 
   const handleLogout = () => {
     dispatch(signOut()).then((res) => {
@@ -50,30 +48,34 @@ export function GlobalNavbar ()
   const handleCvManagementClick = () => {
     navigate("/cv-management");
   };
-   const notifications = useSelector((state) => state.notification.list);
-   const user = useSelector((state) => state.auth.user);
-   const roles = useSelector((state) => state.auth.roles);
-   const dispatch = useDispatch();
-   const blogCategory = useSelector((state) => state.blogs.categories);
-   const unreadCount = useSelector((state) => state.notification.unreadCount);
-   const navigate = useNavigate();
+  const notifications = useSelector((state) => state.notification.list);
+  const user = useSelector((state) => state.auth.user);
+  const roles = useSelector((state) => state.auth.roles);
+  const dispatch = useDispatch();
+  const blogCategory = useSelector((state) => state.blogs.categories);
+  const unreadCount = useSelector((state) => state.notification.unreadCount);
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    dispatch(fetchCategoryThunk());
+    dispatch(fetchCompanyThunk());
+    dispatch(fetchAllCategories());
+  }, []);
 
-   useEffect(() =>
-   {
-      dispatch(fetchCategoryThunk());
-      dispatch(fetchCompanyThunk());
-   }, []);
+  const handleCategoryClick = (categoryId) => {
+    window.location.href = `/jobList/${categoryId}`;
+  };
 
-   const handleCategoryClick = (categoryId) =>
-   {
-      window.location.href = `/jobList/${categoryId}`;
-   };
+  const handleCompanyClick = (companyId) => {
+    window.location.href = `/companyDetail/${companyId}`;
+  };
 
-   const handleCompanyClick = (companyId) =>
-   {
-      window.location.href = `/companyDetail/${companyId}`;
-   };
+  const handleMarkNotification = useCallback(
+    debounce((id) => {
+      dispatch(readNotificationThunk(id));
+    }, 500),
+    [dispatch]
+  );
 
   const handleDeleteNotification = (id) => {
     Swal.fire({
@@ -92,133 +94,134 @@ export function GlobalNavbar ()
     });
   };
 
+  const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
+  const toggleNotification = () =>
+    setNotificationOpen((prevState) => !prevState); // Toggle dropdown thông báo
 
+  return (
+    <header className="site-navbar mt-3">
+      <div className="container-fluid">
+        <div className="row align-items-center">
+          <div className="site-logo col-6">
+            <NavLink to="/">ITGrove</NavLink>
+          </div>
 
-   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
-   const toggleNotification = () =>
-      setNotificationOpen((prevState) => !prevState); // Toggle dropdown thông báo
-
-   return (
-      <header className="site-navbar mt-3">
-         <div className="container-fluid">
-            <div className="row align-items-center">
-               <div className="site-logo col-6">
-                  <NavLink to="/">JobBoard</NavLink>
-               </div>
-
-               <nav className="mx-auto site-navigation">
-                  <ul className="site-menu  d-none d-xl-block ml-0 pl-0">
-                     <li>
-                        <NavLink to="/" className="nav-link">
-                           Home
-                        </NavLink>
-                     </li>
-                     <li>
-                        <NavLink to="/about">About</NavLink>
-                     </li>
-                     <li className="has-children">
-                        <NavLink to="/viewAllJobs">Job Listings</NavLink>
-                        <ul className="dropdown">
-                           <li
-                              className="dropdown-item"
-                              onMouseEnter={() => setSkillsDropdownVisible(true)}
-                              onMouseLeave={() => setSkillsDropdownVisible(false)}
-                           >
-                              <NavLink to="/viewAllSkill">
-                                 Job By Skills <FaChevronRight className="icon" />
-                              </NavLink>
-                              {isSkillsDropdownVisible && (
-                                 <div className="skills-dropdown">
-                                    <div className="dropdown-columns">
-                                       {Array.from({ length: 3 }).map((_, colIndex) => (
-                                          <ul key={colIndex} className="sub-dropdown">
-                                             {categories
-                                                .slice(colIndex * 12, colIndex * 3 + 12)
-                                                .map((category) => (
-                                                   <li
-                                                      key={category.categoryId}
-                                                      onClick={() =>
-                                                         handleCategoryClick(category.categoryId)
-                                                      }
-                                                   >
-                                                      {category.categoryName}
-                                                   </li>
-                                                ))}
-                                             {(colIndex + 1) * 15 <= categories.length && (
-                                                <li
-                                                   className="view-all"
-                                                   onClick={() => navigate('/viewAllSkill')}
-                                                >
-                                                   View All Jobs by Skill <FaChevronRight className="icon2" />
-                                                </li>
-                                             )}
-                                          </ul>
-                                       ))}
-                                    </div>
-                                 </div>
-                              )}
-                           </li>
-                           <li
-                              className="dropdown-item"
-                              onMouseEnter={() => setCompanyDropdownVisible(true)}
-                              onMouseLeave={() => setCompanyDropdownVisible(false)}
-                           >
-                              <NavLink to="/viewAllCompany">
-                                 Job By Company<FaChevronRight className="icon3" />
-                              </NavLink>
-                              {isCompanyDropdownVisible && (
-                                 <div className="skills-dropdown">
-                                    <div className="dropdown-columns">
-                                       {Array.from({ length: 3 }).map((_, colIndex) => (
-                                          <ul key={colIndex} className="sub-dropdown">
-                                             {companies
-                                                .slice(colIndex * 12, colIndex * 3 + 12)
-                                                .map((company) => (
-                                                   <li
-                                                      key={company.companyId}
-                                                      onClick={() =>
-                                                         handleCompanyClick(company.companyId)
-                                                      }
-                                                   >
-                                                      {company.companyName}
-                                                   </li>
-                                                ))}
-                                             {(colIndex + 1) * 15 <= companies.length && (
-                                                <li
-                                                   className="view-all"
-                                                   onClick={() => navigate('/viewAllCompany')}
-                                                >
-                                                   View All Jobs by Company <FaChevronRight className="icon4" />
-                                                </li>
-                                             )}
-                                          </ul>
-                                       ))}
-                                    </div>
-                                 </div>
-                              )}
-                           </li>
-                        </ul>
-                     </li>
-
-                     <li className="has-children">
-                        <NavLink to="/blogs">Blog</NavLink>
-                        <ul className="dropdown">
-                           {blogCategory.map((item) => (
-                              <li key={item.id}>
-                                 <NavLink
-                                    to={`/blogs?type=${encodeURIComponent(item.name)}`}
-                                    className={({ isActive }) =>
-                                       isActive && searchParams.get("type") === item.name
-                                          ? "active"
-                                          : ""
+          <nav className="mx-auto site-navigation">
+            <ul className="site-menu  d-none d-xl-block ml-0 pl-0">
+              <li>
+                <NavLink to="/" className="nav-link">
+                  Home
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/about">About</NavLink>
+              </li>
+              <li className="has-children">
+                <NavLink to="/viewAllJobs">Job Listings</NavLink>
+                <ul className="dropdown">
+                  <li
+                    className="dropdown-item"
+                    onMouseEnter={() => setSkillsDropdownVisible(true)}
+                    onMouseLeave={() => setSkillsDropdownVisible(false)}
+                  >
+                    <NavLink to="/viewAllSkill">
+                      Job By Skills <FaChevronRight className="icon" />
+                    </NavLink>
+                    {isSkillsDropdownVisible && (
+                      <div className="skills-dropdown">
+                        <div className="dropdown-columns">
+                          {Array.from({ length: 3 }).map((_, colIndex) => (
+                            <ul key={colIndex} className="sub-dropdown">
+                              {categories
+                                .slice(colIndex * 12, colIndex * 3 + 12)
+                                .map((category) => (
+                                  <li
+                                    key={category.categoryId}
+                                    onClick={() =>
+                                      handleCategoryClick(category.categoryId)
                                     }
-                                 >
-                                    {item.name}
-                                 </NavLink>
-                              </li>
-                           ))}
-                        </ul>
-                     </li>
+                                  >
+                                    {category.categoryName}
+                                  </li>
+                                ))}
+                              {(colIndex + 1) * 15 <= categories.length && (
+                                <li
+                                  className="view-all"
+                                  onClick={() => navigate("/viewAllSkill")}
+                                >
+                                  View All Jobs by Skill{" "}
+                                  <FaChevronRight className="icon2" />
+                                </li>
+                              )}
+                            </ul>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                  <li
+                    className="dropdown-item"
+                    onMouseEnter={() => setCompanyDropdownVisible(true)}
+                    onMouseLeave={() => setCompanyDropdownVisible(false)}
+                  >
+                    <NavLink to="/viewAllCompany">
+                      Job By Company
+                      <FaChevronRight className="icon3" />
+                    </NavLink>
+                    {isCompanyDropdownVisible && (
+                      <div className="skills-dropdown">
+                        <div className="dropdown-columns">
+                          {Array.from({ length: 3 }).map((_, colIndex) => (
+                            <ul key={colIndex} className="sub-dropdown">
+                              {companies
+                                .slice(colIndex * 12, colIndex * 3 + 12)
+                                .map((company) => (
+                                  <li
+                                    key={company.companyId}
+                                    onClick={() =>
+                                      handleCompanyClick(company.companyId)
+                                    }
+                                  >
+                                    {company.companyName}
+                                  </li>
+                                ))}
+                              {(colIndex + 1) * 15 <= companies.length && (
+                                <li
+                                  className="view-all"
+                                  onClick={() => navigate("/viewAllCompany")}
+                                >
+                                  View All Jobs by Company{" "}
+                                  <FaChevronRight className="icon4" />
+                                </li>
+                              )}
+                            </ul>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                </ul>
+              </li>
+
+              <li className="has-children">
+                <NavLink to="/blogs">Blog</NavLink>
+                <ul className="dropdown">
+                  {blogCategory.map((item) => (
+                    <li key={item.id}>
+                      <NavLink
+                        to={`/blogs?type=${encodeURIComponent(item.name)}`}
+                        className={({ isActive }) =>
+                          isActive && searchParams.get("type") === item.name
+                            ? "active"
+                            : ""
+                        }
+                      >
+                        {item.name}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </li>
 
               <li>
                 <NavLink to="/contact">Contact</NavLink>
@@ -232,20 +235,20 @@ export function GlobalNavbar ()
                 </li>
               )}
 
-                     <li className="d-lg-none">
-                        <NavLink to="/post-job">
-                           <span className="mr-2">+</span> Post a Job
-                        </NavLink>
-                     </li>
+              <li className="d-lg-none">
+                <NavLink to="/post-job">
+                  <span className="mr-2">+</span> Post a Job
+                </NavLink>
+              </li>
 
-                     <li className="d-lg-none">
-                        <NavLink to="/login">Log In</NavLink>
-                     </li>
-                     <li className="d-lg-none">
-                        <NavLink to="/signup">Sign Up</NavLink>
-                     </li>
-                  </ul>
-               </nav>
+              <li className="d-lg-none">
+                <NavLink to="/login">Log In</NavLink>
+              </li>
+              <li className="d-lg-none">
+                <NavLink to="/signup">Sign Up</NavLink>
+              </li>
+            </ul>
+          </nav>
 
           <div className="right-cta-menu text-right d-flex align-items-center col-6">
             <div className="ml-auto d-flex align-items-center">
@@ -259,11 +262,7 @@ export function GlobalNavbar ()
               )}
               {user && (
                 <div className="icon-notification" onClick={toggleNotification}>
-                  <FaBell
-                    size={30}
-                    color="white"
-                    className={unreadCount > 0 ? "shake" : ""}
-                  />
+                  <FaBell size={30} color="white" />
                   {unreadCount > 0 && (
                     <span
                       className="badge"
@@ -368,7 +367,7 @@ export function GlobalNavbar ()
                         header
                         className="text-uppercase font-weight-bold"
                       >
-                        {user.sub}
+                        {user.firstName} {user.lastName}
                       </DropdownItem>
                       <DropdownItem onClick={handleCvManagementClick}>
                         CV Management
@@ -390,18 +389,18 @@ export function GlobalNavbar ()
                 </DropdownMenu>
               </Dropdown>
 
-                     <NavLink
-                        to="#"
-                        className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"
-                     >
-                        <span className="icon-menu h3 m-0 p-0 mt-2"></span>
-                     </NavLink>
-                  </div>
-               </div>
+              <NavLink
+                to="#"
+                className="site-menu-toggle js-menu-toggle d-inline-block d-xl-none mt-lg-2 ml-3"
+              >
+                <span className="icon-menu h3 m-0 p-0 mt-2"></span>
+              </NavLink>
             </div>
-         </div>
-      </header>
-   );
+          </div>
+        </div>
+      </div>
+    </header>
+  );
 }
 
 export default GlobalNavbar;
