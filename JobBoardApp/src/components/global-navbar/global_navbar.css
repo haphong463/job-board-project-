@@ -1,7 +1,14 @@
 :root {
   bg-primary: #89ba16;
 }
-
+.dropdown-item-main{
+  background-color: white !important;
+  color: #3b3d3e !important;
+}
+.dropdown-item-main:hover{
+  background-color: rgb(187, 187, 187) !important;
+  color: #e9e9e9 !important;
+}
 .custom-dropdown-menu {
   left: auto !important;
   right: 0 !important;

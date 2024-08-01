@@ -36,6 +36,8 @@ const TemplateViewer = () => {
   const templatePreviewRef = useRef(null);
   const [showDialog, setShowDialog] = useState(false);
   const [userCVs, setUserCVs] = useState([]);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [countdown, setCountdown] = useState(10);
 
   const fetchTemplate = async () => {
     try {
@@ -57,11 +59,11 @@ const TemplateViewer = () => {
       console.error('Error fetching user CVs:', error);
     }
   };
+
   const handlePrintToPdf = async () => {
     try {
       const cvTitle = userCVs.find(cv => cv.cvId === parseInt(cvId))?.cvTitle || 'cv_template';
 
-      // Generate PDF
       const response = await axiosRequest.get(`/templates/generate/${userId}/${cvId}`, {
         responseType: 'blob',
       });
@@ -70,7 +72,6 @@ const TemplateViewer = () => {
         throw new Error('Invalid response: expected Blob');
       }
 
-      // Create URL for downloading
       const pdfUrl = URL.createObjectURL(response);
       const link = document.createElement('a');
       link.href = pdfUrl;
@@ -79,29 +80,38 @@ const TemplateViewer = () => {
       link.click();
       document.body.removeChild(link);
 
-      // Convert Blob to ArrayBuffer to byte[]
       const pdfData = await response.arrayBuffer();
       const byteArray = new Uint8Array(pdfData);
 
-      // Prepare FormData for saving the PDF
       const formData = new FormData();
       formData.append('name', `${cvTitle}.pdf`);
       formData.append('fileData', new Blob([byteArray], { type: 'application/pdf' }));
 
-      // Save the PDF to the database
       await axiosRequest.post(`/templates/pdf-document/save/${userId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
+      setSuccessMessage('PDF generated and saved successfully!');
+      startCountdown();
     } catch (error) {
       console.error('Error generating or saving PDF:', error);
       alert(`Error generating or saving PDF: ${error.message}`);
     }
   };
 
-
+  const startCountdown = () => {
+    let count = 5;
+    const timer = setInterval(() => {
+      setCountdown(count);
+      count--;
+      if (count < 0) {
+        clearInterval(timer);
+        navigate('/cv-management', { state: { action: 'cvHis' } });
+      }
+    }, 1000);
+  };
 
   const handleUpdateCV = () => {
     navigate(`/cv-management`);
@@ -171,7 +181,7 @@ const TemplateViewer = () => {
         <div className="col-md-3">
           <div className="actions-container-rv">
             <div className="actions-title text-center">Actions</div>
-            <hr className='hr-review-css m-2'/>
+            <hr className='hr-review-css m-2' />
             <div className="action-items-rv d-flex flex-column">
               <div className="action-item-rv cv-selector-item">
                 <CVSelector
@@ -208,6 +218,16 @@ const TemplateViewer = () => {
               <div dangerouslySetInnerHTML={{ __html: templateContent }} />
             </div>
           )}
+          {successMessage && (
+            <div className="success-dialog-overlay">
+              <div className="success-dialog">
+                <p>{successMessage}</p>
+                <p>Redirecting in <i className='text-danger'>{countdown}</i> seconds...</p>
+              </div>
+            </div>
+          )}
+
+
         </div>
       </div>
     </div>

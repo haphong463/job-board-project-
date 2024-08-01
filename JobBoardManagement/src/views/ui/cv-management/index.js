@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCVsAsync,
-  deleteCVAsync,
   disableCVAsync,
+  unDisableCVAsync,
   selectAllCVs,
 } from "../../../features/cvSlice";
 import CreateForm from "./CreateForm";
@@ -37,16 +37,19 @@ const CVManagement = () => {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     setLoading(true);
     dispatch(fetchCVsAsync())
       .then(() => setLoading(false))
       .catch(() => setLoading(false));
-  }, [dispatch]);
+  }, [dispatch, refreshTrigger]);
+
 
   const toggleNewCVModal = () => {
     setNewCVModal(!newCVModal);
+    setRefreshTrigger(prev => prev + 1);
   };
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
@@ -59,29 +62,42 @@ const CVManagement = () => {
   };
   const toggleUpdateCVModal = () => {
     setUpdateCVModal(!updateCVModal);
+    if (updateCVModal) {
+      setRefreshTrigger(prev => prev + 1);
+    }
   };
+
 
   const toggleDetailsModal = () => {
     setDetailsModal(!detailsModal);
   };
-  const isCVDisabled = (cv) => {
-    return cv.disabled;
-  };
+
   const handleDisable = async (id) => {
     try {
       await dispatch(disableCVAsync(id)).unwrap();
       setSuccessMessage("CV successfully disabled");
       setTimeout(() => setSuccessMessage(""), 3000);
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error("Error disabling CV:", error);
       setErrorMessage("Error disabling CV");
       setTimeout(() => setErrorMessage(""), 3000);
     }
   };
-  const isCVInUse = (cv) => {
-    // Replace this with actual logic to determine if CV is in use
-    return cv.references && cv.references.length > 0;
+  const handleUndisable = async (id) => {
+    try {
+      await dispatch(unDisableCVAsync(id)).unwrap();
+      setSuccessMessage("CV successfully undisabled");
+      setTimeout(() => setSuccessMessage(""), 3000);
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error("Error undisabling CV:", error);
+      setErrorMessage("Error undisabling CV");
+      setTimeout(() => setErrorMessage(""), 3000);
+    }
   };
+
+
   const handleEdit = (template) => {
     setSelectedTemplate(template);
     toggleUpdateCVModal();
@@ -92,22 +108,8 @@ const CVManagement = () => {
     toggleDetailsModal();
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this CV?")) {
-      try {
-        await dispatch(deleteCVAsync(id)).unwrap();
-        setSuccessMessage("Delete successful");
-        setTimeout(() => setSuccessMessage(""), 3000);
-        dispatch(fetchCVsAsync());
-      } catch (error) {
-        console.error("Error deleting CV:", error);
-        setErrorMessage(
-          "Cannot delete this CV because it is currently in use."
-        );
-        setTimeout(() => setErrorMessage(""), 3000);
-      }
-    }
-  };
+
+
 
   const columns = [
     {
@@ -155,20 +157,21 @@ const CVManagement = () => {
             >
               Edit
             </DropdownItem>
-            <DropdownItem
-              className="dropdown-delete"
-              onClick={() => handleDelete(row.templateId)}
-              disabled={isCVInUse(row)}
-            >
-              Delete
-            </DropdownItem>
-            <DropdownItem
-              className="dropdown-disable"
-              onClick={() => handleDisable(row.templateId)}
-              disabled={isCVDisabled(row)}
-            >
-              Disable
-            </DropdownItem>
+            {row.disabled ? (
+              <DropdownItem
+                className="dropdown-undisable"
+                onClick={() => handleUndisable(row.templateId)}
+              >
+                Undisable
+              </DropdownItem>
+            ) : (
+              <DropdownItem
+                className="dropdown-disable"
+                onClick={() => handleDisable(row.templateId)}
+              >
+                Disable
+              </DropdownItem>
+            )}
           </DropdownMenu>
         </Dropdown>
       ),
@@ -207,10 +210,10 @@ const CVManagement = () => {
               data={
                 cvs
                   ? cvs.filter((cv) =>
-                      cv.templateName
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
-                    )
+                    cv.templateName
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
+                  )
                   : []
               }
               pagination
@@ -227,7 +230,10 @@ const CVManagement = () => {
           isOpen={updateCVModal}
           toggle={toggleUpdateCVModal}
           templateData={selectedTemplate}
+          setSuccessMessage={setSuccessMessage}
+          setRefreshTrigger={setRefreshTrigger}
         />
+
       )}
       {selectedTemplate && (
         <DetailsForm

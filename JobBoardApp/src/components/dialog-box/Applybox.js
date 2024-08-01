@@ -2,74 +2,120 @@ import React, { useState } from 'react';
 import axiosRequest from '../../configs/axiosConfig';
 import './applybox.css';
 
-const ApplyBox = ({ jobId, userId }) => {
+const ApplyBox = ({ jobId, company, userId, onClose }) => {
   const [name, setName] = useState('');
   const [cv, setCV] = useState(null);
   const [coverLetter, setCoverLetter] = useState('');
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const validateForm = () => {
+    let formErrors = {};
+
+    if (!name.trim()) {
+      formErrors.name = 'Name is required';
+    } else if (name.trim().length < 2) {
+      formErrors.name = 'Name must be at least 2 characters long';
+    }
+
+    if (!cv) {
+      formErrors.cv = 'CV is required';
+    } else if (cv.type !== 'application/pdf') {
+      formErrors.cv = 'Only PDF files are allowed';
+    } else if (cv.size > 3 * 1024 * 1024) {
+      formErrors.cv = 'File size must be less than 3MB';
+    }
+
+    if (coverLetter.trim().length > 1000) {
+      formErrors.coverLetter = 'Cover letter must be less than 1000 characters';
+    }
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (validateForm()) {
+      const formData = new FormData();
+      formData.append('userId', userId);
+      formData.append('employeeName', name);
+      formData.append('cvFile', cv);
+      formData.append('coverLetter', coverLetter);
 
-    const formData = new FormData();
-    formData.append('userId', userId);
-    formData.append('employeeName', name);
-    formData.append('cvFile', cv);
-    formData.append('coverLetter', coverLetter);
-
-    try {
-        const response = await axiosRequest.post(`/jobs/${jobId}`, formData, {
+      try {
+        const response = await axiosRequest.post(`/application/${jobId}/${company.companyId}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-  
-        console.log('Application submitted successfully:', response);
-        // Handle success (e.g., show a success message, clear form, etc.)
+      
+        if (response === "Application submitted successfully.") {
+          setSuccessMessage('Application submitted successfully!');
+          
+          // Set a timer to close the ApplyBox and reload the browser
+          setTimeout(() => {
+            onClose(); // Close the ApplyBox
+            window.location.reload(); // Reload the browser
+          }, 2000); // Wait for 3 seconds before closing and reloading
+        }
       } catch (error) {
         console.error('Error submitting application:', error);
-        // Handle error (e.g., show error message to user)
       }
-    };
+      
+      
+    }
+  };
 
   return (
-    <div className="apply-box">
-      <h2></h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="name">Tên *</label>
-          <input 
-            type="text" 
-            id="name" 
-            value={name} 
-            onChange={(e) => setName(e.target.value)} 
-            required 
-          />
-        </div>
+    <div className="apply-box-overlay">
+      <div className="apply-box">
+        <button className="close-button" onClick={onClose}>×</button>
+        <h2>Apply for <i className='text-primary'>{company.title}</i></h2>
+        {successMessage ? (
+          <div className="alert alert-success mt-3" role="alert">
+            {successMessage}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="name">Name *</label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              {errors.name && <small className="error text-danger">{errors.name}</small>}
+            </div>
 
-        <div className="form-group">
-          <label htmlFor="cv">CV ứng tuyển *</label>
-          <input 
-            type="file" 
-            id="cv" 
-            onChange={(e) => setCV(e.target.files[0])} 
-            required 
-          />
-          <small>Hỗ trợ định dạng .doc .docx .pdf, không chứa mật khẩu bảo vệ, dung lượng dưới 3MB</small>
-        </div>
+            <div className="form-group">
+              <label htmlFor="cv">CV / Resume * (PDF only)</label>
+              <input
+                type="file"
+                id="cv"
+                onChange={(e) => setCV(e.target.files[0])}
+                accept=".pdf"
+              />
+              {errors.cv && <small className="error text-danger">{errors.cv}</small>}
+              <small className='text-danger'>Only PDF files are allowed. File size under 3MB.</small>
+            </div>
 
-        <div className="form-group">
-          <label htmlFor="coverLetter">Thư xin việc (Không bắt buộc)</label>
-          <textarea 
-            id="coverLetter" 
-            value={coverLetter} 
-            onChange={(e) => setCoverLetter(e.target.value)} 
-            placeholder="Những kỹ năng, dự án hay thành tựu nào chứng tỏ bạn là một ứng viên tiềm năng cho vị trí ứng tuyển này?"
-          />
-        </div>
+            <div className="form-group">
+              <label htmlFor="coverLetter">Cover Letter (Optional)</label>
+              <textarea
+                id="coverLetter"
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                placeholder="What skills, projects, or achievements demonstrate that you're a strong candidate for this position?"
+              />
+              {errors.coverLetter && <p className="error text-danger">{errors.coverLetter}</p>}
+            </div>
 
-        <button type="submit" className="submit-button">Gửi CV của tôi</button>
-      </form>
+            <button type="submit" className="submit-button">Submit My Application</button>
+          </form>
+        )}
+      </div>
     </div>
   );
 };

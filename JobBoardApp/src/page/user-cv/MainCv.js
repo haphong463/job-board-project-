@@ -3,46 +3,29 @@ import axiosRequest from "../../configs/axiosConfig";
 import CreateCv from './CreateCv';
 import CvList from './CvList';
 import ListPdf from '../pdf-management/ListPdf';
-import DetailsCv from './DetailsCv';
-import ApplyBox from '../../components/dialog-box/Applybox';
+import JobManagement from './JobManagement';
 import { useSelector } from 'react-redux';
 import './css/main.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
 function MainCv() {
-  const [currentAction, setCurrentAction] = useState('default');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [currentAction, setCurrentAction] = useState(location.state?.action || 'default');
   const user = useSelector(state => state.auth.user);
   const [notification, setNotification] = useState(null);
-  const [hasCVs, setHasCVs] = useState(false);
-  const [deleteQuestion, setDeleteQuestion] = useState(null);
-  const [showQuestionForm, setShowQuestionForm] = useState(false);
-  const [wrongAttempts, setWrongAttempts] = useState(0);
 
-  // useEffect(() => {
-  //   checkHasCVs(); // Check if the user has CVs initially
-  // }, []);
-
-  // const checkHasCVs = async () => {
-  //   try {
-  //     const response = await axiosRequest.get(`/usercv/check-cvs/${user.id}`);
-  //     setHasCVs(response);
-  //     console.log(response) // Assuming server returns true/false
-  //   } catch (error) {
-  //     console.error('Error checking CVs:', error);
-  //     setHasCVs(false); // Set to false by default or handle error state
-  //   }
-  // };
-
-
-
-
-
-
+  useEffect(() => {
+    if (location.state?.action) {
+      setCurrentAction(location.state.action);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
         setNotification(null);
-      }, 5000); // Notification will disappear after 3 seconds
+      }, 5000);
 
       return () => clearTimeout(timer);
     }
@@ -71,16 +54,8 @@ function MainCv() {
               return <ListPdf />;
             case 'cvDetails':
               return <CvList />;
-            case 'box':
-              return <ApplyBox />;
-            case 'delete':
-              return (
-                <DeleteCv
-                  userId={user.id}
-                  onDelete={(message, type = 'success') => setNotification({ type, message })}
-                  onCancel={() => setCurrentAction('default')}
-                />
-              );
+            case 'jobMnt':
+              return <JobManagement />;
             default:
               return (
                 <div className="default-info">
@@ -115,23 +90,46 @@ function MainCv() {
       <div className="main-cv-container">
         <div className="actions-container">
           <h2>Local Actions</h2>
-          <div className={`action-item ${currentAction === 'create' ? 'active' : ''}`} onClick={() => setCurrentAction('create')}>
+          <div 
+            className={`action-item ${currentAction === 'create' ? 'active' : ''}`} 
+            onClick={() => {
+              setCurrentAction('create');
+              navigate('/cv-management', { state: { action: 'create' } });
+            }}
+          >
             <i className="fas fa-plus mr-2"></i> Create CV
           </div>
-          <div className={`action-item ${currentAction === 'cv details' ? 'active' : ''}`} onClick={() => setCurrentAction('cvDetails')}>
+          <div 
+            className={`action-item ${currentAction === 'cvDetails' ? 'active' : ''}`} 
+            onClick={() => {
+              setCurrentAction('cvDetails');
+              navigate('/cv-management', { state: { action: 'cvDetails' } });
+            }}
+          >
             <i className="fas fa-info-circle mr-2"></i> CV Details
           </div>
-          <div className={`action-item ${currentAction === 'cv history' ? 'active' : ''}`} onClick={() => setCurrentAction('cvHis')}>
+          <div 
+            className={`action-item ${currentAction === 'cvHis' ? 'active' : ''}`} 
+            onClick={() => {
+              setCurrentAction('cvHis');
+              navigate('/cv-management', { state: { action: 'cvHis' } });
+            }}
+          >
             <i className="fas fa-history mr-2"></i> CV History
           </div>
-          <div className={`action-item ${currentAction === 'view' ? 'active' : ''}`} onClick={() => setCurrentAction('box')}>
-            <i className="fas fa-box mr-2"></i> Box
+          <div 
+            className={`action-item ${currentAction === 'jobMnt' ? 'active' : ''}`} 
+            onClick={() => {
+              setCurrentAction('jobMnt');
+              navigate('/cv-management', { state: { action: 'jobMnt' } });
+            }}
+          >
+            <i className="fas fa-box mr-2"></i> Applied Jobs
           </div>
 
           <hr style={{
             backgroundColor: 'black',
             width: '100%',
-
           }} />
           <h2 className='mt-3'>Global Actions</h2>
           <Link to="/list-template" >
@@ -149,12 +147,11 @@ function MainCv() {
               <i className="fas fa-blog mr-2"></i> To Blog
             </div>
           </Link>
-          <Link to="/jobs" >
+          <Link to="/viewAllJobs" >
             <div className="global-action-item">
               <i className="fas fa-list-ul mr-2"></i> To Job List
             </div>
           </Link>
-
         </div>
 
         <div className="display-area">

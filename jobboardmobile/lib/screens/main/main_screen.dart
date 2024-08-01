@@ -4,25 +4,20 @@ import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/service/quiz_service.dart';
 
 import '../../core/utils/color_util.dart';
+import '../../models/company_model.dart';
+import '../../models/job_model.dart';
 import '../../service/auth_service.dart';
+import '../../service/company_service.dart';
+import '../../service/jobApplication_service.dart';
+import '../../service/job_service.dart';
 import '../../widget/box_icon.dart';
 import '../../widget/custom_app_bar.dart';
 import '../../core/utils/asset_path_list.dart' as assetPath;
 import '../../widget/search_icon.dart';
-
-class SearchIcon extends StatelessWidget {
-  final Function onTapSuffix;
-
-  const SearchIcon({super.key, required this.onTapSuffix});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.search),
-      onPressed: () => onTapSuffix(),
-    );
-  }
-}
+import '../company/CompanyDetailsScreen.dart';
+import '../company/CompanyListScreen.dart';
+import '../job/ApplyJobsScreen.dart';
+import '../job/JobDetailsScreen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -33,24 +28,51 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final AuthService _authService = AuthService();
+  final CompanyService _companyService = CompanyService();
+  final JobService _jobService = JobService();
+
+
   final storage = const FlutterSecureStorage();
   String? firstName;
   String? lastName;
   String? email;
   String? imageUrl;
+  List<Company> _companies = [];
+  List<Job> _jobs = [];
+  Map<int, Company> _companyMap = <int, Company>{};
+
+
   @override
   void initState() {
     super.initState();
+
     _fetchUserDetails();
+    _fetchCompaniesAndJobs();
   }
+
+  
 
   void _fetchUserDetails() async {
     firstName = await _authService.getFirstName();
     lastName = await _authService.getLastName();
     email = await _authService.getEmail();
     imageUrl = await _authService.getImageUrl();
-
     setState(() {});
+  }
+
+  void _fetchCompaniesAndJobs() async {
+    try {
+      final companies = await _companyService.getAllCompanies();
+      final jobs = await _jobService.getAllJobs();
+
+      setState(() {
+        _companies = companies;
+        _jobs = jobs;
+        _companyMap = {
+          for (var company in companies) company.companyId: company
+        };
+      });
+    } catch (e) {}
   }
 
   void _logout() async {
@@ -58,143 +80,28 @@ class _MainScreenState extends State<MainScreen> {
     Navigator.pushReplacementNamed(context, '/login');
   }
 
-  final List<Map<String, dynamic>> _listForYouData = [
-    {
-      "icon-path": assetPath.SPOTIFY_ICON_PATH,
-      "type": "Full Time",
-      "position": "UI/UX Designer",
-      "salary": "\$450/hr",
-      "is-active": true,
-    },
-    {
-      "icon-path": assetPath.GOOGLE_ICON_PATH,
-      "type": "Full Time",
-      "position": "Senior Developer",
-      "salary": "\$500/hr",
-      "is-active": false,
-    },
-    {
-      "icon-path": assetPath.IBM_ICON_PATH,
-      "type": "Part Time",
-      "position": "Visual Designer",
-      "salary": "\$450/hr",
-      "is-active": false,
-    },
-  ];
-
-  final List<Map<String, dynamic>> _listRecentlyAddedData = [
-    {
-      "icon-path": assetPath.IBM_ICON_PATH,
-      "company": "IBM",
-      "position": "Visual Designer",
-      "salary": "\$450/hr",
-    },
-    {
-      "icon-path": assetPath.GOOGLE_ICON_PATH,
-      "company": "Google",
-      "position": "Server Technician",
-      "salary": "\$500/hr",
-    },
-    {
-      "icon-path": assetPath.FACEBOOK_ICON_PATH,
-      "company": "Facebook",
-      "position": "Ajax Developer",
-      "salary": "\$250/hr",
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorUtil.primaryColor,
         actions: [
-          SearchIcon(
-            onTapSuffix: () => Navigator.of(context).pushNamed('/search'),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => Navigator.of(context).pushNamed('/search'),
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text('${firstName ?? ''} ${lastName ?? ''}'),
-              accountEmail: Text(email ?? ''),
-              currentAccountPicture: imageUrl != null
-                  ? ClipOval(
-                      child: Image.network(
-                      imageUrl!.replaceFirst(
-                        'http://localhost:8080',
-                        Endpoint.imageUrl,
-                      ),
-                      fit: BoxFit.cover,
-                      width: 40,
-                      height: 40,
-                    ))
-                  : const Icon(
-                      Icons.face,
-                      size: 48.0,
-                      color: Colors.white,
-                    ),
-              otherAccountsPictures: const [
-                Icon(
-                  Icons.bookmark_border,
-                  color: Colors.white,
-                ),
-              ],
-              decoration: BoxDecoration(
-                color: ColorUtil.primaryColor,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.note_add),
-              title: const Text('Blog'),
-              onTap: () {
-                Navigator.pushNamed(context, '/blog');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text('Notifications'),
-              onTap: () {
-                Navigator.pushNamed(context, '/notifications');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.note_add),
-              title: const Text('Quiz'),
-              onTap: () {
-                Navigator.pushNamed(context, '/quizzes');
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: () {
-                _logout();
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(),
       body: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 25),
+        margin: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTags(),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             _buildForYouSection(),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             _buildRecentlyAddedSection(),
           ],
         ),
@@ -202,19 +109,96 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildTags() {
-    return Container(
-      child: Row(
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          _buildFlatButton("New York"),
-          const SizedBox(width: 15),
-          _buildFlatButton("Full Time"),
+          UserAccountsDrawerHeader(
+            accountName: Text('${firstName ?? ''} ${lastName ?? ''}'),
+            accountEmail: Text(email ?? ''),
+            currentAccountPicture: imageUrl != null
+                ? ClipOval(
+                    child: Image.network(
+                      imageUrl!.replaceFirst(
+                          'http://localhost:8080', Endpoint.imageUrl),
+                      fit: BoxFit.cover,
+                      width: 40,
+                      height: 40,
+                    ),
+                  )
+                : const Icon(
+                    Icons.face,
+                    size: 48.0,
+                    color: Colors.white,
+                  ),
+            otherAccountsPictures: [
+              const Icon(
+                Icons.bookmark_border,
+                color: Colors.white,
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/applied_jobs');
+                },
+                child: const Icon(
+                  Icons.assignment_turned_in,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+            decoration: BoxDecoration(
+              color: ColorUtil.primaryColor,
+            ),
+          ),
+          _buildDrawerItem(Icons.business, 'Companies', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CompanyListScreen()),
+            );
+          }),
+          _buildDrawerItem(Icons.note_add, 'Blog', () {
+            Navigator.pushNamed(context, '/blog');
+          }),
+          _buildDrawerItem(Icons.notifications, 'Notifications', () {
+            Navigator.pushNamed(context, '/notifications');
+          }),
+          _buildDrawerItem(Icons.note_add, 'Quiz', () {
+            Navigator.pushNamed(context, '/quizzes');
+          }),
+          _buildDrawerItem(Icons.document_scanner, 'Cv-management', () {
+            Navigator.pushNamed(context, '/document_list');
+          }),
+          const Divider(),
+          _buildDrawerItem(Icons.settings, 'Settings', () {
+            Navigator.pop(context);
+          }),
+          _buildDrawerItem(Icons.logout, 'Logout', _logout),
         ],
       ),
     );
   }
 
-  Widget _buildFlatButton(String title) {
+  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildTags() {
+    return Row(
+      children: [
+        _buildTagButton("New York"),
+        const SizedBox(width: 15),
+        _buildTagButton("Full Time"),
+      ],
+    );
+  }
+
+  Widget _buildTagButton(String title) {
     return TextButton(
       style: TextButton.styleFrom(
         backgroundColor: Colors.white,
@@ -239,7 +223,7 @@ class _MainScreenState extends State<MainScreen> {
             Icon(
               Icons.close,
               color: ColorUtil.primaryColor,
-              size: 23,
+              size: 15,
             ),
           ],
         ),
@@ -248,131 +232,138 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildForYouSection() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 15),
-      child: Column(
-        children: [
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "For You",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Company For You",
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 16,
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 190,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                return _buildForYouCard(_listForYouData[index]);
-              },
-              separatorBuilder: (content, index) => const SizedBox(
-                width: 15,
-              ),
-              itemCount: _listForYouData.length,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildForYouCard(Map<String, dynamic> data) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      width: 210,
-      decoration: BoxDecoration(
-        color: data["is-active"] ? ColorUtil.primaryColor : Colors.white,
-        borderRadius: const BorderRadius.all(
-          Radius.circular(10.0),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  data["icon-path"],
-                  height: 40,
-                  width: 40,
-                ),
-                Text(
-                  data["type"],
-                  style: TextStyle(
-                    color: data["is-active"] ? Colors.white : Colors.black,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
+        const SizedBox(height: 5),
+        Container(
+          height: 230,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _companies.length,
+            itemBuilder: (context, index) {
+              final company = _companies[index];
+              return ForYouCard(company: company);
+            },
           ),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  data["position"],
-                  style: TextStyle(
-                    color: data["is-active"] ? Colors.white : Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  data["salary"],
-                  style: TextStyle(
-                    color: data["is-active"] ? Colors.white : Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildRecentlyAddedSection() {
-    return Expanded(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Recently Added",
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Container(
+          height: 230,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _jobs.length,
+            itemBuilder: (context, index) {
+              final job = _jobs[index];
+              final company = _companyMap[job.companyId];
+              if (company != null) {
+                return RecentlyAddedCard(job: job, company: company);
+              } else {
+                return Container(); // or some placeholder widget
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ForYouCard extends StatelessWidget {
+  final Company company;
+
+  const ForYouCard({super.key, required this.company});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CompanyDetailsScreen(company: company),
+          ),
+        );
+      },
       child: Container(
-        constraints: const BoxConstraints.expand(),
+        width: 150,
+        margin: const EdgeInsets.only(right: 15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 5,
+              spreadRadius: 2,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Recently Added",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+              child: Image.network(
+                company.logo.replaceFirst(
+                  'http://localhost:8080',
+                  Endpoint.imageUrl,
+                ),
+                fit: BoxFit.cover,
+                height: 100,
+                width: double.infinity,
               ),
             ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.only(top: 5, bottom: 10),
-                child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemBuilder: (context, index) {
-                    return _buildRecentlyAddedCard(
-                        _listRecentlyAddedData[index]);
-                  },
-                  separatorBuilder: (content, index) => const SizedBox(
-                    height: 10,
-                  ),
-                  itemCount: _listRecentlyAddedData.length,
+            const SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                company.companyName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                company.location,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -380,58 +371,90 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+}
 
-  Widget _buildRecentlyAddedCard(Map<String, dynamic> data) {
-    return Container(
-      height: 75,
-      padding: const EdgeInsets.all(15),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(
-          Radius.circular(10.0),
+class RecentlyAddedCard extends StatelessWidget {
+  final Job job;
+  final Company company;
+
+  const RecentlyAddedCard({
+    Key? key,
+    required this.job,
+    required this.company,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => JobDetailsScreen(job: job, company: company),
+          ),
+        );
+      },
+      child: Container(
+        width: 150,
+        margin: const EdgeInsets.only(right: 15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 5,
+              spreadRadius: 2,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(right: 15),
-            child: Image.asset(
-              data["icon-path"],
-              height: 40,
-              width: 40,
-            ),
-          ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  data["position"],
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+              child: Image.network(
+                company.logo.replaceFirst(
+                  'http://localhost:8080',
+                  Endpoint.imageUrl,
                 ),
-                const SizedBox(height: 5),
-                Text(
-                  data["company"],
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: ColorUtil.tertiaryColor),
+                fit: BoxFit.cover,
+                height: 100,
+                width: double.infinity,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                job.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12,
                 ),
-              ],
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          Text(
-            data["salary"],
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                job.offeredSalary,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }

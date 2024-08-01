@@ -160,7 +160,54 @@ public class EmailServiceImpl implements EmailService {
         javaMailSender.send(message);
     }
 
+    @Async
+    @Override
+    public void sendJobApplicationConfirmation(String toEmail, String employeeName, String jobTitle, String companyName) {
+        String subject = "Job Application Submitted Successfully";
+        String htmlContent =
+                "<html>" +
+                        "<head>" +
+                        "<style>" +
+                        "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                        ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                        ".header { background-color: #4CAF50; color: white; text-align: center; padding: 20px; }" +
+                        ".content { background-color: #f9f9f9; border: 1px solid #ddd; padding: 20px; }" +
+                        "h2 { color: #89ba16ae; }" +
+                        "strong { color: #3498DB; }" +
+                        ".footer { text-align: center; margin-top: 20px; font-size: 0.8em; color: #777; }" +
+                        "</style>" +
+                        "</head>" +
+                        "<body>" +
+                        "<div class='container'>" +
+                        "<div class='header'>" +
+                        "<h2>Job Application Confirmation</h2>" +
+                        "</div>" +
+                        "<div class='content'>" +
+                        "<p>Dear <strong>" + employeeName + "</strong>,</p>" +
+                        "<p>Your application for the position of <strong>" + jobTitle + "</strong> at <strong>" + companyName + "</strong> " +
+                        "has been successfully submitted.</p>" +
+                        "<p>Thank you for your interest. The recruiter will review your application and get back to you soon if you match their requirements.</p>" +
+                        "<p>Best regards,<br>The Job Board Team</p>" +
+                        "</div>" +
+                        "<div class='footer'>" +
+                        "© 2023 Job Board. All rights reserved." +
+                        "</div>" +
+                        "</div>" +
+                        "</body>" +
+                        "</html>";
 
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+            javaMailSender.send(mimeMessage);
+            System.out.println("Job application confirmation email sent successfully!");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
     @Async
     @Override
     public void sendVerificationEmailFlutter(String toEmail, String username, String firstName, String verificationCode, String email) {
