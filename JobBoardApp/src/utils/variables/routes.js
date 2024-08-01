@@ -24,7 +24,7 @@ import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
 import MainCv from "../../page/user-cv/MainCv";
 import ListPdf from "../../page/pdf-management/ListPdf";
 import PdfDetail from "../../page/pdf-management/PdfDetail";
-
+import MyProfile  from "../../page/myprofile/myprofile";
 
 import SetupCredentials from "../../page/signup/SetupCredentials";
 import { Quiz } from "../../page/quiz/quiz";
@@ -34,7 +34,9 @@ import { CompanyDetail } from "../../page/job-listing/company_detail";
 import { ViewAllCompany } from "../../page/job-listing/listCompanyAll";
 import { WriteReview } from "../../page/job-listing/company-review";
 import UpdateCv from "../../page/user-cv/UpdateCv";
+import ManagementProfile from "../../page/myprofile/UserProfileManagement";
 import React from "react";
+
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -70,4 +72,6 @@ export const routes = [
   { path: "/companyDetail/:id", component: <CompanyDetail /> },
   { path: "/viewAllCompany", component: <ViewAllCompany /> },
   { path: "/companyReview", component: <WriteReview /> },
+  {path:"/myprofile",component:<MyProfile/>},
+  {path:"/managementprofile",component:<ManagementProfile/>},
 ];

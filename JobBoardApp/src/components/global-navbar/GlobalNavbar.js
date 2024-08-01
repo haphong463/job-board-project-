@@ -50,6 +50,9 @@ export function GlobalNavbar ()
   const handleCvManagementClick = () => {
     navigate("/cv-management");
   };
+  const handleMyProfileClick = () => {
+   navigate("/managementprofile");
+ };
    const notifications = useSelector((state) => state.notification.list);
    const user = useSelector((state) => state.auth.user);
    const roles = useSelector((state) => state.auth.roles);
@@ -369,6 +372,9 @@ export function GlobalNavbar ()
                         className="text-uppercase font-weight-bold"
                       >
                         {user.sub}
+                        <DropdownItem onClick={handleMyProfileClick}>
+                        My Profile
+                      </DropdownItem>
                       </DropdownItem>
                       <DropdownItem onClick={handleCvManagementClick}>
                         CV Management
