@@ -14,6 +14,11 @@ export const navigation = [
         href: "/jobportal/job-category",
         icon: "bi bi-patch-check",
       },
+      {
+        title: "List Job",
+        href: "/jobportal/job",
+        icon: "bi bi-patch-check",
+      },
     ],
   },
   {

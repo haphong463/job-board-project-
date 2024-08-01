@@ -34,7 +34,7 @@ public class JobDTO {
     private Integer slot;
     private Integer profileApproved = 0;
     private Boolean isSuperHot;
-    private List<Long> categoryId = new ArrayList<>(); // Đảm bảo không phải null
+    private List<Long> categoryId = new ArrayList<>();
     private Long companyId;
     private String expire;
 }

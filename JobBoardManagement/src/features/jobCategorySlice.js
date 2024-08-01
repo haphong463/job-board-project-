@@ -14,6 +14,7 @@ export const fetchJobCategory = createAsyncThunk(
   "job-category/fetch",
   async () => {
     const response = await getAllCategoryAsync();
+    console.log("Fetched categories:", response);
     return response;
   }
 );
