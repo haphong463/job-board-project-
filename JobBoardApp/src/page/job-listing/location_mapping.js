@@ -17,7 +17,7 @@ const locationMapping = {
 };
 
 const JobMappingFilter = {
-  locationMapping,
+    locationMapping,
 };
 
 export default JobMappingFilter;

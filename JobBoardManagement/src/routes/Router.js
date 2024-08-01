@@ -21,6 +21,7 @@ const CvManagement = lazy(() => import("../views/ui/cv-management/index"));
 const Contact = lazy(() => import("../views/ui/contact/index"));
  const QuizCategory = lazy(() => import("../views/ui/quiz-category/index"));
  const Employer = lazy(() => import("../views/ui/employer/index"));
+ const Job = lazy(() => import("../views/ui/job/index"));
 /*****Routes******/
 const ThemeRoutes = [
   {
@@ -41,6 +42,7 @@ const ThemeRoutes = [
       {
         path:"/jobportal/contact", exact: true, element: <Contact />
       },
+      {path:"/jobportal/job", exact: true, element: <Job />},
       {
         path: "/jobportal/job-category",
         exact: true,

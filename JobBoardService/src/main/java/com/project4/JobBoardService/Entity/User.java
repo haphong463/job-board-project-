@@ -40,8 +40,8 @@ public class User  extends  AbstractEntity {
     @NotBlank
     @Size(max = 120)
     private String password;
-
-
+    private String numberphone;
+    private String facebook;
     private String resetToken;
     private boolean verified;
     private String verificationCode;

@@ -34,12 +34,14 @@ public class CompanyDTO {
     private String countryCode;
     private String workingDays;
     private List<ReviewDTO> reviews;  // List of ReviewDTO
+    private List<JobDTO> jobs;  // List of JobDTO
+
     private Boolean membershipRequired = false;
     public void setReviews(List<ReviewDTO> reviews) {
         this.reviews = reviews;
     }
 
-    public void setJobs(List<JobDTO> jobDTOs) {
-
+    public void setJobs(List<JobDTO> jobs) {
+        this.jobs = jobs;
     }
 }

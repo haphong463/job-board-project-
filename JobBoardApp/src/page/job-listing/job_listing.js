@@ -419,8 +419,6 @@ export const JobList = () =>
    const indexOfLastJob = currentPage * jobsPerPage;
    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
 
-   // const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
-
    const currentJobs = useMemo(() =>
    {
       return filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
@@ -645,7 +643,6 @@ export const JobList = () =>
                         )}{" "}
                         jobs in Vietnam
                      </h3>
-
                      {currentJobs.map(job =>
                      {
                         const company = companies.find(company => company.companyId === job.companyId);

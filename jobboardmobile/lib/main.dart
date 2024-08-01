@@ -13,6 +13,7 @@ import 'screens/login_register/forgotpassword_screen.dart';
 import 'screens/login_register/resetpassword_screen.dart';
 import 'screens/login_register/verify_screen.dart';
 import 'screens/login_register/verifyreset_screen.dart';
+import 'screens/company/CompanyListScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
+        '/companies': (context) => const CompanyListScreen(),
         '/blog': (context) => const BlogScreenWidget(),
         '/signup': (context) => SignupScreen(),
         '/forgot_password': (context) => ForgotPasswordScreen(),

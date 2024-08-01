@@ -48,13 +48,16 @@ export function GlobalNavbar() {
   const handleCvManagementClick = () => {
     navigate("/cv-management");
   };
-  const notifications = useSelector((state) => state.notification.list);
-  const user = useSelector((state) => state.auth.user);
-  const roles = useSelector((state) => state.auth.roles);
-  const dispatch = useDispatch();
-  const blogCategory = useSelector((state) => state.blogs.categories);
-  const unreadCount = useSelector((state) => state.notification.unreadCount);
-  const navigate = useNavigate();
+  const handleMyProfileClick = () => {
+   navigate("/managementprofile");
+ };
+   const notifications = useSelector((state) => state.notification.list);
+   const user = useSelector((state) => state.auth.user);
+   const roles = useSelector((state) => state.auth.roles);
+   const dispatch = useDispatch();
+   const blogCategory = useSelector((state) => state.blogs.categories);
+   const unreadCount = useSelector((state) => state.notification.unreadCount);
+   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchCategoryThunk());
@@ -368,6 +371,9 @@ export function GlobalNavbar() {
                         className="text-uppercase font-weight-bold"
                       >
                         {user.firstName} {user.lastName}
+                        <DropdownItem onClick={handleMyProfileClick}>
+                        My Profile
+                      </DropdownItem>
                       </DropdownItem>
                       <DropdownItem onClick={handleCvManagementClick}>
                         CV Management
