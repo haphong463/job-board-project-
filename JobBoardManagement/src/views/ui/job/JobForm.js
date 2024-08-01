@@ -15,10 +15,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addJob, updateJobById } from "../../../features/jobSlice";
 import { yupResolver } from "@hookform/resolvers/yup";
-import DatePicker from "react-datepicker";
 import * as yup from "yup";
-import "react-datepicker/dist/react-datepicker.css";
 import { fetchJobCategory } from "../../../features/jobCategorySlice";
+import { format } from 'date-fns';
 
 const jobSchema = yup.object().shape({
   title: yup.string().required("Title is required"),
@@ -101,13 +100,19 @@ export function JobForm({ isEdit, setIsEdit }) {
       });
     }
   }, [isEdit, setValue]);
-
   const onSubmit = (data) => {
-    const { companyId, categoryId, ...jobData } = data;
+    const { companyId, categoryId, expire, ...jobData } = data;
+  
+    // Format the expire date to DD/MM/YYYY
+    const formattedExpireDate = expire ? format(new Date(expire), 'dd/MM/yyyy') : '';
+  
     const categoryIdArray = Array.isArray(categoryId) ? categoryId : [categoryId];
-
+  
     if (isEdit) {
-      dispatch(updateJobById({ jobId: isEdit.id, jobData: { ...jobData, companyId, categoryId: categoryIdArray } })).then(() => {
+      dispatch(updateJobById({
+        jobId: isEdit.id,
+        jobData: { ...jobData, companyId, categoryId: categoryIdArray, expire: formattedExpireDate }
+      })).then(() => {
         toggleNewJobModal();
       });
     } else {
@@ -115,13 +120,26 @@ export function JobForm({ isEdit, setIsEdit }) {
         addJob({
           companyId: parseInt(companyId, 10),
           categoryId: categoryIdArray.map(id => parseInt(id, 10)),
-          jobData,
+          jobData: { ...jobData, expire: formattedExpireDate },
         })
       ).then(() => {
         toggleNewJobModal();
       });
     }
   };
+  
+  useEffect(() => {
+    if (isEdit) {
+      setNewJobModal(true);
+      Object.keys(isEdit).forEach((key) => {
+        if (key === 'expire' && isEdit[key]) {
+          setValue(key, format(new Date(isEdit[key]), 'yyyy-MM-dd'));
+        } else {
+          setValue(key, isEdit[key] ?? "");
+        }
+      });
+    }
+  }, [isEdit, setValue]);
 
   return (
     <>
@@ -396,46 +414,24 @@ export function JobForm({ isEdit, setIsEdit }) {
               )}
             </FormGroup>
             <FormGroup>
-              <Label for="createdAt">Created At</Label>
-              <Controller
-                name="createdAt"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    {...field}
-                    selected={field.value}
-                    onChange={(date) => field.onChange(date)}
-                    id="createdAt"
-                    placeholderText="Select created date"
-                    className={`form-control ${
-                      errors.createdAt ? "is-invalid" : ""
-                    }`}
-                  />
-                )}
-              />
-              {errors.createdAt && (
-                <FormText color="danger">{errors.createdAt.message}</FormText>
-              )}
-            </FormGroup>
-            <FormGroup>
-              <Label for="expire">Expire</Label>
-              <Controller
-                name="expire"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    id="expire"
-                    placeholder="Enter expire"
-                    type="textarea"
-                    invalid={!!errors.slot}
-                  />
-                )}
-              />
-              {errors.slot && (
-                <FormText color="danger">{errors.slot.message}</FormText>
-              )}
-            </FormGroup>
+  <Label for="expire">Expire</Label>
+  <Controller
+    name="expire"
+    control={control}
+    render={({ field }) => (
+      <Input
+        {...field}
+        id="expire"
+        placeholder="Enter expire date"
+        type="date"
+        invalid={!!errors.expire}
+      />
+    )}
+  />
+  {errors.expire && (
+    <FormText color="danger">{errors.expire.message}</FormText>
+  )}
+</FormGroup>
             <FormGroup>
               <Label for="slot">Slot</Label>
               <Controller
@@ -455,25 +451,7 @@ export function JobForm({ isEdit, setIsEdit }) {
                 <FormText color="danger">{errors.slot.message}</FormText>
               )}
             </FormGroup>
-            <FormGroup>
-              <Label for="profileApproved">Profile Approved</Label>
-              <Controller
-                name="profileApproved"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    id="profileApproved"
-                    placeholder="Enter profile approved"
-                    type="number"
-                    invalid={!!errors.profileApproved}
-                  />
-                )}
-              />
-              {errors.profileApproved && (
-                <FormText color="danger">{errors.profileApproved.message}</FormText>
-              )}
-            </FormGroup>
+       
             <FormGroup>
               <Label for="isSuperHot">Is Super Hot</Label>
               <Controller
