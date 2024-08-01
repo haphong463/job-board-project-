@@ -371,9 +371,11 @@ export function GlobalNavbar() {
                         className="text-uppercase font-weight-bold"
                       >
                         {user.firstName} {user.lastName}
-                        <DropdownItem onClick={handleMyProfileClick}>
-                        My Profile
+                          
+                 
                       </DropdownItem>
+                      <DropdownItem onClick={handleMyProfileClick}>
+                        My Profile
                       </DropdownItem>
                       <DropdownItem onClick={handleCvManagementClick}>
                         CV Management
