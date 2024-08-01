@@ -5,6 +5,7 @@ import { FaUser, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaLink, FaCamera } from
 import { useNavigate } from 'react-router-dom';
 import { fetchUserThunk } from "../../features/userSlice";
 // import './UserProfileManagement.css'; // Ensure custom styling
+import MyProfile from './myprofile';
 
 const UserProfileManagement = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -87,7 +88,7 @@ const UserProfileManagement = () => {
                       handleManageCVClick(); // Trigger navigation
                     }}
                   >
-                    Manage CV
+                    Manage Profile
                   </Button>
                 </div>
               </div>
@@ -121,7 +122,7 @@ const UserProfileManagement = () => {
                   <Form.Group as={Row} className="mb-3">
                     <Form.Label column sm={3}><FaLink /> Personal Link</Form.Label>
                     <Col sm={9}>
-                      <Form.Control type="text" value={user?.personalLink || ''} readOnly />
+                      <Form.Control type="text" value={user?.facebook || ''} readOnly />
                     </Col>
                   </Form.Group>
                 </Form>
