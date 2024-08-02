@@ -23,5 +23,6 @@ public class InforUserDTO {
     private String numberphone;
     private String facebook;
     private List<CertificateDTO> certificates;
+    private List<UserEducationDTO> userEducations;
 
 }

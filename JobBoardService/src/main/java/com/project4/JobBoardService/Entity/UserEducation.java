@@ -14,6 +14,10 @@ public class UserEducation {
     @ManyToOne
     @JoinColumn(name = "cv_id")
     private UserCV userCV;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
 
     private String degree;
     private String institution;
