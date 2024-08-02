@@ -3,6 +3,7 @@ import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteUserThunk,
+  getAllPermissionThunk,
   getUserThunk,
   updateUserStatusThunk,
 } from "../../../features/userSlice";
@@ -28,11 +29,13 @@ import { ModeratorForm } from "./ModeratorForm";
 import PermissionForm from "./PermissionForm"; // Import the new component
 import "./style.css";
 import Swal from "sweetalert2";
+import showToast from "../../../utils/functions/showToast";
 
 const UserList = () => {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.user.list);
   const user = useSelector((state) => state.auth.user);
+  const permissions = useSelector((state) => state.user.permissions);
   const totalPages = useSelector((state) => state.user.totalPages);
   const status = useSelector((state) => state.user.status);
   const error = useSelector((state) => state.user.error);
@@ -159,40 +162,65 @@ const UserList = () => {
     },
     {
       name: "Actions",
-      cell: (row) =>
-        !row.roles.map((item) => item.name).includes("ROLE_ADMIN") && (
-          <Dropdown
-            isOpen={dropdownOpen[row.id]}
-            toggle={() => toggleDropdown(row.id)}
-            a11y
-          >
-            <DropdownToggle caret size="sm">
-              Actions
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem
-                onClick={() => handleStatusToggle(row.id, row.isEnabled)}
-              >
-                {row.isEnabled ? "Deactivate" : "Activate"}
-              </DropdownItem>
-              {!row.isEnabled && (
+      cell: (row) => {
+        const isAdmin = user.role.some(
+          (role) => role.authority === "ROLE_ADMIN"
+        );
+        const isModerator = user.role.some(
+          (role) => role.authority === "ROLE_MODERATOR"
+        );
+        const canManageUser = user.permission
+          .map((item) => item.name)
+          .includes("MANAGE_USER");
+        const isUserAdmin = row.roles.some(
+          (role) => role.name === "ROLE_ADMIN"
+        );
+        const isUserModerator = row.roles.some(
+          (role) => role.name === "ROLE_MODERATOR"
+        );
+        const isUser = row.roles.some((role) => role.name === "ROLE_USER");
+        const isCurrentUser = row.username === user.sub;
+
+        // Check if the current user is a Moderator and is attempting to manage another Moderator
+        const isAttemptingToManageOtherModerator =
+          isModerator && isUserModerator;
+
+        return (
+          !isUserAdmin &&
+          !isAttemptingToManageOtherModerator &&
+          !isCurrentUser && (
+            <Dropdown
+              isOpen={dropdownOpen[row.id]}
+              toggle={() => toggleDropdown(row.id)}
+              a11y
+            >
+              <DropdownToggle caret size="sm">
+                Actions
+              </DropdownToggle>
+              <DropdownMenu>
                 <DropdownItem
-                  color="danger"
-                  onClick={() => handleDeleteUser(row.id)}
+                  onClick={() => handleStatusToggle(row.id, row.isEnabled)}
                 >
-                  Delete
+                  {row.isEnabled ? "Deactivate" : "Activate"}
                 </DropdownItem>
-              )}
-              {row.roles
-                .map((item) => item.name)
-                .includes("ROLE_MODERATOR") && (
-                <DropdownItem onClick={() => handleOpenPermissionModal(row)}>
-                  Assign Permissions
-                </DropdownItem>
-              )}
-            </DropdownMenu>
-          </Dropdown>
-        ),
+                {!row.isEnabled && (
+                  <DropdownItem
+                    color="danger"
+                    onClick={() => handleDeleteUser(row.id)}
+                  >
+                    Delete
+                  </DropdownItem>
+                )}
+                {(isAdmin || (isModerator && canManageUser)) && !isUser && (
+                  <DropdownItem onClick={() => handleOpenPermissionModal(row)}>
+                    Assign Permissions
+                  </DropdownItem>
+                )}
+              </DropdownMenu>
+            </Dropdown>
+          )
+        );
+      },
     },
   ];
 
@@ -228,7 +256,13 @@ const UserList = () => {
         page: currentPage,
         size: pageSize,
       })
-    );
+    ).then((res) => {
+      if (res.meta.requestStatus === "rejected") {
+        showToast(res.payload, "error");
+      }
+    });
+
+    dispatch(getAllPermissionThunk());
   }, [dispatch, currentPage, pageSize]);
 
   const customStyles = {
@@ -247,9 +281,7 @@ const UserList = () => {
     <Card>
       <div className="d-flex justify-content-between align-items-center p-3 gap-3">
         <h4>User List</h4>
-        {user.role.map((item) => item.authority).includes("ROLE_ADMIN") && (
-          <ModeratorForm />
-        )}
+        <ModeratorForm />
       </div>
       <div className="d-flex w-100 gap-2 p-2">
         <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
@@ -295,6 +327,7 @@ const UserList = () => {
           )}
           isOpen={isPermissionModalOpen}
           toggle={handleClosePermissionModal}
+          listPermissions={permissions}
         />
       )}
     </Card>

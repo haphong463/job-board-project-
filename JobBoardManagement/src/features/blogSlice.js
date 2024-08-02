@@ -1,18 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  getAllBlogs,
   createBlog,
   deleteBlog as deleteBlogApi,
   updateBlog,
   getAllBlogsByQuery,
+  getAllHashtag,
 } from "../services/blog_service";
 
-// Thunk để fetch blogs
-export const fetchBlogs = createAsyncThunk(
-  "blogs/fetchBlogs",
+
+
+export const getHashTags = createAsyncThunk(
+  "blogs/hashtags",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await getAllBlogs();
+      const response = await getAllHashtag();
       return response;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -45,7 +46,9 @@ export const addBlog = createAsyncThunk(
       const response = await createBlog(newBlog);
       return response;
     } catch (error) {
-      console.log(error);
+      if (typeof error.response.data === "string") {
+        return rejectWithValue(error.response.data);
+      }
       return rejectWithValue(error.message);
     }
   }
@@ -81,22 +84,11 @@ const blogsSlice = createSlice({
     status: "idle",
     totalPages: 0,
     error: null,
-    statusSubmit: "idle",
+    hashTags: [],
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchBlogs.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(fetchBlogs.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.blogs = action.payload;
-      })
-      .addCase(fetchBlogs.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message;
-      })
       .addCase(searchBlogs.pending, (state) => {
         state.status = "loading";
       })
@@ -111,14 +103,8 @@ const blogsSlice = createSlice({
       })
       .addCase(addBlog.fulfilled, (state, action) => {
         state.blogs.push(action.payload);
-        state.statusSubmit = "succeeded";
       })
-      .addCase(addBlog.pending, (state, action) => {
-        state.statusSubmit = "loading";
-      })
-      .addCase(addBlog.rejected, (state, action) => {
-        state.statusSubmit = "rejected";
-      })
+
       .addCase(deleteBlog.fulfilled, (state, action) => {
         state.blogs = state.blogs.filter((blog) => blog.id !== action.payload);
       })
@@ -126,10 +112,10 @@ const blogsSlice = createSlice({
         state.blogs = state.blogs.map((item) =>
           item.id === action.payload.id ? action.payload : item
         );
-        state.statusSubmit = "succeeded";
       })
-      .addCase(editBlog.pending, (state, action) => {
-        state.statusSubmit = "loading";
+
+      .addCase(getHashTags.fulfilled, (state, action) => {
+        state.hashTags = action.payload;
       });
   },
 });
