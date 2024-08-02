@@ -126,13 +126,16 @@ export const Blog = () => {
         </motion.section>
         <section className="section is-medium">
           <div className="container">
+            <h3 className="title is-3 mb-4">
+              #{order === "desc" ? "Newest" : "Oldest"}
+            </h3>
             {status === "succeeded" && blogs.length > 0 ? (
               <React.Fragment>
                 <div className="row mb-5">
                   {blogs.map((blog) => (
                     <motion.div
                       key={blog.id}
-                      className="mb-5 card-container col-lg-4 col-md-6 col-sm-12"
+                      className="mb-5 card-container col-lg-3 col-md-6 col-sm-12"
                       whileHover={{ y: -10 }}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -235,7 +238,7 @@ export const Blog = () => {
           )}
 
           <div className="container">
-            <h3 className="title is-3 mb-4">Most view</h3>
+            <h3 className="title is-3 mb-4">#Most view</h3>
             {status === "succeeded" && popular.length > 0 && (
               <div className="row mb-5">
                 {popular.map((blog) => (
