@@ -90,9 +90,8 @@ export function ViewAllCompany ()
                         </div>
                     </div>
                 </section>
-
                 {/* Navigation Bar */}
-                <div className="jb_alphabet-nav">
+                <div className="jb_alphabet-nav flex justify-center items-center overflow-x-auto bg-gray-100 p-2">
                     {alphabetGroups.map(group => (
                         <button
                             key={group}
@@ -106,7 +105,7 @@ export function ViewAllCompany ()
                 <div className="jb_category-grid">
                     {sortedInitials.map(initial => (
                         <div key={initial}>
-                            <h2>{initial}</h2>
+                            <h2 style={{ fontWeight: 'bold', fontSize: '25px' }}>{initial}</h2>
                             {groupedCompanies[initial].map(company => (
                                 <div key={company.companyId} className="jb_category-item">
                                     <NavLink to={''} className="jb_item" onClick={() => handleCompanyClick(company.companyId)}>

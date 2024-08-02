@@ -23,7 +23,7 @@ export const JobList = () =>
    const { id } = useParams();
    const categoryId = parseInt(id ?? '0', 10);
    const location = useLocation();
-   const jobsPerPage = 5; // Number of jobs per page
+   const jobsPerPage = 4; // Number of jobs per page
    // const [jobs, setJobs] = useState([]);
    const [jobCount, setJobCount] = useState(0);
    const [selectedJobId, setSelectedJobId] = useState(null);
@@ -486,8 +486,7 @@ export const JobList = () =>
                   </div>
                </div>
             </section>
-
-            <div className="container mt-4">
+            <div className="container mt-6 mb-6">
                <div className="row">
                   <div className="col-md-3 mb-4 text-dark">
                      <div className="border p-3" style={{ borderColor: '#cccccc', fontSize: '14px' }}>
@@ -630,11 +629,10 @@ export const JobList = () =>
                         </div>
                      </div>
 
-
                   </div>
 
                   <div className="col-md-9">
-                     <h3 className="text-center mt-0 mb-4">
+                     <h3 className="text-center mt-0 mb-4" style={{ fontSize: '25px', fontWeight: 'bold' }}>
                         {jobCount}{" "}
                         {location.pathname === "/viewAllJobs" ? (
                            "IT"
@@ -655,7 +653,7 @@ export const JobList = () =>
                            return (
                               <div
                                  key={job.id}
-                                 className={`col-12 mb-3 text-dark border ${selectedJobId === job.id ? 'border-danger' : 'border-light'} rounded-lg p-3 jb_bg-light fs-2`}
+                                 className={`col-12 mb-3 mt-4 text-dark border ${selectedJobId === job.id ? 'border-danger' : 'border-light'} rounded-lg p-4 jb_bg-light fs-2`}
                                  onClick={() => handleJobClick(job.id)}
                               >
                                  <div className="text-dark mb-2">{timeAgo}</div>
@@ -671,7 +669,7 @@ export const JobList = () =>
                                  <div className="mb-2">
                                     <FaMapMarkerAlt className="text-dark" /> {address}
                                  </div>
-                                 <div className="m-0 mt-3">
+                                 <div className="m-0 mt-3 mb-3">
                                     {job.categoryId.map((id) =>
                                     {
                                        const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;

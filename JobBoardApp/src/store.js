@@ -11,6 +11,7 @@ import quizReducer from './features/quizSlice';
 import quizQuestionsReducer from './features/quizQuestionsSlice';
 import jobReducer from './features/jobSlice';
 import companyReducer from './features/companySlice';
+import reviewReducer from './features/reviewSlice';
 import contactsReducer from './features/contactsSlice'; // Import the contacts slice
 import UserReducer from './features/userSlice'; // Import the user slice
 import certificateReducer from './features/certificateSlice'; // Import the certificate slice
@@ -42,6 +43,7 @@ export const store = configureStore({
     quiz: quizReducer,
     job: jobReducer,
     company: companyReducer,
+    review: reviewReducer,
     contacts: contactsReducer,
     user: UserReducer,
     certificates: certificateReducer,

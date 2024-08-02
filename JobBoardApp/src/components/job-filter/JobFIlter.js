@@ -39,7 +39,7 @@ export const JobFilter = () =>
   const handleKeywordClick = (categoryId) =>
   {
     // Điều hướng đến URL với categoryId
-    navigate(`/jobSkillList/${categoryId}`);
+    navigate(`/jobList/${categoryId}`);
   };
 
   return (

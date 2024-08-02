@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import moment from 'moment';
 import './job_company.css';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { fetchJobThunk } from "../../features/jobSlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
 import { fetchCategoryThunk } from "../../features/categorySlice";
@@ -14,16 +14,24 @@ import 'flag-icons/css/flag-icons.min.css';
 import parse from 'html-react-parser';
 import { useDispatch, useSelector } from "react-redux";
 import { CheckCircle } from 'react-bootstrap-icons';
+import axiosRequest from '../../configs/axiosConfig';
+import tagMapping from './tagMapping';
+import DOMPurify from 'dompurify';
+import ReactDOMServer from 'react-dom/server';
 
 export const JobSingle = () =>
 {
    const { id } = useParams();
    const jobId = parseInt(id ?? '0', 10);
    // const [jobs, setJobs] = useState([]);
+   const navigate = useNavigate();
    const dispatch = useDispatch();
    const jobs = useSelector((state) => state.job.jobs);
    const companies = useSelector((state) => state.company.companies);
    const categories = useSelector((state) => state.category.categories);
+
+   const [isSaved, setIsSaved] = useState(false);
+   const [favoriteId, setFavoriteId] = useState(null);
 
    useEffect(() =>
    {
@@ -38,6 +46,29 @@ export const JobSingle = () =>
          dispatch(fetchJobThunk());
       }
    }, [dispatch, jobs.length, companies.length]);
+
+   useEffect(() =>
+   {
+      const jobData = jobs.find(job => job.id === jobId);
+      if (jobData)
+      {
+         axiosRequest.get(`/favorite-jobs/list`)
+            .then(data =>
+            {
+               const favorites = data;
+               const found = favorites.find(fav => fav.jobId === jobId);
+               if (found)
+               {
+                  setIsSaved(true);
+                  setFavoriteId(found.favoriteId);
+               }
+            })
+            .catch(error =>
+            {
+               console.error("Error checking job save status:", error);
+            });
+      }
+   }, [jobId, jobs]);
 
    const jobData = jobs.find(job => job.id === jobId);
    console.log(jobData);
@@ -65,7 +96,7 @@ export const JobSingle = () =>
 
    const handleCompanyClick = (companyId) =>
    {
-      window.location.href = `/companyDetail/${companyId}`;
+      navigate(`/companyDetail/${companyId}`);
    };
 
    const handleCategoryClick = (categoryId) =>
@@ -109,9 +140,9 @@ export const JobSingle = () =>
 
       if (domNode.type === 'tag')
       {
-         const Tag = domNode.name;
+         const Tag = tagMapping[domNode.name] || domNode.name;
          return (
-            <Tag {...domNode.attribs}>
+            <Tag {...domNode.attribs} style={{ color: 'black' }}>
                {domNode.children.map((child, index) => (
                   <React.Fragment key={index}>{parseChildNode(child)}</React.Fragment>
                ))}
@@ -120,32 +151,6 @@ export const JobSingle = () =>
       }
       return null;
    };
-
-   // const currentJobKeySkills = jobData?.keySkills ? jobData.keySkills.split(',').map(skill => skill.trim()) : [];
-
-   // // Filter jobs that share any key skills with the current job
-   // const relatedJobs = jobs.filter(job =>
-   //    job.id !== jobId &&
-   //    job.keySkills && // Ensure job.keySkills is not null or undefined
-   //    job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
-   // );
-
-   // const currentJobCategoryIds = new Set(jobData.categoryId);  // Chuyển List<Long> thành Set<Long>
-
-   // const relatedJobs = jobs.filter(job =>
-   // {
-   //    const jobCategoryIds = new Set(job.categoryId);
-
-   //    // Kiểm tra xem có bất kỳ phần tử nào trong jobCategoryIds tồn tại trong currentJobCategoryIds
-   //    for (const id of jobCategoryIds)
-   //    {
-   //       if (currentJobCategoryIds.has(id))
-   //       {
-   //          return true;
-   //       }
-   //    }
-   //    return false;
-   // });
 
    const categoryArray = Array.isArray(categories) ? categories : [];
 
@@ -178,14 +183,37 @@ export const JobSingle = () =>
       return false;
    });
 
-   // const currentJobKeySkills = jobData?.keySkills ? jobData.keySkills.split(',').map(skill => skill.trim()) : [];
-
-   // // Filter jobs that share any key skills with the current job
-   // const relatedJobs = jobs.filter(job =>
-   //    job.id !== jobId &&
-   //    job.keySkills && // Ensure job.keySkills is not null or undefined
-   //    job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
-   // );
+   const handleSaveJob = async () =>
+   {
+      try
+      {
+         if (isSaved)
+         {
+            // Remove job from favorites
+            await axiosRequest.delete(`/favorite-jobs/delete/${favoriteId}`);
+            setIsSaved(false);
+            setFavoriteId(null);
+         } else
+         {
+            // Save job
+            const data = await axiosRequest.post('/favorite-jobs/add', { jobId });
+            if (data && data.favoriteId)
+            {
+               setFavoriteId(data.favoriteId);
+               setIsSaved(true);
+            } else
+            {
+               console.error('Response does not contain favoriteId:', data);
+               alert('Failed to save job.');
+            }
+         }
+      } catch (error)
+      {
+         console.error("Error saving/removing job:", error);
+         navigate(`/login`);
+         // alert("Failed to save/remove job.");
+      }
+   };
 
    return (
       <GlobalLayoutUser>
@@ -220,10 +248,10 @@ export const JobSingle = () =>
                      <div className="col-lg-8 mb-4 mb-lg-0">
                         <div className="d-flex align-items-center">
                            <div>
-                              <h2>{jobData?.title}</h2>
+                              <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>{jobData?.title}</h2>
                               <div className="m-0 mt-3">
-                                 <span className="icon-room" />
-                                 {companyData?.location}
+                                 <span className="icon-room" style={{ fontSize: '23px', marginLeft: '-3px' }} />
+                                 <span className="text-dark ml-1">{companyData?.location}</span>
                               </div>
                               <div className="m-0 mt-3">
                                  {jobData.categoryId.map((id) =>
@@ -236,27 +264,25 @@ export const JobSingle = () =>
                                     ) : null;
                                  })}
                               </div>
-
-                              {/* <div className="m-0 mt-3" >
-                                 {jobData?.keySkills.split(',').map((skill, index) => (
-                                    <span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
-                                 ))}
-                              </div> */}
                            </div>
                         </div>
                      </div>
                      <div className="col-lg-4">
                         <div className="row">
                            <div className="col-6">
-                              <a href="" className="btn btn-block btn-light btn-md">
+                              <button
+                                 // className="btn btn-block btn-light btn-md"
+                                 className={`btn btn-block ${isSaved ? 'btn_saved_job' : 'btn-light'} btn-md`}
+                                 onClick={handleSaveJob}
+                              >
                                  <span className="icon-heart-o mr-2 text-danger" />
-                                 Save Job
-                              </a>
+                                 {isSaved ? 'Saved Job' : 'Save Job'}
+                              </button>
                            </div>
                            <div className="col-6">
-                              <a href="#" className="btn btn-block btn-primary btn-md">
+                              <button className="btn btn-block btn-primary btn-md">
                                  Apply Now
-                              </a>
+                              </button>
                            </div>
                         </div>
                      </div>
@@ -268,9 +294,7 @@ export const JobSingle = () =>
                               <span className="icon-align-left mr-3" />
                               Job description
                            </h3>
-
                            {addIconsToListItems(jobData?.description)}
-
                         </div>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
@@ -289,7 +313,6 @@ export const JobSingle = () =>
                            <ul className="list-unstyled m-0 p-0">
                               {addIconsToListItems(jobData?.responsibilities)}
                            </ul>
-
                         </div>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
@@ -403,7 +426,7 @@ export const JobSingle = () =>
                         if (company)
                         {
                            return (
-                              <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
+                              <li className="col-12 job-listing d-block d-sm-flex pb-0 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
                                  <div className="job-listing-logo">
                                     <img
                                        src={company.logo}
