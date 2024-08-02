@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Entity;
 
+import com.project4.JobBoardService.DTO.JobDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -33,4 +34,6 @@ public class JobApplication {
 
     @Column(name = "cover_letter", columnDefinition = "TEXT")
     private String coverLetter;
+
 }
+

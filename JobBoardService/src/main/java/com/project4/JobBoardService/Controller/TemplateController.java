@@ -83,6 +83,22 @@ public class TemplateController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
 		}
 	}
+	@PatchMapping("/un_disable/{id}")
+	public ResponseEntity<String> undisableTemplate(@PathVariable Long id) {
+		try {
+			Template template = templateRepository.findById(id)
+					.orElseThrow(() -> new ResourceNotFoundException("Template not found"));
+
+			template.setDisabled(false);
+			templateRepository.save(template);
+
+			return ResponseEntity.noContent().build();
+		} catch (ResourceNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		} catch (Exception ex) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
+		}
+	}
 	@GetMapping
 	public ResponseEntity<List<Template>> getAllTemplate() {
 		List<Template> templates = templateRepository.findAll();
@@ -375,6 +391,10 @@ public class TemplateController {
 			return ResponseEntity.noContent().build();
 		}
 		return ResponseEntity.ok(pdfs);
+	}
+	@GetMapping("/count/{userId}")
+	public int countPdfDocumentsByUserId(@PathVariable Long userId) {
+		return pdfDocumentRepository.countByUserId(userId);
 	}
 	@GetMapping("/document/{id}")
 	public ResponseEntity<PdfDocument> getPdfById(@PathVariable Long id) {

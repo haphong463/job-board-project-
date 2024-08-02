@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:jobboardmobile/screens/job/ApplyJobsScreen.dart';
 import 'package:jobboardmobile/screens/notification/notification_screen.dart';
 import 'package:kommunicate_flutter/kommunicate_flutter.dart';
 import 'package:jobboardmobile/screens/blog/blog_screen_widget.dart';
+import 'screens/cv-management/document_list_screen.dart';
+import 'screens/cv-management/document_view_screen.dart';
 import 'screens/login_register/login_screen.dart';
 import 'screens/login_register/signup_screen.dart';
 import 'screens/main/main_screen.dart';
@@ -50,6 +53,13 @@ class MyApp extends StatelessWidget {
           );
         },
         '/notifications': (context) => const NotificationScreen(),
+        '/document_list': (context) => DocumentListScreen(),
+        '/document_view': (context) {
+          final args =
+              ModalRoute.of(context)?.settings.arguments as Map<String, int>?;
+          return DocumentViewScreen(documentId: args?['documentId'] ?? 0);
+        },
+        '/applied_jobs': (context)  => ApplyJobsScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name!.startsWith('/quiz/')) {

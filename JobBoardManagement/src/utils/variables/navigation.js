@@ -55,9 +55,9 @@ export const navigation = [
   },
   {
     title: "Cv management",
-    icon: "bi bi-question-circle",
+    icon: "bi bi-file-earmark-person",
     href: "/jobportal/cv-management",
-  },
+  },  
   {
     title: "User",
     icon: "bi bi-question-circle",
