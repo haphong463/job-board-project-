@@ -33,9 +33,15 @@ public class CompanyDTO {
 
     private String location;
     private String type;
+
+    private String keySkills;
+    private String companySize;
+    private String country;
+    private String countryCode;
+    private String workingDays;
     private List<ReviewDTO> reviews;  // List of ReviewDTO
 
-
+    private List<JobApplicationDTO> jobApplications; // Chỉ bao gồm thông tin cần thiết
     private Boolean membershipRequired = false;
     public void setReviews(List<ReviewDTO> reviews) {
         this.reviews = reviews;

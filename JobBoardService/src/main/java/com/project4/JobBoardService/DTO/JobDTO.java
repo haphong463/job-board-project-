@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.DTO;
 
+import com.project4.JobBoardService.Entity.Company;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,14 +23,18 @@ public class JobDTO {
     private String responsibilities;
     private String requiredSkills;
     private String workSchedule;
-    private String keySkills;
+//    private String[] keySkills;
     private String position;
     private String experience;
     private String qualification;
-    private int quantity;
+    private String benefit;
+    private int slot;
     private LocalDateTime createdAt;
     private LocalDateTime expired;
-    private Long categoryId;
+    private Integer profileApproved = 0;
+    private Boolean isSuperHot;
+    private List<Long> categoryIds;
+    private Long companyId;
     private Long userId;
 
 }

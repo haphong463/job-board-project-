@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,5 +23,15 @@ public class Category {
 
     @Column(name = "category_name")
     private String categoryName;
+
+    // Constructor để phù hợp với chuyển đổi từ DTO
+    public Category(Long categoryId, String categoryName) {
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+    }
+
+    @ManyToMany(mappedBy = "categories")
+    @JsonIgnore
+    private Set<Job> jobs;
 
 }

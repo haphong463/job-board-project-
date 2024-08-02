@@ -20,5 +20,11 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query("SELECT COUNT(j) FROM Job j WHERE j.user.id = :userId AND FUNCTION('YEAR', j.createdAt) = :year AND FUNCTION('MONTH', j.createdAt) = :month")
     int countJobsByUserIdAndMonth(@Param("userId") Long userId, @Param("year") int year, @Param("month") int month);
 
+    // Method to get the current month's data
+    default int countJobsForUserInCurrentMonth(Long userId) {
+        LocalDate now = LocalDate.now();
+        return countJobsByUserIdAndMonth(userId, now.getYear(), now.getMonthValue());
+    }
+
 
 }

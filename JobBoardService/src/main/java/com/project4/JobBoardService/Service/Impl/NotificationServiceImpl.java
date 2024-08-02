@@ -5,6 +5,7 @@ import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Repository.NotificationRepository;
 import com.project4.JobBoardService.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,10 @@ import java.util.Optional;
 public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
 
     @Override
     public List<Notification> getNotificationByRecipient(User user) {
@@ -33,6 +38,12 @@ public class NotificationServiceImpl implements NotificationService {
            return notificationRepository.save(existingNotification);
         }
         return null;
+    }
+
+
+
+    public void sendNotification(String destination, Object message) {
+        messagingTemplate.convertAndSend(destination, message);
     }
 
     @Override

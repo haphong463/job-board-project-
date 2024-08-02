@@ -27,7 +27,6 @@ public class PayPalService {
         Transaction transaction = new Transaction();
         transaction.setDescription(description);
         transaction.setAmount(amount);
-
         List<Transaction> transactions = new ArrayList<>();
         transactions.add(transaction);
 
@@ -53,4 +52,5 @@ public class PayPalService {
         paymentExecute.setPayerId(payerId);
         return payment.execute(apiContext, paymentExecute);
     }
+
 }

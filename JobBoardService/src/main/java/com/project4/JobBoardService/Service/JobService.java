@@ -11,10 +11,15 @@ public interface JobService {
 //    Integer countJobsByCompanyId(Long companyId);
 List<JobDTO> searchJobsByCompanyId(Long userId, String query);
     List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired);
-    boolean createJob(Long userId, Long categoryId, JobDTO jobDTO);
+    boolean createJob(Long userId, JobDTO jobDTO);
     JobDTO updateJob(Long jobId, JobDTO jobDTO);
     void deleteJob(Long jobId);
     // Add this method
     Optional<JobDTO> findJobById(Long jobId);
+
+
+    int countJobsForUserInMonth(Long userId, int year, int month);
+
+    int countJobsForUserInCurrentMonth(Long userId);
 //    boolean updateJob(Long companyId, Long categoryId, JobDTO jobDTO);
 }

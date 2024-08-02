@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,19 @@ public class JobController {
     @Autowired
     public JobController(JobService jobService) {
         this.jobService = jobService;
+    }
+
+    @GetMapping("/count")
+    public int getJobsCount(@RequestParam("userId") Long userId) {
+        LocalDate now = LocalDate.now();
+        int year = now.getYear();
+        int month = now.getMonthValue();
+        return jobService.countJobsForUserInMonth(userId, year, month);
+    }
+
+    @GetMapping("/count/current")
+    public int getJobsCountForCurrentMonth(@RequestParam("userId") Long userId) {
+        return jobService.countJobsForUserInCurrentMonth(userId);
     }
 
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
@@ -58,12 +72,11 @@ public class JobController {
     }
 
 
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
-    @PostMapping("/users/{userId}/categories/{categoryId}")
+ @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @PostMapping("/users/{userId}")
     public ResponseEntity<String> createJob(@PathVariable("userId") Long userId,
-                                            @PathVariable("categoryId") Long categoryId,
                                             @RequestBody JobDTO jobDTO) {
-        boolean createdJob = jobService.createJob(userId, categoryId, jobDTO);
+        boolean createdJob = jobService.createJob(userId, jobDTO);
 
         if (!createdJob) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User has reached the limit job postings this month.");
@@ -73,12 +86,13 @@ public class JobController {
     }
 
 
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EM  PLOYER')")
     @GetMapping("job/{id}")
     public ResponseEntity<JobDTO> getJobById(@PathVariable Long id) {
         Optional<JobDTO> job = jobService.findJobById(id);
         return job.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')" )
     @PutMapping("/edit/{jobId}")
@@ -90,11 +104,15 @@ public class JobController {
             return ResponseEntity.notFound().build();
         }
     }
+    
+
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    @DeleteMapping("/{jobId}")
-    public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
+        @DeleteMapping("/{jobId}")
+        public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
         jobService.deleteJob(jobId);
         return ResponseEntity.ok().build();
     }
 
 }
+
+

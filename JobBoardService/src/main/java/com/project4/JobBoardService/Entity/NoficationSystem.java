@@ -17,7 +17,7 @@ public class NoficationSystem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String Title;
+    private String title;
 
     private String message;
 

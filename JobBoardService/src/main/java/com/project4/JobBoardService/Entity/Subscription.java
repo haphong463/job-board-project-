@@ -21,6 +21,9 @@ public class Subscription {
 
     private int postLimit;
 
+
+    private String service;
+
     private LocalDate startDate;
 
     private LocalDate endDate;

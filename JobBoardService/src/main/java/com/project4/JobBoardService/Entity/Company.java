@@ -37,8 +37,23 @@ public class Company {
     @Column(length = 100)
     private String location;
 
+    @Column(length = 100)
+    private String keySkills;
+
     @Column(length = 50)
     private String type;
+
+    @Column(length = 100)
+    private String companySize;
+
+    @Column(length = 50)
+    private String country;
+
+    @Column(length = 20)
+    private String countryCode;
+
+    @Column(length = 100)
+    private String workingDays;
 
     @Column(name = "membership_required", nullable = false)
     private Boolean membershipRequired = false;
@@ -46,4 +61,13 @@ public class Company {
     private List<Review> reviews = new ArrayList<>();
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Job> jobs = new ArrayList<>();
+
+    @OneToOne(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private User user;
+
+    // Thêm ánh xạ ngược từ JobApplication nếu cần
+    @OneToMany(mappedBy = "company")
+    private List<JobApplication> jobApplications = new ArrayList<>();
+
+
 }

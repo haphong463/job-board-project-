@@ -21,7 +21,7 @@ import java.util.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User   {
+public class    User   {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -71,6 +71,11 @@ public class User   {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Subscription> subscriptions;
 
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     public User(String username, String email, String password) {
         this.username = username;

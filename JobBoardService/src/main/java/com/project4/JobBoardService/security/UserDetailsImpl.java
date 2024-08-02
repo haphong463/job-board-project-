@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project4.JobBoardService.Entity.Company;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.Gender;
 import lombok.Getter;
@@ -36,16 +37,26 @@ public class UserDetailsImpl implements UserDetails {
     @Getter
     private Gender gender;
 
+
+    @Getter
+    private Long companyId;
+
+
+
+
+
+
     private Collection<? extends GrantedAuthority> authorities;
 
 
     public UserDetailsImpl(Long id, String username, String email, String password,
-                           Collection<? extends GrantedAuthority> authorities) {
+                           Collection<? extends GrantedAuthority> authorities,User user) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
+        this.companyId = user.getCompany() != null ? user.getCompany().getCompanyId() : null;
     }
 
     public static UserDetailsImpl build(User user) {
@@ -58,14 +69,16 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                authorities);
+                authorities,
+                user);
 
         userDetails.firstName = user.getFirstName();
         userDetails.lastName = user.getLastName();
         userDetails.bio = user.getBio();
         userDetails.imageUrl = user.getImageUrl();
         userDetails.gender = user.getGender();
-
+        // Kiểm tra null trước khi gán companyId
+        userDetails.companyId = user.getCompany() != null ? user.getCompany().getCompanyId() : null;
         return userDetails;
     }
 

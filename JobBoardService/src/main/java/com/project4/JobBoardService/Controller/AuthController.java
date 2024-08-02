@@ -75,98 +75,98 @@ public class AuthController {
     private String CLIENT_ID; // Replace with your actual client ID
 
 
-    // ! Đang trong quá trin sửa, đừng ai động vào!
-    @PostMapping("/google")
-    public ResponseEntity<?> authenticateUserWithGoogle(@RequestBody TokenRequest tokenRequest) {
-        try {
-            // Initialize transport and jsonFactory
-            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-            var transport = GoogleNetHttpTransport.newTrustedTransport();
-
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                    .setAudience(Collections.singletonList(CLIENT_ID))
-                    .build();
-
-            GoogleIdToken idToken = verifier.verify(tokenRequest.getToken());
-            if (idToken != null) {
-                GoogleIdToken.Payload payload = idToken.getPayload();
-
-                // Print user identifier
-                String userId = payload.getSubject();
-                System.out.println("User ID: " + userId);
-
-                // Get profile information from payload
-                String email = payload.getEmail();
-                boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
-                String name = (String) payload.get("name");
-                String pictureUrl = (String) payload.get("picture");
-                String locale = (String) payload.get("locale");
-                String familyName = (String) payload.get("family_name");
-                String givenName = (String) payload.get("given_name");
-
-                // Use or store profile information
-                User user = userRepository.findByEmail(email).orElse(null);
-                if (user != null) {
-                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    String jwt = jwtUtils.generateJwtToken(authentication);
-
-                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList());
-                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
-                    return ResponseEntity.ok(new JwtResponse(jwt,
-                            refreshToken.getToken(),
-                            user.getId(),
-                            user.getUsername(),
-                            user.getEmail(),
-                            rolesSignIn));
-
-
-                }
-
-                // Create new user
-                user = new User();
-                user.setEmail(email);
-                user.setUsername(email); // or some other unique identifier
-                user.setFirstName(givenName);
-                user.setLastName(familyName);
-                user.setVerified(emailVerified);
-                user.setPassword(encoder.encode("google-password"));
-                user.setImageUrl(pictureUrl);
-                Set<Role> roles = new HashSet<>();
-                Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                roles.add(userRole);
-                user.setRoles(roles);
-                user = userRepository.save(user);
-
-                UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                String jwt = jwtUtils.generateJwtToken(authentication);
-
-                List<String> rolesSignIn = userDetails.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList());
-                RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
-                return ResponseEntity.ok(new JwtResponse(jwt,
-                        refreshToken.getToken(),
-                        userDetails.getId(),
-                        userDetails.getUsername(),
-                        userDetails.getEmail(),
-                        rolesSignIn));
-            } else {
-                System.out.println("Invalid ID token.");
-                return ResponseEntity.badRequest().body("Invalid token!");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
+//    // ! Đang trong quá trin sửa, đừng ai động vào!
+//    @PostMapping("/google")
+//    public ResponseEntity<?> authenticateUserWithGoogle(@RequestBody TokenRequest tokenRequest) {
+//        try {
+//            // Initialize transport and jsonFactory
+//            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+//            var transport = GoogleNetHttpTransport.newTrustedTransport();
+//
+//            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+//                    .setAudience(Collections.singletonList(CLIENT_ID))
+//                    .build();
+//
+//            GoogleIdToken idToken = verifier.verify(tokenRequest.getToken());
+//            if (idToken != null) {
+//                GoogleIdToken.Payload payload = idToken.getPayload();
+//
+//                // Print user identifier
+//                String userId = payload.getSubject();
+//                System.out.println("User ID: " + userId);
+//
+//                // Get profile information from payload
+//                String email = payload.getEmail();
+//                boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+//                String name = (String) payload.get("name");
+//                String pictureUrl = (String) payload.get("picture");
+//                String locale = (String) payload.get("locale");
+//                String familyName = (String) payload.get("family_name");
+//                String givenName = (String) payload.get("given_name");
+//
+//                // Use or store profile information
+//                User user = userRepository.findByEmail(email).orElse(null);
+//                if (user != null) {
+//                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+//                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//                    SecurityContextHolder.getContext().setAuthentication(authentication);
+//                    String jwt = jwtUtils.generateJwtToken(authentication);
+//
+//                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
+//                            .map(GrantedAuthority::getAuthority)
+//                            .collect(Collectors.toList());
+//                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+//
+//                    return ResponseEntity.ok(new JwtResponse(jwt,
+//                            refreshToken.getToken(),
+//                            user.getId(),
+//                            user.getUsername(),
+//                            user.getEmail(),
+//                            rolesSignIn));
+//
+//
+//                }
+//
+//                // Create new user
+//                user = new User();
+//                user.setEmail(email);
+//                user.setUsername(email); // or some other unique identifier
+//                user.setFirstName(givenName);
+//                user.setLastName(familyName);
+//                user.setVerified(emailVerified);
+//                user.setPassword(encoder.encode("google-password"));
+//                user.setImageUrl(pictureUrl);
+//                Set<Role> roles = new HashSet<>();
+//                Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+//                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+//                roles.add(userRole);
+//                user.setRoles(roles);
+//                user = userRepository.save(user);
+//
+//                UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+//                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
+//                String jwt = jwtUtils.generateJwtToken(authentication);
+//
+//                List<String> rolesSignIn = userDetails.getAuthorities().stream()
+//                        .map(GrantedAuthority::getAuthority)
+//                        .collect(Collectors.toList());
+//                RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+//
+//                return ResponseEntity.ok(new JwtResponse(jwt,
+//                        refreshToken.getToken(),
+//                        userDetails.getId(),
+//                        userDetails.getUsername(),
+//                        userDetails.getEmail(),
+//                        rolesSignIn));
+//            } else {
+//                System.out.println("Invalid ID token.");
+//                return ResponseEntity.badRequest().body("Invalid token!");
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.internalServerError().body(e.getMessage());
+//        }
+//    }
 
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
@@ -185,9 +185,10 @@ public class AuthController {
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh token is not in database!"));
     }
+
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
         Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
         if (!optionalUser.isPresent()) {
             return ResponseEntity
@@ -202,16 +203,16 @@ public class AuthController {
         User user = optionalUser.get();
         if (!user.isVerified()) {
             return ResponseEntity.ok().body(new AuthRepsonse(
-                user.getEmail(),
+                    user.getEmail(),
                     user.isVerified()
             ));
         }
-
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
+        System.out.println(jwt);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
@@ -220,8 +221,11 @@ public class AuthController {
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
+        // Lấy companyId nếu có
+        Long companyId = user.getCompany() != null ? user.getCompany().getCompanyId() : null;
+
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
-                userDetails.getUsername(), userDetails.getEmail(), roles));
+                userDetails.getUsername(), userDetails.getEmail(), roles, companyId));
     }
 
     @PostMapping("/signup")

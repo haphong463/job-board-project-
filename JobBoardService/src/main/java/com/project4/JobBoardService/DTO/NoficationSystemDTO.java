@@ -10,9 +10,10 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class NoficationSystemDTO {
     private Long id;
-    private String Title;
+    private String title;
     private String message;
     private LocalDateTime createdAt;
 

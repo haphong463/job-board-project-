@@ -9,14 +9,27 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
     @Override
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+
+    public List<CategoryDTO> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        return categories.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private CategoryDTO convertToDTO(Category category) {
+        CategoryDTO dto = new CategoryDTO();
+        dto.setCategoryId(category.getCategoryId());
+        dto.setCategoryName(category.getCategoryName());
+        // Set other fields as needed
+        return dto;
     }
 
     @Override

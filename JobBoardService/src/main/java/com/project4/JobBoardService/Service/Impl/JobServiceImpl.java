@@ -3,16 +3,19 @@ package com.project4.JobBoardService.Service.Impl;
 import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
+import com.project4.JobBoardService.Enum.Position;
 import com.project4.JobBoardService.Enum.WorkSchedule;
+import com.project4.JobBoardService.Repository.CategoryRepository;
+import com.project4.JobBoardService.Repository.CompanyRepository;
 import com.project4.JobBoardService.Repository.JobRepository;
+import com.project4.JobBoardService.Repository.TransactionRepository;
 import com.project4.JobBoardService.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,13 +24,19 @@ public class JobServiceImpl   implements JobService {
     private final CategoryService categoryService;
     private final UserService userService;
     private final TransactionService transactionService;
+    private  final CategoryRepository categoryRepository;
 
     @Autowired
-    public JobServiceImpl(JobRepository jobRepository , CompanyService companyService, CategoryService categoryService, UserService userService,TransactionService transactionService) {
+    private TransactionRepository transactionRepository;
+
+
+    @Autowired
+    public JobServiceImpl(JobRepository jobRepository , CompanyService companyService, CategoryService categoryService, UserService userService, TransactionService transactionService, CategoryRepository categoryRepository) {
         this.jobRepository = jobRepository;
         this.categoryService = categoryService;
         this.userService = userService;
         this.transactionService=transactionService;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -42,6 +51,15 @@ public class JobServiceImpl   implements JobService {
         return jobs.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    @Override
+    public int countJobsForUserInMonth(Long userId, int year, int month) {
+        return jobRepository.countJobsByUserIdAndMonth(userId, year, month);
+    }
+
+    @Override
+    public int countJobsForUserInCurrentMonth(Long userId) {
+        return jobRepository.countJobsForUserInCurrentMonth(userId);
+    }
 
     public List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired) {
         LocalDate currentDate = LocalDate.now();
@@ -64,28 +82,41 @@ public class JobServiceImpl   implements JobService {
         return jobRepository.countByCompanyId(companyId);
     }
 */
-  public boolean createJob(Long userId, Long categoryId, JobDTO jobDTO) {
+  public boolean createJob(Long userId, JobDTO jobDTO) {
       Optional<User> userOptional = userService.findById(userId);
-      Optional<Category> categoryOptional = Optional.ofNullable(categoryService.getCategorybyId(categoryId));
 
-      if (userOptional.isPresent() && categoryOptional.isPresent()) {
+      if (userOptional.isPresent()) {
           User user = userOptional.get();
-          Category category = categoryOptional.get();
 
           int jobCountThisMonth = jobRepository.countJobsByUserIdAndMonth(userId, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
 
-
+          // Lấy Subscription hiện tại của người dùng
           Optional<Subscription> subscriptionOptional = transactionService.findActiveSubscriptionByUser(user, LocalDate.now());
+
+          System.out.println(subscriptionOptional);
+
+          // Xác định số lượng bài đăng tối đa dựa trên Subscription
           int maxPosts = subscriptionOptional.map(Subscription::getPostLimit).orElse(10); // 10 nếu không có subscription
 
           if (jobCountThisMonth >= maxPosts) {
               return false;
           }
 
+          List<String> services = transactionRepository.findServicesByUserId(userId);
+
+// Xác định isSuperHot dựa trên dịch vụ
+          boolean isSuperHot = services.contains("HOT");
+
+          // Lấy các Category từ danh sách categoryIds
+          Set<Category> categories = new HashSet<>();
+          for (Long categoryId : jobDTO.getCategoryIds()) {
+              categoryRepository.findById(categoryId).ifPresent(categories::add);
+          }
+
           // Tạo đối tượng Job từ DTO
-          Job job = convertJobToEntity(jobDTO);
-          job.setUser(user);
-          job.setCategory(category);
+          Job job = convertJobToEntity(jobDTO, categories,isSuperHot);
+          job.setUser(user); // Thiết lập User cho Job
+          job.setSuperHot(isSuperHot); // Thiết lập isSuperHot
 
           // Lưu job vào repository
           jobRepository.save(job);
@@ -96,11 +127,13 @@ public class JobServiceImpl   implements JobService {
   }
 
 
+
     public JobDTO updateJob(Long jobId, JobDTO jobDTO) {
         Optional<Job> jobOptional = jobRepository.findById(jobId);
 
         if (jobOptional.isPresent()) {
             Job existingJob = jobOptional.get();
+            // Retrieve the Company entity based on companyId
 
             // Cập nhật các thuộc tính từ JobDTO vào existingJob
             existingJob.setTitle(jobDTO.getTitle());
@@ -108,15 +141,21 @@ public class JobServiceImpl   implements JobService {
             existingJob.setDescription(jobDTO.getDescription());
             existingJob.setCity(jobDTO.getCity());
             existingJob.setResponsibilities(jobDTO.getResponsibilities());
+            existingJob.setBenefit(jobDTO.getBenefit());
             existingJob.setRequiredSkills(jobDTO.getRequiredSkills());
-            existingJob.setWorkSchedule(WorkSchedule.FULL_TIME);
-            existingJob.setWorkSchedule(WorkSchedule.PART_TIME);
-            existingJob.setWorkSchedule(WorkSchedule.FREELANCE);
-            existingJob.setWorkSchedule(WorkSchedule.INTERNSHIP);
-            existingJob.setKeySkills(jobDTO.getKeySkills());
-            existingJob.setPosition(jobDTO.getPosition());
+            existingJob.setWorkSchedule(jobDTO.getWorkSchedule());
+
+            existingJob.setPosition(Position.INTERN);
+            existingJob.setPosition(Position.FRESHER);
+            existingJob.setPosition(Position.MIDDLE);
+            existingJob.setPosition(Position.JUNIOR);
+            existingJob.setPosition(Position.LEADER);
+            existingJob.setPosition(Position.SENIOR);
+            existingJob.setPosition(Position.MANAGER);
             existingJob.setExperience(jobDTO.getExperience());
-            existingJob.setQuantity(jobDTO.getQuantity());
+            existingJob.setSlot(jobDTO.getSlot());
+
+            existingJob.setBenefit(jobDTO.getBenefit());
             existingJob.setQualification(jobDTO.getQualification());
 //            existingJob.setCategoryId(jobDTO.getCategoryId());
 
@@ -131,26 +170,37 @@ public class JobServiceImpl   implements JobService {
 
     }
 
-    private Job convertJobToEntity(JobDTO jobDTO) {
+    private Job convertJobToEntity(JobDTO jobDTO, Set<Category> categories, boolean isSuperHot) {
         Job job = new Job();
+
         job.setTitle(jobDTO.getTitle());
         job.setOfferedSalary(jobDTO.getOfferedSalary());
         job.setDescription(jobDTO.getDescription());
         job.setCity(jobDTO.getCity());
         job.setResponsibilities(jobDTO.getResponsibilities());
         job.setRequiredSkills(jobDTO.getRequiredSkills());
-        job.setWorkSchedule(WorkSchedule.FULL_TIME);
-        job.setWorkSchedule(WorkSchedule.PART_TIME);
-        job.setWorkSchedule(WorkSchedule.FREELANCE);
-        job.setWorkSchedule(WorkSchedule.INTERNSHIP);
-        job.setKeySkills(jobDTO.getKeySkills());
-        job.setQuantity(jobDTO.getQuantity());
-        job.setPosition(jobDTO.getPosition());
+        job.setWorkSchedule(jobDTO.getWorkSchedule());
+        job.setBenefit(jobDTO.getBenefit());
+        job.setSlot(jobDTO.getSlot());
+        job.setPosition(Position.INTERN);
+        job.setPosition(Position.FRESHER);
+        job.setPosition(Position.JUNIOR);
+        job.setPosition(Position.MIDDLE);
+        job.setPosition(Position.MANAGER);
+        job.setPosition(Position.SENIOR);
         job.setExperience(jobDTO.getExperience());
+        if (jobDTO.getCompanyId() != null) {
+          Company company = new Company();
+            company.setCompanyId(jobDTO.getCompanyId());
+            job.setCompany(company);
+        }
+
+        job.setCategories(categories);
         job.setQualification(jobDTO.getQualification());
         job.setCreatedAt(jobDTO.getCreatedAt());
         LocalDateTime createdAt = jobDTO.getCreatedAt() != null ? jobDTO.getCreatedAt() : LocalDateTime.now();
         job.setExpired(createdAt.plusDays(7));
+        job.setSuperHot(isSuperHot); // Thiết lập isSuperHot
         return job;
     }
 
@@ -172,17 +222,21 @@ public class JobServiceImpl   implements JobService {
         dto.setCity(job.getCity());
         dto.setResponsibilities(job.getResponsibilities());
         dto.setRequiredSkills(job.getRequiredSkills());
-        dto.setWorkSchedule(String.valueOf(WorkSchedule.FULL_TIME));
-        dto.setWorkSchedule(String.valueOf(WorkSchedule.PART_TIME));
-        dto.setWorkSchedule(String.valueOf(WorkSchedule.FREELANCE));
-        dto.setWorkSchedule(String.valueOf(WorkSchedule.INTERNSHIP));
-        dto.setKeySkills(job.getKeySkills());
-        dto.setPosition(job.getPosition());
+        dto.setWorkSchedule(job.getWorkSchedule());
+        dto.setBenefit(job.getBenefit());
+        dto.setPosition(String.valueOf(Position.INTERN));
+        dto.setPosition(String.valueOf(Position.FRESHER));
+        dto.setPosition(String.valueOf(Position.JUNIOR));
+        dto.setPosition(String.valueOf(Position.LEADER));
+        dto.setPosition(String.valueOf(Position.MIDDLE));
+        dto.setPosition(String.valueOf(Position.MANAGER));
+        dto.setPosition(String.valueOf(Position.SENIOR));
         dto.setExperience(job.getExperience());
-        dto.setQuantity(job.getQuantity());
+        dto.setSlot(job.getSlot());
         dto.setQualification(job.getQualification());
         dto.setCreatedAt(job.getCreatedAt());
-        dto.setCategoryId(job.getCategory().getCategoryId());
+        List<Long> categoryIds = job.getCategories().stream().map(Category::getCategoryId).collect(Collectors.toList());
+        dto.setCategoryIds(categoryIds);
         dto.setUserId(job.getUser().getId());
         dto.setExpired(job.getExpired());
         return dto;
@@ -203,13 +257,14 @@ public class JobServiceImpl   implements JobService {
         job.setCity(jobDTO.getCity());
         job.setResponsibilities(jobDTO.getResponsibilities());
         job.setRequiredSkills(jobDTO.getRequiredSkills());
-        job.setWorkSchedule(WorkSchedule.FULL_TIME);
-        job.setWorkSchedule(WorkSchedule.PART_TIME);
-        job.setWorkSchedule(WorkSchedule.FREELANCE);
-        job.setWorkSchedule(WorkSchedule.INTERNSHIP);
-        job.setKeySkills(jobDTO.getKeySkills());
-        job.setPosition(jobDTO.getPosition());
-        job.setQuantity(job.getQuantity());
+        job.setWorkSchedule(jobDTO.getWorkSchedule());
+        job.setPosition(Position.INTERN);
+        job.setPosition(Position.FRESHER);
+        job.setPosition(Position.JUNIOR);
+        job.setPosition(Position.SENIOR);
+        job.setPosition(Position.MIDDLE);
+        job.setPosition(Position.MANAGER);
+        job.setSlot(jobDTO.getSlot());
         job.setExperience(jobDTO.getExperience());
         job.setQualification(jobDTO.getQualification());
         job.setCreatedAt(jobDTO.getCreatedAt());

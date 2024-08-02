@@ -32,7 +32,7 @@ public class CompanyController {
         return companyOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize(" hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @PreAuthorize(" hasRole('ADMIN') or hasRole ('EMPLOYER')")
     @PostMapping("/add")
     public Company createCompany(@RequestBody CompanyDTO companyDTO) {
         return companyService.saveCompany(companyDTO);

@@ -1,10 +1,12 @@
 package com.project4.JobBoardService.Entity;
 
+import com.project4.JobBoardService.Enum.Position;
 import com.project4.JobBoardService.Enum.WorkSchedule;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -35,26 +37,43 @@ public class Job {
     private String requiredSkills;
 
     @Column(name = "work_schedule")
-    @Enumerated(EnumType.STRING)
-    private WorkSchedule workSchedule;
+    private String workSchedule;
+
+
+    @Column(columnDefinition = "text")
+    private String benefit;
 
     @Column(name = "keySkills")
     private String keySkills;
 
-    private String position;
+    private Position position;
 
     private String experience;
 
     private String qualification;
 
-    private int quantity;
+    private int slot;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "job_category",
+            joinColumns = @JoinColumn(name = "job_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories;
+
+
+    @Builder.Default
+    @Column(nullable = false, name = "profile_ approved")
+    private Integer profileApproved = 0;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean isSuperHot;
 
     @ManyToOne
     @JoinColumn(name = "company_id")
@@ -73,4 +92,13 @@ public class Job {
     @Column(name = "expired")
     private LocalDateTime expired;
 
+    private String expire;
+
+    public boolean isSuperHot() {
+        return isSuperHot;
+    }
+
+    public void setSuperHot(boolean superHot) {
+        isSuperHot = superHot;
+    }
 }
