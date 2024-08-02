@@ -14,6 +14,6 @@ public interface ReviewService {
     boolean addReview(Long companyId, String username, Review review);
     Review getReview(Long companyId, Long reviewId, String username);
     boolean updateReview(Long companyId, Long reviewId, String username, Review updatedReview);
-
     Company convertCompanyToEntity(CompanyDTO companyDTO);
+    boolean hasUserReviewedCompany(Long companyId, String username);
 }

@@ -48,16 +48,21 @@ export function GlobalNavbar() {
   const handleCvManagementClick = () => {
     navigate("/cv-management");
   };
-  const handleMyProfileClick = () => {
-   navigate("/managementprofile");
- };
-   const notifications = useSelector((state) => state.notification.list);
-   const user = useSelector((state) => state.auth.user);
-   const roles = useSelector((state) => state.auth.roles);
-   const dispatch = useDispatch();
-   const blogCategory = useSelector((state) => state.blogs.categories);
-   const unreadCount = useSelector((state) => state.notification.unreadCount);
-   const navigate = useNavigate();
+  const handleSavedJobClick = () =>
+  {
+    navigate('/savedJob');
+  };
+  const handleMyProfileClick = () =>
+  {
+    navigate("/managementprofile");
+  };
+  const notifications = useSelector((state) => state.notification.list);
+  const user = useSelector((state) => state.auth.user);
+  const roles = useSelector((state) => state.auth.roles);
+  const dispatch = useDispatch();
+  const blogCategory = useSelector((state) => state.blogs.categories);
+  const unreadCount = useSelector((state) => state.notification.unreadCount);
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchCategoryThunk());
@@ -128,7 +133,7 @@ export function GlobalNavbar() {
                     onMouseLeave={() => setSkillsDropdownVisible(false)}
                   >
                     <NavLink to="/viewAllSkill">
-                      Job By Skills <FaChevronRight className="icon" />
+                      Job By Skills <FaChevronRight className="jb_icon" />
                     </NavLink>
                     {isSkillsDropdownVisible && (
                       <div className="skills-dropdown">
@@ -169,7 +174,7 @@ export function GlobalNavbar() {
                   >
                     <NavLink to="/viewAllCompany">
                       Job By Company
-                      <FaChevronRight className="icon3" />
+                      <FaChevronRight className="jb_icon3" />
                     </NavLink>
                     {isCompanyDropdownVisible && (
                       <div className="skills-dropdown">
@@ -377,10 +382,13 @@ export function GlobalNavbar() {
                       <DropdownItem onClick={handleMyProfileClick}>
                         My Profile
                       </DropdownItem>
-                      <DropdownItem onClick={handleCvManagementClick} className="dropdown-item-main">
+                      <DropdownItem onClick={handleCvManagementClick}>
                         CV Management
                       </DropdownItem>
-                      <DropdownItem onClick={handleLogout} className="dropdown-item-main">
+                      <DropdownItem onClick={handleSavedJobClick}>
+                        Saved Jobs
+                      </DropdownItem>
+                      <DropdownItem onClick={handleLogout}>
                         Log out
                       </DropdownItem>
                     </>

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
-import 'package:jobboardmobile/models/content_model.dart';
 import 'package:jobboardmobile/models/notification_model.dart';
 import 'package:jobboardmobile/screens/blog-details/blog_detail_screen_widget.dart';
 import 'package:jobboardmobile/screens/blog/blog_list_widget.dart';
@@ -56,22 +55,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => BlogDetail(
-            blog: ContentModel(
+            blog: BlogPost(
                 id: blog!.id,
                 citation: blog.citation,
                 createdAt: blog.createdAt,
-                content: blog.content,
+                description: blog.content,
                 imageUrl: blog.imageUrl.replaceFirst(
                   'http://localhost:8080',
                   Endpoint.imageUrl,
                 ),
                 slug: blog.slug,
                 title: blog.title,
-                user: blog.user,
-                categories: blog.categories,
-                hashtags: blog.hashtags,
-                thumbnailUrl: blog.thumbnailUrl,
-                updatedAt: blog.updatedAt),
+                user: blog.user),
             commentId: commentId),
       ),
     );
