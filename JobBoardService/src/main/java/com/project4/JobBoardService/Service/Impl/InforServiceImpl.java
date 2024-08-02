@@ -1,17 +1,23 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.DTO.CertificateDTO;
+import com.project4.JobBoardService.DTO.InforUserDTO;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Repository.CertificateRepository;
 import com.project4.JobBoardService.Repository.PermissionRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.InforService;
 import com.project4.JobBoardService.Util.FileUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InforServiceImpl implements InforService {
@@ -19,10 +25,16 @@ public class InforServiceImpl implements InforService {
     private UserRepository userRepository;
     @Autowired
     private PermissionRepository permissionRepository;
+    @Autowired
+    private ModelMapper modelMapper;
+    @Autowired
+    private CertificateRepository certificateRepository;
+
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
     @Override
     public User updateUser1(Long id, User user, MultipartFile multipartFile) {
         User existingUser = userRepository.findById(id).orElse(null);

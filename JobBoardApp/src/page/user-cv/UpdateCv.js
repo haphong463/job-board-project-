@@ -78,6 +78,9 @@ const UpdateCV = ({userId, cvId, onClose}) => {
     if (choice === 'template') {
       navigate('/list-template'); // Adjust this path as needed
     }
+    else{
+      onClose();
+    }
   };
   const CustomModal = ({ show, onClose, onStay, onTemplate }) => {
     const [countdown, setCountdown] = useState(10);

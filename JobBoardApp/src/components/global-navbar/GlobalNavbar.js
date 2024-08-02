@@ -377,10 +377,10 @@ export function GlobalNavbar() {
                       <DropdownItem onClick={handleMyProfileClick}>
                         My Profile
                       </DropdownItem>
-                      <DropdownItem onClick={handleCvManagementClick}>
+                      <DropdownItem onClick={handleCvManagementClick} className="dropdown-item-main">
                         CV Management
                       </DropdownItem>
-                      <DropdownItem onClick={handleLogout}>
+                      <DropdownItem onClick={handleLogout} className="dropdown-item-main">
                         Log out
                       </DropdownItem>
                     </>

@@ -5,6 +5,7 @@ import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Enum.Gender;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -21,4 +22,7 @@ public class InforUserDTO {
     private Set<Role> roles;
     private String numberphone;
     private String facebook;
+    private List<CertificateDTO> certificates;
+    private List<UserEducationDTO> userEducations;
+
 }

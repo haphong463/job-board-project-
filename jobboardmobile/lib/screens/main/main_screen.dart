@@ -8,6 +8,7 @@ import '../../models/company_model.dart';
 import '../../models/job_model.dart';
 import '../../service/auth_service.dart';
 import '../../service/company_service.dart';
+import '../../service/jobApplication_service.dart';
 import '../../service/job_service.dart';
 import '../../widget/box_icon.dart';
 import '../../widget/custom_app_bar.dart';
@@ -15,6 +16,7 @@ import '../../core/utils/asset_path_list.dart' as assetPath;
 import '../../widget/search_icon.dart';
 import '../company/CompanyDetailsScreen.dart';
 import '../company/CompanyListScreen.dart';
+import '../job/ApplyJobsScreen.dart';
 import '../job/JobDetailsScreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -29,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
   final CompanyService _companyService = CompanyService();
   final JobService _jobService = JobService();
 
+
   final storage = const FlutterSecureStorage();
   String? firstName;
   String? lastName;
@@ -38,12 +41,16 @@ class _MainScreenState extends State<MainScreen> {
   List<Job> _jobs = [];
   Map<int, Company> _companyMap = <int, Company>{};
 
+
   @override
   void initState() {
     super.initState();
+
     _fetchUserDetails();
     _fetchCompaniesAndJobs();
   }
+
+  
 
   void _fetchUserDetails() async {
     firstName = await _authService.getFirstName();
@@ -125,10 +132,19 @@ class _MainScreenState extends State<MainScreen> {
                     size: 48.0,
                     color: Colors.white,
                   ),
-            otherAccountsPictures: const [
-              Icon(
+            otherAccountsPictures: [
+              const Icon(
                 Icons.bookmark_border,
                 color: Colors.white,
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/applied_jobs');
+                },
+                child: const Icon(
+                  Icons.assignment_turned_in,
+                  color: Colors.white,
+                ),
               ),
             ],
             decoration: BoxDecoration(
@@ -150,6 +166,9 @@ class _MainScreenState extends State<MainScreen> {
           }),
           _buildDrawerItem(Icons.note_add, 'Quiz', () {
             Navigator.pushNamed(context, '/quizzes');
+          }),
+          _buildDrawerItem(Icons.document_scanner, 'Cv-management', () {
+            Navigator.pushNamed(context, '/document_list');
           }),
           const Divider(),
           _buildDrawerItem(Icons.settings, 'Settings', () {

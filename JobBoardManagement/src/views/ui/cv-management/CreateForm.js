@@ -17,34 +17,61 @@ const CreateForm = ({ toggle, isOpen }) => {
   const [uploadFormDisabled, setUploadFormDisabled] = useState(false);
   const [uploadMessage, setUploadMessage] = useState('');
   const [createButtonDisabled, setCreateButtonDisabled] = useState(true);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setCreateTemplateName(uploadTemplateName);
   }, [uploadTemplateName]);
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!uploadTemplateName.trim()) newErrors.uploadTemplateName = "Template name is required";
+    if (!createTemplateName.trim()) newErrors.createTemplateName = "Template name is required";
+    if (!templateDescription.trim()) newErrors.templateDescription = "Template description is required";
+    if (!templateFilePath.trim()) newErrors.templateFilePath = "Template file path is required";
+    if (!uploadFile) newErrors.uploadFile = "HTML file is required";
+    if (uploadFile && !uploadFile.name.endsWith('.html')) newErrors.uploadFile = "Only HTML files are allowed";
+    if (!templateImage) newErrors.templateImage = "Template image is required";
+    if (templateImage && !templateImage.type.startsWith('image/')) newErrors.templateImage = "Only image files are allowed";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleFileChangeUpload = (e) => {
-    setUploadFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file && file.name.endsWith('.html')) {
+      setUploadFile(file);
+      setErrors({...errors, uploadFile: null});
+    } else {
+      setUploadFile(null);
+      setErrors({...errors, uploadFile: "Only HTML files are allowed"});
+    }
   };
 
   const handleFileChange = (e) => {
-    setTemplateImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setTemplateImage(file);
+      setErrors({...errors, templateImage: null});
+    } else {
+      setTemplateImage(null);
+      setErrors({...errors, templateImage: "Only image files are allowed"});
+    }
   };
 
   const handleUpload = async () => {
+    if (!validateForm()) return;
     setLoadingUpload(true);
 
     try {
       const result = await dispatch(uploadCVAsync({ file: uploadFile, templateName: uploadTemplateName })).unwrap();
 
-      // Set success message
       setUploadMessage('Template uploaded successfully');
       setLoadingUpload(false);
 
-      // Enable Create button and set Template File Path
       setCreateButtonDisabled(false);
       setTemplateFilePath(`http://localhost:8080/api/templates/${uploadTemplateName}`);
 
-      // Disable Upload form after successful upload
       setUploadFormDisabled(true);
     } catch (error) {
       console.error('Error uploading template:', error);
@@ -55,6 +82,7 @@ const CreateForm = ({ toggle, isOpen }) => {
   };
 
   const handleCreate = async () => {
+    if (!validateForm()) return;
     setLoadingCreate(true);
 
     try {
@@ -66,16 +94,13 @@ const CreateForm = ({ toggle, isOpen }) => {
 
       await dispatch(createCVAsync(formData)).unwrap();
 
-      // Reset form fields
       setUploadTemplateName('');
       setTemplateDescription('');
       setTemplateFilePath('');
       setTemplateImage(null);
 
-      // Disable Create button after successful creation
       setCreateButtonDisabled(true);
 
-      // Close the modal after successful creation
       toggle();
     } catch (error) {
       console.error('Error creating template:', error);
@@ -88,15 +113,12 @@ const CreateForm = ({ toggle, isOpen }) => {
     <Modal isOpen={isOpen} toggle={toggle}>
       <ModalHeader toggle={toggle}>Combined CV Actions</ModalHeader>
       <ModalBody>
-        {/* Upload CV Form */}
         <div className="card mb-4">
           <div className="card-header">
             <h5 className="card-title">Upload CV File</h5>
           </div>
           <div className="card-body">
-            {/* Upload message */}
             {uploadMessage && <div className="alert alert-info">{uploadMessage}</div>}
-            {/* Upload form */}
             <Form>
               <FormGroup>
                 <Label for="templateNameUpload">Template Name:</Label>
@@ -108,6 +130,7 @@ const CreateForm = ({ toggle, isOpen }) => {
                   required
                   disabled={uploadFormDisabled}
                 />
+                {errors.uploadTemplateName && <div className="text-danger">{errors.uploadTemplateName}</div>}
               </FormGroup>
               <FormGroup>
                 <Label for="fileUpload">Upload HTML File:</Label>
@@ -119,6 +142,7 @@ const CreateForm = ({ toggle, isOpen }) => {
                   required
                   disabled={uploadFormDisabled}
                 />
+                {errors.uploadFile && <div className="text-danger">{errors.uploadFile}</div>}
               </FormGroup>
               <Button color="primary" onClick={handleUpload} disabled={loadingUpload || uploadFormDisabled}>
                 {loadingUpload ? 'Uploading...' : 'Upload Template'}
@@ -127,13 +151,11 @@ const CreateForm = ({ toggle, isOpen }) => {
           </div>
         </div>
 
-        {/* Create CV Form */}
         <div className="card">
           <div className="card-header">
             <h5 className="card-title">Create New CV</h5>
           </div>
           <div className="card-body">
-            {/* Create form */}
             <Form>
               <FormGroup>
                 <Label for="templateDescription">Template Description:</Label>
@@ -143,6 +165,7 @@ const CreateForm = ({ toggle, isOpen }) => {
                   value={templateDescription}
                   onChange={(e) => setTemplateDescription(e.target.value)}
                 />
+                {errors.templateDescription && <div className="text-danger">{errors.templateDescription}</div>}
               </FormGroup>
               <FormGroup>
                 <Label for="templateFilePath">Template File Path (URL):</Label>
@@ -154,6 +177,7 @@ const CreateForm = ({ toggle, isOpen }) => {
                   required
                   readOnly
                 />
+                {errors.templateFilePath && <div className="text-danger">{errors.templateFilePath}</div>}
               </FormGroup>
               <FormGroup>
                 <Label for="templateImage">Upload Template Image:</Label>
@@ -164,6 +188,7 @@ const CreateForm = ({ toggle, isOpen }) => {
                   accept="image/*"
                   required
                 />
+                {errors.templateImage && <div className="text-danger">{errors.templateImage}</div>}
               </FormGroup>
               <Button color="primary" onClick={handleCreate} disabled={loadingCreate || createButtonDisabled}>
                 {loadingCreate ? 'Creating...' : 'Create Template'}

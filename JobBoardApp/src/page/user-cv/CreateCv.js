@@ -17,6 +17,9 @@ const CreateCV = () => {
     const [userProjects, setUserProjects] = useState([{ projectName: '', description: '', startDate: '', endDate: '' }]);
     const [userSkills, setUserSkills] = useState([{ skillName: '', proficiency: '' }]);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    // validation 
+    const [emailError, setEmailError] = useState('');
+
     const user = useSelector(state => state.auth.user)
     const [existingCVs, setExistingCVs] = useState([]);
     const [errors, setErrors] = useState({
@@ -174,7 +177,11 @@ const CreateCV = () => {
                     <h2>CV Created Successfully!</h2>
                     <p>Choose "View Templates" to select a CV template and print it to PDF, or stay on this page.</p>
                     <div className="modal-buttons">
-                        <button onClick={onClose}>Stay here</button>
+                        <button onClick={() => {
+                            onClose();
+                            window.location.reload();
+                        }}>Stay here</button>
+
                         <button onClick={onTemplate}>View Templates</button>
                     </div>
                     <div className="countdown">
@@ -246,76 +253,129 @@ const CreateCV = () => {
                 break;
             case 'userDetails':
                 userDetails.forEach((detail, index) => {
-                    if (!detail.fullName || !detail.address || !detail.email || !detail.phone || !detail.summary || !detail.dob) {
-                        sectionErrors.push(`Please fill out all fields for User Detail ${index + 1}`);
+                    let detailErrors = {};
+
+                    if (!detail.fullName) detailErrors.fullName = "Full Name is required";
+                    if (!detail.address) detailErrors.address = "Address is required";
+                    if (!detail.dob) detailErrors.dob = "Date of Birth is required";
+                    if (!detail.summary) detailErrors.summary = "Summary is required";
+
+                    if (!detail.email) {
+                        detailErrors.email = "Email is required";
+                    } else if (!/\S+@\S+\.\S+/.test(detail.email)) {
+                        detailErrors.email = "Email format is invalid. Please use a valid email address.";
                     }
-                    if (detail.email && !/\S+@\S+\.\S+/.test(detail.email)) {
-                        sectionErrors.push(`Email format is invalid for User Detail ${index + 1}`);
+
+                    if (!detail.phone) {
+                        detailErrors.phone = "Phone number is required";
+                    } else if (!/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(detail.phone)) {
+                        detailErrors.phone = "Phone number format is invalid. Use format: (123) 456-7890 or 123-456-7890";
                     }
-                    if (detail.phone && !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(detail.phone)) {
-                        sectionErrors.push(`Phone number format is invalid. Valid phone number examples:
-                        (123) 456-7890 || 123-456-7890 || 123.456.7890 || 1234567890`);
+
+                    if (!detail.profileImage && !detail.profileImageBase64) {
+                        detailErrors.profileImage = "Profile image is required";
+                    }
+
+                    if (Object.keys(detailErrors).length > 0) {
+                        sectionErrors[index] = detailErrors;
                     }
                 });
                 break;
             case 'userEducations':
                 userEducations.forEach((education, index) => {
-                    if (!education.institution || !education.degree || !education.description || !education.startDate || !education.endDate) {
-                        sectionErrors.push(`Please fill out all fields for Education ${index + 1}`);
-                    }
+                    let educationErrors = {};
+                    if (!education.institution) educationErrors.institution = "Institution is required";
+                    if (!education.degree) educationErrors.degree = "Degree is required";
+                    if (!education.description) educationErrors.description = "Description is required";
+                    if (!education.startDate) educationErrors.startDate = "Start date is required";
+                    if (!education.endDate) educationErrors.endDate = "End date is required";
+
                     if (education.startDate && education.endDate) {
                         const startDate = new Date(education.startDate);
                         const endDate = new Date(education.endDate);
                         if (startDate > endDate) {
-                            sectionErrors.push(`Start date must be earlier than end date for Education ${index + 1}`);
+                            educationErrors.dateRange = "Start date must be earlier than end date";
                         }
+                    }
+
+                    if (Object.keys(educationErrors).length > 0) {
+                        sectionErrors[index] = educationErrors;
                     }
                 });
                 break;
+
             case 'userExperiences':
                 userExperiences.forEach((experience, index) => {
-                    if (!experience.jobTitle || !experience.company || !experience.description || !experience.startDate || !experience.endDate) {
-                        sectionErrors.push(`Please fill out all fields for Experience ${index + 1}`);
-                    }
+                    let experienceErrors = {};
+                    if (!experience.jobTitle) experienceErrors.jobTitle = "Job title is required";
+                    if (!experience.company) experienceErrors.company = "Company is required";
+                    if (!experience.description) experienceErrors.description = "Description is required";
+                    if (!experience.startDate) experienceErrors.startDate = "Start date is required";
+                    if (!experience.endDate) experienceErrors.endDate = "End date is required";
+
                     if (experience.startDate && experience.endDate) {
                         const startDate = new Date(experience.startDate);
                         const endDate = new Date(experience.endDate);
                         if (startDate > endDate) {
-                            sectionErrors.push(`Start date must be earlier than end date for Experience ${index + 1}`);
+                            experienceErrors.dateRange = "Start date must be earlier than end date";
                         }
                     }
+
+                    if (Object.keys(experienceErrors).length > 0) {
+                        sectionErrors[index] = experienceErrors;
+                    }
                 });
                 break;
+
             case 'userLanguages':
                 userLanguages.forEach((language, index) => {
-                    if (!language.languageName || !language.proficiency) {
-                        sectionErrors.push(`Please fill out all fields for Language ${index + 1}`);
+                    let languageErrors = {};
+                    if (!language.languageName) languageErrors.languageName = "Language name is required";
+                    if (!language.proficiency) languageErrors.proficiency = "Proficiency is required";
+
+                    if (Object.keys(languageErrors).length > 0) {
+                        sectionErrors[index] = languageErrors;
                     }
                 });
                 break;
+
             case 'userProjects':
                 userProjects.forEach((project, index) => {
-                    if (!project.projectName || !project.description || !project.startDate || !project.endDate) {
-                        sectionErrors.push(`Please fill out all fields for Project ${index + 1}`);
-                    }
+                    let projectErrors = {};
+                    if (!project.projectName) projectErrors.projectName = "Project name is required";
+                    if (!project.description) projectErrors.description = "Description is required";
+                    if (!project.startDate) projectErrors.startDate = "Start date is required";
+                    if (!project.endDate) projectErrors.endDate = "End date is required";
+
                     if (project.startDate && project.endDate) {
                         const startDate = new Date(project.startDate);
                         const endDate = new Date(project.endDate);
                         if (startDate > endDate) {
-                            sectionErrors.push(`Start date must be earlier than end date for Project ${index + 1}`);
+                            projectErrors.dateRange = "Start date must be earlier than end date";
                         }
                     }
-                });
-                break;
-            case 'userSkills':
-                userSkills.forEach((skill, index) => {
-                    if (!skill.skillName || !skill.proficiency) {
-                        sectionErrors.push(`Please fill out all fields for Skill ${index + 1}`);
+
+                    if (Object.keys(projectErrors).length > 0) {
+                        sectionErrors[index] = projectErrors;
                     }
                 });
                 break;
+
+            case 'userSkills':
+                userSkills.forEach((skill, index) => {
+                    let skillErrors = {};
+                    if (!skill.skillName) skillErrors.skillName = "Skill name is required";
+                    if (!skill.proficiency) skillErrors.proficiency = "Proficiency is required";
+
+                    if (Object.keys(skillErrors).length > 0) {
+                        sectionErrors[index] = skillErrors;
+                    }
+                });
+                break;
+
             default:
                 break;
+
         }
 
         setErrors((prevErrors) => ({
@@ -480,7 +540,7 @@ const CreateCV = () => {
                     {/* Clone CV Dropdown */}
                     <div className="clone-cv-section">
                         <label htmlFor="cloneCV" className="clone-cv-label">
-                            <i className="icon-copy i-cp-css"></i> <i>Clone existing CV:</i> 
+                            <i className="icon-copy i-cp-css"></i> <i>Clone existing CV:</i>
                         </label>
 
                         <select
@@ -525,13 +585,6 @@ const CreateCV = () => {
                         <>
 
                             <h2 className="cv-section-title-create-css">Section 2: User Details</h2>
-                            {errors.userDetails.length > 0 && (
-                                <div className="cv-validation-errors">
-                                    {errors.userDetails.map((error, index) => (
-                                        <p key={index} className="cv-error-message text-danger">{error}</p>
-                                    ))}
-                                </div>
-                            )}
                             {userDetails.map((detail, index) => (
                                 <div key={index} className="cv-entry">
                                     <input
@@ -542,6 +595,8 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userDetails[index]?.fullName && <div className="cv-error-message text-danger">{errors.userDetails[index].fullName}</div>}
+
                                     <input
                                         type="text"
                                         placeholder="Address"
@@ -550,6 +605,8 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userDetails[index]?.address && <div className="cv-error-message text-danger">{errors.userDetails[index].address}</div>}
+
                                     <input
                                         type="date"
                                         placeholder="Date of Birth"
@@ -558,7 +615,7 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
-
+                                    {errors.userDetails[index]?.dob && <div className="cv-error-message text-danger">{errors.userDetails[index].dob}</div>}
 
                                     <input
                                         type="email"
@@ -568,6 +625,7 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userDetails[index]?.email && <div className="cv-error-message text-danger">{errors.userDetails[index].email}</div>}
 
                                     <input
                                         type="tel"
@@ -577,6 +635,7 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userDetails[index]?.phone && <div className="cv-error-message text-danger">{errors.userDetails[index].phone}</div>}
 
                                     <textarea
                                         rows="5" cols="55"
@@ -587,6 +646,8 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userDetails[index]?.summary && <div className="cv-error-message text-danger">{errors.userDetails[index].summary}</div>}
+
                                     <label htmlFor={`profileImage-${index}`} className="cv-label">
                                         Profile Image
                                     </label>
@@ -605,6 +666,7 @@ const CreateCV = () => {
                                         accept="image/*"
                                         className="cv-file-input"
                                     />
+                                    {errors.userDetails[index]?.profileImage && <div className="cv-error-message text-danger">{errors.userDetails[index].profileImage}</div>}
 
                                     {userDetails.length > 1 && (
                                         <button type="button" onClick={() => removeEntry(index, 'userDetails')} className="cv-remove-btn">
@@ -613,6 +675,7 @@ const CreateCV = () => {
                                     )}
                                 </div>
                             ))}
+
                             <div className="cv-button-group">
                                 <button type="button" onClick={handleGoBack} className="cv-back-btn">
                                     Go Back
@@ -629,13 +692,6 @@ const CreateCV = () => {
                     {step === 3 && (
                         <>
                             <h2 className="cv-section-title-create-css">Section 3: Education</h2>
-                            {errors.userEducations.length > 0 && (
-                                <div className="cv-validation-errors">
-                                    {errors.userEducations.map((error, index) => (
-                                        <p key={index} className="cv-error-message text-danger">{error}</p>
-                                    ))}
-                                </div>
-                            )}
                             {userEducations.map((education, index) => (
                                 <div key={index} className="cv-entry">
                                     <input
@@ -646,6 +702,10 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userEducations[index]?.institution && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].institution}</div>
+                                    )}
+
                                     <input
                                         type="text"
                                         placeholder="Degree"
@@ -654,15 +714,22 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userEducations[index]?.degree && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].degree}</div>
+                                    )}
+
                                     <textarea
                                         rows="5" cols="55"
-                                        type="text"
                                         placeholder="Description"
                                         value={education.description}
                                         onChange={(e) => handleInputChange(e, index, 'description', 'userEducations')}
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userEducations[index]?.description && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].description}</div>
+                                    )}
+
                                     <input
                                         type="date"
                                         placeholder="Start Date"
@@ -671,6 +738,10 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userEducations[index]?.startDate && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].startDate}</div>
+                                    )}
+
                                     <input
                                         type="date"
                                         placeholder="End Date"
@@ -679,6 +750,14 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userEducations[index]?.endDate && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].endDate}</div>
+                                    )}
+
+                                    {errors.userEducations[index]?.dateRange && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].dateRange}</div>
+                                    )}
+
                                     {userEducations.length > 1 && (
                                         <button type="button" onClick={() => removeEntry(index, 'userEducations')} className="cv-remove-btn">
                                             Remove
@@ -697,7 +776,6 @@ const CreateCV = () => {
                                     Continue
                                 </button>
                             </div>
-
                         </>
                     )}
 
@@ -705,13 +783,6 @@ const CreateCV = () => {
                     {step === 4 && (
                         <>
                             <h2 className="cv-section-title-create-css">Section 4: Experience</h2>
-                            {errors.userExperiences.length > 0 && (
-                                <div className="cv-validation-errors">
-                                    {errors.userExperiences.map((error, index) => (
-                                        <p key={index} className="cv-error-message text-danger">{error}</p>
-                                    ))}
-                                </div>
-                            )}
                             {userExperiences.map((experience, index) => (
                                 <div key={index} className="cv-entry">
                                     <input
@@ -722,6 +793,10 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userExperiences[index]?.jobTitle && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].jobTitle}</div>
+                                    )}
+
                                     <input
                                         type="text"
                                         placeholder="Company"
@@ -730,15 +805,22 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userExperiences[index]?.company && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].company}</div>
+                                    )}
+
                                     <textarea
                                         rows="5" cols="55"
-                                        type="text"
                                         placeholder="Description"
                                         value={experience.description}
                                         onChange={(e) => handleInputChange(e, index, 'description', 'userExperiences')}
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userExperiences[index]?.description && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].description}</div>
+                                    )}
+
                                     <input
                                         type="date"
                                         placeholder="Start Date"
@@ -747,6 +829,10 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userExperiences[index]?.startDate && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].startDate}</div>
+                                    )}
+
                                     <input
                                         type="date"
                                         placeholder="End Date"
@@ -755,6 +841,14 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userExperiences[index]?.endDate && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].endDate}</div>
+                                    )}
+
+                                    {errors.userExperiences[index]?.dateRange && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].dateRange}</div>
+                                    )}
+
                                     {userExperiences.length > 1 && (
                                         <button type="button" onClick={() => removeEntry(index, 'userExperiences')} className="cv-remove-btn">
                                             Remove
@@ -773,21 +867,14 @@ const CreateCV = () => {
                                     Continue
                                 </button>
                             </div>
-
                         </>
                     )}
+
 
                     {/* Language Section */}
                     {step === 5 && (
                         <>
                             <h2 className="cv-section-title-create-css">Section 5: Languages</h2>
-                            {errors.userLanguages.length > 0 && (
-                                <div className="cv-validation-errors">
-                                    {errors.userLanguages.map((error, index) => (
-                                        <p key={index} className="cv-error-message text-danger">{error}</p>
-                                    ))}
-                                </div>
-                            )}
                             {userLanguages.map((language, index) => (
                                 <div key={index} className="cv-entry">
                                     <input
@@ -798,6 +885,9 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userLanguages[index]?.languageName && (
+                                        <div className="cv-error-message text-danger">{errors.userLanguages[index].languageName}</div>
+                                    )}
                                     <input
                                         type="text"
                                         placeholder="Proficiency Level"
@@ -806,6 +896,9 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userLanguages[index]?.proficiency && (
+                                        <div className="cv-error-message text-danger">{errors.userLanguages[index].proficiency}</div>
+                                    )}
                                     {userLanguages.length > 1 && (
                                         <button type="button" onClick={() => removeEntry(index, 'userLanguages')} className="cv-remove-btn">
                                             Remove
@@ -824,7 +917,6 @@ const CreateCV = () => {
                                     Continue
                                 </button>
                             </div>
-
                         </>
                     )}
 
@@ -832,13 +924,6 @@ const CreateCV = () => {
                     {step === 6 && (
                         <>
                             <h2 className="cv-section-title-create-css">Section 6: Projects</h2>
-                            {errors.userProjects.length > 0 && (
-                                <div className="cv-validation-errors">
-                                    {errors.userProjects.map((error, index) => (
-                                        <p key={index} className="cv-error-message text-danger">{error}</p>
-                                    ))}
-                                </div>
-                            )}
                             {userProjects.map((project, index) => (
                                 <div key={index} className="cv-entry">
                                     <input
@@ -849,15 +934,20 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userProjects[index]?.projectName && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].projectName}</div>
+                                    )}
                                     <textarea
                                         rows="5" cols="55"
-                                        type="text"
                                         placeholder="Description"
                                         value={project.description}
                                         onChange={(e) => handleInputChange(e, index, 'description', 'userProjects')}
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userProjects[index]?.description && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].description}</div>
+                                    )}
                                     <input
                                         type="date"
                                         placeholder="Start Date"
@@ -866,6 +956,9 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userProjects[index]?.startDate && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].startDate}</div>
+                                    )}
                                     <input
                                         type="date"
                                         placeholder="End Date"
@@ -874,6 +967,12 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userProjects[index]?.endDate && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].endDate}</div>
+                                    )}
+                                    {errors.userProjects[index]?.dateRange && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].dateRange}</div>
+                                    )}
                                     {userProjects.length > 1 && (
                                         <button type="button" onClick={() => removeEntry(index, 'userProjects')} className="cv-remove-btn">
                                             Remove
@@ -892,7 +991,6 @@ const CreateCV = () => {
                                     Continue
                                 </button>
                             </div>
-
                         </>
                     )}
 
@@ -900,13 +998,6 @@ const CreateCV = () => {
                     {step === 7 && (
                         <>
                             <h2 className="cv-section-title-create-css">Section 7: Skills</h2>
-                            {errors.userSkills.length > 0 && (
-                                <div className="cv-validation-errors">
-                                    {errors.userSkills.map((error, index) => (
-                                        <p key={index} className="cv-error-message text-danger">{error}</p>
-                                    ))}
-                                </div>
-                            )}
                             {userSkills.map((skill, index) => (
                                 <div key={index} className="cv-entry">
                                     <input
@@ -917,6 +1008,9 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userSkills[index]?.skillName && (
+                                        <div className="cv-error-message text-danger">{errors.userSkills[index].skillName}</div>
+                                    )}
                                     <input
                                         type="text"
                                         placeholder="Example: HTML, CSS, JavaScript"
@@ -925,6 +1019,9 @@ const CreateCV = () => {
                                         required
                                         className="cv-input"
                                     />
+                                    {errors.userSkills[index]?.proficiency && (
+                                        <div className="cv-error-message text-danger">{errors.userSkills[index].proficiency}</div>
+                                    )}
                                     {userSkills.length > 1 && (
                                         <button type="button" onClick={() => removeEntry(index, 'userSkills')} className="cv-remove-btn">
                                             Remove
@@ -940,12 +1037,10 @@ const CreateCV = () => {
                                 <button type="button" onClick={handleGoBack} className="cv-back-btn">
                                     Go Back
                                 </button>
-
                             </div>
-
-
                         </>
                     )}
+
                 </form>
             </div>
         </div>

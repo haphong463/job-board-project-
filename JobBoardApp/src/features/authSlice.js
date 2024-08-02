@@ -19,6 +19,9 @@ export const signIn = createAsyncThunk(
           message: "Please check your email to verify your account.",
         });
       }
+      if (res.userId) {
+        localStorage.setItem('userId', res.userId.toString()); // Ensure userId is stored as a string
+      }
       return res;
     } catch (error) {
       console.log(">>>error sign in: ", error);

@@ -7,7 +7,8 @@ function DeleteCv({ cvId, onDelete, onCancel,cv }) {
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [notification, setNotification] = useState(null);
-
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  
   const generateRandomQuestion = () => {
     const operations = ['+', '-', '*'];
     const operation = operations[Math.floor(Math.random() * operations.length)];
@@ -83,26 +84,30 @@ function DeleteCv({ cvId, onDelete, onCancel,cv }) {
           {notification.message}
         </div>
       )}
-      <h2><i className="fas fa-exclamation-triangle mr-2"></i> Delete Confirmation</h2>
-      {!showQuestionForm ? (
+      {!notification || notification.type !== 'success' ? (
         <>
-          <p>Are you sure you want to delete <i className='text-danger'>{cv.cvTitle}</i> CV?</p>
-          <button className="confirm-btn" onClick={handleDeleteClick}>Confirm Delete</button>
-          <button className="cancel-btn" onClick={onCancel}>Cancel</button>
+          <h2><i className="fas fa-exclamation-triangle mr-2"></i> Delete Confirmation</h2>
+          {!showQuestionForm ? (
+            <>
+              <p>Are you sure you want to delete <i className='text-danger'>{cv.cvTitle}</i> CV?</p>
+              <button className="confirm-btn" onClick={handleDeleteClick}>Confirm Delete</button>
+              <button className="cancel-btn" onClick={onCancel}>Cancel</button>
+            </>
+          ) : (
+            <div className="question-form">
+              <p className="text-danger">*Answer the following question to confirm delete:</p>
+              <p>{deleteQuestion.question}</p>
+              <input type="number" id="deleteAnswer" placeholder="Your answer" />
+              <button className="confirm-btn" onClick={() => handleAnswerSubmit(document.getElementById('deleteAnswer').value)}>
+                Submit Answer
+              </button>
+              <button className="cancel-btn" onClick={onCancel}>Cancel</button>
+            </div>
+          )}
         </>
-      ) : (
-        <div className="question-form">
-          <p className="text-danger">*Answer the following question to confirm delete:</p>
-          <p>{deleteQuestion.question}</p>
-          <input type="number" id="deleteAnswer" placeholder="Your answer" />
-          <button className="confirm-btn" onClick={() => handleAnswerSubmit(document.getElementById('deleteAnswer').value)}>
-            Submit Answer
-          </button>
-          <button className="cancel-btn" onClick={onCancel}>Cancel</button>
-        </div>
-      )}
+      ) : null}
     </div>
   );
-}
+          }  
 
 export default DeleteCv;

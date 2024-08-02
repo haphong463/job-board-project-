@@ -7,7 +7,8 @@ public enum Position {
     MIDDLE("Middle"),
     SENIOR("Senior"),
     LEADER("Leader"),
-    MANAGER("Manager");
+    MANAGER("Manager"),
+    HR("Hr");
 
     private final String value;
 
