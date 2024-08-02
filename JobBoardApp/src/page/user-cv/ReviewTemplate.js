@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ReviewBox from '../../components/dialog-box/ReviewBox';
 import WaveLoader from '../../components/loading-spinner/LoadingSpinner';
 import '../../assets/css/review-template.css';
-
+import Ads from '../../components/dialog-box/Ads.js';
 const CVSelector = ({ cvs, currentCvId, onCVChange }) => (
   <div className='text-center'>
     <h3 className='text-review-css'>Click to change cv details</h3>
@@ -38,6 +38,10 @@ const TemplateViewer = () => {
   const [userCVs, setUserCVs] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [countdown, setCountdown] = useState(10);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [showAd, setShowAd] = useState(false);
+  const [hasWatchedAd, setHasWatchedAd] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const fetchTemplate = async () => {
     try {
@@ -51,6 +55,19 @@ const TemplateViewer = () => {
     }
   };
 
+  const handleWatchAd = () => {
+    setShowPrintDialog(false);
+    setShowAd(true);
+    setHasWatchedAd(true);
+  };
+
+  const handleCloseAd = () => {
+    setShowAd(false);
+    handlePrintToPdf().then(() => {
+      setHasWatchedAd(false);
+    });
+  };
+
   const fetchUserCVs = async () => {
     try {
       const response = await axiosRequest.get(`/usercv/list-cvs/${userId}`);
@@ -61,7 +78,21 @@ const TemplateViewer = () => {
   };
 
   const handlePrintToPdf = async () => {
+    if (isPrinting) return; // Prevent multiple clicks
+
     try {
+      setIsPrinting(true); // Start loading
+
+      if (!hasWatchedAd) {
+        const countResponse = await axiosRequest.get(`/templates/count/${userId}`);
+        const pdfCount = countResponse;
+
+        if (pdfCount >= 1) {
+          setShowPrintDialog(true);
+          setIsPrinting(false); // End loading if showing dialog
+          return;
+        }
+      }
       const cvTitle = userCVs.find(cv => cv.cvId === parseInt(cvId))?.cvTitle || 'cv_template';
 
       const response = await axiosRequest.get(`/templates/generate/${userId}/${cvId}`, {
@@ -99,6 +130,9 @@ const TemplateViewer = () => {
       console.error('Error generating or saving PDF:', error);
       alert(`Error generating or saving PDF: ${error.message}`);
     }
+    finally {
+      setIsPrinting(false); // End loading
+    }
   };
 
   const startCountdown = () => {
@@ -129,6 +163,7 @@ const TemplateViewer = () => {
     setShowDialog(true);
     fetchTemplate();
     fetchUserCVs();
+    setHasWatchedAd(false);
   }, [key, userId, cvId]);
 
   const handleCVChange = async (newCvId) => {
@@ -190,10 +225,15 @@ const TemplateViewer = () => {
                   onCVChange={handleCVChange}
                 />
               </div>
-
-              <div className="action-item-rv" onClick={handlePrintToPdf}>
-                <span className="icon"><i className="fas fa-print"></i></span>
-                Print to PDF
+              <div
+                className={`action-item-rv ${isPrinting ? 'disabled' : ''}`}
+                onClick={handlePrintToPdf}
+              >
+                <span className="icon">
+                  {isPrinting ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-print"></i>}
+                </span>
+                {isPrinting ? 'Printing...' : 'Print to PDF'}
+               
               </div>
               <div className="action-item-rv" onClick={handleUpdateCV}>
                 <span className="icon"><i className="fas fa-edit"></i></span>
@@ -226,12 +266,35 @@ const TemplateViewer = () => {
               </div>
             </div>
           )}
-
-
+          {showScrollToTop && (
+            <button className="scroll-to-top-button" onClick={scrollToTop}>
+              <i className="fas fa-arrow-up"></i>
+            </button>
+          )}
+          {showPrintDialog && (
+            <div className="dialog-overlay-ad">
+              <div className="dialog-box-ad">
+                <p>You have exceeded your free print limit. Please watch an ad to continue.</p>
+                <div className="ad-container">
+                  <h6>Ads content goes here.</h6>
+                  <button className="button-ad button-watch-ad m-2" onClick={handleWatchAd}>
+                    Watch Ad
+                  </button>
+                  <button className="button-ad button-cancel-ad m-2" onClick={() => setShowPrintDialog(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {showAd && (
+            <Ads onClose={handleCloseAd} />
+          )}
         </div>
       </div>
     </div>
   );
+
 };
 
 export default TemplateViewer;

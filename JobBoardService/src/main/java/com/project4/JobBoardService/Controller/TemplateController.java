@@ -392,6 +392,10 @@ public class TemplateController {
 		}
 		return ResponseEntity.ok(pdfs);
 	}
+	@GetMapping("/count/{userId}")
+	public int countPdfDocumentsByUserId(@PathVariable Long userId) {
+		return pdfDocumentRepository.countByUserId(userId);
+	}
 	@GetMapping("/document/{id}")
 	public ResponseEntity<PdfDocument> getPdfById(@PathVariable Long id) {
 		Optional<PdfDocument> optionalPdfDocument = pdfDocumentRepository.findById(id);

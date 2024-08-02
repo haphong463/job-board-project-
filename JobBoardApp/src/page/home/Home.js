@@ -92,9 +92,9 @@ export const Home = () =>
     window.location.href = `/jobList/${categoryId}`;
   };
 
-  const handleJobClick = (jobId) =>
+  const handleJobClick = (jobId,companyId) =>
   {
-    window.location.href = `/jobDetail/${jobId}`;
+    window.location.href = `/jobDetail/${jobId}/${companyId}`;
   };
 
   return (
@@ -168,7 +168,7 @@ export const Home = () =>
                         <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
                           <h2 className="mb-2" onClick={() =>
                           {
-                            handleJobClick(job.id);
+                            handleJobClick(job.id,job.companyId);
                           }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
                           <strong onClick={() =>
                           {

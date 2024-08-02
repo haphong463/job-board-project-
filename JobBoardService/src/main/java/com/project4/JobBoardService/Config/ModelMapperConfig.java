@@ -33,7 +33,8 @@ public class ModelMapperConfig {
             @Override
             protected void configure() {
                 map().setUserId(source.getUser().getId());
-                map(source.getJob(), destination.getJobDTO()); // Ensure correct mapping
+                map(source.getJob(), destination.getJobDTO());
+                map(source.getCompany().getCompanyId(), destination.getJobDTO().getCompanyId());// Ensure correct mapping
                 map(source.getCompany(), destination.getCompanyDTO());
                 modelMapper.createTypeMap(Job.class, JobDTO.class);
             }

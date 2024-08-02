@@ -50,14 +50,14 @@ const ApplyBox = ({ jobId, company, userId, onClose }) => {
           },
         });
       
-        if (response === "Application submitted successfully.") {
-          setSuccessMessage('Application submitted successfully!');
+        if (response === "Application submitted successfully and notification email sent.") {
+          setSuccessMessage('Application submitted successfully and you will recieve notification email from us!');
           
-          // Set a timer to close the ApplyBox and reload the browser
+           
           setTimeout(() => {
-            onClose(); // Close the ApplyBox
-            window.location.reload(); // Reload the browser
-          }, 2000); // Wait for 3 seconds before closing and reloading
+            onClose();  
+            window.location.reload();  
+          }, 6000);  
         }
       } catch (error) {
         console.error('Error submitting application:', error);
@@ -74,7 +74,7 @@ const ApplyBox = ({ jobId, company, userId, onClose }) => {
         <h2>Apply for <i className='text-primary'>{company.title}</i></h2>
         {successMessage ? (
           <div className="alert alert-success mt-3" role="alert">
-            {successMessage}
+          <h3>{successMessage}</h3>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>

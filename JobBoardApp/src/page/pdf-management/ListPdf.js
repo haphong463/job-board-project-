@@ -11,7 +11,7 @@ const ListPdf = () => {
   const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pdfsPerPage] = useState(6);
+  const [pdfsPerPage] = useState(5);
   const [sortOrder, setSortOrder] = useState('latest');
 
   useEffect(() => {

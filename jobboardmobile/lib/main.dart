@@ -60,7 +60,6 @@ class MyApp extends StatelessWidget {
           return DocumentViewScreen(documentId: args?['documentId'] ?? 0);
         },
         '/applied_jobs': (context)  => ApplyJobsScreen(),
-   
       },
       onGenerateRoute: (settings) {
         if (settings.name!.startsWith('/quiz/')) {

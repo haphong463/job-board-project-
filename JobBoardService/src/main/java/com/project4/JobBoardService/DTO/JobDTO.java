@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class JobDTO {
     private Integer slot;
     private Integer profileApproved = 0;
     private Boolean isSuperHot;
-    private List<Long> categoryId;
+    private List<Long> categoryId = new ArrayList<>();
     private Long companyId;
     private String expire;
 }
