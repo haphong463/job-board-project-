@@ -4,46 +4,50 @@ import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.Entity.Category;
 import com.project4.JobBoardService.Repository.CategoryRepository;
 import com.project4.JobBoardService.Service.CategoryService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
-    @Override
 
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Override
     public List<CategoryDTO> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        return categories.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    private CategoryDTO convertToDTO(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setCategoryId(category.getCategoryId());
-        dto.setCategoryName(category.getCategoryName());
-        // Set other fields as needed
-        return dto;
+        return categories.stream().map(this::convertToDto).toList();
     }
 
     @Override
-    public Category getCategorybyId(Long id) {
-        return categoryRepository.findById(id).orElse(null);
+    public Optional<CategoryDTO> getCategoryById(Long id) {
+        return categoryRepository.findById(id).map(this::convertToDto);
     }
 
     @Override
-    public void savedCategory(Category category) {
+    public void saveCategory(CategoryDTO categoryDTO) {
+        Category category = convertToEntity(categoryDTO);
         categoryRepository.save(category);
     }
 
     @Override
-    public void deleteCategorybyId(Long id) {
+    public void deleteCategoryById(Long id) {
         categoryRepository.deleteById(id);
+    }
+
+    private CategoryDTO convertToDto(Category category) {
+        return modelMapper.map(category, CategoryDTO.class);
+    }
+
+    private Category convertToEntity(CategoryDTO categoryDTO) {
+        return modelMapper.map(categoryDTO, Category.class);
     }
 }

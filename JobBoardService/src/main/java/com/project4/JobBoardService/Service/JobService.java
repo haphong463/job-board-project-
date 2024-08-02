@@ -8,8 +8,8 @@ import java.util.Optional;
 
 public interface JobService {
     List<JobDTO> findAllJobsByCompanyId(Long userId);
-//    Integer countJobsByCompanyId(Long companyId);
-List<JobDTO> searchJobsByCompanyId(Long userId, String query);
+    //    Integer countJobsByCompanyId(Long companyId);
+    List<JobDTO> searchJobsByCompanyId(Long userId, String query);
     List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired);
     boolean createJob(Long userId, JobDTO jobDTO);
     JobDTO updateJob(Long jobId, JobDTO jobDTO);

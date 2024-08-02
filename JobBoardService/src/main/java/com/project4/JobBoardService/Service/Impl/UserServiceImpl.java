@@ -1,21 +1,24 @@
 package com.project4.JobBoardService.Service.Impl;
 
 
+import com.project4.JobBoardService.Entity.Permission;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
+import com.project4.JobBoardService.Repository.PermissionRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.Util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -24,6 +27,61 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+    @Override
+    public User updateUserPermissions(Long userId, List<String> permissions) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Remove existing permissions
+        user.getPermissions().clear();
+
+        // Add new permissions
+        for (String permissionName : permissions) {
+            Permission permission = permissionRepository.findByName(permissionName)
+                    .orElseThrow(() -> new RuntimeException("Permission not found: " + permissionName));
+            user.getPermissions().add(permission);
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public List<Map<String, Object>> getUserRegistrationCountsForYear(int year) {
+        List<Map<String, Object>> registrationCounts = new ArrayList<>();
+        LocalDate startOfYear = LocalDate.of(year, 1, 1);
+        LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+        for (int month = 1; month <= 12; month++) {
+            LocalDate startOfMonth = LocalDate.of(year, month, 1);
+            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+            long count = userRepository.countByCreatedAtBetween(startOfMonth.atStartOfDay(), endOfMonth.atTime(23, 59, 59));
+            Map<String, Object> countMap = new HashMap<>();
+            countMap.put("month", startOfMonth.getMonth().toString());
+            countMap.put("count", count);
+            registrationCounts.add(countMap);
+        }
+
+        return registrationCounts;
+    }
+
+    @Override
+    public User updatePassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public List<Permission> getAllPermission() {
+        return permissionRepository.findAll();
+    }
 
     @Override
     public Optional<User> findByUsername(String username) {

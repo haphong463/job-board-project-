@@ -7,8 +7,6 @@ import {
 } from "../services/AuthService";
 import { jwtDecode } from "jwt-decode"; // Correct import
 import axios from "axios";
-const userNotFound = "User not found";
-const badCredentials = "Bad credentials";
 
 export const signIn = createAsyncThunk(
   "auth/signin",
@@ -21,19 +19,15 @@ export const signIn = createAsyncThunk(
           message: "Please check your email to verify your account.",
         });
       }
+      if (res.userId) {
+        localStorage.setItem('userId', res.userId.toString()); // Ensure userId is stored as a string
+      }
       return res;
     } catch (error) {
-      if (typeof error.response.data.message === "string") {
-        switch (error.response.data.message) {
-          case badCredentials:
-            return rejectWithValue({
-              message: "Your username or password is incorrect.",
-            });
-          case userNotFound:
-            return rejectWithValue({
-              message: "User not found",
-            });
-        }
+      console.log(">>>error sign in: ", error);
+      const status = error.response.status;
+      if (status === 400) {
+        return rejectWithValue(error.response.data.message);
       }
       return rejectWithValue(error.message);
     }
@@ -47,7 +41,11 @@ export const signInOAuth2 = createAsyncThunk(
       const res = await signInOAuth2Async(data);
       return res;
     } catch (error) {
-      console.log(error);
+      console.log('>>> error oauth2: ', error)
+      const status = error.response.status;
+      if (status === 400) {
+        return rejectWithValue(error.response.data.message);
+      }
       return rejectWithValue(error.message);
     }
   }
@@ -74,6 +72,10 @@ export const signUp = createAsyncThunk(
       const res = await signUpAsync(data);
       return res;
     } catch (error) {
+      const status = error.response.status;
+      if (status === 400) {
+        return rejectWithValue(error.response.data.message);
+      }
       return rejectWithValue(error.message);
     }
   }
@@ -165,8 +167,7 @@ const authSlice = createSlice({
       state.verificationMessage = null;
     },
     resetMessages(state) {
-      state.successMessage = "";
-      state.errorMessage = "";
+     state.error = null;
     },
     setCurrentUser(state, action) {
       state.currentUser = action.payload;
@@ -208,11 +209,6 @@ const authSlice = createSlice({
       .addCase(signIn.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
-        if (action.payload && typeof action.payload === "object") {
-          state.isVerified = false;
-          state.verificationEmail = action.payload.email;
-          state.verificationMessage = action.payload.message;
-        }
       })
       .addCase(forgotPassword.fulfilled, (state, action) => {
         state.successMessage = action.payload;
@@ -252,6 +248,9 @@ const authSlice = createSlice({
         state.roles = state.user.role.map((r) => r.authority);
         localStorage.setItem("accessToken", action.payload.accessToken);
         localStorage.setItem("refreshToken", action.payload.refreshToken);
+      })
+      .addCase(signInOAuth2.rejected, (state, action) => {
+        state.error = action.payload;
       })
       .addCase(signOut.fulfilled, (state) => {
         state.user = null;

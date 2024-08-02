@@ -151,6 +151,7 @@ const authSlice = createSlice({
       .addCase(updateUserThunk.fulfilled, (state, action) => {
         console.log(">>> fulfilled: ", action.payload);
         state.userEdit = action.payload;
+        state.user = { ...state.user, imageUrl: action.payload.imageUrl };
       })
       .addCase(updateUserThunk.rejected, (state, action) => {
         console.log(">>> rejected: ", action.payload);

@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jobboardmobile/constant/endpoint.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthService {
   // final String baseUrl = 'http://localhost:8080/api/auth';
-  final String baseUrl = 'http://192.168.110.22:8080/api/auth';
-  final storage = FlutterSecureStorage();
+  final String baseUrl = '${Endpoint.baseUrl}/auth';
+  final storage = const FlutterSecureStorage();
 
   Future<http.Response> login(String username, String password) async {
     final response = await http.post(
@@ -13,19 +16,51 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
     );
-
     if (response.statusCode == 200) {
+      print(response.body);
       var jsonResponse = jsonDecode(response.body);
-      await storage.write(key: 'accessToken', value: jsonResponse['jwt']);
+      await storage.write(key: 'accessToken', value: jsonResponse['token']);
+      Map<String, dynamic> decodedToken =
+          JwtDecoder.decode(jsonResponse['token']);
       await storage.write(
           key: 'refreshToken', value: jsonResponse['refreshToken']);
-      await storage.write(key: 'firstName', value: jsonResponse['firstName']);
-      await storage.write(key: 'lastName', value: jsonResponse['lastName']);
+      await storage.write(key: 'firstName', value: decodedToken['firstName']);
+      await storage.write(key: 'lastName', value: decodedToken['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
+      await storage.write(key: 'username', value: jsonResponse['username']);
+      await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      saveUserId(jsonResponse['id'].toString());
     } else {
       throw Exception('Failed to login');
     }
 
+    return response;
+  }
+
+  Future<http.Response> loginByGoogle(String? token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/google-mobile'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'token': token}),
+    );
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      var jsonResponse = jsonDecode(response.body);
+      await storage.write(key: 'accessToken', value: jsonResponse['token']);
+      Map<String, dynamic> decodedToken =
+          JwtDecoder.decode(jsonResponse['token']);
+      await storage.write(
+          key: 'refreshToken', value: jsonResponse['refreshToken']);
+      await storage.write(key: 'firstName', value: decodedToken['firstName']);
+      await storage.write(key: 'lastName', value: decodedToken['lastName']);
+      await storage.write(key: 'email', value: jsonResponse['email']);
+      await storage.write(key: 'username', value: jsonResponse['username']);
+      await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      saveUserId(jsonResponse['id'].toString());
+    } else {
+      throw Exception('Failed to login');
+    }
     return response;
   }
 
@@ -157,6 +192,84 @@ class AuthService {
     }
   }
 
+  Future<void> refreshToken(BuildContext context) async {
+    final refreshToken = await getRefreshToken();
+    if (refreshToken == null) return;
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/refreshtoken'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'refreshToken': refreshToken}),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      print("JsonRepsonse: $jsonResponse");
+      await storage.write(key: 'accessToken', value: jsonResponse['token']);
+      Map<String, dynamic> decodedToken =
+          JwtDecoder.decode(jsonResponse['token']);
+      await storage.write(
+          key: 'refreshToken', value: jsonResponse['refreshToken']);
+      await storage.write(key: 'firstName', value: decodedToken['firstName']);
+      await storage.write(key: 'lastName', value: decodedToken['lastName']);
+      await storage.write(key: 'email', value: jsonResponse['email']);
+      await storage.write(key: 'username', value: jsonResponse['username']);
+      await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      saveUserId(jsonResponse['id'].toString());
+    } else {
+      _showSessionExpiredDialog(context);
+    }
+  }
+
+  void _showSessionExpiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Session Expired'),
+          content: const Text('Your session has expired. Please log in again.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to login screen
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<http.Response> sendRequestWithRetry(
+    BuildContext context,
+    Future<http.Response> Function() request,
+  ) async {
+    http.Response response = await request();
+    if (response.statusCode == 401) {
+      await refreshToken(context);
+      response = await request();
+    }
+    return response;
+  }
+
+  Future<http.Response> getProtectedResource(BuildContext context) async {
+    return await AuthService().sendRequestWithRetry(
+      context,
+      () async {
+        final accessToken = await AuthService().getAccessToken();
+        return http.get(
+          Uri.parse('${Endpoint.baseUrl}/protected-resource'),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+          },
+        );
+      },
+    );
+  }
+
   Future<String?> getAccessToken() async {
     return await storage.read(key: 'accessToken');
   }
@@ -167,6 +280,10 @@ class AuthService {
 
   Future<String?> getUserId() async {
     return await storage.read(key: 'userId');
+  }
+
+  Future<String?> getImageUrl() async {
+    return await storage.read(key: 'imageUrl');
   }
 
   Future<void> saveUserId(String userId) async {
@@ -183,5 +300,9 @@ class AuthService {
 
   Future<String?> getEmail() async {
     return await storage.read(key: 'email');
+  }
+
+  Future<String?> getUsername() async {
+    return await storage.read(key: 'username');
   }
 }

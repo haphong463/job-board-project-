@@ -1,14 +1,14 @@
 package com.project4.JobBoardService.Enum;
 
 public enum Position {
-
     INTERN("Intern"),
     FRESHER("Fresher"),
     JUNIOR("Junior"),
     MIDDLE("Middle"),
     SENIOR("Senior"),
     LEADER("Leader"),
-    MANAGER("Manager");
+    MANAGER("Manager"),
+    HR("Hr");
 
     private final String value;
 

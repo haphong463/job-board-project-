@@ -4,9 +4,11 @@ import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Entity.Comment;
 import com.project4.JobBoardService.Entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,26 +20,30 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     int countByCategories(BlogCategory blogCategory);
     Blog findBySlug(@Param("slug") String slug);
     int countByComments(Comment comment);
+    Blog findByTitle(String title);
 
+    @Query("SELECT DISTINCT b FROM Blog b " +
+            "JOIN b.categories c " +
+            "LEFT JOIN b.hashtags h " +
+            "WHERE (:type IS NULL OR c.name = :type) " +
+            "AND (LOWER(b.title) LIKE %:query% " +
+            "OR LOWER(b.content) LIKE %:query% " +
+            "OR LOWER(c.name) LIKE %:query% " +
+            "OR LOWER(h.name) LIKE %:query%) " +
+            "AND (:visibility IS NULL OR b.visibility = :visibility)")
+    Page<Blog> searchByQuery(@Param("type") String type,
+                             @Param("query") String query,
+                             @Param("visibility") Boolean visibility,
+                             Pageable pageable);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Blog b SET b.view = b.view + 1 WHERE b.id = :blogId")
+    void incrementViewCount(@Param("blogId") Long blogId);
 
+    @Query(value = "SELECT * FROM Blog b ORDER BY b.view DESC LIMIT 4", nativeQuery = true)
+    List<Blog> findTop4ByOrderByViewDesc();
 
-    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) " +
-            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
-    Page<Blog> searchByQuery(@Param("type") String type, @Param("query") String query, Pageable pageable);
-
-    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (LOWER(b.title) " +
-            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%) AND b.visibility = :visibility")
-    Page<Blog> searchByQuery(@Param("query") String query, Pageable pageable, @Param("visibility") boolean visibility);
-
-
-    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (c.name = :type OR :type IS NULL) AND (LOWER(b.title) " +
-            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%) AND b.visibility = :visibility")
-    Page<Blog> searchByQuery(@Param("type") String type, @Param("query") String query, @Param("visibility") boolean visibility, Pageable pageable);
-
-    @Query("SELECT DISTINCT b FROM Blog b JOIN b.categories c WHERE (LOWER(b.title) " +
-            "LIKE %:query% OR LOWER(b.content) LIKE %:query% OR LOWER(c.name) LIKE %:query%)")
-    Page<Blog> searchByQuery(@Param("query") String query, Pageable pageable);
 }
 
 

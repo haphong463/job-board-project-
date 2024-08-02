@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { signIn, resetSignInSuccess } from "../features/authSlice";
+import showToast from "../utils/function/showToast";
 
 export const useLoginForm = () => {
   const navigate = useNavigate();
@@ -27,8 +28,11 @@ export const useLoginForm = () => {
     dispatch(signIn(data))
       .then((res) => {
         if (res.meta.requestStatus === "fulfilled") {
+          const fullName = res.payload.firstName + " " + res.payload.lastName;
+
           navigate(-1, { replace: true });
           dispatch(resetSignInSuccess());
+          showToast("You're back, " + fullName, "success");
         }
       })
       .catch((err) => {

@@ -8,6 +8,7 @@ import {
   InputGroup,
   InputGroupText,
   Input,
+  Spinner,
 } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBlogs, deleteBlog } from "../../../features/blogSlice";
@@ -49,7 +50,6 @@ export function BlogCategory(props) {
       setIsEdit(editBlog); // Set the state to the selected blog category
     }
   };
-
   const columns = [
     {
       name: "Name",
@@ -92,35 +92,36 @@ export function BlogCategory(props) {
   ];
 
   return (
-    <Row>
-      <Col lg="12">
-        <BlogCategoryForm isEdit={isEdit} setIsEdit={setIsEdit} />{" "}
-        {/* Pass isEdit and setIsEdit as props */}
-      </Col>
-      <Col lg="12">
-        <Card>
-          <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-            <i className="bi bi-card-text me-2"> </i>
-            Blog List
-          </CardTitle>
-          <InputGroup className="mb-3">
-            <InputGroupText>Search</InputGroupText>
-            <Input
-              type="text"
-              placeholder="Search by title"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </InputGroup>
-          <DataTable
-            columns={columns}
-            data={blogCategoryData.filter((blog) =>
-              blog.name.toLowerCase().includes(searchTerm.toLowerCase())
-            )}
+    <Card>
+      <div className="d-flex justify-content-between align-items-center p-3 gap-3">
+        <h4>Category List</h4>
+        <div className="d-flex  p-3 gap-3">
+          <BlogCategoryForm isEdit={isEdit} setIsEdit={setIsEdit} />{" "}
+        </div>
+      </div>
+      <div className="d-flex gap-3 px-2">
+        <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
+          <Input
+            type="text"
+            placeholder="Search by title"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-        </Card>
-      </Col>
-    </Row>
+          <label htmlFor="floatingSearch">Search</label>
+        </div>
+      </div>
+      <DataTable
+        columns={columns}
+        data={blogCategoryData.filter((blog) =>
+          blog.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )}
+        pagination
+        paginationRowsPerPageOptions={[5, 10, 15]}
+        paginationPerPage={5}
+        progressPending={blogCategoryStatus === "loading"}
+        progressComponent={<Spinner />}
+      />
+    </Card>
   );
 }
 

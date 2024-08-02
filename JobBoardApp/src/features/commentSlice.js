@@ -159,10 +159,32 @@ const commentSlice = createSlice({
       })
       .addCase(addComment.fulfilled, (state, action) => {
         const newComment = action.payload;
+        console.log(">>newComment: ", newComment);
+
         const currentTime = new Date().toISOString();
+
+        // Helper function to convert IDs to numbers
+        const convertIdsToNumbers = (comments) => {
+          return comments.map((comment) => {
+            const newComment = {
+              ...comment,
+              id: Number(comment.id), // Ensure ID is a number
+              children: comment.children
+                ? convertIdsToNumbers(comment.children)
+                : [],
+            };
+            return newComment;
+          });
+        };
+
         const addToTree = (comments, newComment) => {
           return comments.map((comment) => {
-            if (comment.id === newComment.parent?.id) {
+            // Convert comment id to number for comparison
+            const commentId = Number(comment.id);
+            const parentId = Number(newComment.parent?.id);
+
+            if (commentId === parentId) {
+              console.log("vao day!");
               return {
                 ...comment,
                 children: [...(comment.children || []), newComment],
@@ -177,8 +199,11 @@ const commentSlice = createSlice({
           });
         };
 
+        // Convert IDs in state.comments to numbers
+        const commentsWithNumbers = convertIdsToNumbers(state.comments);
+
         if (newComment.parent && newComment.parent.id) {
-          state.comments = addToTree(state.comments, {
+          state.comments = addToTree(commentsWithNumbers, {
             ...newComment,
             createdAt: currentTime,
             updatedAt: currentTime,
@@ -191,6 +216,8 @@ const commentSlice = createSlice({
             children: [],
           });
         }
+
+        console.log(state.comments);
       })
 
       .addCase(deleteComment.rejected, (state, action) => {

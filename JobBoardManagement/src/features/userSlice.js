@@ -2,7 +2,9 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   createModeratorAsync,
   deleteUserAsync,
+  getAllPermission,
   getAllUserAsync,
+  updatePermissionModerator,
   updateUserEnableStatusAsync,
 } from "../services/user_service";
 export const getUserThunk = createAsyncThunk(
@@ -56,12 +58,38 @@ export const createModeratorThunk = createAsyncThunk(
     }
   }
 );
+
+export const updatePermissionsThunk = createAsyncThunk(
+  "user/updatePermissions",
+  async ({ userId, permissions }, { rejectWithValue }) => {
+    try {
+      const res = await updatePermissionModerator({ userId, permissions });
+      return res;
+    } catch (error) {
+      console.log("error: ", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllPermissionThunk = createAsyncThunk(
+  "/user/permissions",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getAllPermission();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const userSlice = createSlice({
   initialState: {
     list: [],
     totalPages: 0,
     status: "idle",
     error: null,
+    permissions: [],
   },
   name: "user",
   reducers: {},
@@ -90,6 +118,14 @@ const userSlice = createSlice({
       })
       .addCase(deleteUserThunk.fulfilled, (state, action) => {
         state.list = state.list.filter((user) => user.id !== action.payload);
+      })
+      .addCase(updatePermissionsThunk.fulfilled, (state, action) => {
+        state.list = state.list.map((user) =>
+          user.id === action.payload.id ? action.payload : user
+        );
+      })
+      .addCase(getAllPermissionThunk.fulfilled, (state, action) => {
+        state.permissions = action.payload;
       }),
 });
 

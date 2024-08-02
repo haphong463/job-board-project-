@@ -3,6 +3,7 @@ import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteUserThunk,
+  getAllPermissionThunk,
   getUserThunk,
   updateUserStatusThunk,
 } from "../../../features/userSlice";
@@ -25,11 +26,16 @@ import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import debounce from "lodash.debounce";
 import { ModeratorForm } from "./ModeratorForm";
+import PermissionForm from "./PermissionForm"; // Import the new component
 import "./style.css";
 import Swal from "sweetalert2";
+import showToast from "../../../utils/functions/showToast";
+
 const UserList = () => {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.user.list);
+  const user = useSelector((state) => state.auth.user);
+  const permissions = useSelector((state) => state.user.permissions);
   const totalPages = useSelector((state) => state.user.totalPages);
   const status = useSelector((state) => state.user.status);
   const error = useSelector((state) => state.user.error);
@@ -39,6 +45,8 @@ const UserList = () => {
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const toggleDropdown = (id) => {
     setDropdownOpen((prevState) => ({
@@ -46,6 +54,7 @@ const UserList = () => {
       [id]: !prevState[id],
     }));
   };
+
   const handleStatusToggle = (userId, isEnabled) => {
     NProgress.start();
     dispatch(updateUserStatusThunk({ userId, isEnabled: !isEnabled })).finally(
@@ -75,6 +84,17 @@ const UserList = () => {
       }
     });
   };
+
+  const handleOpenPermissionModal = (user) => {
+    setSelectedUser(user);
+    setIsPermissionModalOpen(true);
+  };
+
+  const handleClosePermissionModal = () => {
+    setSelectedUser(null);
+    setIsPermissionModalOpen(false);
+  };
+
   const mapRoleName = (roleName) => {
     switch (roleName) {
       case "ROLE_ADMIN":
@@ -125,7 +145,6 @@ const UserList = () => {
       name: "Gender",
       cell: (row) => row.gender ?? "Not updated",
     },
-
     {
       name: "Status",
       selector: (row) => row.isEnabled,
@@ -143,33 +162,65 @@ const UserList = () => {
     },
     {
       name: "Actions",
-      cell: (row) =>
-        !row.roles.map((item) => item.name).includes("ROLE_ADMIN") && (
-          <Dropdown
-            isOpen={dropdownOpen[row.id]}
-            toggle={() => toggleDropdown(row.id)}
-            a11y
-          >
-            <DropdownToggle caret size="sm">
-              Actions
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem
-                onClick={() => handleStatusToggle(row.id, row.isEnabled)}
-              >
-                {row.isEnabled ? "Deactivate" : "Activate"}
-              </DropdownItem>
-              {!row.isEnabled && (
+      cell: (row) => {
+        const isAdmin = user.role.some(
+          (role) => role.authority === "ROLE_ADMIN"
+        );
+        const isModerator = user.role.some(
+          (role) => role.authority === "ROLE_MODERATOR"
+        );
+        const canManageUser = user.permission
+          .map((item) => item.name)
+          .includes("MANAGE_USER");
+        const isUserAdmin = row.roles.some(
+          (role) => role.name === "ROLE_ADMIN"
+        );
+        const isUserModerator = row.roles.some(
+          (role) => role.name === "ROLE_MODERATOR"
+        );
+        const isUser = row.roles.some((role) => role.name === "ROLE_USER");
+        const isCurrentUser = row.username === user.sub;
+
+        // Check if the current user is a Moderator and is attempting to manage another Moderator
+        const isAttemptingToManageOtherModerator =
+          isModerator && isUserModerator;
+
+        return (
+          !isUserAdmin &&
+          !isAttemptingToManageOtherModerator &&
+          !isCurrentUser && (
+            <Dropdown
+              isOpen={dropdownOpen[row.id]}
+              toggle={() => toggleDropdown(row.id)}
+              a11y
+            >
+              <DropdownToggle caret size="sm">
+                Actions
+              </DropdownToggle>
+              <DropdownMenu>
                 <DropdownItem
-                  color="danger"
-                  onClick={() => handleDeleteUser(row.id)}
+                  onClick={() => handleStatusToggle(row.id, row.isEnabled)}
                 >
-                  Delete
+                  {row.isEnabled ? "Deactivate" : "Activate"}
                 </DropdownItem>
-              )}
-            </DropdownMenu>
-          </Dropdown>
-        ),
+                {!row.isEnabled && (
+                  <DropdownItem
+                    color="danger"
+                    onClick={() => handleDeleteUser(row.id)}
+                  >
+                    Delete
+                  </DropdownItem>
+                )}
+                {(isAdmin || (isModerator && canManageUser)) && !isUser && (
+                  <DropdownItem onClick={() => handleOpenPermissionModal(row)}>
+                    Assign Permissions
+                  </DropdownItem>
+                )}
+              </DropdownMenu>
+            </Dropdown>
+          )
+        );
+      },
     },
   ];
 
@@ -205,7 +256,13 @@ const UserList = () => {
         page: currentPage,
         size: pageSize,
       })
-    );
+    ).then((res) => {
+      if (res.meta.requestStatus === "rejected") {
+        showToast(res.payload, "error");
+      }
+    });
+
+    dispatch(getAllPermissionThunk());
   }, [dispatch, currentPage, pageSize]);
 
   const customStyles = {
@@ -262,6 +319,17 @@ const UserList = () => {
         progressComponent={<Spinner />}
         progressPending={status === "loading"}
       />
+      {selectedUser && (
+        <PermissionForm
+          userId={selectedUser.id}
+          currentPermissions={selectedUser.permissions.map(
+            (permission) => permission.name
+          )}
+          isOpen={isPermissionModalOpen}
+          toggle={handleClosePermissionModal}
+          listPermissions={permissions}
+        />
+      )}
     </Card>
   );
 };

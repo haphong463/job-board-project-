@@ -22,6 +22,8 @@ public class NewCommentDTO {
     @Setter
     static class Blog_NewCommentDTO {
         private Long id;
+        private String slug;
+        private UserDTO user;
     }
 
     @Getter

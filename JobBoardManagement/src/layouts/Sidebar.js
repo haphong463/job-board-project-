@@ -1,28 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { Button, Nav, NavItem, Collapse, Spinner } from "reactstrap";
+import React, { memo, useState } from "react";
+import { Button, Nav, NavItem, Collapse } from "reactstrap";
 import Logo from "./Logo";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { navigation } from "../utils/variables/navigation";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { jwtDecode } from "jwt-decode";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  checkAndUpdateAccessToken,
-  logout,
-  signOut,
-} from "../features/authSlice";
-import { IoLogOut } from "react-icons/io5";
+import { navigation } from "../utils/variables/navigation";
 
-const Sidebar = () => {
+const Sidebar = memo(() => {
   const showMobilemenu = () => {
     document.getElementById("sidebarArea").classList.toggle("showSidebar");
   };
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [countdown, setCountdown] = useState(1);
-
+  const user = useSelector((state) => state.auth.user);
   const location = useLocation();
+  const roles = user?.role.map((item) => item.authority) || [];
+  const permissions = user?.permission.map((item) => item.name) || [];
+  const isModerator = roles.includes("ROLE_MODERATOR");
+  const hasPermission = (requiredPermission) => {
+    return permissions.includes(requiredPermission);
+  };
   const [collapseStates, setCollapseStates] = useState({});
 
   const toggleCollapse = (index) => {
@@ -35,6 +30,23 @@ const Sidebar = () => {
   const renderNavItems = (items, parentIndex = "") => {
     return items.map((item, index) => {
       const currentIndex = `${parentIndex}${index}`;
+
+      // Conditionally render blog link
+      if (
+        (item.title === "Blog" &&
+          isModerator &&
+          !hasPermission("MANAGE_BLOG")) ||
+        (item.title === "User" &&
+          isModerator &&
+          !hasPermission("MANAGE_USER")) ||
+        (item.title === "Job" && isModerator && !hasPermission("MANAGE_JOB")) ||
+        (item.title === "Company" &&
+          isModerator &&
+          !hasPermission("MANAGE_COMPANY"))
+      ) {
+        return null;
+      }
+
       if (item.children) {
         return (
           <NavItem key={currentIndex} className="sidenav-bg">
@@ -103,6 +115,6 @@ const Sidebar = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Sidebar;

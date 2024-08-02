@@ -1,5 +1,4 @@
-import React, { useState,useContext} from 'react';
-import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
+import React, { useState, useEffect } from 'react';
 import '../../assets/css/create-cv.css';
 import axiosRequest from "../../configs/axiosConfig";
 import { useNavigate } from 'react-router-dom';
@@ -9,17 +8,20 @@ import { useSelector } from 'react-redux';
 const CreateCV = () => {
     const [step, setStep] = useState(1);
     const navigate = useNavigate();
-
-//     const reduxState = useSelector((state) => state);
-// console.log('Redux State:', reduxState);
-
     const [cvTitle, setCvTitle] = useState('');
-    const [userDetails, setUserDetails] = useState([{ fullName: '', address: '', email: '', phone: '', summary: '', profileImage: '' }]);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [userDetails, setUserDetails] = useState([{ fullName: '', address: '', email: '', phone: '', summary: '', profileImage: '', dob: '' }]);
     const [userEducations, setUserEducations] = useState([{ institution: '', degree: '', description: '', startDate: '', endDate: '' }]);
     const [userExperiences, setUserExperiences] = useState([{ jobTitle: '', company: '', description: '', startDate: '', endDate: '' }]);
     const [userLanguages, setUserLanguages] = useState([{ languageName: '', proficiency: '' }]);
     const [userProjects, setUserProjects] = useState([{ projectName: '', description: '', startDate: '', endDate: '' }]);
     const [userSkills, setUserSkills] = useState([{ skillName: '', proficiency: '' }]);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    // validation 
+    const [emailError, setEmailError] = useState('');
+
+    const user = useSelector(state => state.auth.user)
+    const [existingCVs, setExistingCVs] = useState([]);
     const [errors, setErrors] = useState({
         userDetails: [],
         userEducations: [],
@@ -29,73 +31,169 @@ const CreateCV = () => {
         userSkills: [],
         cvTitle: '',
     });
-     
-    
+    useEffect(() => {
+        const fetchExistingCVs = async () => {
+            try {
+                const response = await axiosRequest.get(`/usercv/list-cvs/${user.id}`);
+                setExistingCVs(response);
+            } catch (error) {
+                console.error('Error fetching existing CVs:', error);
+            }
+        };
+
+        fetchExistingCVs();
+    }, [user.id]);
+
     const handleInputChange = (e, index, field, section) => {
-        const value = e.target.value;
+        const { value } = e.target;
+        const updateState = (prevState) => {
+            const newState = [...prevState];
+            newState[index][field] = value;
+            return newState;
+        };
+
         switch (section) {
             case 'userDetails':
-                setUserDetails((prevDetails) => {
-                    const newDetails = [...prevDetails];
-                    newDetails[index][field] = value;
-                    return newDetails;
-                });
+                setUserDetails(updateState);
                 break;
             case 'userEducations':
-                setUserEducations((prevEducations) => {
-                    const newEducations = [...prevEducations];
-                    newEducations[index][field] = value;
-                    return newEducations;
-                });
+                setUserEducations(updateState);
                 break;
             case 'userExperiences':
-                setUserExperiences((prevExperiences) => {
-                    const newExperiences = [...prevExperiences];
-                    newExperiences[index][field] = value;
-                    return newExperiences;
-                });
+                setUserExperiences(updateState);
                 break;
             case 'userLanguages':
-                setUserLanguages((prevLanguages) => {
-                    const newLanguages = [...prevLanguages];
-                    newLanguages[index][field] = value;
-                    return newLanguages;
-                });
+                setUserLanguages(updateState);
                 break;
             case 'userProjects':
-                setUserProjects((prevProjects) => {
-                    const newProjects = [...prevProjects];
-                    newProjects[index][field] = value;
-                    return newProjects;
-                });
+                setUserProjects(updateState);
                 break;
             case 'userSkills':
-                setUserSkills((prevSkills) => {
-                    const newSkills = [...prevSkills];
-                    newSkills[index][field] = value;
-                    return newSkills;
-                });
+                setUserSkills(updateState);
                 break;
             default:
                 break;
         }
     };
 
-    const handleFileChange = (e, index) => {
-        const file = e.target.files[0];
-        setUserDetails((prevDetails) => {
-            const newDetails = [...prevDetails];
-            newDetails[index].profileImage = file;
+    const handleCloneCV = async (e) => {
+        const selectedCVId = e.target.value;
+        console.log('Selected CV ID:', selectedCVId);
 
-            // Create a temporary URL for the selected file
-            newDetails[index].profileImageUrl = file ? URL.createObjectURL(file) : null;
+        if (selectedCVId) {
+            try {
+                const response = await axiosRequest.get(`/usercv/${selectedCVId}`);
+                const formattedResponse = {
+                    ...response,
+                    userDetails: response.userDetails.map(detail => ({
+                        ...detail,
+                        dob: detail.dob ? new Date(detail.dob).toISOString().split('T')[0] : ''
+                    }))
+                };
+                const cvData = formattedResponse;
+                console.log('Cloned CV Data:', cvData);
 
-            return newDetails;
-        });
+                setCvTitle(cvData.cvTitle ? cvData.cvTitle + ' (Copy)' : 'Cloned CV');
+                setUserDetails(cvData.userDetails.map(detail => ({
+                    ...detail,
+                    dob: detail.dob || '', // Keep the date as a string in 'YYYY-MM-DD' format
+                    profileImage: null,
+                    profileImageUrl: detail.profileImageBase64,
+                    profileImageBase64: detail.profileImageBase64
+                })));
+
+                setUserEducations(Array.isArray(cvData.userEducations) ? cvData.userEducations : []);
+                setUserExperiences(Array.isArray(cvData.userExperiences) ? cvData.userExperiences : []);
+                setUserLanguages(Array.isArray(cvData.userLanguages) ? cvData.userLanguages : []);
+                setUserProjects(Array.isArray(cvData.userProjects) ? cvData.userProjects : []);
+                setUserSkills(Array.isArray(cvData.userSkills) ? cvData.userSkills : []);
+
+                // Set image preview if available
+                if (cvData.userDetails[0].profileImageUrl) {
+                    setImagePreview(cvData.userDetails[0].profileImageUrl);
+                }
+
+                // Reset the select element
+                e.target.value = '';
+
+                console.log('CV cloned successfully');
+            } catch (error) {
+                console.error('Error cloning CV:', error);
+            }
+        }
     };
-   
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+                setUserDetails(prevDetails => [{
+                    ...prevDetails[0],
+                    profileImage: file,
+                    profileImageBase64: null
+                }]);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // If no new file is selected, retain the existing image
+            setImagePreview(null);
+            setUserDetails(prevDetails => [{
+                ...prevDetails[0],
+                profileImage: null,
+                profileImageBase64: prevDetails[0].profileImageBase64
+            }]);
+        }
+    };
+
+
+
+
+    const SuccessModal = ({ show, onClose, onTemplate }) => {
+        const [countdown, setCountdown] = useState(10);
+
+        useEffect(() => {
+            if (show) {
+                const timer = setInterval(() => {
+                    setCountdown((prevCount) => {
+                        if (prevCount === 1) {
+                            clearInterval(timer);
+                            onClose();
+                        }
+                        return prevCount - 1;
+                    });
+                }, 1000);
+
+                return () => clearInterval(timer);
+            }
+        }, [show, onClose]);
+
+        if (!show) return null;
+
+        return (
+            <div className="custom-modal">
+                <div className="modal-content">
+                    <h2>CV Created Successfully!</h2>
+                    <p>Choose "View Templates" to select a CV template and print it to PDF, or stay on this page.</p>
+                    <div className="modal-buttons">
+                        <button onClick={() => {
+                            onClose();
+                            window.location.reload();
+                        }}>Stay here</button>
+
+                        <button onClick={onTemplate}>View Templates</button>
+                    </div>
+                    <div className="countdown">
+                        Closing in <i className='text-danger'>{countdown}</i> seconds
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const addNewEntry = (section) => {
-        const isValid = validateFields(section,cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills);
+        const isValid = validateFields(section, cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills);
         if (isValid) {
             switch (section) {
                 case 'userEducations':
@@ -142,9 +240,9 @@ const CreateCV = () => {
         }
     };
 
-    const validateFields = (section,cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills) => {
+    const validateFields = (section, cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills) => {
         let sectionErrors = [];
-      
+
         switch (section) {
             case 'cvTitle':
                 if (!cvTitle || cvTitle.trim().length === 0) {
@@ -153,77 +251,155 @@ const CreateCV = () => {
                     sectionErrors.push('CV Title must be at least 3 characters long');
                 }
                 break;
-          case 'userDetails':
-            userDetails.forEach((detail, index) => {
-              if (!detail.fullName || !detail.address || !detail.email || !detail.phone || !detail.summary) {
-                sectionErrors.push(`Please fill out all fields for User Detail ${index + 1}`);
-              }
-              if(detail.email && !/\S+@\S+\.\S+/.test(detail.email)) {
-                sectionErrors.push(`Email format is invalid for User Detail ${index + 1}`);
-              }
-            });
-            break;
-          case 'userEducations':
-            userEducations.forEach((education, index) => {
-              if (!education.institution || !education.degree || !education.description || !education.startDate || !education.endDate) {
-                sectionErrors.push(`Please fill out all fields for Education ${index + 1}`);
-              }
-            });
-            break;
-          case 'userExperiences':
-            userExperiences.forEach((experience, index) => {
-              if (!experience.jobTitle || !experience.company || !experience.description || !experience.startDate || !experience.endDate) {
-                sectionErrors.push(`Please fill out all fields for Experience ${index + 1}`);
-              }
-            });
-            break;
-          case 'userLanguages':
-            userLanguages.forEach((language, index) => {
-              if (!language.languageName || !language.proficiency) {
-                sectionErrors.push(`Please fill out all fields for Language ${index + 1}`);
-              }
-            });
-            break;
-          case 'userProjects':
-            userProjects.forEach((project, index) => {
-              if (!project.projectName || !project.description || !project.startDate || !project.endDate) {
-                sectionErrors.push(`Please fill out all fields for Project ${index + 1}`);
-              }
-            });
-            break;
-          case 'userSkills':
-            userSkills.forEach((skill, index) => {
-              if (!skill.skillName || !skill.proficiency) {
-                sectionErrors.push(`Please fill out all fields for Skill ${index + 1}`);
-              }
-            });
-            break;
-          default:
-            break;
+            case 'userDetails':
+                userDetails.forEach((detail, index) => {
+                    let detailErrors = {};
+
+                    if (!detail.fullName) detailErrors.fullName = "Full Name is required";
+                    if (!detail.address) detailErrors.address = "Address is required";
+                    if (!detail.dob) detailErrors.dob = "Date of Birth is required";
+                    if (!detail.summary) detailErrors.summary = "Summary is required";
+
+                    if (!detail.email) {
+                        detailErrors.email = "Email is required";
+                    } else if (!/\S+@\S+\.\S+/.test(detail.email)) {
+                        detailErrors.email = "Email format is invalid. Please use a valid email address.";
+                    }
+
+                    if (!detail.phone) {
+                        detailErrors.phone = "Phone number is required";
+                    } else if (!/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(detail.phone)) {
+                        detailErrors.phone = "Phone number format is invalid. Use format: (123) 456-7890 or 123-456-7890";
+                    }
+
+                    if (!detail.profileImage && !detail.profileImageBase64) {
+                        detailErrors.profileImage = "Profile image is required";
+                    }
+
+                    if (Object.keys(detailErrors).length > 0) {
+                        sectionErrors[index] = detailErrors;
+                    }
+                });
+                break;
+            case 'userEducations':
+                userEducations.forEach((education, index) => {
+                    let educationErrors = {};
+                    if (!education.institution) educationErrors.institution = "Institution is required";
+                    if (!education.degree) educationErrors.degree = "Degree is required";
+                    if (!education.description) educationErrors.description = "Description is required";
+                    if (!education.startDate) educationErrors.startDate = "Start date is required";
+                    if (!education.endDate) educationErrors.endDate = "End date is required";
+
+                    if (education.startDate && education.endDate) {
+                        const startDate = new Date(education.startDate);
+                        const endDate = new Date(education.endDate);
+                        if (startDate > endDate) {
+                            educationErrors.dateRange = "Start date must be earlier than end date";
+                        }
+                    }
+
+                    if (Object.keys(educationErrors).length > 0) {
+                        sectionErrors[index] = educationErrors;
+                    }
+                });
+                break;
+
+            case 'userExperiences':
+                userExperiences.forEach((experience, index) => {
+                    let experienceErrors = {};
+                    if (!experience.jobTitle) experienceErrors.jobTitle = "Job title is required";
+                    if (!experience.company) experienceErrors.company = "Company is required";
+                    if (!experience.description) experienceErrors.description = "Description is required";
+                    if (!experience.startDate) experienceErrors.startDate = "Start date is required";
+                    if (!experience.endDate) experienceErrors.endDate = "End date is required";
+
+                    if (experience.startDate && experience.endDate) {
+                        const startDate = new Date(experience.startDate);
+                        const endDate = new Date(experience.endDate);
+                        if (startDate > endDate) {
+                            experienceErrors.dateRange = "Start date must be earlier than end date";
+                        }
+                    }
+
+                    if (Object.keys(experienceErrors).length > 0) {
+                        sectionErrors[index] = experienceErrors;
+                    }
+                });
+                break;
+
+            case 'userLanguages':
+                userLanguages.forEach((language, index) => {
+                    let languageErrors = {};
+                    if (!language.languageName) languageErrors.languageName = "Language name is required";
+                    if (!language.proficiency) languageErrors.proficiency = "Proficiency is required";
+
+                    if (Object.keys(languageErrors).length > 0) {
+                        sectionErrors[index] = languageErrors;
+                    }
+                });
+                break;
+
+            case 'userProjects':
+                userProjects.forEach((project, index) => {
+                    let projectErrors = {};
+                    if (!project.projectName) projectErrors.projectName = "Project name is required";
+                    if (!project.description) projectErrors.description = "Description is required";
+                    if (!project.startDate) projectErrors.startDate = "Start date is required";
+                    if (!project.endDate) projectErrors.endDate = "End date is required";
+
+                    if (project.startDate && project.endDate) {
+                        const startDate = new Date(project.startDate);
+                        const endDate = new Date(project.endDate);
+                        if (startDate > endDate) {
+                            projectErrors.dateRange = "Start date must be earlier than end date";
+                        }
+                    }
+
+                    if (Object.keys(projectErrors).length > 0) {
+                        sectionErrors[index] = projectErrors;
+                    }
+                });
+                break;
+
+            case 'userSkills':
+                userSkills.forEach((skill, index) => {
+                    let skillErrors = {};
+                    if (!skill.skillName) skillErrors.skillName = "Skill name is required";
+                    if (!skill.proficiency) skillErrors.proficiency = "Proficiency is required";
+
+                    if (Object.keys(skillErrors).length > 0) {
+                        sectionErrors[index] = skillErrors;
+                    }
+                });
+                break;
+
+            default:
+                break;
+
         }
-      
+
         setErrors((prevErrors) => ({
-          ...prevErrors,
-          [section]: sectionErrors,
+            ...prevErrors,
+            [section]: sectionErrors,
         }));
-      
+
         return sectionErrors.length === 0;
-      };
-      
+    };
+
     const handleContinue = () => {
         const currentSection = step === 1 ? 'cvTitle' : step === 2 ? 'userDetails' : step === 3 ? 'userEducations' : step === 4 ? 'userExperiences' : step === 5 ? 'userLanguages' : step === 6 ? 'userProjects' : step === 7 ? 'userSkills' : null;
         const isValid = validateFields(currentSection, cvTitle, userDetails, userEducations, userExperiences, userLanguages, userProjects, userSkills);
-      
+
         if (isValid) {
-          setStep(step + 1);
+            setStep(step + 1);
         }
-      };
+    };
 
     const handleGoBack = () => {
         setStep(step - 1);
     };
 
-    const user = useSelector(state => state.auth.user)
+
     // console.log(user)
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -231,16 +407,36 @@ const CreateCV = () => {
             const params = new FormData();
             params.append('cvTitle', cvTitle);
             params.append('user.id', user.id);
+
+            // User Details
             userDetails.forEach((detail, index) => {
                 const prefix = `userDetails[${index}]`;
-                console.log('image: ', detail.profileImage);
                 params.append(`${prefix}.fullName`, detail.fullName);
                 params.append(`${prefix}.address`, detail.address);
                 params.append(`${prefix}.email`, detail.email);
                 params.append(`${prefix}.phone`, detail.phone);
                 params.append(`${prefix}.summary`, detail.summary);
-                params.append('profileImage', detail.profileImage);
+
+                if (detail.dob) {
+                    const dobTimestamp = new Date(detail.dob).getTime();
+                    params.append('dob', dobTimestamp.toString());
+                }
+
+                if (detail.profileImage instanceof File) {
+                    params.append('profileImage', detail.profileImage);
+                } else if (detail.profileImageBase64) {
+                    const byteCharacters = atob(detail.profileImageBase64);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'image/jpeg' });
+                    params.append('profileImage', blob, 'profile.jpg');
+                }
             });
+
+
             userEducations.forEach((education, index) => {
                 const prefix = `userEducations[${index}]`;
                 params.append(`${prefix}.institution`, education.institution);
@@ -283,542 +479,573 @@ const CreateCV = () => {
                 }
             });
             console.log(response.data);
-            navigate('/list-template'); // Handle success response
+            setShowSuccessModal(true); // Handle success response
         } catch (error) {
             console.error(error); // Handle error
         }
     };
 
     return (
-        <GlobalLayoutUser>
-            <section
-                className="section-hero overlay inner-page bg-image"
-                style={{ backgroundImage: 'url("../../../assets/images/hero_1.jpg")' }}
-                id="createCv-section"
-            >
-                <div className="container">
-                    <div className="row">
-                        <div className="col-md-7">
-                            <h1 className="text-white font-weight-bold">Create CV</h1>
-                            <div className="custom-breadcrumbs">
-                                <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                                <span className="text-white">
-                                    <strong>Create CV</strong>
-                                </span>
+        <div className="container py-5">
+            <SuccessModal
+                show={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                onTemplate={() => navigate('/list-template')}
+            />
+            <div className="step-indicator">
+                <div className={`step ${step >= 1 ? 'active' : ''}`}>
+                    <span className="circle"></span>
+                    <div className='text-indicator'>CV Title</div>
+                </div>
+                <div className={`step ${step >= 2 ? 'active' : ''}`}>
+                    <span className="circle"></span>
+                    <div className='text-indicator'>User Details</div>
+                </div>
+                <div className={`step ${step >= 3 ? 'active' : ''}`}>
+                    <span className="circle"></span>
+                    <div className='text-indicator'>Education</div>
+                </div>
+                <div className={`step ${step >= 4 ? 'active' : ''}`}>
+                    <span className="circle"></span>
+                    <div className='text-indicator'>Experiences</div>
+                </div>
+                <div className={`step ${step >= 5 ? 'active' : ''}`}>
+                    <span className="circle"></span>
+                    <div className='text-indicator'>Languages</div>
+                </div>
+                <div className={`step ${step >= 6 ? 'active' : ''}`}>
+                    <span className="circle"></span>
+                    <div className='text-indicator'>Projects</div>
+                </div>
+                <div className={`step ${step >= 7 ? 'active' : ''}`}>
+                    <span className="circle"></span>
+                    <div className='text-indicator'>Skills</div>
+                </div>
+            </div>
+            <div className='cv-bg'>
+                <h2 className='text-center'>
+                    <span className='text-effect-css-create' style={{ '--animation-order': 0 }}>Please</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 1 }}>fill</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 2 }}>out</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 3 }}>these</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 4 }}>form</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 5 }}>before</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 6 }}>choose</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 7 }}>a</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 8 }}>CV</span>{' '}
+                    <span className='text-effect-css-create' style={{ '--animation-order': 9 }}>template</span>
+                </h2>
+
+                <form onSubmit={handleSubmit} className="cv-form">
+                    {/* Clone CV Dropdown */}
+                    <div className="clone-cv-section">
+                        <label htmlFor="cloneCV" className="clone-cv-label">
+                            <i className="icon-copy i-cp-css"></i> <i>Clone existing CV:</i>
+                        </label>
+
+                        <select
+                            id="cloneCV"
+                            onChange={handleCloneCV}
+                            className="clone-cv-select"
+                        >
+                            <option value="">Select a CV to clone</option>
+                            {existingCVs.map(cv => (
+                                <option key={cv.cvId} value={cv.cvId}>{cv.cvTitle}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* CV Title */}
+                    {step === 1 && (
+                        <>
+                            <h1 className="cv-section-title-create-css
+                            ">Section 1: CV Title</h1>
+                            <div className="cv-section">
+                                <label htmlFor="cvTitle" className="cv-label">CV Title:</label>
+                                <input
+                                    type="text"
+                                    id="cvTitle"
+                                    value={cvTitle}
+                                    onChange={(e) => setCvTitle(e.target.value)}
+                                    required
+                                    className="cv-input"
+                                />
+                                {errors.cvTitle && <div className="cv-error-message text-danger">{errors.cvTitle.join(', ')}</div>}
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <section
-                className="py-5 bg-image overlay-primary fixed overlay"
-                style={{
-                    backgroundImage: 'url("../../../assets/images/hero_1.jpg")',
-                }}
-            >
-                <div className="container">
-                    <div className="row align-items-center">
-                        <div className="col-md-8">
-                            <h2 className="text-white">You are struggling with prepare a CV?</h2>
-                            <p className="mb-0 text-white lead">
-                                Scroll down and fill up the form below to create your CV.
-                            </p>
-                        </div>
-                        <div className="col-md-3 ml-auto">
-                            <a href="#" className="btn btn-warning btn-block btn-lg">
-                                Or sign up for free
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                            <div className="cv-button-group">
+                                <button type="button" onClick={handleContinue} className="cv-continue-btn">
+                                    Continue
+                                </button>
+                            </div>
+                        </>
+                    )}
 
-            <div className="container py-5">
-                <div className="step-indicator">
-                    <div className={`step ${step >= 1 ? 'active' : ''}`}>
-                        <span className="circle"></span>
-                        <div>CV Title</div>
-                    </div>
-                    <div className={`step ${step >= 2 ? 'active' : ''}`}>
-                        <span className="circle"></span>
-                        <div>User Details</div>
-                    </div>
-                    <div className={`step ${step >= 3 ? 'active' : ''}`}>
-                        <span className="circle"></span>
-                        <div>Education</div>
-                    </div>
-                    <div className={`step ${step >= 4 ? 'active' : ''}`}>
-                        <span className="circle"></span>
-                        <div>Experiences</div>
-                    </div>
-                    <div className={`step ${step >= 5 ? 'active' : ''}`}>
-                        <span className="circle"></span>
-                        <div>Languages</div>
-                    </div>
-                    <div className={`step ${step >= 6 ? 'active' : ''}`}>
-                        <span className="circle"></span>
-                        <div>Projects</div>
-                    </div>
-                    <div className={`step ${step >= 7 ? 'active' : ''}`}>
-                        <span className="circle"></span>
-                        <div>Skills</div>
-                    </div>
-                </div>
-                <div className='cv-bg'>
-                    <h2 className='text-center'>
-                        <span className='text-effect' style={{ '--animation-order': 0 }}>Please</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 1 }}>fill</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 2 }}>out</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 3 }}>these</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 4 }}>form</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 5 }}>before</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 6 }}>choose</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 7 }}>a</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 8 }}>CV</span>{' '}
-                        <span className='text-effect' style={{ '--animation-order': 9 }}>template</span>
-                    </h2>
+                    {/* User Details */}
+                    {step === 2 && (
+                        <>
 
-                    <form onSubmit={handleSubmit} className="cv-form">
-                    
-                        {/* CV Title */}
-                        {step === 1 && (
-                            <>
-                                <h1 className="cv-section-title">Section 1: CV Title</h1>
-                                <div className="cv-section">
-                                    <label htmlFor="cvTitle" className="cv-label">CV Title:</label>
+                            <h2 className="cv-section-title-create-css">Section 2: User Details</h2>
+                            {userDetails.map((detail, index) => (
+                                <div key={index} className="cv-entry">
                                     <input
                                         type="text"
-                                        id="cvTitle"
-                                        value={cvTitle}
-                                        onChange={(e) => setCvTitle(e.target.value)}
+                                        placeholder="Full Name"
+                                        value={detail.fullName}
+                                        onChange={(e) => handleInputChange(e, index, 'fullName', 'userDetails')}
                                         required
                                         className="cv-input"
                                     />
-                                    {errors.cvTitle && <div className="cv-error-message">{errors.cvTitle.join(', ')}</div>}
-                                </div>
-                                <div className="cv-button-group">
-                                    <button type="button" onClick={handleContinue} className="cv-continue-btn">
-                                        Continue
-                                    </button>
-                                </div>
-                            </>
-                        )}
+                                    {errors.userDetails[index]?.fullName && <div className="cv-error-message text-danger">{errors.userDetails[index].fullName}</div>}
 
-                        {/* User Details */}
-                        {step === 2 && (
-                            <>
+                                    <input
+                                        type="text"
+                                        placeholder="Address"
+                                        value={detail.address}
+                                        onChange={(e) => handleInputChange(e, index, 'address', 'userDetails')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userDetails[index]?.address && <div className="cv-error-message text-danger">{errors.userDetails[index].address}</div>}
 
-                                <h2 className="cv-section-title">Section 2: User Details</h2>
-                                {errors.userDetails.length > 0 && (
-                                    <div className="cv-validation-errors">
-                                        {errors.userDetails.map((error, index) => (
-                                            <p key={index} className="cv-error-message">{error}</p>
-                                        ))}
-                                    </div>
-                                )}
-                                {userDetails.map((detail, index) => (
-                                    <div key={index} className="cv-entry">
-                                        <input
-                                            type="text"
-                                            placeholder="Full Name"
-                                            value={detail.fullName}
-                                            onChange={(e) => handleInputChange(e, index, 'fullName', 'userDetails')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Address"
-                                            value={detail.address}
-                                            onChange={(e) => handleInputChange(e, index, 'address', 'userDetails')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="email"
-                                            placeholder="Email"
-                                            value={detail.email}
-                                            onChange={(e) => handleInputChange(e, index, 'email', 'userDetails')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        
-                                        <input
-                                            type="number"
-                                            placeholder="Phone"
-                                            value={detail.phone}
-                                            onChange={(e) => handleInputChange(e, index, 'phone', 'userDetails')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Summary"
-                                            value={detail.summary}
-                                            onChange={(e) => handleInputChange(e, index, 'summary', 'userDetails')}
-                                            required
-                                            className="cv-input"
-                                        />
+                                    <input
+                                        type="date"
+                                        placeholder="Date of Birth"
+                                        value={detail.dob}
+                                        onChange={(e) => handleInputChange(e, index, 'dob', 'userDetails')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userDetails[index]?.dob && <div className="cv-error-message text-danger">{errors.userDetails[index].dob}</div>}
 
+                                    <input
+                                        type="email"
+                                        placeholder="Email (Exp: your-email-prefix@gmail.com)"
+                                        value={detail.email}
+                                        onChange={(e) => handleInputChange(e, index, 'email', 'userDetails')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userDetails[index]?.email && <div className="cv-error-message text-danger">{errors.userDetails[index].email}</div>}
 
-                                        <label htmlFor={`profileImage-${index}`} className="cv-label">
-                                            Profile Image
-                                        </label>
-                                        <input
-                                            type="file"
-                                            id={`profileImage-${index}`}
-                                            accept="image/*"
-                                            onChange={(e) => handleFileChange(e, index)}
-                                            className="cv-file-input"
-                                        />
-                                        {detail.profileImageUrl && (
-                                            <img
-                                                src={detail.profileImageUrl}
-                                                alt="Profile"
-                                                className="cv-profile-image"
-                                            />
-                                        )}
-                                        {userDetails.length > 1 && (
-                                            <button type="button" onClick={() => removeEntry(index, 'userDetails')} className="cv-remove-btn">
-                                                Remove
-                                            </button>
+                                    <input
+                                        type="tel"
+                                        placeholder="Phone (Accept format: (123) 456-7890 || 123-456-7890 || 123.456.7890 || 1234567890)"
+                                        value={detail.phone}
+                                        onChange={(e) => handleInputChange(e, index, 'phone', 'userDetails')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userDetails[index]?.phone && <div className="cv-error-message text-danger">{errors.userDetails[index].phone}</div>}
+
+                                    <textarea
+                                        rows="5" cols="55"
+                                        type="text"
+                                        placeholder="Summary"
+                                        value={detail.summary}
+                                        onChange={(e) => handleInputChange(e, index, 'summary', 'userDetails')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userDetails[index]?.summary && <div className="cv-error-message text-danger">{errors.userDetails[index].summary}</div>}
+
+                                    <label htmlFor={`profileImage-${index}`} className="cv-label">
+                                        Profile Image
+                                    </label>
+                                    <div className="cv-image-preview">
+                                        {imagePreview ? (
+                                            <img src={imagePreview} alt="Profile Preview" className="cv-preview-image" width={300} height={200} />
+                                        ) : detail.profileImageBase64 ? (
+                                            <img src={`data:image/jpeg;base64,${detail.profileImageBase64}`} alt="Current Profile" className="cv-preview-image" width={300} height={300} />
+                                        ) : (
+                                            <p>No image uploaded</p>
                                         )}
                                     </div>
-                                ))}
-                                <div className="cv-button-group">
-                                    <button type="button" onClick={handleGoBack} className="cv-back-btn">
-                                        Go Back
-                                    </button>
-                                    <button type="button" onClick={handleContinue} className="cv-continue-btn">
-                                        Continue
-                                    </button>
+                                    <input
+                                        type="file"
+                                        onChange={handleFileChange}
+                                        accept="image/*"
+                                        className="cv-file-input"
+                                    />
+                                    {errors.userDetails[index]?.profileImage && <div className="cv-error-message text-danger">{errors.userDetails[index].profileImage}</div>}
+
+                                    {userDetails.length > 1 && (
+                                        <button type="button" onClick={() => removeEntry(index, 'userDetails')} className="cv-remove-btn">
+                                            Remove
+                                        </button>
+                                    )}
                                 </div>
+                            ))}
 
-                            </>
-                        )}
-
-                        {/* Education Section */}
-                        {step === 3 && (
-                            <>
-                                <h2 className="cv-section-title">Section 3: Education</h2>
-                                {errors.userEducations.length > 0 && (
-                                    <div className="cv-validation-errors">
-                                        {errors.userEducations.map((error, index) => (
-                                            <p key={index} className="cv-error-message">{error}</p>
-                                        ))}
-                                    </div>
-                                )}
-                                {userEducations.map((education, index) => (
-                                    <div key={index} className="cv-entry">
-                                        <input
-                                            type="text"
-                                            placeholder="Institution"
-                                            value={education.institution}
-                                            onChange={(e) => handleInputChange(e, index, 'institution', 'userEducations')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Degree"
-                                            value={education.degree}
-                                            onChange={(e) => handleInputChange(e, index, 'degree', 'userEducations')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Description"
-                                            value={education.description}
-                                            onChange={(e) => handleInputChange(e, index, 'description', 'userEducations')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="date"
-                                            placeholder="Start Date"
-                                            value={education.startDate}
-                                            onChange={(e) => handleInputChange(e, index, 'startDate', 'userEducations')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="date"
-                                            placeholder="End Date"
-                                            value={education.endDate}
-                                            onChange={(e) => handleInputChange(e, index, 'endDate', 'userEducations')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        {userEducations.length > 1 && (
-                                            <button type="button" onClick={() => removeEntry(index, 'userEducations')} className="cv-remove-btn">
-                                                Remove
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                                <button type="button" onClick={() => addNewEntry('userEducations')} className="cv-add-btn">
-                                    Add More
+                            <div className="cv-button-group">
+                                <button type="button" onClick={handleGoBack} className="cv-back-btn">
+                                    Go Back
                                 </button>
-                                <div className="cv-button-group">
-                                    <button type="button" onClick={handleGoBack} className="cv-back-btn">
-                                        Go Back
-                                    </button>
-                                    <button type="button" onClick={handleContinue} className="cv-continue-btn">
-                                        Continue
-                                    </button>
-                                </div>
-
-                            </>
-                        )}
-
-                        {/* Experience Section */}
-                        {step === 4 && (
-                            <>
-                                <h2 className="cv-section-title">Section 4: Experience</h2>
-                                {errors.userExperiences.length > 0 && (
-                                    <div className="cv-validation-errors">
-                                        {errors.userExperiences.map((error, index) => (
-                                            <p key={index} className="cv-error-message">{error}</p>
-                                        ))}
-                                    </div>
-                                )}
-                                {userExperiences.map((experience, index) => (
-                                    <div key={index} className="cv-entry">
-                                        <input
-                                            type="text"
-                                            placeholder="Job Title"
-                                            value={experience.jobTitle}
-                                            onChange={(e) => handleInputChange(e, index, 'jobTitle', 'userExperiences')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Company"
-                                            value={experience.company}
-                                            onChange={(e) => handleInputChange(e, index, 'company', 'userExperiences')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Description"
-                                            value={experience.description}
-                                            onChange={(e) => handleInputChange(e, index, 'description', 'userExperiences')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="date"
-                                            placeholder="Start Date"
-                                            value={experience.startDate}
-                                            onChange={(e) => handleInputChange(e, index, 'startDate', 'userExperiences')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="date"
-                                            placeholder="End Date"
-                                            value={experience.endDate}
-                                            onChange={(e) => handleInputChange(e, index, 'endDate', 'userExperiences')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        {userExperiences.length > 1 && (
-                                            <button type="button" onClick={() => removeEntry(index, 'userExperiences')} className="cv-remove-btn">
-                                                Remove
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                                <button type="button" onClick={() => addNewEntry('userExperiences')} className="cv-add-btn">
-                                    Add More
+                                <button type="button" onClick={handleContinue} className="cv-continue-btn">
+                                    Continue
                                 </button>
-                                <div className="cv-button-group">
-                                    <button type="button" onClick={handleGoBack} className="cv-back-btn">
-                                        Go Back
-                                    </button>
-                                    <button type="button" onClick={handleContinue} className="cv-continue-btn">
-                                        Continue
-                                    </button>
+                            </div>
+
+                        </>
+                    )}
+
+                    {/* Education Section */}
+                    {step === 3 && (
+                        <>
+                            <h2 className="cv-section-title-create-css">Section 3: Education</h2>
+                            {userEducations.map((education, index) => (
+                                <div key={index} className="cv-entry">
+                                    <input
+                                        type="text"
+                                        placeholder="Institution"
+                                        value={education.institution}
+                                        onChange={(e) => handleInputChange(e, index, 'institution', 'userEducations')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userEducations[index]?.institution && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].institution}</div>
+                                    )}
+
+                                    <input
+                                        type="text"
+                                        placeholder="Degree"
+                                        value={education.degree}
+                                        onChange={(e) => handleInputChange(e, index, 'degree', 'userEducations')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userEducations[index]?.degree && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].degree}</div>
+                                    )}
+
+                                    <textarea
+                                        rows="5" cols="55"
+                                        placeholder="Description"
+                                        value={education.description}
+                                        onChange={(e) => handleInputChange(e, index, 'description', 'userEducations')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userEducations[index]?.description && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].description}</div>
+                                    )}
+
+                                    <input
+                                        type="date"
+                                        placeholder="Start Date"
+                                        value={education.startDate}
+                                        onChange={(e) => handleInputChange(e, index, 'startDate', 'userEducations')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userEducations[index]?.startDate && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].startDate}</div>
+                                    )}
+
+                                    <input
+                                        type="date"
+                                        placeholder="End Date"
+                                        value={education.endDate}
+                                        onChange={(e) => handleInputChange(e, index, 'endDate', 'userEducations')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userEducations[index]?.endDate && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].endDate}</div>
+                                    )}
+
+                                    {errors.userEducations[index]?.dateRange && (
+                                        <div className="cv-error-message text-danger">{errors.userEducations[index].dateRange}</div>
+                                    )}
+
+                                    {userEducations.length > 1 && (
+                                        <button type="button" onClick={() => removeEntry(index, 'userEducations')} className="cv-remove-btn">
+                                            Remove
+                                        </button>
+                                    )}
                                 </div>
-
-                            </>
-                        )}
-
-                        {/* Language Section */}
-                        {step === 5 && (
-                            <>
-                                <h2 className="cv-section-title">Section 5: Languages</h2>
-                                {errors.userLanguages.length > 0 && (
-                                    <div className="cv-validation-errors">
-                                        {errors.userLanguages.map((error, index) => (
-                                            <p key={index} className="cv-error-message">{error}</p>
-                                        ))}
-                                    </div>
-                                )}
-                                {userLanguages.map((language, index) => (
-                                    <div key={index} className="cv-entry">
-                                        <input
-                                            type="text"
-                                            placeholder="Language Name"
-                                            value={language.languageName}
-                                            onChange={(e) => handleInputChange(e, index, 'languageName', 'userLanguages')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Proficiency Level"
-                                            value={language.proficiency}
-                                            onChange={(e) => handleInputChange(e, index, 'proficiency', 'userLanguages')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        {userLanguages.length > 1 && (
-                                            <button type="button" onClick={() => removeEntry(index, 'userLanguages')} className="cv-remove-btn">
-                                                Remove
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                                <button type="button" onClick={() => addNewEntry('userLanguages')} className="cv-add-btn">
-                                    Add More
+                            ))}
+                            <button type="button" onClick={() => addNewEntry('userEducations')} className="cv-add-btn">
+                                Add More
+                            </button>
+                            <div className="cv-button-group">
+                                <button type="button" onClick={handleGoBack} className="cv-back-btn">
+                                    Go Back
                                 </button>
-                                <div className="cv-button-group">
-                                    <button type="button" onClick={handleGoBack} className="cv-back-btn">
-                                        Go Back
-                                    </button>
-                                    <button type="button" onClick={handleContinue} className="cv-continue-btn">
-                                        Continue
-                                    </button>
-                                </div>
-
-                            </>
-                        )}
-
-                        {/* Project Section */}
-                        {step === 6 && (
-                            <>
-                                <h2 className="cv-section-title">Section 6: Projects</h2>
-                                {errors.userProjects.length > 0 && (
-                                    <div className="cv-validation-errors">
-                                        {errors.userProjects.map((error, index) => (
-                                            <p key={index} className="cv-error-message">{error}</p>
-                                        ))}
-                                    </div>
-                                )}
-                                {userProjects.map((project, index) => (
-                                    <div key={index} className="cv-entry">
-                                        <input
-                                            type="text"
-                                            placeholder="Project Name"
-                                            value={project.projectName}
-                                            onChange={(e) => handleInputChange(e, index, 'projectName', 'userProjects')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Description"
-                                            value={project.description}
-                                            onChange={(e) => handleInputChange(e, index, 'description', 'userProjects')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="date"
-                                            placeholder="Start Date"
-                                            value={project.startDate}
-                                            onChange={(e) => handleInputChange(e, index, 'startDate', 'userProjects')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="date"
-                                            placeholder="End Date"
-                                            value={project.endDate}
-                                            onChange={(e) => handleInputChange(e, index, 'endDate', 'userProjects')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        {userProjects.length > 1 && (
-                                            <button type="button" onClick={() => removeEntry(index, 'userProjects')} className="cv-remove-btn">
-                                                Remove
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                                <button type="button" onClick={() => addNewEntry('userProjects')} className="cv-add-btn">
-                                    Add More
+                                <button type="button" onClick={handleContinue} className="cv-continue-btn">
+                                    Continue
                                 </button>
-                                <div className="cv-button-group">
-                                    <button type="button" onClick={handleGoBack} className="cv-back-btn">
-                                        Go Back
-                                    </button>
-                                    <button type="button" onClick={handleContinue} className="cv-continue-btn">
-                                        Continue
-                                    </button>
+                            </div>
+                        </>
+                    )}
+
+                    {/* Experience Section */}
+                    {step === 4 && (
+                        <>
+                            <h2 className="cv-section-title-create-css">Section 4: Experience</h2>
+                            {userExperiences.map((experience, index) => (
+                                <div key={index} className="cv-entry">
+                                    <input
+                                        type="text"
+                                        placeholder="Job Title"
+                                        value={experience.jobTitle}
+                                        onChange={(e) => handleInputChange(e, index, 'jobTitle', 'userExperiences')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userExperiences[index]?.jobTitle && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].jobTitle}</div>
+                                    )}
+
+                                    <input
+                                        type="text"
+                                        placeholder="Company"
+                                        value={experience.company}
+                                        onChange={(e) => handleInputChange(e, index, 'company', 'userExperiences')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userExperiences[index]?.company && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].company}</div>
+                                    )}
+
+                                    <textarea
+                                        rows="5" cols="55"
+                                        placeholder="Description"
+                                        value={experience.description}
+                                        onChange={(e) => handleInputChange(e, index, 'description', 'userExperiences')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userExperiences[index]?.description && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].description}</div>
+                                    )}
+
+                                    <input
+                                        type="date"
+                                        placeholder="Start Date"
+                                        value={experience.startDate}
+                                        onChange={(e) => handleInputChange(e, index, 'startDate', 'userExperiences')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userExperiences[index]?.startDate && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].startDate}</div>
+                                    )}
+
+                                    <input
+                                        type="date"
+                                        placeholder="End Date"
+                                        value={experience.endDate}
+                                        onChange={(e) => handleInputChange(e, index, 'endDate', 'userExperiences')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userExperiences[index]?.endDate && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].endDate}</div>
+                                    )}
+
+                                    {errors.userExperiences[index]?.dateRange && (
+                                        <div className="cv-error-message text-danger">{errors.userExperiences[index].dateRange}</div>
+                                    )}
+
+                                    {userExperiences.length > 1 && (
+                                        <button type="button" onClick={() => removeEntry(index, 'userExperiences')} className="cv-remove-btn">
+                                            Remove
+                                        </button>
+                                    )}
                                 </div>
-
-                            </>
-                        )}
-
-                        {/* Skill Section */}
-                        {step === 7 && (
-                            <>
-                                <h2 className="cv-section-title">Section 7: Skills</h2>
-                                {errors.userSkills.length > 0 && (
-                                    <div className="cv-validation-errors">
-                                        {errors.userSkills.map((error, index) => (
-                                            <p key={index} className="cv-error-message">{error}</p>
-                                        ))}
-                                    </div>
-                                )}
-                                {userSkills.map((skill, index) => (
-                                    <div key={index} className="cv-entry">
-                                        <input
-                                            type="text"
-                                            placeholder="Skill Name"
-                                            value={skill.skillName}
-                                            onChange={(e) => handleInputChange(e, index, 'skillName', 'userSkills')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Proficiency Level"
-                                            value={skill.proficiency}
-                                            onChange={(e) => handleInputChange(e, index, 'proficiency', 'userSkills')}
-                                            required
-                                            className="cv-input"
-                                        />
-                                        {userSkills.length > 1 && (
-                                            <button type="button" onClick={() => removeEntry(index, 'userSkills')} className="cv-remove-btn">
-                                                Remove
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                                <button type="button" onClick={() => addNewEntry('userSkills')} className="cv-add-btn">
-                                    Add More
+                            ))}
+                            <button type="button" onClick={() => addNewEntry('userExperiences')} className="cv-add-btn">
+                                Add More
+                            </button>
+                            <div className="cv-button-group">
+                                <button type="button" onClick={handleGoBack} className="cv-back-btn">
+                                    Go Back
                                 </button>
-                                <button type="submit" className="cv-submit-btn">Submit CV</button>
-                                <div className="cv-button-group">
-                                    <button type="button" onClick={handleGoBack} className="cv-back-btn">
-                                        Go Back
-                                    </button>
+                                <button type="button" onClick={handleContinue} className="cv-continue-btn">
+                                    Continue
+                                </button>
+                            </div>
+                        </>
+                    )}
 
+
+                    {/* Language Section */}
+                    {step === 5 && (
+                        <>
+                            <h2 className="cv-section-title-create-css">Section 5: Languages</h2>
+                            {userLanguages.map((language, index) => (
+                                <div key={index} className="cv-entry">
+                                    <input
+                                        type="text"
+                                        placeholder="Language Name"
+                                        value={language.languageName}
+                                        onChange={(e) => handleInputChange(e, index, 'languageName', 'userLanguages')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userLanguages[index]?.languageName && (
+                                        <div className="cv-error-message text-danger">{errors.userLanguages[index].languageName}</div>
+                                    )}
+                                    <input
+                                        type="text"
+                                        placeholder="Proficiency Level"
+                                        value={language.proficiency}
+                                        onChange={(e) => handleInputChange(e, index, 'proficiency', 'userLanguages')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userLanguages[index]?.proficiency && (
+                                        <div className="cv-error-message text-danger">{errors.userLanguages[index].proficiency}</div>
+                                    )}
+                                    {userLanguages.length > 1 && (
+                                        <button type="button" onClick={() => removeEntry(index, 'userLanguages')} className="cv-remove-btn">
+                                            Remove
+                                        </button>
+                                    )}
                                 </div>
+                            ))}
+                            <button type="button" onClick={() => addNewEntry('userLanguages')} className="cv-add-btn">
+                                Add More
+                            </button>
+                            <div className="cv-button-group">
+                                <button type="button" onClick={handleGoBack} className="cv-back-btn">
+                                    Go Back
+                                </button>
+                                <button type="button" onClick={handleContinue} className="cv-continue-btn">
+                                    Continue
+                                </button>
+                            </div>
+                        </>
+                    )}
 
+                    {/* Project Section */}
+                    {step === 6 && (
+                        <>
+                            <h2 className="cv-section-title-create-css">Section 6: Projects</h2>
+                            {userProjects.map((project, index) => (
+                                <div key={index} className="cv-entry">
+                                    <input
+                                        type="text"
+                                        placeholder="Project Name"
+                                        value={project.projectName}
+                                        onChange={(e) => handleInputChange(e, index, 'projectName', 'userProjects')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userProjects[index]?.projectName && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].projectName}</div>
+                                    )}
+                                    <textarea
+                                        rows="5" cols="55"
+                                        placeholder="Description"
+                                        value={project.description}
+                                        onChange={(e) => handleInputChange(e, index, 'description', 'userProjects')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userProjects[index]?.description && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].description}</div>
+                                    )}
+                                    <input
+                                        type="date"
+                                        placeholder="Start Date"
+                                        value={project.startDate}
+                                        onChange={(e) => handleInputChange(e, index, 'startDate', 'userProjects')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userProjects[index]?.startDate && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].startDate}</div>
+                                    )}
+                                    <input
+                                        type="date"
+                                        placeholder="End Date"
+                                        value={project.endDate}
+                                        onChange={(e) => handleInputChange(e, index, 'endDate', 'userProjects')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userProjects[index]?.endDate && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].endDate}</div>
+                                    )}
+                                    {errors.userProjects[index]?.dateRange && (
+                                        <div className="cv-error-message text-danger">{errors.userProjects[index].dateRange}</div>
+                                    )}
+                                    {userProjects.length > 1 && (
+                                        <button type="button" onClick={() => removeEntry(index, 'userProjects')} className="cv-remove-btn">
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => addNewEntry('userProjects')} className="cv-add-btn">
+                                Add More
+                            </button>
+                            <div className="cv-button-group">
+                                <button type="button" onClick={handleGoBack} className="cv-back-btn">
+                                    Go Back
+                                </button>
+                                <button type="button" onClick={handleContinue} className="cv-continue-btn">
+                                    Continue
+                                </button>
+                            </div>
+                        </>
+                    )}
 
-                            </>
-                        )}
-                    </form>
-                </div>
+                    {/* Skill Section */}
+                    {step === 7 && (
+                        <>
+                            <h2 className="cv-section-title-create-css">Section 7: Skills</h2>
+                            {userSkills.map((skill, index) => (
+                                <div key={index} className="cv-entry">
+                                    <input
+                                        type="text"
+                                        placeholder="Skill Name"
+                                        value={skill.skillName}
+                                        onChange={(e) => handleInputChange(e, index, 'skillName', 'userSkills')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userSkills[index]?.skillName && (
+                                        <div className="cv-error-message text-danger">{errors.userSkills[index].skillName}</div>
+                                    )}
+                                    <input
+                                        type="text"
+                                        placeholder="Example: HTML, CSS, JavaScript"
+                                        value={skill.proficiency}
+                                        onChange={(e) => handleInputChange(e, index, 'proficiency', 'userSkills')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userSkills[index]?.proficiency && (
+                                        <div className="cv-error-message text-danger">{errors.userSkills[index].proficiency}</div>
+                                    )}
+                                    {userSkills.length > 1 && (
+                                        <button type="button" onClick={() => removeEntry(index, 'userSkills')} className="cv-remove-btn">
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => addNewEntry('userSkills')} className="cv-add-btn">
+                                Add More
+                            </button>
+                            <button type="submit" className="cv-submit-btn">Submit CV</button>
+                            <div className="cv-button-group">
+                                <button type="button" onClick={handleGoBack} className="cv-back-btn">
+                                    Go Back
+                                </button>
+                            </div>
+                        </>
+                    )}
+
+                </form>
             </div>
-        </GlobalLayoutUser>
+        </div>
+
+
     );
 };
 

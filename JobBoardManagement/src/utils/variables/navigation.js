@@ -14,6 +14,11 @@ export const navigation = [
         href: "/jobportal/job-category",
         icon: "bi bi-patch-check",
       },
+      {
+        title: "List Job",
+        href: "/jobportal/job",
+        icon: "bi bi-patch-check",
+      },
     ],
   },
   {
@@ -27,24 +32,45 @@ export const navigation = [
       },
       {
         title: "List",
-        href: "/jobportal/table",
+        href: "/jobportal/blog",
         icon: "bi bi-hdd-stack",
       },
     ],
   },
   {
-    title: "Quiz and Questions",
-    icon: "bi bi-question-circle",
-    href: "/jobportal/quiz",
+    title: "Quiz",
+    icon: "bi bi-box",
+    children: [
+      {
+        title: "Category",
+        href: "/jobportal/quiz-category",
+        icon: "bi bi-patch-check",
+      },
+      {
+        title: "Quiz&Question",
+        href: "/jobportal/quiz",
+        icon: "bi bi-hdd-stack",
+      },
+    ],
   },
+  {
+    title: "Cv management",
+    icon: "bi bi-file-earmark-person",
+    href: "/jobportal/cv-management",
+  },  
   {
     title: "User",
     icon: "bi bi-question-circle",
     href: "/jobportal/user",
   },
   {
+    title: "Employer",
+    icon: "bi bi-question-circle",
+    href: "/jobportal/employer",
+  },
+  {
     title: "Contact",
-    icon: "bi bi-envelope", 
+    icon: "bi bi-envelope",
     href: "/jobportal/contact",
   },
   {

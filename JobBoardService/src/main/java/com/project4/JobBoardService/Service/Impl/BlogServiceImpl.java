@@ -1,7 +1,11 @@
 package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.Entity.Blog;
+import com.project4.JobBoardService.Entity.HashTag;
 import com.project4.JobBoardService.Repository.BlogRepository;
+import com.project4.JobBoardService.Repository.CommentRepository;
+import com.project4.JobBoardService.Repository.HashTagRepository;
+import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.BlogService;
 import com.project4.JobBoardService.Util.FileUtils;
 import org.modelmapper.ModelMapper;
@@ -13,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -26,9 +31,31 @@ public class BlogServiceImpl implements BlogService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private HashTagRepository hashTagRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
     @Override
-    public Blog createBlog(Blog blog, MultipartFile imageFile) {
+    public Blog createBlog(Blog blog, MultipartFile imageFile, List<String> hashtagNames) {
         handleImageFile(blog, imageFile, "create");
+
+        List<HashTag> hashTags = new ArrayList<>();
+        for (String tagName : hashtagNames) {
+            HashTag hashTag = hashTagRepository.findByName(tagName)
+                    .orElseGet(() -> {
+                        HashTag newTag = new HashTag();
+                        newTag.setName(tagName);
+                        return hashTagRepository.save(newTag);
+                    });
+            hashTags.add(hashTag);
+        }
+        blog.setHashtags(hashTags);
+
         return blogRepository.save(blog);
     }
 
@@ -43,11 +70,24 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile) {
+    public Blog updateBlog(Long id, Blog updatedBlog, MultipartFile imageFile, List<String> hashtagNames) {
         Blog existingBlog = blogRepository.findById(id).orElse(null);
         if (existingBlog != null) {
             updateBlogDetails(existingBlog, updatedBlog);
             handleImageFile(existingBlog, imageFile, "update");
+
+            List<HashTag> hashTags = new ArrayList<>();
+            for (String tagName : hashtagNames) {
+                HashTag hashTag = hashTagRepository.findByName(tagName)
+                        .orElseGet(() -> {
+                            HashTag newTag = new HashTag();
+                            newTag.setName(tagName);
+                            return hashTagRepository.save(newTag);
+                        });
+                hashTags.add(hashTag);
+            }
+            existingBlog.setHashtags(hashTags);
+
             return blogRepository.save(existingBlog);
         } else {
             logger.warning("Blog not found: " + id);
@@ -69,10 +109,7 @@ public class BlogServiceImpl implements BlogService {
         return blogRepository.findBySlug(slug);
     }
 
-    @Override
-    public Page<Blog> searchBlogs(String query, String type, Pageable pageable) {
-        return blogRepository.searchByQuery(type, query, pageable);
-    }
+
 
 
     private void handleImageFile(Blog blog, MultipartFile imageFile, String operationType) {
@@ -102,18 +139,33 @@ public class BlogServiceImpl implements BlogService {
 
 
     @Override
-    public Page<Blog> searchBlogs(String query, String type, Pageable pageable, boolean visibility) {
+    public Page<Blog> searchBlogs(String query, String type, Pageable pageable, Boolean visibility) {
         return blogRepository.searchByQuery(type, query, visibility, pageable);
     }
 
     @Override
-    public Page<Blog> searchBlogs(String query, Pageable pageable) {
-        return blogRepository.searchByQuery(query, pageable);
+    public List<HashTag> getAllHashTag() {
+        return hashTagRepository.findAll();
     }
 
     @Override
-    public Page<Blog> searchBlogs(String query, Pageable pageable, boolean visibility) {
-        return blogRepository.searchByQuery(query, pageable, visibility);
+    public int getCommentCountByBlog(Blog blog) {
+        return commentRepository.countByBlog(blog);
+    }
+
+    @Override
+    public Blog getBlogByTitle(String title) {
+        return blogRepository.findByTitle(title);
+    }
+
+    @Override
+    public void incrementViewBlog(Blog blog) {
+        blogRepository.incrementViewCount(blog.getId());
+    }
+
+    @Override
+    public List<Blog> getPopularBlog() {
+        return blogRepository.findTop4ByOrderByViewDesc();
     }
 
     private void deleteImageFile(Blog blog) {

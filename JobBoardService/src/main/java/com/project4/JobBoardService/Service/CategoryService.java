@@ -7,12 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CategoryService {
-    public List<CategoryDTO> getAllCategories();
-    Category getCategorybyId(Long id);
-
-    void savedCategory(Category category);
-
-    void deleteCategorybyId(Long id);
-
-
+    List<CategoryDTO> getAllCategories();
+    Optional<CategoryDTO> getCategoryById(Long id);
+    void saveCategory(CategoryDTO categoryDTO);
+    void deleteCategoryById(Long id);
 }

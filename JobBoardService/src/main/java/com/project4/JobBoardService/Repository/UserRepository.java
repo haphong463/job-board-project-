@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 @Repository
@@ -26,6 +27,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "(LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<User> searchAllUsers(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE MONTH(u.createdAt) = MONTH(CURRENT_DATE) AND YEAR(u.createdAt) = YEAR(CURRENT_DATE)")
+    long countUsersRegisteredInCurrentMonth();
+
+    long countByCreatedAtBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+
 
     Boolean existsByUsername(String username);
     Optional<User> findByEmail(String email);

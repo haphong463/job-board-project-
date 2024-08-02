@@ -2,18 +2,15 @@ package com.project4.JobBoardService.Service.Impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project4.JobBoardService.Config.ResourceNotFoundException;
-import com.project4.JobBoardService.DTO.QuestionResultDTO;
-import com.project4.JobBoardService.DTO.QuestionSubmissionDTO;
-import com.project4.JobBoardService.DTO.QuizSubmissionDTO;
+import com.project4.JobBoardService.DTO.*;
+import com.project4.JobBoardService.Entity.CategoryQuiz;
 import com.project4.JobBoardService.Entity.Question;
 import com.project4.JobBoardService.Entity.Quiz;
-import com.project4.JobBoardService.Repository.QuestionRepository;
-import com.project4.JobBoardService.Repository.QuizRepository;
-import com.project4.JobBoardService.Repository.QuizScoreRepository;
-import com.project4.JobBoardService.Repository.UserRepository;
+import com.project4.JobBoardService.Repository.*;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuizService;
 import com.project4.JobBoardService.Util.FileUtils;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +26,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class QuizServiceImpl implements QuizService {
+public class  QuizServiceImpl implements QuizService {
     private static final Logger logger = Logger.getLogger(QuizServiceImpl.class.getName());
     @Autowired
     private UserRepository userRepository;
@@ -47,15 +44,33 @@ public class QuizServiceImpl implements QuizService {
 
     @Autowired
     private QuizScoreRepository quizScoreRepository;
+
+    @Autowired
+    private CategoryQuizRepository categoryQuizRepository;
+
     @Override
-    public Quiz createQuiz(Quiz quiz, MultipartFile imageFile) throws IOException {
+    public Quiz createQuiz(Quiz quiz, MultipartFile imageFile, Long categoryId) throws IOException{
+        CategoryQuiz category = categoryQuizRepository.findById(categoryId).orElse(null);
+        if (category == null) {
+            throw new IllegalArgumentException("Invalid category ID");
+        }
+        quiz.setCategory(category);
         handleImageFile(quiz, imageFile, "create");
         return quizRepository.save(quiz);
     }
 
     @Override
-    public List<Quiz> getAllQuizzes() {
-        return quizRepository.findAll();
+    public List<QuizDTO> getAllQuizzes() {
+        List<Quiz> quizzes = quizRepository.findAll();
+        return quizzes.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+    private QuizDTO convertToDto(Quiz quiz) {
+        QuizDTO quizDTO = modelMapper.map(quiz, QuizDTO.class);
+        if (quiz.getCategory() != null) {
+            quizDTO.setCategoryId(quiz.getCategory().getId());
+            quizDTO.setCategoryName(quiz.getCategory().getName());
+        }
+        return quizDTO;
     }
     @Override
     public Quiz getQuizById(Long id) {
@@ -63,11 +78,31 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public Quiz updateQuiz(Long id, Quiz updatedQuiz, MultipartFile imageFile) throws IOException {
+    public Quiz updateQuiz(Long id, Quiz updatedQuiz, MultipartFile imageFile, Long categoryId) throws IOException {
         Quiz existingQuiz = quizRepository.findById(id).orElse(null);
         if (existingQuiz != null) {
-            updateQuizDetails(existingQuiz, updatedQuiz);
-            handleImageFile(existingQuiz, imageFile, "update");
+            existingQuiz.setTitle(updatedQuiz.getTitle());
+            existingQuiz.setDescription(updatedQuiz.getDescription());
+
+            CategoryQuiz category = categoryQuizRepository.findById(categoryId).orElse(null);
+            if (category == null) {
+                throw new IllegalArgumentException("Invalid category ID");
+            }
+            existingQuiz.setCategory(category);
+
+            if (updatedQuiz.getQuestions() != null) {
+                existingQuiz.getQuestions().clear();
+                existingQuiz.getQuestions().addAll(updatedQuiz.getQuestions());
+                for (Question question : existingQuiz.getQuestions()) {
+                    question.setQuiz(existingQuiz);
+                }
+            }
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                handleImageFile(existingQuiz, imageFile, "update");
+            }
+
+            // Save the updated quiz
             return quizRepository.save(existingQuiz);
         } else {
             logger.warning("Quiz not found: " + id);
@@ -83,7 +118,6 @@ public class QuizServiceImpl implements QuizService {
             quizRepository.deleteById(id);
         }
     }
-
     private void handleImageFile(Quiz quiz, MultipartFile imageFile, String operationType) throws IOException {
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
@@ -178,7 +212,7 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
         quiz.incrementNumberOfUsers();
         quizRepository.save(quiz);
-        // Add logic to save the user's completion if needed
     }
+
 
 }

@@ -29,7 +29,28 @@ export const updateUserAsync = async (data, id) =>
     },
   });
 
+export const updatePermissionModerator = async ({ userId, permissions }) =>
+  await axiosRequest.put(
+    `${URL}/${userId}/permissions`,
+
+    permissions,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
 export const signOutAsync = async (data) =>
   await axiosRequest.post("/auth/signout", {
     refreshToken: data,
   });
+
+export const updatePasswordAsync = async (id, currentPassword, newPassword) =>
+  await axiosRequest.put(`/user/${id}/password`, {
+    currentPassword,
+    newPassword,
+  });
+
+export const getAllPermission = async () =>
+  await axiosRequest.get("/user/permissions");

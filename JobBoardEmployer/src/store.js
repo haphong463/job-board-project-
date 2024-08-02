@@ -6,6 +6,7 @@ import authReducer from "./features/authSlice";
 import { configureStore } from "@reduxjs/toolkit";
 import jobReducer from "./features/JobSlice"; // Đảm bảo đường dẫn và tên file chính xác
 import categoryReducer from "./features/categorySlice";
+import companyReducer from "./features/companySlice";
 const persistConfig = {
   key: "root",
   version: 1,
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   jobs: jobReducer,
   categories: categoryReducer,
+  companies: companyReducer
   // notification: notificationReducer,
 });
 

@@ -77,54 +77,54 @@ public class JobServiceImpl   implements JobService {
         Optional<Job> job = jobRepository.findById(jobId);
         return job.map(this::convertToDto);
     }
-  /*  @Override
-    public Integer countJobsByCompanyId(Long companyId) {
-        return jobRepository.countByCompanyId(companyId);
-    }
-*/
-  public boolean createJob(Long userId, JobDTO jobDTO) {
-      Optional<User> userOptional = userService.findById(userId);
+    /*  @Override
+      public Integer countJobsByCompanyId(Long companyId) {
+          return jobRepository.countByCompanyId(companyId);
+      }
+  */
+    public boolean createJob(Long userId, JobDTO jobDTO) {
+        Optional<User> userOptional = userService.findById(userId);
 
-      if (userOptional.isPresent()) {
-          User user = userOptional.get();
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
 
-          int jobCountThisMonth = jobRepository.countJobsByUserIdAndMonth(userId, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
+            int jobCountThisMonth = jobRepository.countJobsByUserIdAndMonth(userId, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
 
-          // Lấy Subscription hiện tại của người dùng
-          Optional<Subscription> subscriptionOptional = transactionService.findActiveSubscriptionByUser(user, LocalDate.now());
+            // Lấy Subscription hiện tại của người dùng
+            Optional<Subscription> subscriptionOptional = transactionService.findActiveSubscriptionByUser(user, LocalDate.now());
 
-          System.out.println(subscriptionOptional);
+            System.out.println(subscriptionOptional);
 
-          // Xác định số lượng bài đăng tối đa dựa trên Subscription
-          int maxPosts = subscriptionOptional.map(Subscription::getPostLimit).orElse(10); // 10 nếu không có subscription
+            // Xác định số lượng bài đăng tối đa dựa trên Subscription
+            int maxPosts = subscriptionOptional.map(Subscription::getPostLimit).orElse(10); // 10 nếu không có subscription
 
-          if (jobCountThisMonth >= maxPosts) {
-              return false;
-          }
+            if (jobCountThisMonth >= maxPosts) {
+                return false;
+            }
 
-          List<String> services = transactionRepository.findServicesByUserId(userId);
+            List<String> services = transactionRepository.findServicesByUserId(userId);
 
 // Xác định isSuperHot dựa trên dịch vụ
-          boolean isSuperHot = services.contains("HOT");
+            boolean isSuperHot = services.contains("HOT");
 
-          // Lấy các Category từ danh sách categoryIds
-          Set<Category> categories = new HashSet<>();
-          for (Long categoryId : jobDTO.getCategoryIds()) {
-              categoryRepository.findById(categoryId).ifPresent(categories::add);
-          }
+            // Lấy các Category từ danh sách categoryIds
+            Set<Category> categories = new HashSet<>();
+            for (Long categoryId : jobDTO.getCategoryIds()) {
+                categoryRepository.findById(categoryId).ifPresent(categories::add);
+            }
 
-          // Tạo đối tượng Job từ DTO
-          Job job = convertJobToEntity(jobDTO, categories,isSuperHot);
-          job.setUser(user); // Thiết lập User cho Job
-          job.setSuperHot(isSuperHot); // Thiết lập isSuperHot
+            // Tạo đối tượng Job từ DTO
+            Job job = convertJobToEntity(jobDTO, categories,isSuperHot);
+            job.setUser(user); // Thiết lập User cho Job
+            job.setSuperHot(isSuperHot); // Thiết lập isSuperHot
 
-          // Lưu job vào repository
-          jobRepository.save(job);
-          return true;
-      } else {
-          return false;
-      }
-  }
+            // Lưu job vào repository
+            jobRepository.save(job);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 
 
@@ -190,7 +190,7 @@ public class JobServiceImpl   implements JobService {
         job.setPosition(Position.SENIOR);
         job.setExperience(jobDTO.getExperience());
         if (jobDTO.getCompanyId() != null) {
-          Company company = new Company();
+            Company company = new Company();
             company.setCompanyId(jobDTO.getCompanyId());
             job.setCompany(company);
         }

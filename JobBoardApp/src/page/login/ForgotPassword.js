@@ -48,7 +48,7 @@ const ForgotPassword = () => {
           </div>
         </div>
       </section>
-      <section className="site-section">
+      <section className="section is-medium">
         <div className="container">
           <div className="row">
             <div className="col-lg-6">

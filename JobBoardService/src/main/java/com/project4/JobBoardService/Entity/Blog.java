@@ -1,15 +1,12 @@
 package com.project4.JobBoardService.Entity;
 
-import com.project4.JobBoardService.Enum.BlogStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -58,4 +55,12 @@ public class Blog extends AbstractEntity {
 
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "blog_hashtag",
+            joinColumns = @JoinColumn(name = "blog_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id", referencedColumnName = "id"))
+    private List<HashTag> hashtags = new ArrayList<>();
+
+    private int view;
 }

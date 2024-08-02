@@ -38,6 +38,8 @@ dependencies {
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.2.0'
 	// https://mvnrepository.com/artifact/com.paypal.sdk/paypal-core
 	implementation group: 'com.paypal.sdk', name: 'paypal-core', version: '1.7.2'
+	// https://mvnrepository.com/artifact/com.paypal.sdk/rest-api-sdk
+	implementation group: 'com.paypal.sdk', name: 'rest-api-sdk', version: '1.14.0'
 
 	// https://mvnrepository.com/artifact/com.paypal.sdk/rest-api-sdk
 	implementation group: 'com.paypal.sdk', name: 'rest-api-sdk', version: '1.14.0'
@@ -108,8 +110,7 @@ dependencies {
 
 
 	// iTextPDF
-	 implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.4'
-	 implementation 'com.itextpdf:html2pdf:3.0.3'
+	implementation group: 'com.itextpdf', name: 'html2pdf', version: '5.0.4'
 	
 	// Gson
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.11.0'

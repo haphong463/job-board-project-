@@ -8,12 +8,13 @@ const HEADERS_FORM_DATA = {
 
 export const fetchQuizzes = async () => await axiosRequest.get(URL);
 
-export const createQuiz = async (title, description, imageFile) => {
+export const createQuiz = async (title, description, imageFile,categoryId) => {
   try {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("imageFile", imageFile);
+    formData.append("categoryId", categoryId);
 
     const data = await axiosRequest.post(`${URL}/createQuiz`, formData, {
       headers: HEADERS_FORM_DATA,
@@ -38,11 +39,15 @@ export const deleteQuiz = async (quizId) => {
 export const updateQuiz = async (id, data, imageFile) => {
   try {
     const formData = new FormData();
-    formData.append("quiz", JSON.stringify(data));
+    formData.append("title", data.title);
+    formData.append("description", data.description);
     formData.append("imageFile", imageFile);
+    formData.append("categoryId", data.categoryId);
 
     const response = await axiosRequest.put(`${URL}/${id}`, formData, {
-      headers: HEADERS_FORM_DATA,
+      headers: {
+        "Content-Type": "multipart/form-data"
+      },
     });
 
     return response.data;

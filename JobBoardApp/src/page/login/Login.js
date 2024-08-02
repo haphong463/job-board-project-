@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import {
+  resetMessages,
   resetVerificationMessage,
   signInOAuth2,
 } from "../../features/authSlice";
@@ -14,17 +15,16 @@ import "./login.css";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { signInOAuth2Async } from "../../services/AuthService";
+import showToast from "../../utils/function/showToast";
+import { Divider } from "antd";
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
-  const verificationMessage = useSelector(
-    (state) => state.auth.verificationMessage
-  );
+  const error = useSelector((state) => state.auth.error);
   const status = useSelector((state) => state.auth.status);
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
-  console.log(">>> show password: ", showPassword);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -33,16 +33,16 @@ export const Login = () => {
     const credential = credentialResponse.credential;
     dispatch(signInOAuth2(credential)).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
+        const fullName = res.payload.firstName + " " + res.payload.lastName;
+        showToast("You're back, " + fullName, "success");
         navigate("/");
       }
     });
   };
 
   useEffect(() => {
-    dispatch(resetVerificationMessage());
+    dispatch(resetMessages());
   }, [dispatch]);
-
-  console.log(">>> status: ", status);
 
   if (user) return <Navigate to="/" replace={true} />;
 
@@ -59,26 +59,24 @@ export const Login = () => {
           <div className="container">
             <div className="row">
               <div className="col-md-7">
-                <h1 className="text-white font-weight-bold">Sign Up/Login</h1>
+                <h1 className="text-white font-weight-bold">Login</h1>
                 <div className="custom-breadcrumbs">
                   <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                  <span className="text-white">
-                    <strong>Log In</strong>
-                  </span>
+                  <span className="text-white">Log In</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        <section className="site-section">
+        <section className="site-section section is-medium">
           <div className="container">
             <div className="row">
               <div className="col-lg-6">
-                {verificationMessage && (
+                {error && (
                   <>
                     <Alert variant="danger">
                       <MdErrorOutline size={25} className="mr-2" />
-                      {verificationMessage}
+                      {error}
                     </Alert>
                   </>
                 )}
@@ -140,20 +138,27 @@ export const Login = () => {
                       <NavLink to="/signup">Register now</NavLink>
                     </p>
                   </div>
-                  <GoogleOAuthProvider
-                    clientId={process.env.REACT_APP_GOOGLE_CLIENTID}
-                  >
-                    <GoogleLogin
-                      onSuccess={handleSuccess}
-                      onError={(err) => {
-                        console.log(err);
-                      }}
-                    />
-                  </GoogleOAuthProvider>
+                  <Divider className="text-secondary">OR</Divider>
+                  <div className="d-flex justify-content-center">
+                    <GoogleOAuthProvider
+                      clientId={process.env.REACT_APP_GOOGLE_CLIENTID}
+                    >
+                      <GoogleLogin
+                        onSuccess={handleSuccess}
+                        onError={(err) => {
+                          console.log(err);
+                        }}
+                        shape="pill"
+                        size="large"
+                        text="signin_with"
+                        type="standard"
+                      />
+                    </GoogleOAuthProvider>
+                  </div>
                 </form>
               </div>
               <div className="col-lg-6 d-none d-lg-block">
-                <div className="info-box">
+                <div className="info-box content">
                   <h4>Welcome Back!</h4>
                   <p>
                     By logging in, you gain access to all the features and

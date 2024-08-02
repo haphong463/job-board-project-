@@ -22,16 +22,23 @@ import {
 import { CSVLink } from "react-csv";
 import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
-import { searchBlogs, deleteBlog } from "../../../features/blogSlice";
+import {
+  searchBlogs,
+  deleteBlog,
+  getHashTags,
+} from "../../../features/blogSlice";
 import debounce from "lodash.debounce";
 import { FaFileExcel } from "react-icons/fa";
 import "./style.css";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import Swal from "sweetalert2";
+import { Navigate } from "react-router-dom";
+import { getExcelData } from "../../../services/blog_service";
 
 export function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs);
+  const excelData = useSelector((state) => state.blogs.exportExcel);
   const totalPages = useSelector((state) => state.blogs.totalPages);
   const status = useSelector((state) => state.blogs.status);
   const blogCategoryData = useSelector(
@@ -101,8 +108,11 @@ export function Blog(props) {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        dispatch(deleteBlog(id));
-        Swal.fire("Deleted!", "Your blog has been deleted.", "success");
+        dispatch(deleteBlog(id)).then((res) => {
+          if (res.meta.requestStatus === "fulfilled") {
+            Swal.fire("Deleted!", "Your blog has been deleted.", "success");
+          }
+        });
       }
     });
   };
@@ -190,30 +200,28 @@ export function Blog(props) {
       width: "300px",
       cell: (row) => <div>{row.user.email}</div>,
     },
-    {
-      name: "Comments Count",
-      selector: (row) => row.commentCount,
-      sortable: true,
-      cell: (row) => <div>{row.commentCount}</div>,
-    },
+
     {
       name: "Actions",
-      cell: (row) => (
-        <Dropdown
-          isOpen={dropdownOpen[row.id]}
-          toggle={() => toggleDropdown(row.id)}
-        >
-          <DropdownToggle caret color="info">
-            Actions
-          </DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem onClick={() => handleEdit(row.id)}>Edit</DropdownItem>
-            <DropdownItem onClick={() => handleDelete(row.id)}>
-              Delete
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      ),
+      cell: (row) =>
+        user.sub === row.user.username ? (
+          <Dropdown
+            isOpen={dropdownOpen[row.id]}
+            toggle={() => toggleDropdown(row.id)}
+          >
+            <DropdownToggle caret color="info">
+              Actions
+            </DropdownToggle>
+            <DropdownMenu>
+              <DropdownItem onClick={() => handleEdit(row.id)}>
+                Edit
+              </DropdownItem>
+              <DropdownItem onClick={() => handleDelete(row.id)}>
+                Delete
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        ) : null,
     },
   ];
 
@@ -224,26 +232,19 @@ export function Blog(props) {
       },
     },
   };
+  const user = useSelector((state) => state.auth.user);
+  const roles = user?.role.map((item) => item.authority) || [];
+  const permissions = user?.permission.map((item) => item.name) || [];
+  const isModerator = roles.includes("ROLE_MODERATOR");
+  const hasManageBlogPermission = permissions.includes("MANAGE_BLOG");
 
-  const csvHeaders = [
-    { label: "ID", key: "id" },
-    { label: "Title", key: "title" },
-    { label: "Category", key: "categories" },
-    { label: "Visibility", key: "visibility" },
-    { label: "Posted By", key: "user.email" },
-    { label: "Comments Count", key: "commentCount" },
-  ];
+  useEffect(() => {
+    dispatch(getHashTags());
+  }, []);
 
-  const csvData = blogData.map((row) => ({
-    id: row.id,
-    title: row.title,
-    categories: row.categories.map((c) => c.name).join(", "),
-    visibility: row.visibility ? "Show" : "Hide",
-    "user.email": row.user.email,
-    commentCount: row.commentCount,
-  }));
-
-  console.log(">>>status: ", status === "loading");
+  if (isModerator && !hasManageBlogPermission) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <Card>
@@ -251,16 +252,11 @@ export function Blog(props) {
         <h4>Blog List</h4>
         <div className="d-flex  p-3 gap-3">
           <Form isEdit={isEdit} setIsEdit={setIsEdit} />
-          <CSVLink
-            data={csvData}
-            headers={csvHeaders}
-            filename={"blog_data.csv"}
-          >
-            <Button color="success">
-              <FaFileExcel />
-              Export CSV
-            </Button>
-          </CSVLink>
+
+          <Button color="success" onClick={getExcelData}>
+            <FaFileExcel />
+            Export CSV
+          </Button>
         </div>
       </div>
       <div className="d-flex gap-3 px-2">
@@ -285,7 +281,7 @@ export function Blog(props) {
             value={selectedCategory}
             className="form-select"
           >
-            <option value="ALL">All</option>
+            <option value="">All</option>
             {blogCategoryData.map((category) => (
               <option key={category.id} value={category.name}>
                 {category.name}

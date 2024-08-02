@@ -72,7 +72,7 @@ public class JobController {
     }
 
 
- @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
     @PostMapping("/users/{userId}")
     public ResponseEntity<String> createJob(@PathVariable("userId") Long userId,
                                             @RequestBody JobDTO jobDTO) {
@@ -104,15 +104,13 @@ public class JobController {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
 
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-        @DeleteMapping("/{jobId}")
-        public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
+    @DeleteMapping("/{jobId}")
+    public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
         jobService.deleteJob(jobId);
         return ResponseEntity.ok().build();
     }
 
 }
-
-

@@ -1,31 +1,41 @@
 import { AboutUs } from "../../page/about-us/AboutUs";
 import { BlogSingle } from "../../page/blog-single/BlogSingle";
-import  Blog  from "../../page/blog/Blog";
+import Blog from "../../page/blog/Blog";
 import { Contact } from "../../page/contact/Contact";
 import { Faq } from "../../page/faq/Faq";
 import { Home } from "../../page/home/Home";
 import { Portfolio } from "../../page/portfolio/Portfolio";
 import { PortfolioSingle } from "../../page/portfolio-single/PortfolioSingle";
-import { JobListing } from "../../page/job-listing/JobListing";
+import { JobList } from "../../page/job-listing/job_listing";
+import { ViewAllSkill } from "../../page/job-listing/listSkillAll";
 import { PostJob } from "../../page/post-job/PostJob";
 import { Login } from "../../page/login/Login";
 import SignUp from "../../page/signup/SignUp";
 import ForgotPassword from "../../page/login/ForgotPassword";
 import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
-import { JobSingle } from "../../page/job-single/JobSingle";
+import { JobSingle } from "../../page/job-listing/JobSingle";
+import { JobSingle1 } from "../../page/job-single/JobSingle";
+import  {JobListing}  from "../../page/job-listing/JobListing";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
-import CreateCV from "../../page/user-cv/CreateCv";
-import CreateTemplate from "../../page/user-cv/CreateTemplate";
 import ListTemplate from "../../page/list-template/ListTemplate";
 import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
-
+import MainCv from "../../page/user-cv/MainCv";
+import ListPdf from "../../page/pdf-management/ListPdf";
+import PdfDetail from "../../page/pdf-management/PdfDetail";
+import MyProfile  from "../../page/myprofile/myprofile";
 
 import SetupCredentials from "../../page/signup/SetupCredentials";
 import { Quiz } from "../../page/quiz/quiz";
 import QuizResult from "../../page/quiz/QuizResult";
 import QuizQuestions from "../../page/quiz/QuizQuestions";
+import { CompanyDetail } from "../../page/job-listing/company_detail";
+import { ViewAllCompany } from "../../page/job-listing/listCompanyAll";
+import { WriteReview } from "../../page/job-listing/company-review";
 import UpdateCv from "../../page/user-cv/UpdateCv";
+import ManagementProfile from "../../page/myprofile/UserProfileManagement";
+import React from "react";
+
 export const routes = [
   { path: "/", component: <Home /> },
   { path: "/about", component: <AboutUs /> },
@@ -35,23 +45,32 @@ export const routes = [
   { path: "/post-job", component: <PostJob /> },
   { path: "/portfolio", component: <Portfolio /> },
   { path: "/portfolio/:id", component: <PortfolioSingle /> },
-  { path: "/job-listing", component: <JobListing /> },
+  // { path: "/jobSkillList/:id", component: <JobList /> },
+  { path: "/jobList/:id", component: <JobList /> },
+  { path: "/jobDetail/:id/:companyId", component: <JobSingle /> },
+  { path: "/jobListing", component: <JobListing /> },
+  { path: "/viewAllJobs/:searchTerm?", component: <JobList /> },
+  { path: "/viewAllJobs", component: <JobList /> },
+  { path: "/viewAllSkill", component: <ViewAllSkill /> },
   { path: "/login", component: <Login /> },
   { path: "/signup", component: <SignUp /> },
-  { path: "/create-cv", component: <CreateCV /> },
-  { path: "/update-cv/:cvId", component: <UpdateCv /> },
-  { path: "/create-template", component: <CreateTemplate /> },
-
+  { path: "/cv-management", component: <MainCv /> },
   { path: "/list-template", component: <ListTemplate /> },
-  { path: "/review-template/:templateName", component: <ReviewTemplate /> },
+  { path: "/list-pdf", component: <ListPdf /> },
+  { path: "/pdf-cv/:id", component: <PdfDetail /> },
+  { path: "/review-template/:templateName/:userId/:cvId", component: <ReviewTemplate /> },
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
-  { path: "/job-listings", component: <JobListing /> },
-  { path: "/job/:id", component: <JobSingle /> },
+  { path: "/job", component: <JobSingle1 /> },
   { path: "/gallery", component: <Gallery /> },
   { path: "/EmployerSignUp", component: <EmployerSignUp /> },
   { path: "/SetupCredentials", component: <SetupCredentials /> },
   { path: "/quiz", component: <Quiz /> },
   { path: "/quiz/:quizId", component: <QuizQuestions /> },
   { path: "/quiz/:quizId/result", component: <QuizResult /> },
+  { path: "/companyDetail/:id", component: <CompanyDetail /> },
+  { path: "/viewAllCompany", component: <ViewAllCompany /> },
+  { path: "/companyReview", component: <WriteReview /> },
+  {path:"/myprofile",component:<MyProfile/>},
+  {path:"/managementprofile",component:<ManagementProfile/>},
 ];

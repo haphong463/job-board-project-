@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
 import {
@@ -8,44 +8,69 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import { FaBell, FaUserCircle } from "react-icons/fa";
+import { FaBell, FaChevronRight, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
+import { fetchCompanyThunk } from "../../features/companySlice";
 import {
+  deleteNotificationThunk,
   markNotificationAsRead,
   readNotificationThunk,
 } from "../../features/notificationSlice";
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
+import { MdDelete, MdMessage } from "react-icons/md";
+
+import { Link } from "react-scroll";
+import categoryData from "./category.json";
+import companyData from "../../page/job-listing/company_data.json";
+import Swal from "sweetalert2";
+
 export function GlobalNavbar() {
   const [searchParams] = useSearchParams();
-  const [hoveredCategory, setHoveredCategory] = useState(null);
+  // const [categories, setCategories] = useState([]);
+  // const [companies, setCompanies] = useState([]);
+  const [isSkillsDropdownVisible, setSkillsDropdownVisible] = useState(false);
+  const [isCompanyDropdownVisible, setCompanyDropdownVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false); // Thêm state để quản lý dropdown thông báo
-
-  const navigate = useNavigate();
-  const notifications = useSelector((state) => state.notification.list);
-  const user = useSelector((state) => state.auth.user);
-  const roles = useSelector((state) => state.auth.roles);
-  const dispatch = useDispatch();
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const categories = useSelector((state) => state.category.categories);
-  const blogCategory = useSelector((state) => state.blogs.categories);
-  const unreadCount = useSelector((state) => state.notification.unreadCount);
+  const companies = useSelector((state) => state.company.companies);
 
   const handleLogout = () => {
-    dispatch(signOut());
+    dispatch(signOut()).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/login");
+      }
+    });
   };
 
-  useEffect(() => {
-    if (categories.length === 0) {
-      dispatch(fetchCategoryThunk());
-      dispatch(fetchAllCategories());
-    }
-  }, [dispatch]);
+  const handleCvManagementClick = () => {
+    navigate("/cv-management");
+  };
+  const handleMyProfileClick = () => {
+   navigate("/managementprofile");
+ };
+   const notifications = useSelector((state) => state.notification.list);
+   const user = useSelector((state) => state.auth.user);
+   const roles = useSelector((state) => state.auth.roles);
+   const dispatch = useDispatch();
+   const blogCategory = useSelector((state) => state.blogs.categories);
+   const unreadCount = useSelector((state) => state.notification.unreadCount);
+   const navigate = useNavigate();
 
-  const handleCategoryClick = (categoryName) => {
-    // setSelectedCategory(categoryName);
-    console.log("Selected category:", categoryName);
+  useEffect(() => {
+    dispatch(fetchCategoryThunk());
+    dispatch(fetchCompanyThunk());
+    dispatch(fetchAllCategories());
+  }, []);
+
+  const handleCategoryClick = (categoryId) => {
+    window.location.href = `/jobList/${categoryId}`;
+  };
+
+  const handleCompanyClick = (companyId) => {
+    window.location.href = `/companyDetail/${companyId}`;
   };
 
   const handleMarkNotification = useCallback(
@@ -54,6 +79,23 @@ export function GlobalNavbar() {
     }, 500),
     [dispatch]
   );
+
+  const handleDeleteNotification = (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteNotificationThunk(id));
+        Swal.fire("Deleted!", "Your notification has been deleted.", "success");
+      }
+    });
+  };
 
   const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
   const toggleNotification = () =>
@@ -64,7 +106,7 @@ export function GlobalNavbar() {
       <div className="container-fluid">
         <div className="row align-items-center">
           <div className="site-logo col-6">
-            <NavLink to="/">JobGrove </NavLink>
+            <NavLink to="/">ITGrove</NavLink>
           </div>
 
           <nav className="mx-auto site-navigation">
@@ -77,35 +119,89 @@ export function GlobalNavbar() {
               <li>
                 <NavLink to="/about">About</NavLink>
               </li>
-              <li
-                className="has-children"
-                onMouseEnter={() => setHoveredCategory("Job By Skills")}
-                onMouseLeave={() => setHoveredCategory(null)}
-              >
-                <NavLink to="/job-listings">Job Listings</NavLink>
+              <li className="has-children">
+                <NavLink to="/viewAllJobs">Job Listings</NavLink>
                 <ul className="dropdown">
-                  <li>
-                    <NavLink to="/job-single">Job By Skills</NavLink>
-                    <div>
-                      {hoveredCategory === "Job By Skills" && (
-                        <ul>
-                          {categories.map((category) => (
-                            <li
-                              key={category.categoryId}
-                              onClick={() =>
-                                handleCategoryClick(category.categoryName)
-                              }
-                            >
-                              <a
-                                href={`/search?category=${category.categoryName}`}
-                              >
-                                {category.categoryName}
-                              </a>
-                            </li>
+                  <li
+                    className="dropdown-item"
+                    onMouseEnter={() => setSkillsDropdownVisible(true)}
+                    onMouseLeave={() => setSkillsDropdownVisible(false)}
+                  >
+                    <NavLink to="/viewAllSkill">
+                      Job By Skills <FaChevronRight className="icon" />
+                    </NavLink>
+                    {isSkillsDropdownVisible && (
+                      <div className="skills-dropdown">
+                        <div className="dropdown-columns">
+                          {Array.from({ length: 3 }).map((_, colIndex) => (
+                            <ul key={colIndex} className="sub-dropdown">
+                              {categories
+                                .slice(colIndex * 12, colIndex * 3 + 12)
+                                .map((category) => (
+                                  <li
+                                    key={category.categoryId}
+                                    onClick={() =>
+                                      handleCategoryClick(category.categoryId)
+                                    }
+                                  >
+                                    {category.categoryName}
+                                  </li>
+                                ))}
+                              {(colIndex + 1) * 15 <= categories.length && (
+                                <li
+                                  className="view-all"
+                                  onClick={() => navigate("/viewAllSkill")}
+                                >
+                                  View All Jobs by Skill{" "}
+                                  <FaChevronRight className="icon2" />
+                                </li>
+                              )}
+                            </ul>
                           ))}
-                        </ul>
-                      )}
-                    </div>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                  <li
+                    className="dropdown-item"
+                    onMouseEnter={() => setCompanyDropdownVisible(true)}
+                    onMouseLeave={() => setCompanyDropdownVisible(false)}
+                  >
+                    <NavLink to="/viewAllCompany">
+                      Job By Company
+                      <FaChevronRight className="icon3" />
+                    </NavLink>
+                    {isCompanyDropdownVisible && (
+                      <div className="skills-dropdown">
+                        <div className="dropdown-columns">
+                          {Array.from({ length: 3 }).map((_, colIndex) => (
+                            <ul key={colIndex} className="sub-dropdown">
+                              {companies
+                                .slice(colIndex * 12, colIndex * 3 + 12)
+                                .map((company) => (
+                                  <li
+                                    key={company.companyId}
+                                    onClick={() =>
+                                      handleCompanyClick(company.companyId)
+                                    }
+                                  >
+                                    {company.companyName}
+                                  </li>
+                                ))}
+                              {(colIndex + 1) * 15 <= companies.length && (
+                                <li
+                                  className="view-all"
+                                  onClick={() => navigate("/viewAllCompany")}
+                                >
+                                  View All Jobs by Company{" "}
+                                  <FaChevronRight className="icon4" />
+                                </li>
+                              )}
+                            </ul>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </li>
                 </ul>
               </li>
@@ -116,7 +212,7 @@ export function GlobalNavbar() {
                   {blogCategory.map((item) => (
                     <li key={item.id}>
                       <NavLink
-                        to={`/blogs?type=${item.name}`}
+                        to={`/blogs?type=${encodeURIComponent(item.name)}`}
                         className={({ isActive }) =>
                           isActive && searchParams.get("type") === item.name
                             ? "active"
@@ -129,18 +225,13 @@ export function GlobalNavbar() {
                   ))}
                 </ul>
               </li>
+
               <li>
                 <NavLink to="/contact">Contact</NavLink>
               </li>
-              {user && (
-                <li>
-                  <NavLink to="/quiz">Quiz</NavLink>
-                </li>
-              )}
               <li>
-                <NavLink to="/create-cv">Create CV</NavLink>
+                <NavLink to="/quiz">Quiz</NavLink>
               </li>
-
               {!roles.includes("ROLE_EMPLOYER") && (
                 <li>
                   <NavLink to="/EmployerSignUp">For Employer</NavLink>
@@ -174,16 +265,7 @@ export function GlobalNavbar() {
               )}
               {user && (
                 <div className="icon-notification" onClick={toggleNotification}>
-                  {/* <img
-                    src="https://i.imgur.com/AC7dgLA.png"
-                    alt=""
-                    className={unreadCount > 0 ? "shake" : ""} // Apply shake class if unreadCount > 0
-                  /> */}
-                  <FaBell
-                    size={30}
-                    color="white"
-                    className={unreadCount > 0 ? "shake" : ""}
-                  />
+                  <FaBell size={30} color="white" />
                   {unreadCount > 0 && (
                     <span
                       className="badge"
@@ -210,49 +292,69 @@ export function GlobalNavbar() {
                     notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className="notifications-item"
-                        onClick={
-                          !notification.read
-                            ? () => {
-                                handleMarkNotification(notification.id);
-                                navigate(notification.url);
-                              }
-                            : () => {
-                                navigate(notification.url);
-                              }
-                        }
+                        className="notification-container"
                       >
-                        <img src={notification.sender.imageUrl} alt="img" />
-                        <div className="text">
-                          <h4
-                            className={`${
-                              notification.read ? "" : "font-weight-bold"
-                            }`}
-                          >
-                            {notification.sender.firstName}{" "}
-                            {notification.sender.lastName}
-                          </h4>
-                          <p
-                            className={`${
-                              notification.read ? "" : "font-weight-bold"
-                            }`}
-                          >
-                            {notification.message}
-                          </p>
-                          {/* <small className="d-block">
-                          {moment(notification.createdAt).from()}
-                        </small> */}
+                        <div
+                          className="notifications-item"
+                          onClick={
+                            !notification.read
+                              ? () => {
+                                  handleMarkNotification(notification.id);
+                                  navigate(notification.url);
+                                }
+                              : () => {
+                                  navigate(notification.url);
+                                }
+                          }
+                        >
+                          <div className="avatar-container">
+                            <img src={notification.sender.imageUrl} alt="img" />
+                            {notification.type === "COMMENT" && (
+                              <div className="icon-container">
+                                <MdMessage className="message-icon" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="text">
+                            <h4
+                              className={`${
+                                notification.read ? "" : "font-weight-bold"
+                              }`}
+                            >
+                              {notification.sender.firstName}{" "}
+                              {notification.sender.lastName}
+                            </h4>
+                            <p
+                              className={`${
+                                notification.read ? "" : "font-weight-bold"
+                              }`}
+                            >
+                              {notification.message}
+                            </p>
+                          </div>
                         </div>
+                        <button
+                          className="delete-button"
+                          onClick={(e) => {
+                            handleDeleteNotification(notification.id);
+                          }}
+                        >
+                          <MdDelete />
+                        </button>
                       </div>
                     ))
                   ) : (
                     <div className="text-center">
-                      <img src="https://static.topcv.vn/v4/image/toppy-notification-empty.png" />
+                      <img
+                        src="https://static.topcv.vn/v4/image/toppy-notification-empty.png"
+                        alt="No notifications"
+                      />
                       <p>You don't have any notifications yet.</p>
                     </div>
                   )}
                 </div>
               )}
+
               <Dropdown
                 isOpen={dropdownOpen}
                 toggle={toggleDropdown}
@@ -268,9 +370,17 @@ export function GlobalNavbar() {
                         header
                         className="text-uppercase font-weight-bold"
                       >
-                        {user.sub}
+                        {user.firstName} {user.lastName}
+                          
+                 
                       </DropdownItem>
-                      <DropdownItem onClick={handleLogout}>
+                      <DropdownItem onClick={handleMyProfileClick}>
+                        My Profile
+                      </DropdownItem>
+                      <DropdownItem onClick={handleCvManagementClick} className="dropdown-item-main">
+                        CV Management
+                      </DropdownItem>
+                      <DropdownItem onClick={handleLogout} className="dropdown-item-main">
                         Log out
                       </DropdownItem>
                     </>
@@ -300,3 +410,5 @@ export function GlobalNavbar() {
     </header>
   );
 }
+
+export default GlobalNavbar;

@@ -2,10 +2,12 @@ package com.project4.JobBoardService.security;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project4.JobBoardService.Entity.Company;
+import com.project4.JobBoardService.Entity.Permission;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.Gender;
 import lombok.Getter;
@@ -46,6 +48,9 @@ public class UserDetailsImpl implements UserDetails {
 
 
 
+    @Getter
+    private Set<Permission> permissions;
+
     private Collection<? extends GrantedAuthority> authorities;
 
 
@@ -79,6 +84,7 @@ public class UserDetailsImpl implements UserDetails {
         userDetails.gender = user.getGender();
         // Kiểm tra null trước khi gán companyId
         userDetails.companyId = user.getCompany() != null ? user.getCompany().getCompanyId() : null;
+        userDetails.permissions = user.getPermissions();
         return userDetails;
     }
 

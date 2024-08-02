@@ -6,14 +6,21 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store";
-import persistStore from "redux-persist/es/persistStore";
-import { PersistGate } from "redux-persist/integration/react";
+// import persistStore from "redux-persist/es/persistStore";
 import LoadingSpinner from "./components/loading-spinner/LoadingSpinner";
 // import { I18nextProvider } from "react-i18next";
 // import i18n from "./translation/translatetion";
+import Kommunicate from "@kommunicate/kommunicate-chatbot-plugin";
+
+Kommunicate.init("kommunicate-support", {
+  appId: process.env.REACT_APP_CHATBOT_ID,
+  automaticChatOpenOnNavigation: true,
+  popupWidget: true,
+});
+
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-// let persistor = persistStore(store);
+// const persistor = persistStore(store);
 root.render(
   <Router>
     <Provider store={store}>

@@ -21,6 +21,7 @@ import { signOut } from "../features/authSlice";
 
 const Header = ({ handleLogout }) => {
   const user = useSelector((state) => state.auth.user);
+  const userEdit = useSelector((state) => state.auth.userEdit);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -66,13 +67,13 @@ const Header = ({ handleLogout }) => {
       <Collapse navbar isOpen={isOpen}>
         <Nav className="me-auto" navbar>
           <NavItem>
-            <Link to="/starter" className="nav-link">
+            <Link to="/jobportal/starter" className="nav-link">
               Starter
             </Link>
           </NavItem>
           <NavItem>
-            <Link to="/about" className="nav-link">
-              About
+            <Link to="/jobportal/blog" className="nav-link">
+              Blog
             </Link>
           </NavItem>
           <UncontrolledDropdown inNavbar nav>
@@ -90,21 +91,21 @@ const Header = ({ handleLogout }) => {
         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
           <DropdownToggle color="primary">
             <img
-              src={user.imageUrl}
-              alt="profile" 
+              src={userEdit?.imageUrl}
+              alt="profile"
               className="rounded-circle"
-              width="30"
+              width="40"
+              style={{
+                objectFit: "contain",
+              }}
             ></img>
           </DropdownToggle>
           <DropdownMenu>
             <DropdownItem header>Info</DropdownItem>
-            <DropdownItem>My Account</DropdownItem>
             <DropdownItem onClick={() => navigate("/jobportal/settings")}>
               Edit Profile
             </DropdownItem>
             <DropdownItem divider />
-            <DropdownItem>My Balance</DropdownItem>
-            <DropdownItem>Inbox</DropdownItem>
             <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
           </DropdownMenu>
         </Dropdown>

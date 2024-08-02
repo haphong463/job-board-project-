@@ -12,11 +12,12 @@ export function BlogContent(props) {
         img.setAttribute("height", "auto");
       });
     }
-  }, [props.content]); // Chạy lại hiệu ứng khi blog.content thay đổi
+  }, [props.content]);
 
   return (
     <blockquote
       ref={blockquoteRef}
+      className="content" // Thêm lớp CSS ở đây
       dangerouslySetInnerHTML={{
         __html: props.content,
       }}

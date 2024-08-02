@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/comment_model.dart';
+import 'package:jobboardmobile/models/content_model.dart';
+import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/comment_service.dart';
 
 class CommentWidget extends StatefulWidget {
   final Comment comment;
   final int level;
+  final void Function(String) deleteComment;
+  final void Function(bool) toggleMainCommentField; // Add this parameter
+  final ContentModel blog;
 
-  const CommentWidget({super.key, required this.comment, this.level = 0});
+  const CommentWidget(
+      {super.key,
+      required this.comment,
+      this.level = 0,
+      required this.deleteComment,
+      required this.toggleMainCommentField,
+      required this.blog});
 
   @override
   _CommentWidgetState createState() => _CommentWidgetState();
@@ -15,55 +27,119 @@ class CommentWidget extends StatefulWidget {
 
 class _CommentWidgetState extends State<CommentWidget> {
   final CommentService _commentService = CommentService();
+  final AuthService _authService = AuthService();
+  final GlobalKey _commentKey = GlobalKey(); // Add this line
+
+  String? username;
   bool _replying = false;
+  bool _isEditing = false;
+  TextEditingController editEditingController = TextEditingController();
   TextEditingController replyEditingController = TextEditingController();
+  FocusNode replyFocusNode = FocusNode();
 
-  void _editComment(BuildContext context, Comment comment) {
-    // Handle edit comment action
+  void _fetchUserDetails() async {
+    username = await _authService.getUsername();
+    setState(() {});
   }
 
-  void _deleteComment(BuildContext context, Comment comment) {
-    // Handle delete comment action
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserDetails();
+    editEditingController.text = widget.comment.content;
   }
 
-  void _toggleReply() {
+  void _editComment(BuildContext context) {
     setState(() {
-      _replying = !_replying;
-      if (!_replying) {
-        replyEditingController.clear();
-      }
+      _isEditing = true;
+      widget.toggleMainCommentField(false);
     });
   }
 
-  void _addReply(String content) async {
+  void _addReply(String content, Comment parentComment) async {
     try {
       String temporaryCommentId = '${DateTime.now().millisecondsSinceEpoch}';
 
       var reply = {
         'id': temporaryCommentId,
-        'blog': {'id': widget.comment.blog.id},
-        'parentComment': {'id': widget.comment.id}, // Set parent comment id
+        'blog': {
+          'id': parentComment.blog.id,
+          'user': {'username': widget.blog.user.username}
+        },
+        'parent': {'id': parentComment.id},
         'content': content,
-        'user': {
-          'username': "haphong2134"
-        }, // Assuming user.username is the username
+        'user': {'username': username},
       };
-      // You'll need to adjust this based on your CommentService implementation
-      // to handle adding replies
       Comment createdReply = await _commentService.createComment(reply);
-      print(createdReply.content);
       setState(() {
-        widget.comment.children.add(createdReply);
-        _toggleReply(); // Hide reply field after successful reply
+        parentComment.children.add(createdReply);
+        _toggleReply();
       });
     } catch (e) {
       print('Failed to add reply: $e');
     }
   }
 
+  void _saveEdit() async {
+    try {
+      var updatedComment = {
+        'content': editEditingController.text,
+        'user': {'username': username}
+      };
+      await _commentService.updateComment(widget.comment.id, updatedComment);
+      setState(() {
+        widget.comment.content = editEditingController.text;
+        _isEditing = false;
+        widget.toggleMainCommentField(true);
+      });
+    } catch (e) {
+      print('Failed to edit comment: $e');
+    }
+  }
+
+  void _toggleReply() {
+    setState(() {
+      _replying = !_replying;
+
+      if (!_replying) {
+        replyFocusNode.unfocus();
+        replyEditingController.clear();
+      } else {
+        replyFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: const Text('Are you sure you want to delete this comment?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                widget.deleteComment(widget.comment.id);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
+      key: _commentKey, // Add this line
       padding:
           EdgeInsets.only(left: 16.0 * widget.level, top: 8.0, bottom: 8.0),
       child: Column(
@@ -73,8 +149,17 @@ class _CommentWidgetState extends State<CommentWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                child: Text(widget.comment.user
-                    .email[0]), // Placeholder cho avatar người dùng
+                child: ClipOval(
+                  child: Image.network(
+                    widget.comment.user.imageUrl.replaceFirst(
+                      'http://localhost:8080',
+                      Endpoint.imageUrl,
+                    ),
+                    fit: BoxFit.cover,
+                    width: 40,
+                    height: 40,
+                  ),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -84,8 +169,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                     Row(
                       children: [
                         Text(
-                          widget.comment.user
-                              .email, // Placeholder cho tên người dùng
+                          "${widget.comment.user.firstName} ${widget.comment.user.lastName}",
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const Spacer(),
@@ -109,22 +193,25 @@ class _CommentWidgetState extends State<CommentWidget> {
                                   value: 'Reply',
                                   child: Text('Reply'),
                                 ),
-                                const PopupMenuItem<String>(
-                                  value: 'Edit',
-                                  child: Text('Edit'),
-                                ),
-                                const PopupMenuItem<String>(
-                                  value: 'Delete',
-                                  child: Text('Delete'),
-                                ),
+                                if (username ==
+                                    widget.comment.user.username) ...[
+                                  const PopupMenuItem<String>(
+                                    value: 'Edit',
+                                    child: Text('Edit'),
+                                  ),
+                                  const PopupMenuItem<String>(
+                                    value: 'Delete',
+                                    child: Text('Delete'),
+                                  ),
+                                ]
                               ],
                             ).then((value) {
                               if (value == 'Reply') {
                                 _toggleReply();
                               } else if (value == 'Edit') {
-                                _editComment(context, widget.comment);
+                                _editComment(context);
                               } else if (value == 'Delete') {
-                                _deleteComment(context, widget.comment);
+                                _confirmDelete(context);
                               }
                             });
                           },
@@ -132,7 +219,34 @@ class _CommentWidgetState extends State<CommentWidget> {
                         ),
                       ],
                     ),
-                    Text(widget.comment.content),
+                    if (_isEditing)
+                      TextField(
+                        controller: editEditingController,
+                        decoration: const InputDecoration(
+                          hintText: 'Edit your comment',
+                          border: OutlineInputBorder(),
+                        ),
+                      )
+                    else
+                      Text(widget.comment.content),
+                    if (_isEditing)
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: _saveEdit,
+                            child: const Text('Save'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _isEditing = false;
+                                widget.toggleMainCommentField(true);
+                              });
+                            },
+                            child: const Text('Cancel'),
+                          ),
+                        ],
+                      ),
                     Text(
                       DateFormat.yMMMd().format(widget.comment.createdAt),
                       style: const TextStyle(color: Colors.grey),
@@ -140,22 +254,33 @@ class _CommentWidgetState extends State<CommentWidget> {
                     if (_replying)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter your reply',
-                                  border: OutlineInputBorder(),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    decoration: const InputDecoration(
+                                      hintText: 'Enter your reply',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    controller: replyEditingController,
+                                    focusNode: replyFocusNode,
+                                  ),
                                 ),
-                                controller: replyEditingController,
-                              ),
+                                IconButton(
+                                  icon: const Icon(Icons.send),
+                                  onPressed: () {
+                                    _addReply(replyEditingController.text,
+                                        widget.comment);
+                                  },
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.send),
-                              onPressed: () {
-                                _addReply(replyEditingController.text);
-                              },
+                            TextButton(
+                              onPressed: _toggleReply,
+                              child: const Text('Cancel'),
                             ),
                           ],
                         ),
@@ -166,8 +291,13 @@ class _CommentWidgetState extends State<CommentWidget> {
             ],
           ),
           const SizedBox(height: 8),
-          ...widget.comment.children.map((child) =>
-              CommentWidget(comment: child, level: widget.level + 1)),
+          ...widget.comment.children.map((child) => CommentWidget(
+                comment: child,
+                level: widget.level + 1,
+                deleteComment: widget.deleteComment,
+                toggleMainCommentField: widget.toggleMainCommentField,
+                blog: widget.blog, // Pass the toggle function
+              )),
         ],
       ),
     );

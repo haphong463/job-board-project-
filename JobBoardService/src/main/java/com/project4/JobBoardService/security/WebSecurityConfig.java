@@ -18,8 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.net.http.HttpRequest;
-
 
 @Configuration
 @EnableMethodSecurity
@@ -73,13 +71,16 @@ public class WebSecurityConfig {
                                 .requestMatchers(HttpMethod.GET).permitAll()
 
                                 .requestMatchers("/api/payment/**").permitAll()
+                                .requestMatchers("/api/employer/**").permitAll()
+                                .requestMatchers("/api/certificates/**").permitAll()
 
                                 .requestMatchers("/api/usercv/**").permitAll()
                                 .requestMatchers("/api/templates/**").permitAll()
-
+                                .requestMatchers("/api/jobs/**").permitAll()
+                                .requestMatchers("/api/application/**").permitAll()
+                                .requestMatchers("/api/categoriesquiz/**").permitAll()
                                 .requestMatchers("/api/quizzes/**").permitAll()
                                 .requestMatchers("/api/contacts/**").permitAll()
-
                                 .anyRequest().authenticated()
 
                 );

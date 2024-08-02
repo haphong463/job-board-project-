@@ -1,12 +1,6 @@
 package com.project4.JobBoardService.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -20,11 +14,16 @@ public class UserEducation {
     @ManyToOne
     @JoinColumn(name = "cv_id")
     private UserCV userCV;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
 
     private String degree;
     private String institution;
     private String startDate;
     private String endDate;
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
 
     // Getters and setters

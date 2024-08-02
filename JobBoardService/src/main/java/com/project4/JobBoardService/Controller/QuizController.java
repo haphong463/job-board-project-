@@ -2,13 +2,11 @@ package com.project4.JobBoardService.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project4.JobBoardService.DTO.*;
-import com.project4.JobBoardService.Entity.Question;
-import com.project4.JobBoardService.Entity.Quiz;
-import com.project4.JobBoardService.Entity.QuizScore;
-import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Entity.*;
 import com.project4.JobBoardService.Repository.QuizRepository;
 import com.project4.JobBoardService.Repository.QuizScoreRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
+import com.project4.JobBoardService.Service.CategoryQuizService;
 import com.project4.JobBoardService.Service.EmailService;
 import com.project4.JobBoardService.Service.QuestionService;
 import com.project4.JobBoardService.Service.QuizService;
@@ -61,6 +59,9 @@ public class QuizController {
     private QuizRepository quizRepository;
     @Autowired
     private QuizScoreRepository quizScoreRepository;
+
+    @Autowired
+    private CategoryQuizService categoryQuizService;
     @Autowired
     private ModelMapper modelMapper;
     public QuizController(QuizService quizService, ModelMapper modelMapper) {
@@ -68,61 +69,70 @@ public class QuizController {
         this.modelMapper = modelMapper;
     }
 
+
+
     @PostMapping("/createQuiz")
     public ResponseEntity<QuizDTO> createQuiz(
             @RequestParam("title") String title,
             @RequestParam("description") String description,
-            @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam("categoryId") Long categoryId) throws IOException {
 
-
-
-        // Continue with your processing logic
         QuizDTO quizDto = new QuizDTO();
         quizDto.setTitle(title);
         quizDto.setDescription(description);
 
         Quiz quiz = modelMapper.map(quizDto, Quiz.class);
-        Quiz createdQuiz = quizService.createQuiz(quiz, imageFile);
+        Quiz createdQuiz = quizService.createQuiz(quiz, imageFile, categoryId);
 
         QuizDTO responseDto = modelMapper.map(createdQuiz, QuizDTO.class);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+
     @PreAuthorize("permitAll()")
     @GetMapping
     public ResponseEntity<List<QuizDTO>> getAllQuizzes() {
-        try {
-            List<Quiz> quizzes = quizService.getAllQuizzes();
-            List<QuizDTO> quizDtos = quizzes.stream()
-                    .map(quiz -> modelMapper.map(quiz, QuizDTO.class))
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(quizDtos);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        List<QuizDTO> quizzes = quizService.getAllQuizzes();
+        return ResponseEntity.ok(quizzes);
     }
     @PreAuthorize("permitAll()")
     @GetMapping("/{id}")
     public ResponseEntity<QuizDTO> getQuizById(@PathVariable Long id) {
         Quiz quiz = quizService.getQuizById(id);
         if (quiz != null) {
-            return ResponseEntity.ok(modelMapper.map(quiz, QuizDTO.class));
+            QuizDTO quizDto = modelMapper.map(quiz, QuizDTO.class);
+            return new ResponseEntity<>(quizDto, HttpStatus.OK);
         } else {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<QuizDTO> updateQuiz(@PathVariable Long id,
-                                              @RequestParam("quiz") String quizStr,
-                                              @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
-        QuizDTO quizDto = new ObjectMapper().readValue(quizStr, QuizDTO.class);
+    public ResponseEntity<QuizDTO> updateQuiz(
+            @PathVariable Long id,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam("categoryId") Long categoryId) throws IOException {
+
+        // Create a QuizDTO object from request parameters
+        QuizDTO quizDto = new QuizDTO();
+        quizDto.setTitle(title);
+        quizDto.setDescription(description);
+
+        // Map QuizDTO to Quiz entity
         Quiz updatedQuiz = modelMapper.map(quizDto, Quiz.class);
-        Quiz quiz = quizService.updateQuiz(id, updatedQuiz, imageFile);
+
+        // Call service to update quiz
+        Quiz quiz = quizService.updateQuiz(id, updatedQuiz, imageFile, categoryId);
+
         if (quiz != null) {
+            // Map result to QuizDTO and return response
             return ResponseEntity.ok(modelMapper.map(quiz, QuizDTO.class));
         } else {
+            // Return response if quiz not found
             return ResponseEntity.notFound().build();
         }
     }
@@ -430,5 +440,9 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
         return new ResponseEntity<>(completedQuizIds, HttpStatus.OK);
 
     }
+
+
+
+
 
 }
