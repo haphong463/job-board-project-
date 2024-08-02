@@ -4,6 +4,7 @@ import { FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import moment from 'moment';
 import './job_company.css';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import ApplyBox from '../../components/dialog-box/Applybox';
 import { fetchJobThunk } from "../../features/jobSlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
 import { fetchCategoryThunk } from "../../features/categorySlice";
@@ -26,25 +27,39 @@ export const JobSingle = () =>
    // const [jobs, setJobs] = useState([]);
    const dispatch = useDispatch();
    const jobs = useSelector((state) => state.job.jobs);
+
+   const userId = useSelector(state => state.auth.user.id);
+
    const companies = useSelector((state) => state.company.companies);
+
    const categories = useSelector((state) => state.category.categories);
 
+   const [showApplyBox, setShowApplyBox] = useState(false);
+
+   const [hasApplied, setHasApplied] = useState(false);
+
    const [isSaved, setIsSaved] = useState(false);
+   const navigate = useNavigate();
    const [favoriteId, setFavoriteId] = useState(null);
 
-   useEffect(() =>
+
+   const checkIfApplied = async () =>
    {
-   const checkIfApplied = async () => {
-      try {
+      try
+      {
          const response = await axiosRequest.get(`/application/user/${userId}/job/${jobId}`);
          setHasApplied(response); // Ensure `response.data` is boolean
-      } catch (error) {
+      } catch (error)
+      {
          console.error('Error checking application status', error);
       }
    };
 
 
-   useEffect(() => {
+
+
+   useEffect(() =>
+   {
       dispatch(fetchCategoryThunk());
 
       if (companies.length === 0)
@@ -55,7 +70,7 @@ export const JobSingle = () =>
       {
          dispatch(fetchJobThunk());
       }
-   checkIfApplied();
+      checkIfApplied();
    }, [dispatch, jobs.length, companies.length]);
 
    useEffect(() =>
@@ -86,14 +101,17 @@ export const JobSingle = () =>
    const companyData = companies.find(company => company.companyId === jobData?.companyId);
 
 
-   if (!jobData || !companyData) {
+   if (!jobData || !companyData)
+   {
       return <div>Loading...</div>; // Hoặc bạn có thể chuyển hướng đến trang lỗi
    }
-   const handleApplyClick = (e) => {
+   const handleApplyClick = (e) =>
+   {
       e.preventDefault();
       setShowApplyBox(true);
-    };
-   const handleCloseApplyBox = () => {
+   };
+   const handleCloseApplyBox = () =>
+   {
       setShowApplyBox(false);
    };
 
@@ -329,11 +347,30 @@ export const JobSingle = () =>
                                  {isSaved ? 'Saved Job' : 'Save Job'}
                               </button>
                            </div>
-                           <div className="col-6">
-                              <a href="#" className="btn btn-block btn-primary btn-md">
-                                 Apply Now
-                              </a>
+                           <div className="jb-overview-content__apply-btn apply-btn">
+
+                              {hasApplied ? (
+
+                                 <button className="jb-apply-btn__btn btn bg-secondary text-light" disabled>
+
+                                    Applied!
+
+                                 </button>
+
+                              ) : (
+
+                                 <a
+                                    href="#"
+                                    className="jb-apply-btn__btn btn bg-primary text-light"
+
+                                    onClick={handleApplyClick}
+                                 >
+                                    Apply Now
+                                 </a>
+                              )}
                            </div>
+
+                           {showApplyBox && <ApplyBox company={jobData} jobId={jobId} userId={userId} onClose={handleCloseApplyBox} />}
                         </div>
                      </div>
                   </div>
