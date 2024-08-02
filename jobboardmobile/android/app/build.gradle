@@ -49,9 +49,9 @@ android {
 
     signingConfigs {
         debug {
-            keyAlias 'androiddebugkey'
+            keyAlias 'myalias'
             keyPassword '123456'
-            storeFile file('mykey.jks')
+            storeFile file('D:\\Aptech\\Sem4\\PRJ4\\WorkSpace2_for_Project04\\job-board-project-\\jobboardmobile\\android\\app\\mykey.jks')
             storePassword '123456'
         }
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:jobboardmobile/models/company_model.dart';
 import 'package:jobboardmobile/service/company_service.dart';
 import '../../core/utils/color_util.dart';
@@ -112,10 +113,21 @@ class _CompanyListScreenState extends State<CompanyListScreen> {
               ],
             ),
             const SizedBox(height: 10),
-            Text(
-              company.description,
-              style: const TextStyle(fontSize: 14),
+            Html(
+              data: company.description.isNotEmpty
+                  ? company.description
+                  : 'No Description',
+              style: {
+                "body": Style(
+                    fontSize: FontSize(16.0),
+                    listStyleType: ListStyleType.none),
+              },
             ),
+
+            // Text(
+            //   company.description,
+            //   style: const TextStyle(fontSize: 14),
+            // ),
             const SizedBox(height: 10),
             Text(
               'Website: ${company.websiteLink}',

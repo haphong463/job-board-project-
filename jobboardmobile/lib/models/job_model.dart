@@ -1,5 +1,3 @@
-import 'company_model.dart';
-
 class Job {
   final int id;
   final String title;
@@ -50,27 +48,27 @@ class Job {
 
   factory Job.fromJson(Map<String, dynamic> json) {
     return Job(
-      id: json['id'],
-      title: json['title'],
-      offeredSalary: json['offeredSalary'],
-      description: json['description'],
-      responsibilities: json['responsibilities'],
-      requiredSkills: json['requiredSkills'],
-      workSchedule: json['workSchedule'],
-      keySkills: json['keySkills'],
-      position: json['position'],
-      experience: json['experience'],
-      qualification: json['qualification'],
-      jobType: json['jobType'],
-      contractType: json['contractType'],
-      benefit: json['benefit'],
-      createdAt: DateTime.parse(json['createdAt']),
-      slot: json['slot'],
-      profileApproved: json['profileApproved'],
-      isSuperHot: json['isSuperHot'],
-      categoryId: List<int>.from(json['categoryId']),
-      companyId: json['companyId'],
-      expire: json['expire'],
+      id: json['id'] ?? 0,
+      title: json['title'] ?? '',
+      offeredSalary: json['offeredSalary'] ?? '',
+      description: json['description'] ?? '',
+      responsibilities: json['responsibilities'] ?? '',
+      requiredSkills: json['requiredSkills'] ?? '',
+      workSchedule: json['workSchedule'] ?? '',
+      keySkills: json['keySkills'] ?? '',
+      position: json['position'] ?? '',
+      experience: json['experience'] ?? '',
+      qualification: json['qualification'] ?? '',
+      jobType: json['jobType'] ?? '',
+      contractType: json['contractType'] ?? '',
+      benefit: json['benefit'] ?? '',
+      createdAt: DateTime.parse(json['createdAt'] ?? ''),
+      slot: json['slot'] ?? '',
+      profileApproved: json['profileApproved'] ?? '',
+      isSuperHot: json['isSuperHot'] ?? '',
+      categoryId: List<int>.from(json['categoryId'] ?? 0),
+      companyId: json['companyId'] ?? 0,
+      expire: json['expire'] ?? '',
     );
   }
 }
