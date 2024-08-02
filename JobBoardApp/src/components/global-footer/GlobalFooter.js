@@ -80,19 +80,13 @@ export const GlobalFooter = () => {
             </div>
           </div>
         </div>
-        {/* <div className="row text-center">
+        <div className="row text-center">
           <div className="col-12">
             <p className="copyright">
-              <small>
-                Copyright © All rights reserved | This template is made with
-                <i className="icon-heart text-danger" aria-hidden="true" /> by
-                <a href="https://colorlib.com" target="_blank">
-                  Colorlib
-                </a>
-              </small>
+              <small>Copyright © ITGrove</small>
             </p>
           </div>
-        </div> */}
+        </div>
       </div>
     </footer>
   );

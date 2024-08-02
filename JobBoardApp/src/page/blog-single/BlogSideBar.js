@@ -30,15 +30,10 @@ export const BlogSideBar = memo((props) => {
           alt="Image placeholder"
           className="img-fluid mb-4 w-100 rounded-circle"
         />
-        <h3>
+        <h4 className="title is-4">
           {author?.firstName} {author?.lastName}
-        </h3>
+        </h4>
         <p className="text-truncate-multiline">{author?.bio}</p>
-        <p>
-          <a href="#" className="btn btn-primary btn-sm">
-            Read More
-          </a>
-        </p>
       </div>
       <div className="sidebar-box">
         <div className="categories">

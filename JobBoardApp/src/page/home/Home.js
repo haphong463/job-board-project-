@@ -8,12 +8,11 @@ import { fetchJobThunk } from "../../features/jobSlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
-import "../job-listing/listSkillAll"
-import jobData from '../job-listing/job_data.json';
-import companyData from '../job-listing/company_data.json';
+import "../job-listing/listSkillAll";
+import jobData from "../job-listing/job_data.json";
+import companyData from "../job-listing/company_data.json";
 
-export const Home = () =>
-{
+export const Home = () => {
   const location = useLocation();
   const navigate = useNavigate(); // Correct usage of useNavigate
   const [message, setMessage] = useState("");
@@ -22,79 +21,43 @@ export const Home = () =>
   const companies = useSelector((state) => state.company.companies);
   const categories = useSelector((state) => state.category.categories);
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     dispatch(fetchCategoryThunk());
-    if (companies.length === 0)
-    {
+    if (companies.length === 0) {
       dispatch(fetchCompanyThunk());
     }
-    if (jobs.length === 0)
-    {
+    if (jobs.length === 0) {
       dispatch(fetchJobThunk());
     }
   }, [dispatch, jobs.length, companies.length]);
 
-  useEffect(() =>
-  {
-    // Ensure selectpicker is initialized
-    $(".selectpicker").selectpicker("refresh");
-
-    // Extract query parameters
-    const searchParams = new URLSearchParams(location.search);
-    const message = searchParams.get("message");
-
-    if (message)
-    {
-      setMessage(message);
-      setTimeout(() =>
-      {
-        setMessage("");
-        // Remove the message parameter from the URL
-        navigate(location.pathname, { replace: true });
-        // Reload the page
-        window.location.reload();
-      }, 2000); // Adjust the time (5000 ms = 5 seconds) as needed
-    }
-
-    // const superHotJobs = jobs.filter(job => job.isSuperHot);
-    // setJobs(superHotJobs);
-  }, [location, navigate]);
-
-  const filteredJobs = useMemo(() =>
-  {
-    return jobs.filter(job => job.isSuperHot == 1);
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => job.isSuperHot == 1);
   }, [jobs]);
 
-  const getLocation1String = (address) =>
-  {
-    if (typeof address !== 'string')
-    {
-      return '';
+  const getLocation1String = (address) => {
+    if (typeof address !== "string") {
+      return "";
     }
 
     const parts = address.split(", ");
     const len = parts.length;
-    if (len >= 2)
-    {
+    if (len >= 2) {
       return parts.slice(-2).join(", ");
     }
     return address;
   };
 
-  const handleCompanyClick = (companyId) =>
-  {
+  const handleCompanyClick = (companyId) => {
     window.location.href = `/companyDetail/${companyId}`;
   };
 
-  const handleCategoryClick = (categoryId) =>
-  {
+  const handleCategoryClick = (categoryId) => {
     window.location.href = `/jobList/${categoryId}`;
   };
 
-  const handleJobClick = (jobId,companyId) =>
-  {
-    window.location.href = `/jobDetail/${jobId}/${companyId}`;
+  const handleJobClick = (jobId) => {
+    window.location.href = `/jobDetail/${jobId}`;
   };
 
   return (
@@ -144,13 +107,15 @@ export const Home = () =>
               </div>
             </div>
             <ul className="job-listings mb-5">
-              {filteredJobs.map(job =>
-              {
-                const company = companies.find(company => company.companyId === job.companyId);
-                const categoryArray = Array.isArray(categories) ? categories : [];
+              {filteredJobs.map((job) => {
+                const company = companies.find(
+                  (company) => company.companyId === job.companyId
+                );
+                const categoryArray = Array.isArray(categories)
+                  ? categories
+                  : [];
                 const address = getLocation1String(company?.location);
-                if (company)
-                {
+                if (company) {
                   return (
                     <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
                       {/* <a href={`/jobDetail/${job.id}`} /> */}
@@ -158,28 +123,54 @@ export const Home = () =>
                         <img
                           src={company.logo}
                           alt="Free Website Template"
-                          className="img-fluid p-0 d-inline-block rounded-sm bg-white" onClick={() =>
-                          {
+                          className="img-fluid p-0 d-inline-block rounded-sm bg-white"
+                          onClick={() => {
                             handleCompanyClick(job.companyId);
-                          }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
+                          }}
+                          style={{
+                            width: "7em",
+                            height: "7em",
+                            objectFit: "contain",
+                            cursor: "pointer",
+                          }}
                         />
                       </div>
                       <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
                         <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                          <h2 className="mb-2" onClick={() =>
-                          {
-                            handleJobClick(job.id,job.companyId);
-                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
-                          <strong onClick={() =>
-                          {
-                            handleCompanyClick(job.companyId);
-                          }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
+                          <h2
+                            className="mb-2"
+                            onClick={() => {
+                              handleJobClick(job.id);
+                            }}
+                            style={{
+                              textDecoration: "none",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {job.title}
+                          </h2>
+                          <strong
+                            onClick={() => {
+                              handleCompanyClick(job.companyId);
+                            }}
+                            style={{
+                              textDecoration: "none",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {company.companyName}
+                          </strong>
                           <div className="m-0 mt-3">
-                            {job.categoryId.map((id) =>
-                            {
-                              const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
+                            {job.categoryId.map((id) => {
+                              const categoryName = categoryArray.find(
+                                (category) => category.categoryId === id
+                              )?.categoryName;
                               return categoryName ? (
-                                <span key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">
+                                <span
+                                  key={id}
+                                  onClick={() => handleCategoryClick(id)}
+                                  className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark"
+                                >
                                   {categoryName}
                                 </span>
                               ) : null;
@@ -192,7 +183,9 @@ export const Home = () =>
                           </div>
                         </div>
                         <div className="job-listing-meta ">
-                          <span className="badge bg-danger">{job.contractType}</span>
+                          <span className="badge bg-danger">
+                            {job.contractType}
+                          </span>
                         </div>
                       </div>
                     </li>

@@ -1,32 +1,22 @@
 package com.project4.JobBoardService.Controller;
 
 import com.project4.JobBoardService.DTO.JobDTO;
-import com.project4.JobBoardService.Entity.Category;
-import com.project4.JobBoardService.Entity.Job;
-import com.project4.JobBoardService.Entity.Review;
-import com.project4.JobBoardService.Repository.CategoryRepository;
 import com.project4.JobBoardService.Repository.JobRepository;
 import com.project4.JobBoardService.Service.JobService;
-import org.checkerframework.checker.units.qual.A;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/jobs")
 
 @CrossOrigin(origins = "http://localhost:3000")
-public class JobController {
+public class JobAdminController {
 
 
     @Autowired
@@ -39,7 +29,7 @@ public class JobController {
     private JobRepository jobRepository;
 
     @Autowired
-    public JobController(JobService jobService) {
+    public JobAdminController(JobService jobService) {
         this.jobService = jobService;
     }
 

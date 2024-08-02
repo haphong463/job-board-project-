@@ -18,9 +18,7 @@ export const AboutUs = () => {
               <h1 className="text-white font-weight-bold">About Us</h1>
               <div className="custom-breadcrumbs">
                 <a href="#">Home</a> <span className="mx-2 slash">/</span>
-                <span className="text-white">
-                  <strong>About Us</strong>
-                </span>
+                <span className="text-white">About Us</span>
               </div>
             </div>
           </div>

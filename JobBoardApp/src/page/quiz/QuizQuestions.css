@@ -1,3 +1,9 @@
+/* Quiz Component Styles */
+.quiz-container {
+  /* Add any container-specific styles */
+}
+
+/* Header Styles */
 .quiz-header {
   display: flex;
   justify-content: space-between;
@@ -5,92 +11,153 @@
   margin-bottom: 20px;
 }
 
-.timer {
+.quiz-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.quiz-timer {
   font-size: 1.2rem;
   font-weight: bold;
   color: #ff0000;
 }
 
-.card-title {
-  font-weight: bold;
+/* Question Card Styles */
+.quiz-question-card {
+  margin-bottom: 20px;
 }
 
-
-
-.answered-indicator {
-  float: right;
-  color: green;
+.quiz-question-title {
   font-weight: bold;
+  margin-bottom: 15px;
 }
 
+.quiz-option-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.quiz-option-item {
+  cursor: pointer;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  border-radius: 4px;
+}
+
+.quiz-option-item:hover {
+  background-color: #f8f9fa;
+}
+
+.quiz-option-item input[type="radio"] {
+  margin-right: 10px;
+}
+
+/* Navigation Styles */
 .quiz-navigation {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
 
-.question-navigation {
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 5px;
+.quiz-nav-button {
+  min-width: 100px;
 }
 
-.question-navigation h4 {
-  margin-bottom: 15px;
-}
-
-.question-navigation ul {
-  max-height: 300px;
+/* Question List Styles */
+.quiz-question-list {
+  max-height: 470px;
   overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
 }
 
-.question-navigation .list-group-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.quiz-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.btn {
-  min-width: 150px;
-}
-
-
-.list-group-item {
+.quiz-question-item {
   cursor: pointer;
+  padding: 5px 10px;
+  margin-bottom: 5px;
+  border-radius: 4px;
 }
 
-
-
-.list-group-item label {
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: 0.75rem 1.25rem;
-  margin: -0.75rem -1.25rem;
-}
-
-
-.question-list .list-group-item.answered {
-  font-weight: bold;
-  color: green;
-}
-
-.question-list .list-group-item.answered::after {
-  content: ' ✓';
-  color: green;
-}
-
-.question-list .list-group-item.active {
+.quiz-question-item--active {
   background-color: #007bff;
   color: white;
 }
-.question-list {
-  max-height: 470px; 
-  overflow-y: auto; 
+
+.quiz-question-item--answered {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.quiz-question-item--answered::after {
+  content: ' ✓';
+  color: #28a745;
+}
+
+/* Summary Styles */
+.quiz-summary {
+  margin-top: 20px;
+}
+
+.quiz-summary__unanswered {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.quiz-summary__actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Modal Styles */
+.quiz-modal .modal-content {
+  background-color: white;
+  color: black;
+  border-radius: 5px;
+}
+
+.quiz-modal .modal-header,
+.quiz-modal .modal-body,
+.quiz-modal .modal-footer {
+  border: none;
+}
+
+.quiz-modal .modal-title {
+  font-weight: bold;
+}
+
+.quiz-modal .modal-footer .btn {
+  min-width: 100px;
+}
+
+.quiz-modal .btn-primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.quiz-modal .btn-primary:hover,
+.quiz-modal .btn-primary:focus {
+  background-color: #0056b3;
+}
+
+.quiz-modal .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+.quiz-modal .btn-secondary:hover,
+.quiz-modal .btn-secondary:focus {
+  background-color: #545b62;
+}
+
+/* Ensure modal backdrop doesn't interfere with clicks */
+.modal-backdrop {
+  z-index: 1040;
+}
+
+.modal-open .modal {
+  z-index: 1050;
 }

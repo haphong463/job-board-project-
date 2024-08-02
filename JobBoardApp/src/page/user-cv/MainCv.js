@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import axiosRequest from "../../configs/axiosConfig";
 import CreateCv from './CreateCv';
 import CvList from './CvList';
@@ -48,11 +48,11 @@ function MainCv() {
         {renderNotification()}
         {(() => {
           switch (currentAction) {
-            case 'create':
+            case "create":
               return <CreateCv />;
-            case 'cvHis':
+            case "cvHis":
               return <ListPdf />;
-            case 'cvDetails':
+            case "cvDetails":
               return <CvList />;
             case 'jobMnt':
               return <JobManagement />;
@@ -60,7 +60,9 @@ function MainCv() {
               return (
                 <div className="default-info">
                   <div className="welcome-overlay">
-                    <h2 className='welcome fade-in'>Welcome back <i className='userName'>{user.lastName}</i>!</h2>
+                    <h2 className="welcome fade-in">
+                      Welcome back <i className="userName">{user.lastName}</i>!
+                    </h2>
                   </div>
                 </div>
               );
@@ -72,7 +74,7 @@ function MainCv() {
 
   return (
     <div className="main-cv-wrapper">
-      <section className='p-4'>
+      <section className="p-4">
         <div className="container">
           <div className="row">
             <div className="col-md-7">
@@ -137,7 +139,7 @@ function MainCv() {
               <i className="fas fa-list mr-2"></i> To List Template
             </div>
           </Link>
-          <Link to="/quiz" >
+          <Link to="/quiz">
             <div className="global-action-item">
               <i className="fas fa-question-circle mr-2"></i> To Quiz
             </div>
@@ -154,9 +156,7 @@ function MainCv() {
           </Link>
         </div>
 
-        <div className="display-area">
-          {renderDisplayArea()}
-        </div>
+        <div className="display-area">{renderDisplayArea()}</div>
       </div>
     </div>
   );

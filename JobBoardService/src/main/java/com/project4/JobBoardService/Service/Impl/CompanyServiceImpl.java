@@ -41,7 +41,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
     @Override
     public Optional<CompanyDTO> getCompanyById(Long id) {
-        return companyRepository.findById(id)
+        return companyRepository.findByIdWithJobs(id)
                 .map(this::convertCompanyToDTOWithReviewsAndJobs);
     }
 

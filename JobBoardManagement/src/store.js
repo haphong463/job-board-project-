@@ -12,7 +12,7 @@ import userReducer from "./features/userSlice";
 import cvReducer from "./features/cvSlice";
 import quizCategoryReducer from "./features/quizCategorySlice";
 import employerReducer from "./features/employerSlice";
-
+import JobReducer from "./features/jobSlice";
 const persistConfig = {
   key: "root",
   version: 1,
@@ -31,6 +31,7 @@ const reducer = combineReducers({
   templates: cvReducer,
   categoryQuiz: quizCategoryReducer,
   employers: employerReducer,
+  jobs: JobReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, reducer);

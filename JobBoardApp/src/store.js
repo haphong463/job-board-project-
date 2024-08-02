@@ -12,7 +12,8 @@ import quizQuestionsReducer from './features/quizQuestionsSlice';
 import jobReducer from './features/jobSlice';
 import companyReducer from './features/companySlice';
 import contactsReducer from './features/contactsSlice'; // Import the contacts slice
-
+import UserReducer from './features/userSlice'; // Import the user slice
+import certificateReducer from './features/certificateSlice'; // Import the certificate slice
 // Cấu hình persist với whitelist
 // const persistConfig = {
 //   key: "root",
@@ -41,7 +42,10 @@ export const store = configureStore({
     quiz: quizReducer,
     job: jobReducer,
     company: companyReducer,
-    contacts: contactsReducer, // Add the contacts slice to the store
+    contacts: contactsReducer,
+    user: UserReducer,
+    certificates: certificateReducer,
+
   },
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({

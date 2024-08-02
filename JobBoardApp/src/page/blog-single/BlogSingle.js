@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllBlog,
@@ -13,6 +13,8 @@ import {
   editComment,
   addComment,
 } from "../../features/commentSlice";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 import { BlogContent } from "./BlogContent";
 import { CommentForm } from "./CommentForm";
 import { CommentList } from "./CommentList";
@@ -22,9 +24,7 @@ import ReadingBar from "./ReadingBar";
 import { calculateReadingTime } from "../../utils/function/readingTime";
 import { BlogSideBar } from "./BlogSideBar";
 import "./style.css";
-import { Spinner } from "react-bootstrap";
-import { Badge } from "reactstrap";
-
+import axiosRequest from "../../configs/axiosConfig";
 export const BlogSingle = () => {
   const dispatch = useDispatch();
   const blog = useSelector((state) => state.blogs.blog);
@@ -34,7 +34,8 @@ export const BlogSingle = () => {
   const user = useSelector((state) => state.auth.user);
   const { id } = useParams();
   const [readingTime, setReadingTime] = useState(0);
-  const isLoading = useSelector((state) => state.blogs.loading); // Assuming you have a loading state
+  const [readingCount, setReadingCount] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,6 +61,42 @@ export const BlogSingle = () => {
     }
   }, [blog]);
 
+  useEffect(() => {
+    const socket = new SockJS(process.env.REACT_APP_WEBSOCKET_ENDPOINT);
+    const stompClient = new Client({
+      webSocketFactory: () => socket,
+      debug: (str) => console.log(str),
+    });
+
+    const handleBeforeUnload = () => {
+      axiosRequest.get(`/blogs/blog/${id}/leave`);
+    };
+
+    stompClient.onConnect = () => {
+      stompClient.subscribe(`/topic/blog/${id}`, (message) => {
+        console.log(">>> message: ", message);
+        if (message.body) {
+          setReadingCount(JSON.parse(message.body));
+        }
+      });
+
+      // Thông báo khi người dùng truy cập vào bài post
+      axiosRequest.get(`/blogs/blog/${id}`);
+
+      // Thông báo khi người dùng rời khỏi bài post
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    };
+
+    stompClient.activate();
+
+    // Lắng nghe sự thay đổi của location để gọi leave khi người dùng chuyển trang
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      stompClient.deactivate();
+      handleBeforeUnload(); // Gọi sự kiện leave khi component bị unmount
+    };
+  }, [id]);
+
   const handleDeleteComment = (commentId) => {
     dispatch(deleteComment(commentId));
   };
@@ -69,13 +106,9 @@ export const BlogSingle = () => {
   };
 
   const handleAddComment = (newComment) => {
-    const payload = dispatch(addComment(newComment));
-    return payload;
+    dispatch(addComment(newComment));
   };
-
-  if (isLoading) {
-    return <Spinner />;
-  }
+  console.log(">>>Read count: ", readingCount);
 
   return (
     <GlobalLayoutUser>
@@ -113,9 +146,10 @@ export const BlogSingle = () => {
           <section className="site-section" id="next-section">
             <ReadingBar />
             <div className="container">
+              <p>There are {readingCount} people reading with you.</p>
               <div className="row">
                 <div className="col-lg-8 blog-content">
-                  <h3 className="mb-4">{blog.title}</h3>
+                  <h3 className="mb-4 title is-4">{blog.title}</h3>
                   <p className="text-center">
                     <img
                       src={blog.imageUrl}
@@ -126,37 +160,42 @@ export const BlogSingle = () => {
                       }}
                     />
                   </p>
-                  <i>{blog.citation}</i>
+                  <i className="is-italic">{blog.citation}</i>
                   <hr />
                   <BlogContent content={blog.content} />
                   <hr />
-                  <div className="d-flex justify-content-between">
+                  <div>
                     <p>
                       Categories:
                       {blog.categories.slice(0, 3).map((item, index) => (
-                        <NavLink
-                          key={item.id}
-                          to={`/blogs?type=${encodeURIComponent(item.name)}`}
-                        >
-                          <Badge
-                            key={item.id}
-                            color="primary"
-                            style={{
-                              color: "white",
-                              marginRight:
-                                index !== blog.categories.length - 1
-                                  ? "10px"
-                                  : "0px",
-                            }}
+                        <React.Fragment key={item.id}>
+                          <NavLink
+                            to={`/blogs?type=${encodeURIComponent(item.name)}`}
                           >
-                            {item.name}
-                          </Badge>
-                        </NavLink>
+                            <span
+                              key={item.id}
+                              color="primary"
+                              className="text-white tag is-success"
+                            >
+                              {item.name}
+                            </span>
+                          </NavLink>
+                          {index < blog.categories.length - 1 && " "}
+                        </React.Fragment>
                       ))}
-                    </p>{" "}
-                    <p className="font-weight-bold text-right">
-                      Updated on:{" "}
-                      {moment(blog.updatedAt).format("MMMM Do YYYY")}
+                    </p>
+                    <p>
+                      Tags:
+                      {blog.hashtags.map((item, index) => (
+                        <React.Fragment key={item.id}>
+                          <NavLink to={`/blogs?query=${item.name}`}>
+                            <span className="text-white tag is-success">
+                              #{item.name}
+                            </span>
+                          </NavLink>
+                          {index < blog.hashtags.length - 1 && " "}
+                        </React.Fragment>
+                      ))}
                     </p>
                   </div>
                 </div>
@@ -166,7 +205,9 @@ export const BlogSingle = () => {
                   <div className="pt-5">
                     {comments.length > 0 ? (
                       <>
-                        <h3 className="mb-5">{comments.length} Comments</h3>
+                        <h4 className="mb-5 title is-4">
+                          {comments.length} Comments
+                        </h4>
                         <CommentList
                           comments={comments}
                           addComment={handleAddComment}

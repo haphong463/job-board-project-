@@ -40,8 +40,8 @@ public class User  extends  AbstractEntity {
     @NotBlank
     @Size(max = 120)
     private String password;
-
-
+    private String numberphone;
+    private String facebook;
     private String resetToken;
     private boolean verified;
     private String verificationCode;
@@ -75,6 +75,8 @@ public class User  extends  AbstractEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Certificate> certificates = new ArrayList<>();
 
 
     public User(String username, String email, String password) {
