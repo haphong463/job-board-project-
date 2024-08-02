@@ -27,6 +27,7 @@ public class BlogResponseDTO {
     private Date updatedAt;
     private int commentCount;
     private List<HashTagDTO> hashtags;
+    private int view;
 
     // Getters and setters
 

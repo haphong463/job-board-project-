@@ -4,9 +4,11 @@ import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Entity.Comment;
 import com.project4.JobBoardService.Entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,6 +20,7 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     int countByCategories(BlogCategory blogCategory);
     Blog findBySlug(@Param("slug") String slug);
     int countByComments(Comment comment);
+    Blog findByTitle(String title);
 
     @Query("SELECT DISTINCT b FROM Blog b " +
             "JOIN b.categories c " +
@@ -32,6 +35,15 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
                              @Param("query") String query,
                              @Param("visibility") Boolean visibility,
                              Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Blog b SET b.view = b.view + 1 WHERE b.id = :blogId")
+    void incrementViewCount(@Param("blogId") Long blogId);
+
+    @Query(value = "SELECT * FROM Blog b ORDER BY b.view DESC LIMIT 4", nativeQuery = true)
+    List<Blog> findTop4ByOrderByViewDesc();
+
 }
 
 
