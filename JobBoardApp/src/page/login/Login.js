@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, NavLink, useNavigate } from "react-router-dom";
 import {
+  resetMessages,
   resetVerificationMessage,
   signInOAuth2,
 } from "../../features/authSlice";
@@ -18,9 +19,7 @@ import showToast from "../../utils/function/showToast";
 import { Divider } from "antd";
 export const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
-  const verificationMessage = useSelector(
-    (state) => state.auth.verificationMessage
-  );
+  const error = useSelector((state) => state.auth.error);
   const status = useSelector((state) => state.auth.status);
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
@@ -42,7 +41,7 @@ export const Login = () => {
   };
 
   useEffect(() => {
-    dispatch(resetVerificationMessage());
+    dispatch(resetMessages());
   }, [dispatch]);
 
   if (user) return <Navigate to="/" replace={true} />;
@@ -73,11 +72,11 @@ export const Login = () => {
           <div className="container">
             <div className="row">
               <div className="col-lg-6">
-                {verificationMessage && (
+                {error && (
                   <>
                     <Alert variant="danger">
                       <MdErrorOutline size={25} className="mr-2" />
-                      {verificationMessage}
+                      {error}
                     </Alert>
                   </>
                 )}

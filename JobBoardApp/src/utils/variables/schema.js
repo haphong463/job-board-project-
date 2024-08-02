@@ -9,18 +9,38 @@ const containsForbiddenWord = (value) => {
 
 // Define validation schema
 export const signUpSchema = yup.object().shape({
-    firstName: yup.string().required('First name is required'),
-    lastName: yup.string().required('Last name is required'),
-    username: yup.string()
-      .test('forbidden-words', 'Username contains forbidden words', value => !containsForbiddenWord(value))
-      .required('Username is required'),
-    email: yup.string()
-      .email('Invalid email')
-      .test('forbidden-words', 'Email contains forbidden words', value => !containsForbiddenWord(value))
-      .required('Email is required'),
-    password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-    confirmPassword: yup.string()
-      .oneOf([yup.ref('password'), null], 'Passwords must match')
-      .required('Confirm Password is required'),
-    gender: yup.string().required('Gender is required'),
-  });
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
+  username: yup
+    .string()
+    .test(
+      "forbidden-words",
+      "Username contains forbidden words",
+      (value) => !containsForbiddenWord(value)
+    )
+    .test(
+      "no-spaces",
+      "Username cannot contain spaces",
+      (value) => !/\s/.test(value)
+    )
+
+    .required("Username is required"),
+  email: yup
+    .string()
+    .email("Invalid email")
+    .test(
+      "forbidden-words",
+      "Email contains forbidden words",
+      (value) => !containsForbiddenWord(value)
+    )
+    .required("Email is required"),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
+  gender: yup.string().required("Gender is required"),
+});

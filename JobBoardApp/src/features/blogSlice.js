@@ -3,6 +3,8 @@ import {
   findBlogById,
   getAllBlog,
   getAllBlogFilter,
+  getAllHashTags,
+  getBlogPopular,
 } from "../services/BlogService";
 import { getAllBlogCategories } from "../services/BlogCategoryService";
 
@@ -41,6 +43,17 @@ export const fetchAllBlog = createAsyncThunk(
     }
   }
 );
+export const fetchBlogPopular = createAsyncThunk(
+  "blogs/getPopular",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await getBlogPopular();
+      return res;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 export const fetchBlogs = createAsyncThunk(
   "blogs/fetchBlogs",
   async ({ query, page, size, type, order }, { rejectWithValue }) => {
@@ -53,7 +66,13 @@ export const fetchBlogs = createAsyncThunk(
     }
   }
 );
-
+export const fetchHashtags = createAsyncThunk(
+  "hashtags/fetchHashtags",
+  async () => {
+    const data = await getAllHashTags();
+    return data;
+  }
+);
 const blogSlice = createSlice({
   name: "blog",
   initialState: {
@@ -66,6 +85,8 @@ const blogSlice = createSlice({
     author: null,
     lastUpdated: null,
     totalPages: 0,
+    hashtags: [],
+    popular: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -96,6 +117,18 @@ const blogSlice = createSlice({
         state.status = "failed";
         state.error = action.error.message;
       })
+      .addCase(fetchBlogPopular.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchBlogPopular.fulfilled, (state, action) => {
+        state.popular = action.payload;
+        state.status = "succeeded";
+        state.lastUpdated = Date.now(); // Cập nhật lastUpdated khi fetch thành công
+      })
+      .addCase(fetchBlogPopular.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
       .addCase(fetchAllCategories.pending, (state) => {
         state.status = "loading";
       })
@@ -119,6 +152,17 @@ const blogSlice = createSlice({
         state.totalPages = action.payload.totalPages;
       })
       .addCase(fetchBlogs.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(fetchHashtags.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchHashtags.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.hashtags = action.payload;
+      })
+      .addCase(fetchHashtags.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       });

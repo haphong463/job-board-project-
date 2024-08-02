@@ -7,9 +7,8 @@ import { Badge, Input } from "reactstrap";
 import { motion } from "framer-motion";
 import debounce from "lodash/debounce";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllBlog, fetchBlogs } from "../../features/blogSlice";
+import { fetchBlogPopular, fetchBlogs } from "../../features/blogSlice";
 import "./style.css";
-import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
 import { FaHome } from "react-icons/fa";
 import { BlogPagination } from "./BlogPagination";
 import { Spinner } from "react-bootstrap";
@@ -17,16 +16,16 @@ import { Spinner } from "react-bootstrap";
 export const Blog = () => {
   const dispatch = useDispatch();
   const blogs = useSelector((state) => state.blogs.blogsFilter);
+  const popular = useSelector((state) => state.blogs.popular);
   const status = useSelector((state) => state.blogs.status);
-  const error = useSelector((state) => state.blogs.error);
   const totalPages = useSelector((state) => state.blogs.totalPages);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(0);
-  const [order, setOrder] = useState("");
+  const [order, setOrder] = useState("asc");
 
   const postsPerPage = 9;
   const navigate = useNavigate();
-  const type = searchParams.get("type");
+  const type = searchParams.get("type") ?? "ALL";
   const query = searchParams.get("query");
   const [searchText, setSearchText] = useState(query || "");
 
@@ -42,19 +41,23 @@ export const Blog = () => {
         })
       );
     }, 300),
-    [dispatch]
+    []
   );
 
   const handleSearchChange = (e) => {
     const newSearchText = e.target.value;
     setSearchText(newSearchText);
-    setSearchParams({ query: newSearchText, order });
+    setSearchParams({ query: newSearchText, order, type });
     debouncedSearch(e.target.value);
   };
 
   useEffect(() => {
     debouncedSearch(searchText, order, type, currentPage, postsPerPage);
   }, [debouncedSearch, searchText, order, type, currentPage, postsPerPage]);
+
+  useEffect(() => {
+    dispatch(fetchBlogPopular());
+  }, [dispatch]);
 
   const paginate = (pageNumber) => {
     if (pageNumber >= 0 && pageNumber < totalPages) {
@@ -139,7 +142,7 @@ export const Blog = () => {
                         <NavLink to={`/blog/${blog.slug}`}>
                           <img
                             src={blog.thumbnailUrl}
-                            alt="Image"
+                            alt={blog.title}
                             className="rounded mb-4 card-img-top"
                             style={{
                               height: "auto",
@@ -148,7 +151,7 @@ export const Blog = () => {
                           />
                         </NavLink>
                         <div className="card-body d-flex flex-column">
-                          <h6 className="card-title text-truncate-two">
+                          <h6 className="card-title text-truncate-two title is-6">
                             <NavLink
                               to={`/blog/${blog.slug}`}
                               className="text-black"
@@ -230,6 +233,75 @@ export const Blog = () => {
               <Spinner />
             </div>
           )}
+
+          <div className="container">
+            <h3 className="title is-3 mb-4">Most view</h3>
+            {status === "succeeded" && popular.length > 0 && (
+              <div className="row mb-5">
+                {popular.map((blog) => (
+                  <motion.div
+                    key={blog.id}
+                    className="mb-5 card-container col-lg-3 col-md-6 col-sm-12"
+                    whileHover={{ y: -10 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className="card h-100">
+                      <NavLink to={`/blog/${blog.slug}`}>
+                        <img
+                          src={blog.thumbnailUrl}
+                          alt={blog.title}
+                          className="rounded mb-4 card-img-top"
+                          style={{
+                            height: "auto",
+                            width: "100%",
+                          }}
+                        />
+                      </NavLink>
+                      <div className="card-body d-flex flex-column">
+                        <h6 className="card-title text-truncate-two title is-6">
+                          <NavLink
+                            to={`/blog/${blog.slug}`}
+                            className="text-black"
+                          >
+                            {blog.title}
+                          </NavLink>
+                        </h6>
+                        <div>
+                          {blog.categories.slice(0, 3).map((item, index) => (
+                            <Badge
+                              key={item.id}
+                              color="primary"
+                              style={{
+                                color: "white",
+                                marginRight:
+                                  index !== blog.categories.length - 1
+                                    ? "10px"
+                                    : "0px",
+                              }}
+                            >
+                              {item.name}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="card-text mb-4 flex-grow-1 text-truncate-multiline">
+                          {blog.citation}
+                        </div>
+                        <div>
+                          {moment(blog.createdAt).format("MMMM DD, YYYY")}{" "}
+                          <span className="mx-2 slash">•</span>
+                          <span className="mx-2">
+                            {`${calculateReadingTime(blog.content)} min`}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </>
     </GlobalLayoutUser>
