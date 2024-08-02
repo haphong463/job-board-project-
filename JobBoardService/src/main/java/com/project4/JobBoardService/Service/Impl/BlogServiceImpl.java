@@ -1,13 +1,9 @@
 package com.project4.JobBoardService.Service.Impl;
 
-import com.project4.JobBoardService.Config.Annotation.CheckPermission;
-import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.HashTag;
-import com.project4.JobBoardService.Entity.User;
-import com.project4.JobBoardService.Enum.EPermissions;
-import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Repository.BlogRepository;
+import com.project4.JobBoardService.Repository.CommentRepository;
 import com.project4.JobBoardService.Repository.HashTagRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.BlogService;
@@ -24,7 +20,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Service
 public class BlogServiceImpl implements BlogService {
@@ -41,6 +36,9 @@ public class BlogServiceImpl implements BlogService {
 
     @Autowired
     private HashTagRepository hashTagRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Override
     public Blog createBlog(Blog blog, MultipartFile imageFile, List<String> hashtagNames) {
@@ -145,6 +143,30 @@ public class BlogServiceImpl implements BlogService {
         return blogRepository.searchByQuery(type, query, visibility, pageable);
     }
 
+    @Override
+    public List<HashTag> getAllHashTag() {
+        return hashTagRepository.findAll();
+    }
+
+    @Override
+    public int getCommentCountByBlog(Blog blog) {
+        return commentRepository.countByBlog(blog);
+    }
+
+    @Override
+    public Blog getBlogByTitle(String title) {
+        return blogRepository.findByTitle(title);
+    }
+
+    @Override
+    public void incrementViewBlog(Blog blog) {
+        blogRepository.incrementViewCount(blog.getId());
+    }
+
+    @Override
+    public List<Blog> getPopularBlog() {
+        return blogRepository.findTop4ByOrderByViewDesc();
+    }
 
     private void deleteImageFile(Blog blog) {
         String imageUrl = blog.getImageUrl();

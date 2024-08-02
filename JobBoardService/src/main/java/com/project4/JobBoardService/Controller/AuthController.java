@@ -1,4 +1,5 @@
 package com.project4.JobBoardService.Controller;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -43,7 +44,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-@CrossOrigin(origins = "http://localhost:3000/" )
+
+@CrossOrigin(origins = "http://localhost:3000/")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -107,7 +109,11 @@ public class AuthController {
 
                 // Use or store profile information
                 User user = userRepository.findByEmail(email).orElse(null);
+
                 if (user != null) {
+                    if (!user.getIsEnabled()) {
+                        return ResponseEntity.badRequest().body(new MessageResponse("Your account is deactivated."));
+                    }
                     UserDetailsImpl userDetails = UserDetailsImpl.build(user);
                     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -187,7 +193,8 @@ public class AuthController {
 
             // Make the request to Google's userinfo endpoint
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {
+            });
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 Map<String, Object> payload = response.getBody();
@@ -288,6 +295,7 @@ public class AuthController {
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh token is not in database!"));
     }
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -295,21 +303,17 @@ public class AuthController {
         if (!optionalUser.isPresent()) {
             return ResponseEntity
                     .badRequest()
-                    .body(new ErrorDetails(
-                            new Date(),
-                            "Bad credentials",
-                            "The user with username " + loginRequest.getUsername() + " was not found"
-                    ));
+                    .body(new MessageResponse("Invalid credentials! Please try again.")
+                    );
         }
         User user = optionalUser.get();
-
+        if (!user.getIsEnabled()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Your account is deactivated."));
+        }
         boolean isEmployer = user.getRoles().stream()
                 .anyMatch(role -> role.getName().equals(ERole.ROLE_EMPLOYER));
         if (!isEmployer && !user.isVerified()) {
-            return ResponseEntity.ok().body(new AuthRepsonse(
-                    user.getEmail(),
-                    user.isVerified()
-            ));
+            return ResponseEntity.badRequest().body(new MessageResponse("Please verify your email."));
         }
 
 
@@ -343,13 +347,13 @@ public class AuthController {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+                    .body(new MessageResponse("Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(new MessageResponse("Email is already in use!"));
         }
 
         User user = new User(signUpRequest.getUsername(),
@@ -468,6 +472,7 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("Employer registered successfully! Please check your email for verification instructions."));
     }
+
     @PostMapping("/signout")
     public ResponseEntity<?> signOutUser(@RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
@@ -483,6 +488,7 @@ public class AuthController {
 
         return null;
     }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -501,6 +507,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
+
     @PostMapping("/verify-reset-token")
     public ResponseEntity<?> verifyResetToken(@RequestParam("email") String email,
                                               @RequestParam("token") String token) {
@@ -543,7 +550,7 @@ public class AuthController {
 //approve
 
 
-//VerifyUser
+    //VerifyUser
     @RequestMapping(value = "/verify", method = {RequestMethod.GET, RequestMethod.POST})
     public void verifyEmail(
             @RequestParam("email") String email,
@@ -569,6 +576,7 @@ public class AuthController {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "User not found!");
         }
     }
+
     //Verify Employer
     @RequestMapping(value = "/verify-employer", method = {RequestMethod.GET, RequestMethod.POST})
     public void verifyEmployer(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
@@ -583,59 +591,58 @@ public class AuthController {
             response.sendRedirect("http://localhost:3000/SetupCredentials?message=Employer verified successfully!");
         }
     }
-//Username password Employer
-@PostMapping("/setup-credentials")
-public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupRequest passwordSetupRequest) {
-    Employer employer = employerRepository.findByVerificationCode(passwordSetupRequest.getCode());
-    if (employer == null) {
-        return ResponseEntity
-                .badRequest()
-                .body(new MessageResponse("Error: Invalid verification code."));
+
+    //Username password Employer
+    @PostMapping("/setup-credentials")
+    public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupRequest passwordSetupRequest) {
+        Employer employer = employerRepository.findByVerificationCode(passwordSetupRequest.getCode());
+        if (employer == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Invalid verification code."));
+        }
+
+        if (!passwordSetupRequest.getPassword().equals(passwordSetupRequest.getConfirmPassword())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Passwords do not match!"));
+        }
+
+        if (userRepository.existsByUsername(passwordSetupRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmail(employer.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        User user = new User();
+        user.setUsername(passwordSetupRequest.getUsername());
+        user.setEmail(employer.getEmail());
+        user.setFirstName(employer.getName());
+        user.setLastName(employer.getTitle());
+        user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
+        user.setIsEnabled(true);
+
+        Set<Role> roles = new HashSet<>();
+        Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        roles.add(employerRole);
+        user.setRoles(roles);
+
+
+        userRepository.save(user);
+
+        employer.setUser(user);
+        employerRepository.save(employer);
+
+
+        return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
     }
-
-    if (!passwordSetupRequest.getPassword().equals(passwordSetupRequest.getConfirmPassword())) {
-        return ResponseEntity
-                .badRequest()
-                .body(new MessageResponse("Error: Passwords do not match!"));
-    }
-
-    if (userRepository.existsByUsername(passwordSetupRequest.getUsername())) {
-        return ResponseEntity
-                .badRequest()
-                .body(new MessageResponse("Error: Username is already taken!"));
-    }
-
-    if (userRepository.existsByEmail(employer.getEmail())) {
-        return ResponseEntity
-                .badRequest()
-                .body(new MessageResponse("Error: Email is already in use!"));
-    }
-
-    User user = new User();
-    user.setUsername(passwordSetupRequest.getUsername());
-    user.setEmail(employer.getEmail());
-    user.setFirstName(employer.getName());
-    user.setLastName(employer.getTitle());
-    user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
-    user.setIsEnabled(true);
-
-    Set<Role> roles = new HashSet<>();
-    Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
-            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-    roles.add(employerRole);
-    user.setRoles(roles);
-
-
-
-    userRepository.save(user);
-
-    employer.setUser(user);
-    employerRepository.save(employer);
-
-
-    return ResponseEntity.ok(new MessageResponse("Username and password setup successfully! Please check your email to verify your account."));
-}
-
 
 
     @PostMapping("/forgot-password-flutter")
@@ -656,6 +663,7 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
+
     @PostMapping("/set-new-passwordFlutter")
     public ResponseEntity<?> setNewPassword(@RequestBody SetPasswordRequest request) {
         String email = request.getEmail();
@@ -675,7 +683,6 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email not found!"));
         }
     }
-
 
 
     @PostMapping("/signupFlutter")
@@ -740,7 +747,7 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
 
     @PostMapping("/verifyFlutter")
     public ResponseEntity<?> verifyEmailFlutter(@RequestParam("email") String email,
-                                         @RequestParam("code") String code) {
+                                                @RequestParam("code") String code) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -781,6 +788,7 @@ public ResponseEntity<?> setupCredentials(@Valid @RequestBody PasswordSetupReque
     private String generateVerificationCode() {
         return UUID.randomUUID().toString().substring(0, 6);
     }
+
     private String generateResetToken() {
         return UUID.randomUUID().toString().substring(0, 6);
     }

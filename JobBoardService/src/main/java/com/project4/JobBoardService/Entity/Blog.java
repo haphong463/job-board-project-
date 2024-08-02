@@ -61,4 +61,6 @@ public class Blog extends AbstractEntity {
             joinColumns = @JoinColumn(name = "blog_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "hashtag_id", referencedColumnName = "id"))
     private List<HashTag> hashtags = new ArrayList<>();
+
+    private int view;
 }

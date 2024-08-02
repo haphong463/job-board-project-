@@ -1,9 +1,26 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Button, Form, FormGroup, Label, Input, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import {
+  Button,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "reactstrap";
 import { updatePermissionsThunk } from "../../../features/userSlice";
+import { formatPermissionName } from "../../../utils/functions/formatPermission";
 
-const PermissionForm = ({ userId, currentPermissions, isOpen, toggle }) => {
+const PermissionForm = ({
+  userId,
+  currentPermissions,
+  isOpen,
+  toggle,
+  listPermissions,
+}) => {
   const dispatch = useDispatch();
   const [permissions, setPermissions] = useState(currentPermissions);
 
@@ -25,43 +42,27 @@ const PermissionForm = ({ userId, currentPermissions, isOpen, toggle }) => {
       <Form onSubmit={handleSubmit}>
         <ModalHeader toggle={toggle}>Assign Permissions</ModalHeader>
         <ModalBody>
-          <FormGroup check>
-            <Label check>
-              <Input
-                type="checkbox"
-                value="MANAGE_BLOG"
-                checked={permissions.includes("MANAGE_BLOG")}
-                onChange={handleChange}
-              />
-              Manage Blog
-            </Label>
-          </FormGroup>
-          <FormGroup check>
-            <Label check>
-              <Input
-                type="checkbox"
-                value="MANAGE_JOB"
-                checked={permissions.includes("MANAGE_JOB")}
-                onChange={handleChange}
-              />
-              Manage Job
-            </Label>
-          </FormGroup>
-          <FormGroup check>
-            <Label check>
-              <Input
-                type="checkbox"
-                value="MANAGE_COMPANY"
-                checked={permissions.includes("MANAGE_COMPANY")}
-                onChange={handleChange}
-              />
-              Manage Company
-            </Label>
-          </FormGroup>
+          {listPermissions.map((item) => (
+            <FormGroup check>
+              <Label check>
+                <Input
+                  type="checkbox"
+                  value={item.name}
+                  checked={permissions.includes(item.name)}
+                  onChange={handleChange}
+                />
+                {formatPermissionName(item.name)}
+              </Label>
+            </FormGroup>
+          ))}
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" type="submit">Save</Button>
-          <Button color="secondary" onClick={toggle}>Cancel</Button>
+          <Button color="primary" type="submit">
+            Save
+          </Button>
+          <Button color="secondary" onClick={toggle}>
+            Cancel
+          </Button>
         </ModalFooter>
       </Form>
     </Modal>

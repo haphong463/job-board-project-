@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Button, Form, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
 import { updateCVAsync } from '../../../features/cvSlice';
 
-const UpdateForm = ({ toggle, isOpen, templateData }) => {
+const UpdateForm = ({ toggle, isOpen, templateData, setSuccessMessage }) => {
   const dispatch = useDispatch();
 
   const [templateName, setTemplateName] = useState(templateData.templateName || '');
@@ -12,15 +12,35 @@ const UpdateForm = ({ toggle, isOpen, templateData }) => {
   const [templateImage, setTemplateImage] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(templateData.templateImageBase64 || '');
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [htmlFileName, setHtmlFileName] = useState('');
+  const [fileError, setFileError] = useState('');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     setTemplateName(templateData.templateName || '');
     setTemplateDescription(templateData.templateDescription || '');
-    setImagePreviewUrl(templateData.templateImageBase64 || '');
-  }, [templateData]);
+    if (templateData.templateImageBase64) {
+      setImagePreviewUrl(`data:image/jpeg;base64,${templateData.templateImageBase64}`);
+    }
+  }, [templateData,refreshTrigger]);
 
   const handleFileChange = (e) => {
-    setTemplateHtmlFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type === 'text/html') {
+        setTemplateHtmlFile(file);
+        setHtmlFileName(file.name);
+        setFileError('');
+      } else {
+        setTemplateHtmlFile(null);
+        setHtmlFileName('');
+        setFileError('Please upload a valid HTML file.');
+      }
+    } else {
+      setTemplateHtmlFile(null);
+      setHtmlFileName('');
+      setFileError('');
+    }
   };
 
   const handleImageChange = (e) => {
@@ -30,7 +50,6 @@ const UpdateForm = ({ toggle, isOpen, templateData }) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        console.log('Image Preview URL:', reader.result); // Check the result
         setImagePreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
@@ -38,24 +57,32 @@ const UpdateForm = ({ toggle, isOpen, templateData }) => {
   };
 
   const handleUpdate = async () => {
+    if (fileError) {
+      return;
+    }
+  
     setLoadingUpdate(true);
-
+  
     try {
       const formData = new FormData();
-      formData.append('templateName', templateName); // Ensure templateName is sent but not editable
+      formData.append('templateName', templateName);
       formData.append('templateDescription', templateDescription);
       if (templateImage) formData.append('templateImage', templateImage);
       if (templateHtmlFile) formData.append('templateHtmlFile', templateHtmlFile);
-
+  
       await dispatch(updateCVAsync({ id: templateData.templateId, formData })).unwrap();
-
-      toggle(); // Close the modal after successful update
+  
+      setSuccessMessage("CV updated successfully");
+    setTimeout(() => setSuccessMessage(""), 3000);
+    setRefreshTrigger(prev => prev + 1);
+    toggle();
     } catch (error) {
       console.error('Error updating template:', error);
     } finally {
       setLoadingUpdate(false);
     }
   };
+  
 
   return (
     <Modal isOpen={isOpen} toggle={toggle}>
@@ -68,7 +95,7 @@ const UpdateForm = ({ toggle, isOpen, templateData }) => {
               type="text"
               id="templateName"
               value={templateName}
-              readOnly // Prevent user editing
+              readOnly
               required
             />
           </FormGroup>
@@ -89,6 +116,8 @@ const UpdateForm = ({ toggle, isOpen, templateData }) => {
               onChange={handleFileChange}
               accept=".html"
             />
+            {htmlFileName && <span className="selected-file">{htmlFileName}</span>}
+            {fileError && <div className="text-danger">{fileError}</div>}
           </FormGroup>
           <FormGroup>
             <Label for="templateImage">Upload Template Image:</Label>
@@ -99,13 +128,17 @@ const UpdateForm = ({ toggle, isOpen, templateData }) => {
               accept="image/*"
             />
             {imagePreviewUrl && (
-              <img src={imagePreviewUrl} alt="Template Preview" style={{ marginTop: '10px', maxWidth: '100%' }} />
+              <img 
+                src={imagePreviewUrl} 
+                alt="Template Preview" 
+                style={{ marginTop: '10px', maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} 
+              />
             )}
           </FormGroup>
         </Form>
       </ModalBody>
       <ModalFooter>
-        <Button color="primary" onClick={handleUpdate} disabled={loadingUpdate}>
+        <Button color="primary" onClick={handleUpdate} disabled={loadingUpdate || fileError !== ''}>
           {loadingUpdate ? 'Updating...' : 'Update Template'}
         </Button>
         <Button color="secondary" onClick={toggle}>

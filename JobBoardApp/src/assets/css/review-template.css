@@ -1,4 +1,8 @@
- .text-review-css{
+.action-item-rv.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.text-review-css{
   color: #333;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   font-weight: bolder;
@@ -6,6 +10,37 @@
 .hr-review-css{
   background-color: rgb(32, 32, 32);
 }
+.success-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(62, 62, 62, 0.647);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.success-dialog {
+  position: relative;
+  color: green;
+  background-color: white;
+  padding: 50px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+}
+
+.success-dialog p,i {
+  margin: 10px 0;
+  font-size: 1rem;
+  font-weight: bolder;
+}
+
+
 /* Styling for the heading above the selector */
 .cv-selector-wrapper h4 {
   font-size: 16px;
@@ -242,4 +277,66 @@
   .template-preview {
     height: 70vh;
   }
+}
+/* ads css  */
+/* Container for the entire dialog */
+.dialog-overlay-ad {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Ensure the dialog is on top */
+}
+
+/* Dialog box styling */
+.dialog-box-ad{
+  background-color: white;
+  padding: 20px;
+  border: 1px solid black;
+  border-radius: 8px; /* Optional: adds rounded corners */
+  width: 500px; /* Adjust as needed */
+  max-width: 90%; /* Responsive design */
+  text-align: center;
+}
+.dialog-box-ad p{
+  color:#f44336 ;
+  font-weight: bolder;
+  font-size: larger;
+}
+
+/* Button container for aligning buttons to the right */
+.button-container-ad {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px; /* Space between buttons */
+}
+
+/* Button styling */
+.button-ad {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-watch-ad {
+  background-color: #4CAF50; /* Green background */
+  color: white;
+}
+.button-watch-ad:hover {
+  background-color: #4caf4fbb; /* Green background */
+  color: black;
+}
+.button-cancel-ad {
+  background-color: #f44336; /* Red background */
+  color: white;
+}
+.button-cancel-ad:hover {
+  background-color: #f44336ae; /* Red background */
+  color: black;
 }

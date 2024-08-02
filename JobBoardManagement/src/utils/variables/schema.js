@@ -1,4 +1,5 @@
 import * as yup from "yup";
+const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
 
 export const blogSchema = (isEdit) => {
   return yup.object().shape({
@@ -14,9 +15,25 @@ export const blogSchema = (isEdit) => {
       .array()
       .of(yup.string().required("Hashtag is required"))
       .min(1, "At least one hashtag is required")
-      .required("Hashtags are required"),
+      .required("Hashtags are required")
+      .test("unique", "Hashtags must be unique", (value) => {
+        if (value) {
+          return new Set(value).size === value.length;
+        }
+        return true; // If value is undefined or null, no need to validate uniqueness
+      }),
     image: isEdit
-      ? yup.mixed().nullable()
+      ? yup
+          .mixed()
+          .nullable()
+          .test("fileSize", "The file is too large", (file) => {
+            if (!file) return true; // Không kiểm tra nếu không có tệp
+            return file.size <= 2000000;
+          })
+          .test("fileFormat", "Unsupported Format", (file) => {
+            if (!file) return true; // Không kiểm tra nếu không có tệp
+            return SUPPORTED_FORMATS.includes(file.type);
+          })
       : yup
           .mixed()
           .test("required", "You need to provide a file", (file) => {
@@ -25,6 +42,10 @@ export const blogSchema = (isEdit) => {
           })
           .test("fileSize", "The file is too large", (file) => {
             return file && file.size <= 2000000;
+          })
+          .test("fileFormat", "Unsupported Format", (file) => {
+            console.log(file.type);
+            return file && SUPPORTED_FORMATS.includes(file.type);
           }),
   });
 };

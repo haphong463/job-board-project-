@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ReviewBox from '../../components/dialog-box/ReviewBox';
 import WaveLoader from '../../components/loading-spinner/LoadingSpinner';
 import '../../assets/css/review-template.css';
-
+import Ads from '../../components/dialog-box/Ads.js';
 const CVSelector = ({ cvs, currentCvId, onCVChange }) => (
   <div className='text-center'>
     <h3 className='text-review-css'>Click to change cv details</h3>
@@ -36,6 +36,12 @@ const TemplateViewer = () => {
   const templatePreviewRef = useRef(null);
   const [showDialog, setShowDialog] = useState(false);
   const [userCVs, setUserCVs] = useState([]);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [countdown, setCountdown] = useState(10);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [showAd, setShowAd] = useState(false);
+  const [hasWatchedAd, setHasWatchedAd] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const fetchTemplate = async () => {
     try {
@@ -49,6 +55,19 @@ const TemplateViewer = () => {
     }
   };
 
+  const handleWatchAd = () => {
+    setShowPrintDialog(false);
+    setShowAd(true);
+    setHasWatchedAd(true);
+  };
+
+  const handleCloseAd = () => {
+    setShowAd(false);
+    handlePrintToPdf().then(() => {
+      setHasWatchedAd(false);
+    });
+  };
+
   const fetchUserCVs = async () => {
     try {
       const response = await axiosRequest.get(`/usercv/list-cvs/${userId}`);
@@ -57,11 +76,25 @@ const TemplateViewer = () => {
       console.error('Error fetching user CVs:', error);
     }
   };
+
   const handlePrintToPdf = async () => {
+    if (isPrinting) return; // Prevent multiple clicks
+
     try {
+      setIsPrinting(true); // Start loading
+
+      if (!hasWatchedAd) {
+        const countResponse = await axiosRequest.get(`/templates/count/${userId}`);
+        const pdfCount = countResponse;
+
+        if (pdfCount >= 1) {
+          setShowPrintDialog(true);
+          setIsPrinting(false); // End loading if showing dialog
+          return;
+        }
+      }
       const cvTitle = userCVs.find(cv => cv.cvId === parseInt(cvId))?.cvTitle || 'cv_template';
 
-      // Generate PDF
       const response = await axiosRequest.get(`/templates/generate/${userId}/${cvId}`, {
         responseType: 'blob',
       });
@@ -70,7 +103,6 @@ const TemplateViewer = () => {
         throw new Error('Invalid response: expected Blob');
       }
 
-      // Create URL for downloading
       const pdfUrl = URL.createObjectURL(response);
       const link = document.createElement('a');
       link.href = pdfUrl;
@@ -79,29 +111,41 @@ const TemplateViewer = () => {
       link.click();
       document.body.removeChild(link);
 
-      // Convert Blob to ArrayBuffer to byte[]
       const pdfData = await response.arrayBuffer();
       const byteArray = new Uint8Array(pdfData);
 
-      // Prepare FormData for saving the PDF
       const formData = new FormData();
       formData.append('name', `${cvTitle}.pdf`);
       formData.append('fileData', new Blob([byteArray], { type: 'application/pdf' }));
 
-      // Save the PDF to the database
       await axiosRequest.post(`/templates/pdf-document/save/${userId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
+      setSuccessMessage('PDF generated and saved successfully!');
+      startCountdown();
     } catch (error) {
       console.error('Error generating or saving PDF:', error);
       alert(`Error generating or saving PDF: ${error.message}`);
     }
+    finally {
+      setIsPrinting(false); // End loading
+    }
   };
 
-
+  const startCountdown = () => {
+    let count = 5;
+    const timer = setInterval(() => {
+      setCountdown(count);
+      count--;
+      if (count < 0) {
+        clearInterval(timer);
+        navigate('/cv-management', { state: { action: 'cvHis' } });
+      }
+    }, 1000);
+  };
 
   const handleUpdateCV = () => {
     navigate(`/cv-management`);
@@ -119,6 +163,7 @@ const TemplateViewer = () => {
     setShowDialog(true);
     fetchTemplate();
     fetchUserCVs();
+    setHasWatchedAd(false);
   }, [key, userId, cvId]);
 
   const handleCVChange = async (newCvId) => {
@@ -171,7 +216,7 @@ const TemplateViewer = () => {
         <div className="col-md-3">
           <div className="actions-container-rv">
             <div className="actions-title text-center">Actions</div>
-            <hr className='hr-review-css m-2'/>
+            <hr className='hr-review-css m-2' />
             <div className="action-items-rv d-flex flex-column">
               <div className="action-item-rv cv-selector-item">
                 <CVSelector
@@ -180,10 +225,15 @@ const TemplateViewer = () => {
                   onCVChange={handleCVChange}
                 />
               </div>
-
-              <div className="action-item-rv" onClick={handlePrintToPdf}>
-                <span className="icon"><i className="fas fa-print"></i></span>
-                Print to PDF
+              <div
+                className={`action-item-rv ${isPrinting ? 'disabled' : ''}`}
+                onClick={handlePrintToPdf}
+              >
+                <span className="icon">
+                  {isPrinting ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-print"></i>}
+                </span>
+                {isPrinting ? 'Printing...' : 'Print to PDF'}
+               
               </div>
               <div className="action-item-rv" onClick={handleUpdateCV}>
                 <span className="icon"><i className="fas fa-edit"></i></span>
@@ -208,10 +258,43 @@ const TemplateViewer = () => {
               <div dangerouslySetInnerHTML={{ __html: templateContent }} />
             </div>
           )}
+          {successMessage && (
+            <div className="success-dialog-overlay">
+              <div className="success-dialog">
+                <p>{successMessage}</p>
+                <p>Redirecting in <i className='text-danger'>{countdown}</i> seconds...</p>
+              </div>
+            </div>
+          )}
+          {showScrollToTop && (
+            <button className="scroll-to-top-button" onClick={scrollToTop}>
+              <i className="fas fa-arrow-up"></i>
+            </button>
+          )}
+          {showPrintDialog && (
+            <div className="dialog-overlay-ad">
+              <div className="dialog-box-ad">
+                <p>You have exceeded your free print limit. Please watch an ad to continue.</p>
+                <div className="ad-container">
+                  <h6>Ads content goes here.</h6>
+                  <button className="button-ad button-watch-ad m-2" onClick={handleWatchAd}>
+                    Watch Ad
+                  </button>
+                  <button className="button-ad button-cancel-ad m-2" onClick={() => setShowPrintDialog(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {showAd && (
+            <Ads onClose={handleCloseAd} />
+          )}
         </div>
       </div>
     </div>
   );
+
 };
 
 export default TemplateViewer;

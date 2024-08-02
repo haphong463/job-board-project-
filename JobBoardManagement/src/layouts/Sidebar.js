@@ -15,8 +15,9 @@ const Sidebar = memo(() => {
   const roles = user?.role.map((item) => item.authority) || [];
   const permissions = user?.permission.map((item) => item.name) || [];
   const isModerator = roles.includes("ROLE_MODERATOR");
-  const hasManageBlogPermission = permissions.includes("MANAGE_BLOG");
-
+  const hasPermission = (requiredPermission) => {
+    return permissions.includes(requiredPermission);
+  };
   const [collapseStates, setCollapseStates] = useState({});
 
   const toggleCollapse = (index) => {
@@ -31,7 +32,18 @@ const Sidebar = memo(() => {
       const currentIndex = `${parentIndex}${index}`;
 
       // Conditionally render blog link
-      if (item.title === "Blog" && isModerator && !hasManageBlogPermission) {
+      if (
+        (item.title === "Blog" &&
+          isModerator &&
+          !hasPermission("MANAGE_BLOG")) ||
+        (item.title === "User" &&
+          isModerator &&
+          !hasPermission("MANAGE_USER")) ||
+        (item.title === "Job" && isModerator && !hasPermission("MANAGE_JOB")) ||
+        (item.title === "Company" &&
+          isModerator &&
+          !hasPermission("MANAGE_COMPANY"))
+      ) {
         return null;
       }
 

@@ -9,7 +9,7 @@ public interface EmailService {
     void sendEmailNotification(String toEmail, String subject, String message);
     void sendVerificationEmailEmployer(String toEmail, String name, String verificationCode);
     void sendResetPasswordEmail(String toEmail, String resetToken);
-
+    void sendJobApplicationConfirmation(String toEmail, String employeeName, String jobTitle, String companyName);
 
     void sendCertificateEmail(String toEmail, String username, File certificate);
 

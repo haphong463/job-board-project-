@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import '../../core/utils/color_util.dart';
 import '../../models/job_model.dart';
 import '../../models/company_model.dart';
@@ -56,25 +55,17 @@ class JobDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _buildInfoRow('Salary', job.offeredSalary),
-                  // _buildInfoRow('Description', job.description),
-                  // _buildInfoRow('Responsibilities', job.responsibilities),
-                  // _buildInfoRow('Required Skills', job.requiredSkills),
-                  // _buildInfoRow('Work Schedule', job.workSchedule),
-                  // _buildInfoRow('Key Skills', job.keySkills),
-                  _buildInfoRow('Description', job.description, isHtml: true),
-                  _buildInfoRow('Responsibilities', job.responsibilities,
-                      isHtml: true),
-                  _buildInfoRow('Required Skills', job.requiredSkills,
-                      isHtml: true),
-                  _buildInfoRow('Work Schedule', job.workSchedule,
-                      isHtml: true),
+                  _buildInfoRow('Description', job.description),
+                  _buildInfoRow('Responsibilities', job.responsibilities),
+                  _buildInfoRow('Required Skills', job.requiredSkills),
+                  _buildInfoRow('Work Schedule', job.workSchedule),
+                  _buildInfoRow('Key Skills', job.keySkills),
                   _buildInfoRow('Position', job.position),
                   _buildInfoRow('Experience', job.experience),
-                  // _buildInfoRow('Qualification', job.qualification),
+                  _buildInfoRow('Qualification', job.qualification),
                   _buildInfoRow('Job Type', job.jobType),
                   _buildInfoRow('Contract Type', job.contractType),
-                  _buildInfoRow('Benefits', job.benefit, isHtml: true),
-                  // _buildInfoRow('Benefits', job.benefit),
+                  _buildInfoRow('Benefits', job.benefit),
                   _buildInfoRow(
                       'Created At', job.createdAt.toLocal().toString()),
                   _buildInfoRow('Slot', job.slot.toString()),
@@ -119,7 +110,7 @@ class JobDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String title, String value, {bool isHtml = false}) {
+  Widget _buildInfoRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(

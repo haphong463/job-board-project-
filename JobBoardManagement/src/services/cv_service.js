@@ -21,7 +21,14 @@ export const disableCV = async (id) => {
     throw error;
   }
 };
-
+export const unDisableCV = async (id) => {
+  try {
+    await axiosRequest.patch(`${baseURL}/un_disable/${id}`);
+  } catch (error) {
+    console.error(`Error un-disabling CV with id ${id}:`, error);
+    throw error;
+  }
+};
 export const fetchCVById = async (id) => {
   try {
     return await axiosRequest.get(`${baseURL}/${id}`);

@@ -5,12 +5,13 @@ import { FaUser, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaLink, FaPlus, FaExter
 import { useNavigate } from 'react-router-dom';
 import { fetchUserThunk } from "../../features/userSlice";
 import { fetchCertificatesByUserIdThunk, createCertificateThunk, updateCertificateThunk, deleteCertificateThunk } from "../../features/certificateSlice";
+import { fetchEducationThunk } from "../../features/userSlice";
 import MyProfile from './myprofile';
 
 const UserProfileManagement = () => {
   const [activeTab, setActiveTab] = useState('profile');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddCertificateModal, setShowAddCertificateModal] = useState(false);
+  const [showEditCertificateModal, setShowEditCertificateModal] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [newCertificate, setNewCertificate] = useState({
     name: '',
@@ -19,12 +20,16 @@ const UserProfileManagement = () => {
     link: '',
     description: ''
   });
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.user);
   const certificates = useSelector((state) => state.certificates.certificates) || [];
+  const education = useSelector((state) => state.user.education) || [];
   const loading = useSelector((state) => state.certificates.loading);
   const error = useSelector((state) => state.certificates.error);
+  const educationLoading = useSelector((state) => state.user.educationStatus) === 'loading';
+  const educationError = useSelector((state) => state.user.educationError);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -37,6 +42,7 @@ const UserProfileManagement = () => {
   useEffect(() => {
     if (user?.id) {
       dispatch(fetchCertificatesByUserIdThunk(user.id));
+      dispatch(fetchEducationThunk(user.id));
     }
   }, [dispatch, user?.id]);
 
@@ -46,16 +52,16 @@ const UserProfileManagement = () => {
 
   const handleAddCertificate = () => {
     dispatch(createCertificateThunk({ ...newCertificate, userId: user.id }));
-    setNewCertificate({ name: '', organization: '', issueDate: '', link: '', description: '' }); // Clear form
-    setShowAddModal(false);
+    setNewCertificate({ name: '', organization: '', issueDate: '', link: '', description: '' });
+    setShowAddCertificateModal(false);
   };
 
   const handleUpdateCertificate = () => {
     if (selectedCertificate) {
       dispatch(updateCertificateThunk({ id: selectedCertificate.id, certificateDTO: newCertificate }));
       setSelectedCertificate(null);
-      setNewCertificate({ name: '', organization: '', issueDate: '', link: '', description: '' }); // Clear form
-      setShowEditModal(false);
+      setNewCertificate({ name: '', organization: '', issueDate: '', link: '', description: '' });
+      setShowEditCertificateModal(false);
     }
   };
 
@@ -63,12 +69,19 @@ const UserProfileManagement = () => {
     dispatch(deleteCertificateThunk(id));
   };
 
+ 
+
+  
+
+ 
   const handleModalChange = (e) => {
     setNewCertificate({
       ...newCertificate,
       [e.target.name]: e.target.value,
     });
   };
+
+
 
   return (
     <Container fluid>
@@ -181,177 +194,237 @@ const UserProfileManagement = () => {
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h4>Certificates</h4>
-                <Button variant="outline-primary" onClick={() => setShowAddModal(true)}>
+                <Button variant="outline-primary" onClick={() => setShowAddCertificateModal(true)}>
                   <FaPlus /> Add Certificate
                 </Button>
               </div>
               {loading && <p>Loading certificates...</p>}
               {error && <p>Error fetching certificates: {error}</p>}
               {certificates.length === 0 ? (
-                <p>No certificates available.</p>
+                <p>No certificates found</p>
               ) : (
-                <ul>
-                  {certificates.map((cert) => (
-                    <li key={cert.id}>
-                      {cert.name} - {cert.organization} ({cert.issueDate}) 
-                      {cert.link && (
-                        <Button 
-                          variant="link" 
-                          className="ml-2" 
-                          href={cert.link} 
-                          target="_blank"
-                        >
-                          <FaExternalLinkAlt />
-                        </Button>
-                      )}
-                      <Button 
-                        variant="outline-warning" 
-                        className="ms-2"
-                        onClick={() => {
-                          setNewCertificate(cert);
-                          setSelectedCertificate(cert);
-                          setShowEditModal(true);
-                        }}
-                      >
-                        <FaEdit />
-                      </Button>
-                      <Button 
-                        variant="outline-danger" 
-                        className="ms-2"
-                        onClick={() => handleDeleteCertificate(cert.id)}
-                      >
-                        <FaTrash />
-                      </Button>
+                <ul className="list-unstyled">
+                  {certificates.map((certificate) => (
+                    <li key={certificate.id} className="mb-3">
+                      <Card>
+                        <Card.Body>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                              <h5>{certificate.name}</h5>
+                              <p>{certificate.organization}</p>
+                              <p>{certificate.issueDate}</p>
+                              <p>{certificate.description}</p>
+                              <a href={certificate.link} target="_blank" rel="noopener noreferrer">
+                                <FaExternalLinkAlt /> View Certificate
+                              </a>
+                            </div>
+                            <div>
+                              <Button
+                                variant="outline-secondary"
+                                className="me-2"
+                                onClick={() => {
+                                  setSelectedCertificate(certificate);
+                                  setNewCertificate(certificate);
+                                  setShowEditCertificateModal(true);
+                                }}
+                              >
+                                <FaEdit /> Edit
+                              </Button>
+                              <Button
+                                variant="outline-danger"
+                                onClick={() => handleDeleteCertificate(certificate.id)}
+                              >
+                                <FaTrash /> Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
                     </li>
                   ))}
                 </ul>
               )}
             </Card.Body>
           </Card>
+
+          {/* Education Management */}
+          <Card className="mt-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h4>Education</h4>
+         
+              </div>
+              {educationLoading && <p>Loading education...</p>}
+              {educationError && <p>Error fetching education: {educationError}</p>}
+              {education.length === 0 ? (
+                <p>No education records found</p>
+              ) : (
+                <ul className="list-unstyled">
+                  {education.map((edu) => (
+                    <li key={edu.id} className="mb-3">
+                      <Card>
+                        <Card.Body>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                              <h5>{edu.degree}</h5>
+                              <p>{edu.institution}</p>
+                              <p>{edu.startDate} - {edu.endDate}</p>
+                            </div>
+                            <div>
+                             
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card.Body>
+          </Card>
+
+          {/* Add Certificate Modal */}
+          <Modal show={showAddCertificateModal} onHide={() => setShowAddCertificateModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Add Certificate</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="name"
+                    value={newCertificate.name}
+                    onChange={handleModalChange}
+                    placeholder="Certificate Name"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Organization</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="organization"
+                    value={newCertificate.organization}
+                    onChange={handleModalChange}
+                    placeholder="Issuing Organization"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Issue Date</Form.Label>
+                  <Form.Control
+                    type="month"
+                    name="issueDate"
+                    value={newCertificate.issueDate}
+                    onChange={handleModalChange}
+                    placeholder="Issue Date"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Link</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="link"
+                    value={newCertificate.link}
+                    onChange={handleModalChange}
+                    placeholder="Certificate Link"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    name="description"
+                    value={newCertificate.description}
+                    onChange={handleModalChange}
+                    placeholder="Certificate Description"
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowAddCertificateModal(false)}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={handleAddCertificate}>
+                Add Certificate
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Edit Certificate Modal */}
+          <Modal show={showEditCertificateModal} onHide={() => setShowEditCertificateModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Edit Certificate</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="name"
+                    value={newCertificate.name}
+                    onChange={handleModalChange}
+                    placeholder="Certificate Name"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Organization</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="organization"
+                    value={newCertificate.organization}
+                    onChange={handleModalChange}
+                    placeholder="Issuing Organization"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Issue Date</Form.Label>
+                  <Form.Control
+                    type="month"
+                    name="issueDate"
+                    value={newCertificate.issueDate}
+                    onChange={handleModalChange}
+                    placeholder="Issue Date"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Link</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="link"
+                    value={newCertificate.link}
+                    onChange={handleModalChange}
+                    placeholder="Certificate Link"
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    name="description"
+                    value={newCertificate.description}
+                    onChange={handleModalChange}
+                    placeholder="Certificate Description"
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowEditCertificateModal(false)}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={handleUpdateCertificate}>
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Edit Education Modal */}
+         
         </Col>
       </Row>
-
-      {/* Modal for Adding Certificate */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Certificate</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Certificate Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={newCertificate.name}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Issued By</Form.Label>
-              <Form.Control
-                type="text"
-                name="organization"
-                value={newCertificate.organization}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Issue Date</Form.Label>
-              <Form.Control
-                type="month"
-                name="issueDate"
-                value={newCertificate.issueDate}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Certificate Link</Form.Label>
-              <Form.Control
-                type="text"
-                name="link"
-                value={newCertificate.link || ''}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="description"
-                value={newCertificate.description || ''}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>Cancel</Button>
-          <Button variant="primary" onClick={handleAddCertificate}>Add Certificate</Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Modal for Editing Certificate */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Certificate</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Certificate Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={newCertificate.name}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Issued By</Form.Label>
-              <Form.Control
-                type="text"
-                name="organization"
-                value={newCertificate.organization}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Issue Date</Form.Label>
-              <Form.Control
-                type="month"
-                name="issueDate"
-                value={newCertificate.issueDate}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Certificate Link</Form.Label>
-              <Form.Control
-                type="text"
-                name="link"
-                value={newCertificate.link || ''}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="description"
-                value={newCertificate.description || ''}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancel</Button>
-          <Button variant="primary" onClick={handleUpdateCertificate}>Save Changes</Button>
-        </Modal.Footer>
-      </Modal>
     </Container>
   );
 };

@@ -20,26 +20,17 @@ public class BlogDTO {
     private String title;
     @NotNull
     private String content;
-
     @NotNull
-    private List<Long> categoryIds; // Danh sách id của các BlogCategory
-
+    private List<Long> categoryIds;
     @NotNull
     private String citation;
-
     @NotNull
     public  String username;
-
     @NotNull
     private boolean visibility;
-
     @NotNull
     private String slug;
     @Nullable
     private MultipartFile image;
-
     private List<String> hashtags;
-
-
-    // Getters and setters
 }

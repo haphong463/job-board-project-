@@ -60,4 +60,5 @@ public class Company {
     private List<Review> reviews = new ArrayList<>();
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Job> jobs = new ArrayList<>();
+
 }

@@ -24,7 +24,6 @@ export const JobSingle = () =>
    const { id } = useParams();
    const jobId = parseInt(id ?? '0', 10);
    // const [jobs, setJobs] = useState([]);
-   const navigate = useNavigate();
    const dispatch = useDispatch();
    const jobs = useSelector((state) => state.job.jobs);
    const companies = useSelector((state) => state.company.companies);
@@ -35,6 +34,17 @@ export const JobSingle = () =>
 
    useEffect(() =>
    {
+   const checkIfApplied = async () => {
+      try {
+         const response = await axiosRequest.get(`/application/user/${userId}/job/${jobId}`);
+         setHasApplied(response); // Ensure `response.data` is boolean
+      } catch (error) {
+         console.error('Error checking application status', error);
+      }
+   };
+
+
+   useEffect(() => {
       dispatch(fetchCategoryThunk());
 
       if (companies.length === 0)
@@ -45,6 +55,7 @@ export const JobSingle = () =>
       {
          dispatch(fetchJobThunk());
       }
+   checkIfApplied();
    }, [dispatch, jobs.length, companies.length]);
 
    useEffect(() =>
@@ -74,10 +85,17 @@ export const JobSingle = () =>
    console.log(jobData);
    const companyData = companies.find(company => company.companyId === jobData?.companyId);
 
-   if (!jobData || !companyData)
-   {
+
+   if (!jobData || !companyData) {
       return <div>Loading...</div>; // Hoặc bạn có thể chuyển hướng đến trang lỗi
    }
+   const handleApplyClick = (e) => {
+      e.preventDefault();
+      setShowApplyBox(true);
+    };
+   const handleCloseApplyBox = () => {
+      setShowApplyBox(false);
+   };
 
    const getLocation1String = (address) =>
    {
@@ -151,6 +169,32 @@ export const JobSingle = () =>
       }
       return null;
    };
+
+   // const currentJobKeySkills = jobData?.keySkills ? jobData.keySkills.split(',').map(skill => skill.trim()) : [];
+
+   // // Filter jobs that share any key skills with the current job
+   // const relatedJobs = jobs.filter(job =>
+   //    job.id !== jobId &&
+   //    job.keySkills && // Ensure job.keySkills is not null or undefined
+   //    job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
+   // );
+
+   // const currentJobCategoryIds = new Set(jobData.categoryId);  // Chuyển List<Long> thành Set<Long>
+
+   // const relatedJobs = jobs.filter(job =>
+   // {
+   //    const jobCategoryIds = new Set(job.categoryId);
+
+   //    // Kiểm tra xem có bất kỳ phần tử nào trong jobCategoryIds tồn tại trong currentJobCategoryIds
+   //    for (const id of jobCategoryIds)
+   //    {
+   //       if (currentJobCategoryIds.has(id))
+   //       {
+   //          return true;
+   //       }
+   //    }
+   //    return false;
+   // });
 
    const categoryArray = Array.isArray(categories) ? categories : [];
 
@@ -264,6 +308,12 @@ export const JobSingle = () =>
                                     ) : null;
                                  })}
                               </div>
+
+                              {/* <div className="m-0 mt-3" >
+                                 {jobData?.keySkills.split(',').map((skill, index) => (
+                                    <span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
+                                 ))}
+                              </div> */}
                            </div>
                         </div>
                      </div>
@@ -280,9 +330,9 @@ export const JobSingle = () =>
                               </button>
                            </div>
                            <div className="col-6">
-                              <button className="btn btn-block btn-primary btn-md">
+                              <a href="#" className="btn btn-block btn-primary btn-md">
                                  Apply Now
-                              </button>
+                              </a>
                            </div>
                         </div>
                      </div>
@@ -294,7 +344,9 @@ export const JobSingle = () =>
                               <span className="icon-align-left mr-3" />
                               Job description
                            </h3>
+
                            {addIconsToListItems(jobData?.description)}
+
                         </div>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
@@ -313,6 +365,7 @@ export const JobSingle = () =>
                            <ul className="list-unstyled m-0 p-0">
                               {addIconsToListItems(jobData?.responsibilities)}
                            </ul>
+
                         </div>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">

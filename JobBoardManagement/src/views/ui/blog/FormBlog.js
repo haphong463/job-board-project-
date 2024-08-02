@@ -37,25 +37,27 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
   const blogs = useSelector((state) => state.blogs.blogs);
   const statusSubmit = useSelector((state) => state.blogs.statusSubmit);
-
   const user = useSelector((state) => state.auth.user);
   const [modal, setModal] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [tags, setTags] = useState([]);
+
   const {
     handleSubmit,
     control,
     setValue,
     reset,
     watch,
-    formState: { errors, isDirty },
+    setError,
+
+    formState: { errors, isDirty, isLoading },
   } = useForm({
     resolver: yupResolver(blogSchema(isEdit)),
     defaultValues: {
       title: "",
       content: "",
       categoryIds: [],
-      image: "",
+      image: null,
       visibility: true,
     },
   });
@@ -82,18 +84,30 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
     if (!newData.image || newData.image.length === 0) {
       delete newData.image;
     }
-    console.log(">>> new data: ", newData);
-
     const formData = createFormData(newData);
     if (!isEdit) {
-      dispatch(addBlog(formData)).then((response) => {
-        if (response.meta.requestStatus === "fulfilled") {
-          showToast("Blog added successfully!", "success");
-          toggle();
-        } else {
-          showToast("Failed to add blog", "error");
-        }
-      });
+      dispatch(addBlog(formData))
+        .then((response) => {
+          console.log(response);
+
+          if (response.meta.requestStatus === "fulfilled") {
+            showToast("Blog added successfully!", "success");
+            toggle();
+          } else {
+            if (
+              typeof response.payload === "string" &&
+              response.payload === "Title already exists in blog table."
+            )
+              setError("title", {
+                message: response.payload,
+              });
+
+            showToast("Failed to add blog", "error");
+          }
+        })
+        .finally(() => {
+          setTags([]);
+        });
     } else {
       dispatch(editBlog({ newBlog: formData, id: isEdit.id })).then(
         (response) => {
@@ -119,22 +133,19 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       );
       setValue("visibility", isEdit.visibility);
       setValue("citation", isEdit.citation);
+
       setTags(isEdit.hashtags.map((item) => item.name));
+      setValue("hashtags", tags);
     }
   }, [isEdit, setValue]);
 
   useEffect(() => {
     const imageFile = watch("image");
-
     if (imageFile) {
       const objectUrl = URL.createObjectURL(imageFile);
       setPreviewUrl(objectUrl);
-
-      // Revoke the old object URL
       return () => URL.revokeObjectURL(objectUrl);
     }
-
-    // Reset the preview URL if no image is selected
     setPreviewUrl(null);
   }, [watch("image")]);
 
@@ -206,9 +217,9 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
             <Button
               color="primary"
               type="submit"
-              disabled={!isDirty || !!(statusSubmit === "loading")}
+              disabled={!isDirty || isLoading}
             >
-              {statusSubmit === "loading" && <Spinner size="sm" />}{" "}
+              {isLoading && <Spinner size="sm" />}{" "}
               {isEdit ? "Update" : "Submit"}
             </Button>
           </ModalFooter>

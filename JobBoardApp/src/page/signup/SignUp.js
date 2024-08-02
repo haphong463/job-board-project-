@@ -20,6 +20,7 @@ function SignUp() {
   });
   const dispatch = useDispatch();
   const signUpSuccess = useSelector((state) => state.auth.signUpSuccess);
+  const error = useSelector((state) => state.auth.error);
   const [password, setPassword] = useState("");
   const onSubmit = async (data) => {
     console.log(data);
@@ -72,6 +73,12 @@ function SignUp() {
               {signUpSuccess && (
                 <div className="alert alert-success" role="alert">
                   Successfully signed up! Verify your account via email.
+                </div>
+              )}
+
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
                 </div>
               )}
               <form

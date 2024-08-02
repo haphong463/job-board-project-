@@ -22,17 +22,23 @@ import {
 import { CSVLink } from "react-csv";
 import Form from "./FormBlog";
 import { useDispatch, useSelector } from "react-redux";
-import { searchBlogs, deleteBlog } from "../../../features/blogSlice";
+import {
+  searchBlogs,
+  deleteBlog,
+  getHashTags,
+} from "../../../features/blogSlice";
 import debounce from "lodash.debounce";
 import { FaFileExcel } from "react-icons/fa";
 import "./style.css";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import Swal from "sweetalert2";
 import { Navigate } from "react-router-dom";
+import { getExcelData } from "../../../services/blog_service";
 
 export function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs);
+  const excelData = useSelector((state) => state.blogs.exportExcel);
   const totalPages = useSelector((state) => state.blogs.totalPages);
   const status = useSelector((state) => state.blogs.status);
   const blogCategoryData = useSelector(
@@ -226,32 +232,15 @@ export function Blog(props) {
       },
     },
   };
-
-  const csvHeaders = [
-    { label: "ID", key: "id" },
-    { label: "Title", key: "title" },
-    { label: "Category", key: "categories" },
-    { label: "Visibility", key: "visibility" },
-    { label: "Posted By", key: "user.email" },
-    { label: "Comments Count", key: "commentCount" },
-  ];
-
-  const csvData = blogData.map((row) => ({
-    id: row.id,
-    title: row.title,
-    categories: row.categories.map((c) => c.name).join(", "),
-    visibility: row.visibility ? "Show" : "Hide",
-    "user.email": row.user.email,
-    commentCount: row.commentCount,
-  }));
-
-  console.log(">>>status: ", status === "loading");
-
   const user = useSelector((state) => state.auth.user);
   const roles = user?.role.map((item) => item.authority) || [];
   const permissions = user?.permission.map((item) => item.name) || [];
   const isModerator = roles.includes("ROLE_MODERATOR");
   const hasManageBlogPermission = permissions.includes("MANAGE_BLOG");
+
+  useEffect(() => {
+    dispatch(getHashTags());
+  }, []);
 
   if (isModerator && !hasManageBlogPermission) {
     return <Navigate to="/" />;
@@ -263,16 +252,11 @@ export function Blog(props) {
         <h4>Blog List</h4>
         <div className="d-flex  p-3 gap-3">
           <Form isEdit={isEdit} setIsEdit={setIsEdit} />
-          <CSVLink
-            data={csvData}
-            headers={csvHeaders}
-            filename={"blog_data.csv"}
-          >
-            <Button color="success">
-              <FaFileExcel />
-              Export CSV
-            </Button>
-          </CSVLink>
+
+          <Button color="success" onClick={getExcelData}>
+            <FaFileExcel />
+            Export CSV
+          </Button>
         </div>
       </div>
       <div className="d-flex gap-3 px-2">
