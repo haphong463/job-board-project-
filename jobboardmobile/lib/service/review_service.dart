@@ -38,21 +38,45 @@ class ReviewService {
       final AuthService authService = AuthService();
       String? accessToken = await authService.getAccessToken();
 
+      // Check if the user has already reviewed the company
+      bool hasReviewed = await hasUserReviewedCompany(companyId);
+      if (hasReviewed) {
+        throw Exception('User has already posted a review for this company.');
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/$companyId/reviews'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $accessToken'
+          'Authorization': 'Bearer $accessToken',
         },
-        body: jsonEncode(review.toJson()), // Sử dụng toJson()
+        body: jsonEncode(review.toJson()),
       );
 
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        return Review.fromJson(jsonDecode(response.body));
+        // Try to parse response as JSON, fallback to plain text
+        try {
+          return Review.fromJson(jsonDecode(response.body));
+        } catch (e) {
+          // Handle plain text responses
+          if (response.body == 'Review added successfully!') {
+            return Review.fromJson({
+              'message': 'Review added successfully!',
+              'id': -1, // or any default value
+            });
+          } else {
+            throw Exception('Unexpected response format');
+          }
+        }
       } else {
-        throw Exception('Failed to add review');
+        print('Failed to add review: ${response.statusCode} ${response.body}');
+        throw Exception(
+            'Failed to add review. Server responded with status code ${response.statusCode}');
       }
     } catch (e) {
+      print('Exception: $e');
       throw Exception('Failed to add review: $e');
     }
   }
@@ -109,14 +133,9 @@ class ReviewService {
     try {
       final AuthService authService = AuthService();
       String? accessToken = await authService.getAccessToken();
-      String? username = await authService.getUsername();
-
-      if (username == null) {
-        throw Exception('Username not found');
-      }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/$companyId/reviews/hasReviewed?username=$username'),
+        Uri.parse('$baseUrl/$companyId/reviews/hasReviewed'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $accessToken'

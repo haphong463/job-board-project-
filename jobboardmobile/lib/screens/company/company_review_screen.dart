@@ -25,15 +25,12 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   double _rating = 0.0;
-
   String? _username;
 
   @override
   void initState() {
     super.initState();
     _fetchUserInfo();
-    _fetchReviews();
-    _checkUserReviewStatus();
   }
 
   Future<void> _fetchUserInfo() async {
@@ -42,6 +39,10 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       setState(() {
         _username = username;
       });
+      if (_username != null) {
+        await _fetchReviews();
+        await _checkUserReviewStatus();
+      }
     } catch (e) {
       print('Failed to fetch user info: $e');
     }
@@ -52,6 +53,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       final reviews = await _reviewService.getAllReviews(widget.companyId);
       setState(() {
         _reviews = reviews;
+        _hasReviewed = reviews.any((review) => review.username == _username);
       });
     } catch (e) {
       print('Failed to load reviews: $e');
@@ -74,17 +76,22 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
 
   Future<void> _addReview() async {
     if (_titleController.text.isEmpty || _descriptionController.text.isEmpty) {
-      print('Title and description cannot be empty');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Title and description cannot be empty'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
     if (_username == null) {
-      print('User not logged in');
-      return;
-    }
-
-    if (_hasReviewed) {
-      print('You have already reviewed this company');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('User not logged in'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -94,10 +101,10 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
         title: _titleController.text,
         description: _descriptionController.text,
         rating: _rating,
-        company: Company.empty(), // Update if necessary
-        user: User.empty(), // Update if necessary
+        company: Company.empty(),
+        user: User.empty(),
         username: _username!,
-        imageUrl: '', // Optional
+        imageUrl: '',
       );
 
       await _reviewService.addReview(widget.companyId, review);
@@ -105,11 +112,24 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       _descriptionController.clear();
       setState(() {
         _rating = 0.0;
+        _hasReviewed = true;
       });
-      await _fetchReviews(); // Fetch reviews again to show the new review
-      await _checkUserReviewStatus(); // Update review status
+      await _fetchReviews();
+      await _checkUserReviewStatus();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Review added successfully'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
     } catch (e) {
-      print('Failed to add review: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add review: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -213,15 +233,6 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                   ],
                 ),
               )
-            else
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Text(
-                  'You have already submitted a review for this company.',
-                  style:
-                      TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-              ),
           ],
         ),
       ),

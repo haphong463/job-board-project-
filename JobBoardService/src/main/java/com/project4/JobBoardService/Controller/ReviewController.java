@@ -35,9 +35,11 @@ public class ReviewController {
                                        @RequestBody ReviewDTO reviewDTO,
                                        @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-
-        // Set the username in the DTO before passing it to the service
         reviewDTO.setUsername(username);
+
+        if (reviewService.hasUserReviewedCompany(companyId, username)) {
+            return ResponseEntity.badRequest().body("User has already posted a review for this company.");
+        }
 
         boolean success = reviewService.addReview(companyId, reviewDTO);
         if (success) {
