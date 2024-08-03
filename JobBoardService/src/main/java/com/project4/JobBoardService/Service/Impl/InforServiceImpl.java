@@ -54,6 +54,8 @@ public class InforServiceImpl implements InforService {
         existingBlog.setBio(updatedBlog.getBio());
         existingBlog.setNumberphone(updatedBlog.getNumberphone());
         existingBlog.setFacebook(updatedBlog.getFacebook());
+        existingBlog.setDateOfBirth(updatedBlog.getDateOfBirth());
+        existingBlog.setCurrentAddress(updatedBlog.getCurrentAddress());
     }
     private void handleImageFile(User user, MultipartFile imageFile, String operationType) {
         if (imageFile != null && !imageFile.isEmpty()) {

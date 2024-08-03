@@ -5,6 +5,7 @@ import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Enum.Gender;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -24,5 +25,6 @@ public class InforUserDTO {
     private String facebook;
     private List<CertificateDTO> certificates;
     private List<UserEducationDTO> userEducations;
-
+    private LocalDate dateOfBirth;
+    private String currentAddress;
 }

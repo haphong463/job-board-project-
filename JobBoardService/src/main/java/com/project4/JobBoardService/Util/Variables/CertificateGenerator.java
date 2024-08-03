@@ -43,7 +43,7 @@ public class CertificateGenerator {
 
 
     public static File generateCertificate(String username, String quizTitle, String firstName, String lastName) {
-        String inputPdfPath = "uploads/certificate/certificate1.pdf";
+        String inputPdfPath = "uploads/certificate/certificate.pdf";
         String outputPdfPath = "src/main/resources/uploads/certificate/certificate_" + username + ".pdf";
 
         try {
