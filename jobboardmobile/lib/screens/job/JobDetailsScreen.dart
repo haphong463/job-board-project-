@@ -3,15 +3,18 @@ import '../../core/utils/color_util.dart';
 import '../../models/job_model.dart';
 import '../../models/company_model.dart';
 import '../../constant/endpoint.dart'; // Import your endpoint
+import 'package:flutter_html/flutter_html.dart';
 
 class JobDetailsScreen extends StatelessWidget {
   final Job job;
   final Company company;
+  final bool isHtml;
 
   const JobDetailsScreen({
     Key? key,
     required this.job,
     required this.company,
+    required this.isHtml,
   }) : super(key: key);
 
   @override

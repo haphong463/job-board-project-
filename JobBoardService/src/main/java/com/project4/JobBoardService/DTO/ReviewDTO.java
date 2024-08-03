@@ -22,4 +22,9 @@ public class ReviewDTO {
     @Min(value = 0, message = "Rating must be greater than or equal to 0")
     @Max(value = 5, message = "Rating must be less than or equal to 5")
     private double rating;
+
+    @NotBlank(message = "Username is required") // Add this validation
+    private String username; // Add this field
+    private String imageUrl;
+
 }

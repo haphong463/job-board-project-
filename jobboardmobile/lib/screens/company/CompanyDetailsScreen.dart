@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/utils/color_util.dart';
 import '../../service/job_service.dart';
 import '../job/JobDetailsScreen.dart';
+import 'company_review_screen.dart'; // Import the new review screen
 import '../../constant/endpoint.dart'; // Import your endpoint
 
 class CompanyDetailsScreen extends StatefulWidget {
@@ -138,6 +139,7 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
                                 builder: (context) => JobDetailsScreen(
                                   job: job,
                                   company: widget.company,
+                                  isHtml: true,
                                 ),
                               ),
                             );
@@ -146,6 +148,22 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
                       );
                     },
                   ),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CompanyReviewScreen(
+                        companyId: widget.company.companyId,
+                      ),
+                    ),
+                  );
+                },
+                child: Text('Review Company'),
+              ),
+            ),
           ],
         ),
       ),
