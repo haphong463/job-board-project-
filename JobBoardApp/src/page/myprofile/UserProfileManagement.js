@@ -167,13 +167,13 @@ const UserProfileManagement = () => {
                   <Form.Group as={Row} className="mb-3">
                     <Form.Label column sm={3}><FaCalendar /> Date of Birth</Form.Label>
                     <Col sm={9}>
-                      <Form.Control type="date" value={user?.birthDate || ''} readOnly />
+                      <Form.Control type="date" value={user?.dateOfBirth || ''} readOnly />
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row} className="mb-3">
                     <Form.Label column sm={3}><FaMapMarkerAlt /> Current Address</Form.Label>
                     <Col sm={9}>
-                      <Form.Control type="text" value={user?.address || ''} readOnly />
+                      <Form.Control type="text" value={user?.currentAddress || ''} readOnly />
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row} className="mb-3">
