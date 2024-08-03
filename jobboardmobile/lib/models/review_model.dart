@@ -10,7 +10,8 @@ class Review {
   final User user;
   final String username;
   final String imageUrl;
-
+  int likeCount;
+  bool likedByCurrentUser;
   Review({
     required this.id,
     required this.title,
@@ -20,6 +21,8 @@ class Review {
     required this.user,
     required this.username,
     required this.imageUrl,
+    required this.likeCount,
+    required this.likedByCurrentUser,
   });
 
   // Factory constructor for empty review
@@ -32,6 +35,8 @@ class Review {
         user: User.empty(),
         username: '',
         imageUrl: '',
+        likeCount: 0,
+        likedByCurrentUser: false,
       );
 
   factory Review.fromJson(Map<String, dynamic> json) {
@@ -45,7 +50,9 @@ class Review {
           : Company.empty(),
       user: json['user'] != null ? User.fromJson(json['user']) : User.empty(),
       username: json['username'] ?? '',
-      imageUrl: json['imageUrl'] ?? '', // Provide default empty string
+      imageUrl: json['imageUrl'] ?? '',
+      likeCount: json['likeCount'] ?? 0,
+      likedByCurrentUser: json['likedByCurrentUser'] ?? false,
     );
   }
 
@@ -59,6 +66,8 @@ class Review {
       'user': user.toJson(),
       'username': username,
       'imageUrl': imageUrl,
+      'likeCount': likeCount,
+      'likedByCurrentUser': likedByCurrentUser,
     };
   }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:jobboardmobile/dto/LikeResponse.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/models/review_model.dart';
 import 'package:jobboardmobile/service/review_service.dart';
 
+import '../../constant/endpoint.dart';
 import '../../models/company_model.dart';
 import '../../models/user_model.dart';
 
@@ -97,7 +99,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
 
     try {
       final review = Review(
-        id: 0,
+        id: 0, // ID sẽ được gán bởi backend
         title: _titleController.text,
         description: _descriptionController.text,
         rating: _rating,
@@ -105,17 +107,21 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
         user: User.empty(),
         username: _username!,
         imageUrl: '',
+        likeCount: 0,
+        likedByCurrentUser: false,
       );
 
-      await _reviewService.addReview(widget.companyId, review);
-      _titleController.clear();
-      _descriptionController.clear();
+      final savedReview =
+          await _reviewService.addReview(widget.companyId, review);
+
       setState(() {
+        _titleController.clear();
+        _descriptionController.clear();
         _rating = 0.0;
         _hasReviewed = true;
+        _reviews.add(savedReview); // Thêm đánh giá đã lưu vào danh sách
       });
-      await _fetchReviews();
-      await _checkUserReviewStatus();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Review added successfully'),
@@ -127,6 +133,66 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to add review: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _likeReview(Review review) async {
+    print('Review ID to like: ${review.id}');
+
+    try {
+      final LikeResponse likeResponse =
+          await _reviewService.likeReview(widget.companyId, review.id);
+      if (likeResponse.success) {
+        setState(() {
+          review.likeCount++;
+          review.likedByCurrentUser = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(likeResponse.message),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        throw Exception(likeResponse.message);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to like review: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _unlikeReview(Review review) async {
+    try {
+      final response =
+          await _reviewService.unlikeReview(widget.companyId, review.id);
+      if (response.success) {
+        setState(() {
+          review.likeCount--;
+          review.likedByCurrentUser = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to unlike review: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -156,13 +222,15 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                       itemCount: _reviews.length,
                       itemBuilder: (context, index) {
                         final review = _reviews[index];
+                        // Replace 'http://localhost:8080' with the actual endpoint URL
+                        String modifiedImageUrl = review.imageUrl.isNotEmpty
+                            ? review.imageUrl.replaceAll(
+                                'http://localhost:8080', Endpoint.imageUrl)
+                            : 'https://bootdey.com/img/Content/avatar/avatar6.png';
+
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              review.imageUrl.isNotEmpty
-                                  ? review.imageUrl
-                                  : 'https://bootdey.com/img/Content/avatar/avatar6.png',
-                            ),
+                            backgroundImage: NetworkImage(modifiedImageUrl),
                             backgroundColor: Colors.grey[300],
                           ),
                           title: Text(review.title),
@@ -173,6 +241,30 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                               Text(
                                   'Rating: ${review.rating.toStringAsFixed(1)}'),
                               Text(review.description),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Likes: ${review.likeCount}'),
+                                  IconButton(
+                                    icon: Icon(
+                                      review.likedByCurrentUser
+                                          ? Icons.thumb_up
+                                          : Icons.thumb_up_outlined,
+                                      color: review.likedByCurrentUser
+                                          ? Colors.blue
+                                          : null,
+                                    ),
+                                    onPressed: () {
+                                      if (review.likedByCurrentUser) {
+                                        _unlikeReview(review);
+                                      } else {
+                                        _likeReview(review);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         );

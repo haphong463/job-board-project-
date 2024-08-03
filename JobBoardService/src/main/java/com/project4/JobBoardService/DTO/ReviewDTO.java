@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @Getter
 @Setter
@@ -26,5 +28,7 @@ public class ReviewDTO {
     @NotBlank(message = "Username is required") // Add this validation
     private String username; // Add this field
     private String imageUrl;
+    private int likeCount;
+    private boolean likedByCurrentUser;
 
 }

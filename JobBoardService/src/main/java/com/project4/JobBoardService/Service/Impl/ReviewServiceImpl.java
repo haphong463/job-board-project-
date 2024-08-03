@@ -1,5 +1,7 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.Entity.ReviewLike;
+import com.project4.JobBoardService.Repository.ReviewLikeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.project4.JobBoardService.DTO.CompanyDTO;
@@ -25,12 +27,14 @@ public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
+    private final ReviewLikeRepository reviewLikeRepository;
     @Autowired
-    public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService, UserRepository userRepository, ModelMapper modelMapper) {
+    public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService, UserRepository userRepository, ModelMapper modelMapper, ReviewLikeRepository reviewLikeRepository) {
         this.reviewRepository = reviewRepository;
         this.companyService = companyService;
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.reviewLikeRepository = reviewLikeRepository;
     }
 
     @Override
@@ -42,7 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public boolean addReview(Long companyId, ReviewDTO reviewDTO) {
+    public Review addReview(Long companyId, ReviewDTO reviewDTO) {
         Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
         Optional<User> userOptional = userRepository.findByUsername(reviewDTO.getUsername());
 
@@ -57,11 +61,11 @@ public class ReviewServiceImpl implements ReviewService {
             review.setCompany(company);
             review.setUser(user);
 
-            reviewRepository.save(review);
+            Review savedReview = reviewRepository.save(review);
 
-            return true;
+            return savedReview;
         }
-        return false;
+        return null; // Hoặc ném một exception nếu cần
     }
 
     @Override
@@ -80,57 +84,66 @@ public class ReviewServiceImpl implements ReviewService {
         return null;
     }
 
+
+
     @Override
-    public boolean updateReview(Long companyId, Long reviewId, ReviewDTO updatedReviewDTO) {
-        Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
-        Optional<User> userOptional = userRepository.findByUsername(updatedReviewDTO.getUsername());
+    public boolean likeReview(Long reviewId, String username) {
+        // In ra thông tin ban đầu
+        System.out.println("Processing likeReview for reviewId: " + reviewId + " and username: " + username);
 
-        if (companyOptional.isPresent() && userOptional.isPresent()) {
-            Company company = companyOptional.get();
+        Optional<Review> reviewOptional = reviewRepository.findById(reviewId);
+        Optional<User> userOptional = userRepository.findByUsername(username);
+
+        if (!reviewOptional.isPresent()) {
+            // Nếu không tìm thấy đánh giá, in thông báo lỗi
+            System.out.println("Review with ID " + reviewId + " not found.");
+            return false;
+        }
+
+        if (!userOptional.isPresent()) {
+            // Nếu không tìm thấy người dùng, in thông báo lỗi
+            System.out.println("User with username " + username + " not found.");
+            return false;
+        }
+
+        Review review = reviewOptional.get();
+        User user = userOptional.get();
+
+        // In thông tin đánh giá và người dùng
+        System.out.println("Found review: " + review);
+        System.out.println("Found user: " + user);
+
+        if (reviewLikeRepository.existsByReviewIdAndUserId(reviewId, user.getId())) {
+            // Nếu người dùng đã thích đánh giá rồi, in thông báo
+            System.out.println("User " + username + " has already liked review with ID " + reviewId + ".");
+            return false;
+        }
+
+        ReviewLike like = new ReviewLike();
+        like.setReview(review);
+        like.setUser(user);
+        reviewLikeRepository.save(like);
+
+        // In thông báo thành công
+        System.out.println("Successfully liked review with ID " + reviewId + " by user " + username + ".");
+        return true;
+    }
+    @Override
+    public boolean unlikeReview(Long reviewId, String username) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
+            Optional<ReviewLike> likeOptional = reviewLikeRepository.findByReviewIdAndUserId(reviewId, user.getId());
 
-            Review updatedReview = reviewRepository.findById(reviewId).orElse(null);
-
-            if (updatedReview != null) {
-                updatedReview.setTitle(updatedReviewDTO.getTitle());
-                updatedReview.setDescription(updatedReviewDTO.getDescription());
-                updatedReview.setRating(updatedReviewDTO.getRating());
-                updatedReview.setCompany(company);
-                updatedReview.setUser(user);
-
-                reviewRepository.save(updatedReview);
-
+            if (likeOptional.isPresent()) {
+                reviewLikeRepository.delete(likeOptional.get());
                 return true;
             }
         }
         return false;
     }
 
-    @Override
-    public boolean deleteReview(Long companyId, Long reviewId, String username) {
-        Optional<Company> companyOptional = companyService.getCompanyById(companyId)
-                .map(this::convertCompanyToEntity);
-        Optional<User> userOptional = userRepository.findByUsername(username);
-
-        if (companyOptional.isPresent() && userOptional.isPresent()) {
-            User user = userOptional.get();
-            Optional<Review> reviewOptional = reviewRepository.findById(reviewId);
-
-            if (reviewOptional.isPresent()) {
-                Review review = reviewOptional.get();
-                System.out.println("Review found: " + review);
-                if (review.getCompany().getCompanyId().equals(companyId) && review.getUser().equals(user)) {
-                    reviewRepository.delete(review);
-                    return true;
-                } else {
-                    System.out.println("Review does not belong to the user.");
-                }
-            } else {
-                System.out.println("Review not found.");
-            }
-        }
-        return false;
-    }
 
     @Override
     public boolean hasUserReviewedCompany(Long companyId, String username) {
@@ -145,7 +158,8 @@ public class ReviewServiceImpl implements ReviewService {
     private ReviewDTO convertToDTO(Review review) {
         ReviewDTO reviewDTO = modelMapper.map(review, ReviewDTO.class);
         reviewDTO.setUsername(review.getUser().getUsername());
-        reviewDTO.setImageUrl(review.getUser().getImageUrl()); // Ensure this is set from the User entity
+        reviewDTO.setImageUrl(review.getUser().getImageUrl());
+        reviewDTO.setLikeCount(review.getLikeCount());
         return reviewDTO;
     }
 
@@ -160,4 +174,8 @@ public class ReviewServiceImpl implements ReviewService {
         company.setType(companyDTO.getType());
         return company;
     }
+
+
+
+
 }

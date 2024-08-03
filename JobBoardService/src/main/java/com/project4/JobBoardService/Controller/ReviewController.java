@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.Controller;
 
 import com.project4.JobBoardService.DTO.ReviewDTO;
+import com.project4.JobBoardService.Entity.Review;
 import com.project4.JobBoardService.Service.CompanyService;
 import com.project4.JobBoardService.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +42,9 @@ public class ReviewController {
             return ResponseEntity.badRequest().body("User has already posted a review for this company.");
         }
 
-        boolean success = reviewService.addReview(companyId, reviewDTO);
-        if (success) {
-            return ResponseEntity.ok("Review added successfully!");
+        Review newReview = reviewService.addReview(companyId, reviewDTO);
+        if (newReview != null) {
+            return ResponseEntity.ok(newReview);
         } else {
             return ResponseEntity.badRequest().body("Failed to add review. Company or user not found.");
         }
@@ -63,20 +64,7 @@ public class ReviewController {
         }
     }
 
-    @PutMapping("/{reviewId}")
-    public ResponseEntity<?> updateReview(@PathVariable Long companyId,
-                                          @PathVariable Long reviewId,
-                                          @RequestBody ReviewDTO updatedReviewDTO,
-                                          @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
 
-        boolean success = reviewService.updateReview(companyId, reviewId, updatedReviewDTO);
-        if (success) {
-            return ResponseEntity.ok("Review updated successfully!");
-        } else {
-            return ResponseEntity.badRequest().body("Failed to update review. Company or user not found.");
-        }
-    }
 
     @GetMapping("/hasReviewed")
     public ResponseEntity<?> hasUserReviewedCompany(@PathVariable Long companyId,
@@ -85,4 +73,29 @@ public class ReviewController {
         boolean hasReviewed = reviewService.hasUserReviewedCompany(companyId, username);
         return ResponseEntity.ok(hasReviewed);
     }
+
+    @PostMapping("/{reviewId}/like")
+    public ResponseEntity<?> likeReview(@PathVariable Long reviewId,
+                                        @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        boolean success = reviewService.likeReview(reviewId, username);
+        if (success) {
+            return ResponseEntity.ok("Review liked successfully!");
+        } else {
+            return ResponseEntity.badRequest().body("Failed to like review. Review not found or already liked.");
+        }
+    }
+
+    @DeleteMapping("/{reviewId}/unlike")
+    public ResponseEntity<?> unlikeReview(@PathVariable Long reviewId,
+                                          @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        boolean success = reviewService.unlikeReview(reviewId, username);
+        if (success) {
+            return ResponseEntity.ok("Review unliked successfully!");
+        } else {
+            return ResponseEntity.badRequest().body("Failed to unlike review. Review not found or not liked.");
+        }
+    }
+
 }

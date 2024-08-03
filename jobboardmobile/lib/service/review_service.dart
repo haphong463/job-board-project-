@@ -5,6 +5,8 @@ import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/review_model.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 
+import '../dto/LikeResponse.dart';
+
 class ReviewService {
   final String baseUrl = '${Endpoint.baseUrl}/companies';
 
@@ -38,12 +40,6 @@ class ReviewService {
       final AuthService authService = AuthService();
       String? accessToken = await authService.getAccessToken();
 
-      // Check if the user has already reviewed the company
-      bool hasReviewed = await hasUserReviewedCompany(companyId);
-      if (hasReviewed) {
-        throw Exception('User has already posted a review for this company.');
-      }
-
       final response = await http.post(
         Uri.parse('$baseUrl/$companyId/reviews'),
         headers: <String, String>{
@@ -56,27 +52,13 @@ class ReviewService {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        // Try to parse response as JSON, fallback to plain text
-        try {
-          return Review.fromJson(jsonDecode(response.body));
-        } catch (e) {
-          // Handle plain text responses
-          if (response.body == 'Review added successfully!') {
-            return Review.fromJson({
-              'message': 'Review added successfully!',
-              'id': -1, // or any default value
-            });
-          } else {
-            throw Exception('Unexpected response format');
-          }
-        }
+        var responseBody = jsonDecode(response.body);
+        return Review.fromJson(responseBody);
       } else {
-        print('Failed to add review: ${response.statusCode} ${response.body}');
         throw Exception(
             'Failed to add review. Server responded with status code ${response.statusCode}');
       }
     } catch (e) {
-      print('Exception: $e');
       throw Exception('Failed to add review: $e');
     }
   }
@@ -149,6 +131,61 @@ class ReviewService {
       }
     } catch (e) {
       throw Exception('Failed to check if user has reviewed: $e');
+    }
+  }
+
+  Future<LikeResponse> likeReview(int companyId, int reviewId) async {
+    try {
+      final AuthService authService = AuthService();
+      String? accessToken = await authService.getAccessToken();
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/$companyId/reviews/$reviewId/like'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      // Log the status and response body
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return LikeResponse.fromJson(jsonDecode(response.body));
+      } else {
+        // Log the detailed response body for debugging
+        final responseBody = jsonDecode(response.body);
+        print('Detailed error response: $responseBody');
+        throw Exception(
+            'Failed to like review. Status code: ${response.statusCode}. Error: $responseBody');
+      }
+    } catch (e) {
+      throw Exception('Failed to like review: $e');
+    }
+  }
+
+  Future<LikeResponse> unlikeReview(int companyId, int reviewId) async {
+    try {
+      final AuthService authService = AuthService();
+      String? accessToken = await authService.getAccessToken();
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/$companyId/reviews/$reviewId/unlike'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return LikeResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception(
+            'Failed to unlike review. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to unlike review: $e');
     }
   }
 }
