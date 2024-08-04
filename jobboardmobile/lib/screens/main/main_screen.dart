@@ -71,6 +71,15 @@ class _MainScreenState extends State<MainScreen> {
     } catch (e) {}
   }
 
+  void _navigateToProfile() async {
+    final result = await Navigator.pushNamed(context, '/myprofile');
+    if (result == true) {
+      // Profile was updated, refresh user details
+      _fetchUserDetails();
+      setState(() {}); // Trigger a rebuild of the UI
+    }
+  }
+
   void _logout() async {
     await _authService.logout();
     Navigator.pushReplacementNamed(context, '/login');
@@ -147,6 +156,7 @@ class _MainScreenState extends State<MainScreen> {
               color: ColorUtil.primaryColor,
             ),
           ),
+          _buildDrawerItem(Icons.note_add, 'My Profile', _navigateToProfile),
           _buildDrawerItem(Icons.business, 'Companies', () {
             Navigator.push(
               context,
