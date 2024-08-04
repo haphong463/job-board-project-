@@ -61,13 +61,13 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       final reviews = await _reviewService.getAllReviews(widget.companyId);
       List<Review> updatedReviews = [];
       for (var review in reviews) {
-        bool isLiked = await LikeStorage.getLikeStatus(review.id!);
+        bool isLiked = _username != null
+            ? await LikeStorage.getLikeStatus(review.id!, _username!)
+            : false;
         updatedReviews.add(review.copyWith(likedByCurrentUser: isLiked));
       }
       setState(() {
         _reviews = updatedReviews;
-        _hasReviewed =
-            updatedReviews.any((review) => review.username == _username);
       });
     } catch (e) {
       print('Failed to load reviews: $e');
@@ -161,7 +161,9 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       LikeResponse response =
           await _reviewService.likeReview(widget.companyId, review.id!);
       if (response.success) {
-        await LikeStorage.saveLikeStatus(review.id!, true);
+        if (_username != null) {
+          await LikeStorage.saveLikeStatus(review.id!, _username!, true);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(response.message), backgroundColor: Colors.green),
@@ -201,7 +203,9 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       final response =
           await _reviewService.unlikeReview(widget.companyId, review.id!);
       if (response.success) {
-        await LikeStorage.saveLikeStatus(review.id!, false);
+        if (_username != null) {
+          await LikeStorage.saveLikeStatus(review.id!, _username!, false);
+        }
       } else {
         setState(() {
           review.likeCount++;
@@ -240,6 +244,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                   decoration: InputDecoration(
                     labelText: 'Title',
                     border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.title),
                   ),
                 ),
                 SizedBox(height: 16),
@@ -248,11 +253,14 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                   decoration: InputDecoration(
                     labelText: 'Description',
                     border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.description),
                   ),
                   maxLines: 3,
                 ),
                 SizedBox(height: 16),
-                Text('Rating:', style: TextStyle(fontSize: 16)),
+                Text('Rating:',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 RatingBar.builder(
                   initialRating: _rating,
                   minRating: 1,
@@ -300,90 +308,137 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Company Reviews'),
+        backgroundColor: Colors.blue,
+        elevation: 0,
       ),
+      backgroundColor: Colors.grey[100],
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Reviews:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Reviews',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Expanded(
               child: _reviews.isEmpty
-                  ? Center(child: Text('No reviews available'))
-                  : ListView.builder(
-                      itemCount: _reviews.length,
-                      itemBuilder: (context, index) {
-                        final review = _reviews[index];
-                        String modifiedImageUrl = review.imageUrl.isNotEmpty
-                            ? review.imageUrl.replaceAll(
-                                'http://localhost:8080', Endpoint.imageUrl)
-                            : 'https://bootdey.com/img/Content/avatar/avatar6.png';
+                  ? Center(
+                      child: Text(
+                        'No reviews available',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                    )
+                  : _buildReviewsList(),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: _hasReviewed
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _showReviewDialog,
+              icon: Icon(Icons.rate_review),
+              label: Text('Add Review'),
+              backgroundColor: Colors.blue,
+            ),
+    );
+  }
 
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(modifiedImageUrl),
-                            backgroundColor: Colors.grey[300],
-                          ),
-                          title: Text(review.title),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('By: ${review.username}'),
-                              Text(
-                                  'Rating: ${review.rating.toStringAsFixed(1)}'),
-                              Text(review.description),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Likes: ${review.likeCount}'),
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.thumb_up,
-                                          color: review.likedByCurrentUser
-                                              ? Colors.blue
-                                              : Colors.grey,
-                                        ),
-                                        onPressed: () {
-                                          if (!review.likedByCurrentUser) {
-                                            _likeReview(review);
-                                          }
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.thumb_down,
-                                          color: !review.likedByCurrentUser
-                                              ? Colors.red
-                                              : Colors.grey,
-                                        ),
-                                        onPressed: () {
-                                          if (review.likedByCurrentUser) {
-                                            _unlikeReview(review);
-                                          }
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
+  Widget _buildReviewsList() {
+    return ListView.separated(
+      itemCount: _reviews.length,
+      separatorBuilder: (context, index) => Divider(),
+      itemBuilder: (context, index) {
+        final review = _reviews[index];
+        return _buildReviewCard(review);
+      },
+    );
+  }
+
+  Widget _buildReviewCard(Review review) {
+    String modifiedImageUrl = review.imageUrl.isNotEmpty
+        ? review.imageUrl.replaceAll('http://localhost:8080', Endpoint.imageUrl)
+        : 'https://bootdey.com/img/Content/avatar/avatar6.png';
+
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(modifiedImageUrl),
+                  radius: 24,
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        review.username,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      Text(
+                        review.title,
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Text(
+              review.description,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                RatingBarIndicator(
+                  rating: review.rating,
+                  itemBuilder: (context, index) => Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  itemCount: 5,
+                  itemSize: 20.0,
+                  direction: Axis.horizontal,
+                ),
+                Row(
+                  children: [
+                    Text(
+                      review.likeCount.toString(),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(
+                        review.likedByCurrentUser
+                            ? Icons.thumb_up
+                            : Icons.thumb_up_alt_outlined,
+                        color: review.likedByCurrentUser ? Colors.blue : null,
+                      ),
+                      onPressed: () {
+                        review.likedByCurrentUser
+                            ? _unlikeReview(review)
+                            : _likeReview(review);
                       },
                     ),
+                  ],
+                ),
+              ],
             ),
-            if (!_hasReviewed)
-              ElevatedButton(
-                onPressed: _showReviewDialog,
-                child: Text('Add Review'),
-              ),
           ],
         ),
       ),

@@ -70,19 +70,4 @@ class Company {
       'membershipRequired': membershipRequired,
     };
   }
-
-  Company.empty()
-      : companyId = 0,
-        companyName = '',
-        logo = '',
-        websiteLink = '',
-        description = '',
-        location = '',
-        keySkills = '',
-        type = '',
-        companySize = '',
-        country = '',
-        countryCode = '',
-        workingDays = '',
-        membershipRequired = false;
 }
