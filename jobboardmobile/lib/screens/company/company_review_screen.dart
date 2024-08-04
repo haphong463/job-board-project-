@@ -4,8 +4,10 @@ import 'package:jobboardmobile/models/review_model.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/review_service.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
+import 'dart:math';
 
 import '../../dto/LikeResponse.dart';
+import '../../dto/LikeStorage.dart';
 
 class CompanyReviewScreen extends StatefulWidget {
   final int companyId;
@@ -33,6 +35,12 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
     _fetchUserInfo();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchReviews();
+  }
+
   Future<void> _fetchUserInfo() async {
     try {
       final username = await _authService.getUsername();
@@ -51,9 +59,15 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   Future<void> _fetchReviews() async {
     try {
       final reviews = await _reviewService.getAllReviews(widget.companyId);
+      List<Review> updatedReviews = [];
+      for (var review in reviews) {
+        bool isLiked = await LikeStorage.getLikeStatus(review.id!);
+        updatedReviews.add(review.copyWith(likedByCurrentUser: isLiked));
+      }
       setState(() {
-        _reviews = reviews;
-        _hasReviewed = reviews.any((review) => review.username == _username);
+        _reviews = updatedReviews;
+        _hasReviewed =
+            updatedReviews.any((review) => review.username == _username);
       });
     } catch (e) {
       print('Failed to load reviews: $e');
@@ -138,95 +152,147 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   }
 
   Future<void> _likeReview(Review review) async {
-    if (review.id == null) {
-      print('Review ID is null');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cannot like review: Review ID is missing'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    setState(() {
+      review.likeCount++;
+      review.likedByCurrentUser = true;
+    });
 
     try {
       LikeResponse response =
           await _reviewService.likeReview(widget.companyId, review.id!);
       if (response.success) {
-        setState(() {
-          review.likeCount++;
-          review.likedByCurrentUser = true;
-        });
+        await LikeStorage.saveLikeStatus(review.id!, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
+              content: Text(response.message), backgroundColor: Colors.green),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to like review: ${response.message}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      print('Failed to like review: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to like review: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _unlikeReview(Review review) async {
-    if (review.id == null) {
-      print('Review ID is null');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cannot unlike review: Review ID is missing'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    try {
-      LikeResponse response =
-          await _reviewService.unlikeReview(widget.companyId, review.id!);
-      if (response.success) {
         setState(() {
           review.likeCount--;
           review.likedByCurrentUser = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to unlike review: ${response.message}'),
-            backgroundColor: Colors.red,
-          ),
+              content: Text('Failed to like review: ${response.message}'),
+              backgroundColor: Colors.red),
         );
       }
     } catch (e) {
-      print('Failed to unlike review: $e');
+      setState(() {
+        review.likeCount--;
+        review.likedByCurrentUser = false;
+      });
+      print('Failed to like review: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to unlike review: $e'),
-          backgroundColor: Colors.red,
-        ),
+            content: Text('Failed to like review: $e'),
+            backgroundColor: Colors.red),
       );
     }
+  }
+
+  Future<void> _unlikeReview(Review review) async {
+    setState(() {
+      review.likeCount = max(0, review.likeCount - 1);
+      review.likedByCurrentUser = false;
+    });
+
+    try {
+      final response =
+          await _reviewService.unlikeReview(widget.companyId, review.id!);
+      if (response.success) {
+        await LikeStorage.saveLikeStatus(review.id!, false);
+      } else {
+        setState(() {
+          review.likeCount++;
+          review.likedByCurrentUser = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to unlike: ${response.message}')),
+        );
+      }
+    } catch (e) {
+      print('Error unliking review: $e');
+      setState(() {
+        review.likeCount++;
+        review.likedByCurrentUser = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error unliking review. Please try again.')),
+      );
+    }
+  }
+
+  void _showReviewDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title:
+              Text('Add Review', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+                SizedBox(height: 16),
+                Text('Rating:', style: TextStyle(fontSize: 16)),
+                RatingBar.builder(
+                  initialRating: _rating,
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                  itemBuilder: (context, _) => Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  onRatingUpdate: (rating) {
+                    setState(() {
+                      _rating = rating;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _addReview();
+              },
+              child: Text('Submit'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -293,7 +359,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                                       IconButton(
                                         icon: Icon(
                                           Icons.thumb_down,
-                                          color: review.likedByCurrentUser
+                                          color: !review.likedByCurrentUser
                                               ? Colors.red
                                               : Colors.grey,
                                         ),
@@ -314,59 +380,10 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                     ),
             ),
             if (!_hasReviewed)
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Add your review:',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        labelText: 'Title',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 8),
-                    RatingBar.builder(
-                      initialRating: _rating,
-                      minRating: 1,
-                      direction: Axis.horizontal,
-                      allowHalfRating: true,
-                      itemCount: 5,
-                      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => Icon(
-                        Icons.star,
-                        color: Colors.amber,
-                      ),
-                      onRatingUpdate: (rating) {
-                        setState(() {
-                          _rating = rating;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _addReview,
-                      child: Text('Submit Review'),
-                    ),
-                  ],
-                ),
-              )
+              ElevatedButton(
+                onPressed: _showReviewDialog,
+                child: Text('Add Review'),
+              ),
           ],
         ),
       ),

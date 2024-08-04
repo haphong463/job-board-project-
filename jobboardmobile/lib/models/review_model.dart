@@ -52,4 +52,19 @@ class Review {
       'likedByCurrentUser': likedByCurrentUser,
     };
   }
+
+  Review copyWith({bool? likedByCurrentUser}) {
+    return Review(
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      rating: this.rating,
+      company: this.company,
+      user: this.user,
+      username: this.username,
+      imageUrl: this.imageUrl,
+      likeCount: this.likeCount,
+      likedByCurrentUser: likedByCurrentUser ?? this.likedByCurrentUser,
+    );
+  }
 }
