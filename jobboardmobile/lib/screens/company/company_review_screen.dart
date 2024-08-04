@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:jobboardmobile/dto/LikeResponse.dart';
-import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/models/review_model.dart';
+import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/review_service.dart';
+import 'package:jobboardmobile/constant/endpoint.dart';
 
-import '../../constant/endpoint.dart';
-import '../../models/company_model.dart';
-import '../../models/user_model.dart';
+import '../../dto/LikeResponse.dart';
 
 class CompanyReviewScreen extends StatefulWidget {
   final int companyId;
@@ -99,12 +97,12 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
 
     try {
       final review = Review(
-        id: 0, // ID sẽ được gán bởi backend
+        id: 0,
         title: _titleController.text,
         description: _descriptionController.text,
         rating: _rating,
-        company: Company.empty(),
-        user: User.empty(),
+        company: '',
+        user: '',
         username: _username!,
         imageUrl: '',
         likeCount: 0,
@@ -119,7 +117,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
         _descriptionController.clear();
         _rating = 0.0;
         _hasReviewed = true;
-        _reviews.add(savedReview); // Thêm đánh giá đã lưu vào danh sách
+        _reviews.add(savedReview);
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -140,27 +138,42 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   }
 
   Future<void> _likeReview(Review review) async {
-    print('Review ID to like: ${review.id}');
+    if (review.id == null) {
+      print('Review ID is null');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot like review: Review ID is missing'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     try {
-      final LikeResponse likeResponse =
-          await _reviewService.likeReview(widget.companyId, review.id);
-      if (likeResponse.success) {
+      LikeResponse response =
+          await _reviewService.likeReview(widget.companyId, review.id!);
+      if (response.success) {
         setState(() {
           review.likeCount++;
           review.likedByCurrentUser = true;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(likeResponse.message),
+            content: Text(response.message),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
         );
       } else {
-        throw Exception(likeResponse.message);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to like review: ${response.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
+      print('Failed to like review: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to like review: $e'),
@@ -171,9 +184,20 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   }
 
   Future<void> _unlikeReview(Review review) async {
+    if (review.id == null) {
+      print('Review ID is null');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot unlike review: Review ID is missing'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     try {
-      final response =
-          await _reviewService.unlikeReview(widget.companyId, review.id);
+      LikeResponse response =
+          await _reviewService.unlikeReview(widget.companyId, review.id!);
       if (response.success) {
         setState(() {
           review.likeCount--;
@@ -187,9 +211,15 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
           ),
         );
       } else {
-        throw Exception(response.message);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to unlike review: ${response.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
+      print('Failed to unlike review: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to unlike review: $e'),
@@ -222,7 +252,6 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                       itemCount: _reviews.length,
                       itemBuilder: (context, index) {
                         final review = _reviews[index];
-                        // Replace 'http://localhost:8080' with the actual endpoint URL
                         String modifiedImageUrl = review.imageUrl.isNotEmpty
                             ? review.imageUrl.replaceAll(
                                 'http://localhost:8080', Endpoint.imageUrl)
@@ -246,22 +275,35 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('Likes: ${review.likeCount}'),
-                                  IconButton(
-                                    icon: Icon(
-                                      review.likedByCurrentUser
-                                          ? Icons.thumb_up
-                                          : Icons.thumb_up_outlined,
-                                      color: review.likedByCurrentUser
-                                          ? Colors.blue
-                                          : null,
-                                    ),
-                                    onPressed: () {
-                                      if (review.likedByCurrentUser) {
-                                        _unlikeReview(review);
-                                      } else {
-                                        _likeReview(review);
-                                      }
-                                    },
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.thumb_up,
+                                          color: review.likedByCurrentUser
+                                              ? Colors.blue
+                                              : Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          if (!review.likedByCurrentUser) {
+                                            _likeReview(review);
+                                          }
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.thumb_down,
+                                          color: review.likedByCurrentUser
+                                              ? Colors.red
+                                              : Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          if (review.likedByCurrentUser) {
+                                            _unlikeReview(review);
+                                          }
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

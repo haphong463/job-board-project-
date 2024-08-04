@@ -46,7 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review addReview(Long companyId, ReviewDTO reviewDTO) {
+    public ReviewDTO addReview(Long companyId, ReviewDTO reviewDTO) {
         Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
         Optional<User> userOptional = userRepository.findByUsername(reviewDTO.getUsername());
 
@@ -63,9 +63,9 @@ public class ReviewServiceImpl implements ReviewService {
 
             Review savedReview = reviewRepository.save(review);
 
-            return savedReview;
+            return convertToDTO(savedReview); // Return the DTO
         }
-        return null; // Hoặc ném một exception nếu cần
+        return null; // Or throw an exception if needed
     }
 
     @Override
@@ -87,47 +87,28 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     @Override
-    public boolean likeReview(Long reviewId, String username) {
-        // In ra thông tin ban đầu
-        System.out.println("Processing likeReview for reviewId: " + reviewId + " and username: " + username);
-
+    public boolean likeReview(Long companyId, Long reviewId, String username) {
         Optional<Review> reviewOptional = reviewRepository.findById(reviewId);
         Optional<User> userOptional = userRepository.findByUsername(username);
 
-        if (!reviewOptional.isPresent()) {
-            // Nếu không tìm thấy đánh giá, in thông báo lỗi
-            System.out.println("Review with ID " + reviewId + " not found.");
-            return false;
+        if (reviewOptional.isPresent() && userOptional.isPresent()) {
+            Review review = reviewOptional.get();
+            User user = userOptional.get();
+
+            if (reviewLikeRepository.existsByReviewIdAndUserId(reviewId, user.getId())) {
+                return false; // User already liked the review
+            }
+
+            ReviewLike like = new ReviewLike();
+            like.setReview(review);
+            like.setUser(user);
+            reviewLikeRepository.save(like);
+
+            return true;
         }
-
-        if (!userOptional.isPresent()) {
-            // Nếu không tìm thấy người dùng, in thông báo lỗi
-            System.out.println("User with username " + username + " not found.");
-            return false;
-        }
-
-        Review review = reviewOptional.get();
-        User user = userOptional.get();
-
-        // In thông tin đánh giá và người dùng
-        System.out.println("Found review: " + review);
-        System.out.println("Found user: " + user);
-
-        if (reviewLikeRepository.existsByReviewIdAndUserId(reviewId, user.getId())) {
-            // Nếu người dùng đã thích đánh giá rồi, in thông báo
-            System.out.println("User " + username + " has already liked review with ID " + reviewId + ".");
-            return false;
-        }
-
-        ReviewLike like = new ReviewLike();
-        like.setReview(review);
-        like.setUser(user);
-        reviewLikeRepository.save(like);
-
-        // In thông báo thành công
-        System.out.println("Successfully liked review with ID " + reviewId + " by user " + username + ".");
-        return true;
+        return false;
     }
+
     @Override
     public boolean unlikeReview(Long reviewId, String username) {
         Optional<User> userOptional = userRepository.findByUsername(username);
@@ -157,6 +138,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
     private ReviewDTO convertToDTO(Review review) {
         ReviewDTO reviewDTO = modelMapper.map(review, ReviewDTO.class);
+        reviewDTO.setId(review.getId());
         reviewDTO.setUsername(review.getUser().getUsername());
         reviewDTO.setImageUrl(review.getUser().getImageUrl());
         reviewDTO.setLikeCount(review.getLikeCount());

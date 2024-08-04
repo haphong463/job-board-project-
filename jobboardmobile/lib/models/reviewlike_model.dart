@@ -1,7 +1,7 @@
 class ReviewLike {
-  final int id;
-  final int reviewId;
-  final int userId;
+  int id;
+  int reviewId;
+  int userId;
 
   ReviewLike({
     required this.id,
@@ -12,16 +12,16 @@ class ReviewLike {
   factory ReviewLike.fromJson(Map<String, dynamic> json) {
     return ReviewLike(
       id: json['id'],
-      reviewId: json['review_id'],
-      userId: json['user_id'],
+      reviewId: json['reviewId'],
+      userId: json['userId'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'review_id': reviewId,
-      'user_id': userId,
+      'reviewId': reviewId,
+      'userId': userId,
     };
   }
 }

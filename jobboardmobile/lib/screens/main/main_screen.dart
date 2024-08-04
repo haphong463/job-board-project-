@@ -31,7 +31,6 @@ class _MainScreenState extends State<MainScreen> {
   final CompanyService _companyService = CompanyService();
   final JobService _jobService = JobService();
 
-
   final storage = const FlutterSecureStorage();
   String? firstName;
   String? lastName;
@@ -41,7 +40,6 @@ class _MainScreenState extends State<MainScreen> {
   List<Job> _jobs = [];
   Map<int, Company> _companyMap = <int, Company>{};
 
-
   @override
   void initState() {
     super.initState();
@@ -49,8 +47,6 @@ class _MainScreenState extends State<MainScreen> {
     _fetchUserDetails();
     _fetchCompaniesAndJobs();
   }
-
-  
 
   void _fetchUserDetails() async {
     firstName = await _authService.getFirstName();
@@ -390,7 +386,8 @@ class RecentlyAddedCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => JobDetailsScreen(job: job, company: company),
+            builder: (context) =>
+                JobDetailsScreen(job: job, company: company, isHtml: false),
           ),
         );
       },

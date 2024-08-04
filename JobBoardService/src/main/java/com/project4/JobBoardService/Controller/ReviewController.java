@@ -30,7 +30,6 @@ public class ReviewController {
         List<ReviewDTO> reviews = reviewService.getAllReviews(companyId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
-
     @PostMapping
     public ResponseEntity<?> addReview(@PathVariable Long companyId,
                                        @RequestBody ReviewDTO reviewDTO,
@@ -42,7 +41,7 @@ public class ReviewController {
             return ResponseEntity.badRequest().body("User has already posted a review for this company.");
         }
 
-        Review newReview = reviewService.addReview(companyId, reviewDTO);
+        ReviewDTO newReview = reviewService.addReview(companyId, reviewDTO); // Return DTO
         if (newReview != null) {
             return ResponseEntity.ok(newReview);
         } else {
@@ -75,10 +74,13 @@ public class ReviewController {
     }
 
     @PostMapping("/{reviewId}/like")
-    public ResponseEntity<?> likeReview(@PathVariable Long reviewId,
+    public ResponseEntity<?> likeReview(@PathVariable Long companyId, @PathVariable Long reviewId,
                                         @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        boolean success = reviewService.likeReview(reviewId, username);
+        System.out.println("Processing likeReview for reviewId: " + reviewId + " and username: " + username);
+        System.out.println("Company ID: " + companyId); // Log the company ID
+
+        boolean success = reviewService.likeReview(companyId, reviewId, username);
         if (success) {
             return ResponseEntity.ok("Review liked successfully!");
         } else {

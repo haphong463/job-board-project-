@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewDTO {
+    private Long id;
+
     @NotBlank(message = "Title is required")
     private String title;
 

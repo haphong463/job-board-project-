@@ -19,9 +19,9 @@ public interface ReviewService {
 
 
     List<ReviewDTO> getAllReviews(Long companyId);
-    Review addReview(Long companyId, ReviewDTO reviewDTO);
+    ReviewDTO addReview(Long companyId, ReviewDTO reviewDTO);
     ReviewDTO getReview(Long companyId, Long reviewId, String username);
     boolean hasUserReviewedCompany(Long companyId, String username);
-    boolean likeReview(Long reviewId, String username);
+    boolean likeReview(Long companyId,Long reviewId, String username);
     boolean unlikeReview(Long reviewId, String username);
 }

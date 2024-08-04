@@ -12,13 +12,16 @@ class ReviewService {
 
   final String defaultImageUrl =
       'https://bootdey.com/img/Content/avatar/avatar6.png';
-
   Future<List<Review>> getAllReviews(int companyId) async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/$companyId/reviews'));
 
+      print('Raw response: ${response.body}'); // Add this line
+
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
+
+        print('Decoded JSON: $jsonResponse'); // Add this line
 
         if (jsonResponse == null || jsonResponse is! List) {
           throw Exception('Invalid JSON format');
@@ -60,31 +63,6 @@ class ReviewService {
       }
     } catch (e) {
       throw Exception('Failed to add review: $e');
-    }
-  }
-
-  Future<Review> updateReview(
-      int companyId, int reviewId, Review review) async {
-    try {
-      final AuthService authService = AuthService();
-      String? accessToken = await authService.getAccessToken();
-
-      final response = await http.put(
-        Uri.parse('$baseUrl/$companyId/reviews/$reviewId'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $accessToken'
-        },
-        body: jsonEncode(review.toJson()), // Sử dụng toJson()
-      );
-
-      if (response.statusCode == 200) {
-        return Review.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Failed to update review');
-      }
-    } catch (e) {
-      throw Exception('Failed to update review: $e');
     }
   }
 
@@ -147,20 +125,21 @@ class ReviewService {
         },
       );
 
-      // Log the status and response body
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('Like review response: ${response.body}');
 
       if (response.statusCode == 200) {
-        return LikeResponse.fromJson(jsonDecode(response.body));
+        if (response.headers['content-type']?.contains('application/json') ??
+            false) {
+          return LikeResponse.fromJson(jsonDecode(response.body));
+        } else {
+          return LikeResponse(success: true, message: response.body);
+        }
       } else {
-        // Log the detailed response body for debugging
-        final responseBody = jsonDecode(response.body);
-        print('Detailed error response: $responseBody');
         throw Exception(
-            'Failed to like review. Status code: ${response.statusCode}. Error: $responseBody');
+            'Failed to like review. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      print('Exception: $e');
       throw Exception('Failed to like review: $e');
     }
   }
@@ -178,13 +157,21 @@ class ReviewService {
         },
       );
 
+      print('Unlike review response: ${response.body}');
+
       if (response.statusCode == 200) {
-        return LikeResponse.fromJson(jsonDecode(response.body));
+        if (response.headers['content-type']?.contains('application/json') ??
+            false) {
+          return LikeResponse.fromJson(jsonDecode(response.body));
+        } else {
+          return LikeResponse(success: true, message: response.body);
+        }
       } else {
         throw Exception(
             'Failed to unlike review. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      print('Exception: $e');
       throw Exception('Failed to unlike review: $e');
     }
   }
