@@ -27,7 +27,8 @@ class AuthService {
       await storage.write(key: 'firstName', value: decodedToken['firstName']);
       await storage.write(key: 'lastName', value: decodedToken['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
-      await storage.write(key: 'username', value: jsonResponse['username']);
+      await storage.write(
+          key: 'username', value: jsonResponse['username']); // Save username
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
       saveUserId(jsonResponse['id'].toString());
     } else {
@@ -304,5 +305,17 @@ class AuthService {
 
   Future<String?> getUsername() async {
     return await storage.read(key: 'username');
+  }
+
+  Future<void> saveFirstName(String firstName) async {
+    await storage.write(key: 'firstName', value: firstName);
+  }
+
+  Future<void> saveLastName(String lastName) async {
+    await storage.write(key: 'lastName', value: lastName);
+  }
+
+  Future<void> saveImageUrl(String imageUrl) async {
+    await storage.write(key: 'imageUrl', value: imageUrl);
   }
 }
