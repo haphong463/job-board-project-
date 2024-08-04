@@ -66,6 +66,9 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
             : false;
         updatedReviews.add(review.copyWith(likedByCurrentUser: isLiked));
       }
+      // Sort reviews by like count in descending order
+      updatedReviews.sort((a, b) => b.likeCount.compareTo(a.likeCount));
+
       setState(() {
         _reviews = updatedReviews;
       });

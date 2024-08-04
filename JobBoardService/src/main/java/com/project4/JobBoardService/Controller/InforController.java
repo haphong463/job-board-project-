@@ -44,7 +44,7 @@ public class InforController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_EMPLOYER')")
     public ResponseEntity<?> updateUser1(@PathVariable Long id,
-                                         @ModelAttribute InforUserDTO userDTO, @RequestParam("imageFile") @Nullable MultipartFile file,
+                                         @ModelAttribute InforUserDTO inforUserDTO, @RequestParam("imageFile") @Nullable MultipartFile file,
                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             String authToken = token.replace("Bearer ", "");
@@ -56,10 +56,10 @@ public class InforController {
                 return ResponseEntity.notFound().build();
             }
 
-            User user = modelMapper.map(userDTO, User.class);
+            User user = modelMapper.map(inforUserDTO, User.class);
             User result = inforService.updateUser1(id, user, file);
 
-            UserDTO resultDTO = modelMapper.map(result, UserDTO.class);
+            InforUserDTO resultDTO = modelMapper.map(result, InforUserDTO.class);
             return ResponseEntity.ok(resultDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
