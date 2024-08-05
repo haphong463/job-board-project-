@@ -213,3 +213,10 @@
 .scroll-button-down {
   bottom: 10px;
 }
+
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none; 
+}
