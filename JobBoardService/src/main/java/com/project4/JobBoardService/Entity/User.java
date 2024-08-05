@@ -21,7 +21,7 @@ import java.util.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User   {
+public class User extends AbstractEntity  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,6 +41,10 @@ public class User   {
     @NotBlank
     @Size(max = 120)
     private String password;
+
+    private String numberphone;
+
+    private String facebook;
 
 
     private String resetToken;

@@ -113,4 +113,11 @@ public class JobController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PutMapping("/{jobId}/hide")
+    public ResponseEntity<Void> hideJob(@PathVariable Long jobId) {
+        jobService.hideJob(jobId);
+        return ResponseEntity.ok().build();
+    }
+
 }

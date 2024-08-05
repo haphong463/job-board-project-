@@ -1,12 +1,10 @@
 package com.project4.JobBoardService.DTO;
 
-import com.project4.JobBoardService.Entity.Company;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,8 +27,11 @@ public class JobDTO {
     private String qualification;
     private String benefit;
     private int slot;
+
+    private Boolean isHidden;
     private LocalDateTime createdAt;
     private LocalDateTime expired;
+    private String expire;
     private Integer profileApproved = 0;
     private Boolean isSuperHot;
     private List<Long> categoryIds;

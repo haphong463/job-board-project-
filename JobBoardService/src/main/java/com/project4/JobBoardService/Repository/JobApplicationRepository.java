@@ -27,10 +27,20 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     @Query("SELECT COUNT(j) FROM JobApplication j WHERE j.company.id = :companyId AND j.approved = true")
     long countApprovedApplicationsByCompanyId(@Param("companyId") Long companyId);
 
+
+    @Query("SELECT COUNT(ja) FROM JobApplication ja WHERE ja.job.id = :jobId")
+    long countApprovedApplicationsByJobId(@Param("jobId") Long jobId);
+
     @Modifying
     @Transactional
     @Query("UPDATE JobApplication ja SET ja.isNew = false WHERE ja.id = :applicationId")
     void markAsRead(@Param("applicationId") Long applicationId);
+
+    List<JobApplication> findByUserId(Long userId);
+
+
+    boolean existsByUserIdAndJobId(Long userId, Long jobId);
+
 
 
 }

@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Service.Impl;
 
+import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
@@ -154,6 +155,8 @@ public class JobServiceImpl   implements JobService {
             existingJob.setPosition(Position.MANAGER);
             existingJob.setExperience(jobDTO.getExperience());
             existingJob.setSlot(jobDTO.getSlot());
+            existingJob.setIsHidden(jobDTO.getIsHidden());
+            existingJob.setExpire(jobDTO.getExpire());
 
             existingJob.setBenefit(jobDTO.getBenefit());
             existingJob.setQualification(jobDTO.getQualification());
@@ -195,8 +198,11 @@ public class JobServiceImpl   implements JobService {
             job.setCompany(company);
         }
 
+
         job.setCategories(categories);
         job.setQualification(jobDTO.getQualification());
+        job.setIsHidden(jobDTO.getIsHidden());
+        job.setExpire(jobDTO.getExpire());
         job.setCreatedAt(jobDTO.getCreatedAt());
         LocalDateTime createdAt = jobDTO.getCreatedAt() != null ? jobDTO.getCreatedAt() : LocalDateTime.now();
         job.setExpired(createdAt.plusDays(7));
@@ -208,6 +214,23 @@ public class JobServiceImpl   implements JobService {
     public void deleteJob(Long jobId) {
         jobRepository.deleteById(jobId);
     }
+
+    @Override
+    public void hideJob(long jobId) {
+        Job job = null;
+        try {
+            job = jobRepository.findById(jobId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+        } catch (ResourceNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Toggle the isHidden state
+        job.setIsHidden(!job.getIsHidden());
+
+        jobRepository.save(job);
+    }
+
 
 
 
@@ -233,14 +256,19 @@ public class JobServiceImpl   implements JobService {
         dto.setPosition(String.valueOf(Position.SENIOR));
         dto.setExperience(job.getExperience());
         dto.setSlot(job.getSlot());
+        dto.setIsHidden(job.getIsHidden());
+        dto.setIsSuperHot(job.isSuperHot());
         dto.setQualification(job.getQualification());
         dto.setCreatedAt(job.getCreatedAt());
+        dto.setExpire(job.getExpire());
         List<Long> categoryIds = job.getCategories().stream().map(Category::getCategoryId).collect(Collectors.toList());
         dto.setCategoryIds(categoryIds);
         dto.setUserId(job.getUser().getId());
         dto.setExpired(job.getExpired());
         return dto;
     }
+
+
     private Category convertCategoryToEntity(CategoryDTO categoryDTO) {
         Category category = new Category();
         category.setCategoryId(categoryDTO.getCategoryId());
@@ -269,6 +297,7 @@ public class JobServiceImpl   implements JobService {
         job.setQualification(jobDTO.getQualification());
         job.setCreatedAt(jobDTO.getCreatedAt());
         job.setExpired(jobDTO.getExpired());
+        job.setExpire(jobDTO.getExpire());
 
         // Set other fields as needed
         return job;

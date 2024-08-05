@@ -109,6 +109,10 @@ public class JobApplicationService {
         return jobApplicationRepository.countApprovedApplicationsByCompanyId(companyId);
     }
 
+    public long getcvJob(Long jobId) {
+        return jobApplicationRepository.countApprovedApplicationsByJobId(jobId);
+    }
+
 
     public void approveJobApplication(Long jobApplicationId) {
         Optional<JobApplication> jobApplicationOpt = jobApplicationRepository.findById(jobApplicationId);

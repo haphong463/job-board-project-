@@ -14,6 +14,8 @@ public interface JobService {
     boolean createJob(Long userId, JobDTO jobDTO);
     JobDTO updateJob(Long jobId, JobDTO jobDTO);
     void deleteJob(Long jobId);
+
+    void hideJob(long jobId);
     // Add this method
     Optional<JobDTO> findJobById(Long jobId);
 

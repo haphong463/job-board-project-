@@ -83,6 +83,11 @@ public class Job {
     @JoinColumn(name = "user", nullable = false)
     private User user;
 
+
+    @Builder.Default
+    @Column(name = "is_hidden", nullable = false)
+    private Boolean isHidden = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -45,6 +45,12 @@ public class JobApplicationController {
         return ResponseEntity.ok(count);
     }
 
+    @GetMapping("/count-approved-by-job/{jobId}")
+    public ResponseEntity<Long> getApprovedCvCountByJobId(@PathVariable Long jobId) {
+        long count = jobApplicationService.getcvJob(jobId);
+        return ResponseEntity.ok(count);
+    }
+
 
     @GetMapping("/newCount")
     public ResponseEntity<Long> getcvCount(@RequestParam Long companyId) {
