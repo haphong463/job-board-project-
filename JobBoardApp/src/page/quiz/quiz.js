@@ -11,7 +11,7 @@ import {
   Button,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-import "./Quiz.css"; 
+import "./Quiz.css";
 
 export const Quiz = () => {
   const [categories, setCategories] = useState([]);
@@ -270,14 +270,13 @@ export const Quiz = () => {
             <div className="row">
               <div className="col-md-12 text-center">
                 <h3 className="mb-4 font-weight-bold">
-                  Hệ thống đánh giá chất lượng kỹ năng ứng viên
+                  Candidate Skill Assessment System
                 </h3>
-                <p className="lead" >
-                  Khẳng định năng lực nghề nghiệp thông qua các bài thi đa dạng
-                  chủ đề, từ đa dạng các ngành nghề. Hệ thống sẽ xác thực kỹ
-                  năng dựa vào CV, từ đó giúp CV của bạn trở nên nổi bật trong
-                  mắt nhà tuyển dụng và nâng cao tỷ lệ trúng tuyển tại các công
-                  ty bạn mong muốn.
+                <p className="lead">
+                  Assert your career skills through diverse tests from various
+                  fields. The system will verify skills based on your CV, making
+                  your CV stand out to employers and increasing your chances of
+                  getting hired at your desired companies.
                 </p>
               </div>
             </div>
@@ -286,7 +285,7 @@ export const Quiz = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Nhập từ khóa tìm kiếm"
+                  placeholder="Enter search keyword"
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
@@ -297,9 +296,9 @@ export const Quiz = () => {
                   value={selectedStatus}
                   onChange={handleStatusChange}
                 >
-                  <option value="all">Tất cả</option>
-                  <option value="completed">Đã hoàn thành</option>
-                  <option value="incomplete">Chưa hoàn thành</option>
+                  <option value="all">All</option>
+                  <option value="completed">Completed</option>
+                  <option value="incomplete">Incomplete</option>
                 </select>
               </div>
               <div className="col-md-4">
@@ -308,7 +307,7 @@ export const Quiz = () => {
                   value={filterCategory}
                   onChange={handleCategoryChange}
                 >
-                  <option value="all">Tất cả danh mục</option>
+                  <option value="all">All categories</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.name}>
                       {category.name}
@@ -322,49 +321,47 @@ export const Quiz = () => {
                 <div key={category.id} className="col-md-12">
                   <h4 className="category-title">{category.name}</h4>
                   <div className="row">
-                  {category.quizzes.map((quiz) => (
-                    <div className="col-lg-4 mb-4" key={quiz.id}>
-                      <div className="quiz-card border rounded p-4">
-                        <img
-                          src={quiz.imageUrl}
-                          alt={quiz.title}
-                          className="img-fluid mb-3"
-                        />
-                      <h3>{quiz.title}</h3>
-                        <div className="quiz-details">
-                        <div className="quiz-categories" >
-                        {category.name|| "No Category"}
+                    {category.quizzes.map((quiz) => (
+                      <div className="col-lg-4 mb-4" key={quiz.id}>
+                        <div className="quiz-card border rounded p-4">
+                          <img
+                            src={quiz.imageUrl}
+                            alt={quiz.title}
+                            className="img-fluid mb-3"
+                          />
+                          <h3>{quiz.title}</h3>
+                          <div className="quiz-details">
+                            <div className="quiz-categories">
+                              {category.name || "No Category"}
                             </div>
-                          
-                              <div className="quiz-candidates">
-                              {quiz.numberOfUsers || 0}+ Số lần ứng viên làm bài thi
+                            <div className="quiz-candidates">
+                              {quiz.numberOfUsers || 0}+ Number of candidates
+                              taking this quiz
                             </div>
-                         
+                          </div>
+                          {completedQuizzes.includes(quiz.id) ? (
+                            <div className="quizsuccess">
+                              You have completed this quiz.
+                            </div>
+                          ) : attemptsInfo[quiz.id]?.locked ? (
+                            <div className="quizwarning">
+                              You have no attempts left. Please come back on{" "}
+                              {calculateNextAttemptDate(
+                                attemptsInfo[quiz.id]?.timeLeft
+                              )}
+                              .
+                            </div>
+                          ) : (
+                            <button
+                              className="btn btn-success"
+                              onClick={() => handleStartQuiz(quiz)}
+                            >
+                              Take Quiz
+                            </button>
+                          )}
                         </div>
-                        {completedQuizzes.includes(quiz.id) ? (
-                          <div className="quizsuccess">
-                            Bạn đã hoàn thành quiz này.
-                          </div>
-                        ) : attemptsInfo[quiz.id]?.locked ? (
-                          <div className="quizwarning">
-                            Bạn đã hết lượt làm bài thi này. Hãy quay trở lại vào
-                            ngày{" "}
-                            {calculateNextAttemptDate(
-                              attemptsInfo[quiz.id]?.timeLeft
-                            )}
-                            .
-                          </div>
-                        ) : (
-                          <button
-                            className="btn btn-success"
-                            onClick={() => handleStartQuiz(quiz)}
-                          >
-                            Làm bài thi
-                          </button>
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    ))}
                   </div>
                 </div>
               ))}
@@ -378,7 +375,7 @@ export const Quiz = () => {
           classes={{ paper: "custom-dialog" }}
         >
           <DialogTitle className="custom-dialog-title">
-            Thông tin bài đánh giá
+            Quiz Information
           </DialogTitle>
           <DialogContent className="custom-dialog-content">
             {selectedQuiz && (
@@ -387,38 +384,39 @@ export const Quiz = () => {
                   <div className="quiz-info">
                     <div className="info-item">
                       <i className="fas fa-book"></i>
-                      <p>Chủ đề: {selectedQuiz.title}</p>
+                      <p>Topic: {selectedQuiz.title}</p>
                     </div>
                     <div className="info-item">
                       <i className="fas fa-question"></i>
-                      <p>10 câu hỏi nhiều đáp án</p>
+                      <p>10 multiple-choice questions</p>
                     </div>
                     <div className="info-item">
                       <i className="fas fa-clock"></i>
-                      <p>10 phút làm bài</p>
+                      <p>10 minutes</p>
                     </div>
                     <div className="info-item">
                       <i className="fas fa-users"></i>
                       <p>
-                        {selectedQuiz.numberOfUsers || 0}+ Số lần ứng viên đã
-                        làm bài đánh giá này
+                        {selectedQuiz.numberOfUsers || 0}+ Number of candidates
+                        who have taken this quiz
                       </p>
                     </div>
                   </div>
                   <p className="top-info">
-        * Bạn sẽ nhận được chứng nhận đánh giá hoàn thành khi nằm trong Top 20% ứng viên
-      </p>
+                    * You will receive a completion certificate if you are in
+                    the top 20% of candidates
+                  </p>
                   <div className="custom-dialog-description">
-                  <p>Mô tả bài đánh giá</p>
-                  <p>{selectedQuiz.description}</p>
-                    <p><strong>
-                      Số lần làm bài còn lại:       </strong>  {" "}
+                    <p>Quiz Description</p>
+                    <p>{selectedQuiz.description}</p>
+                    <p>
+                      <strong>Remaining Attempts: </strong>
                       {attemptsInfo[selectedQuiz.id]?.attemptsLeft}
-                       </p> 
+                    </p>
                     {attemptsInfo[selectedQuiz.id]?.timeLeft > 0 && (
                       <p>
-                        Thời gian chờ: {attemptsInfo[selectedQuiz.id]?.timeLeft}{" "}
-                        giây
+                        Wait Time: {attemptsInfo[selectedQuiz.id]?.timeLeft}{" "}
+                        seconds
                       </p>
                     )}
                   </div>
@@ -432,7 +430,7 @@ export const Quiz = () => {
               className="custom-dialog-button"
               color="primary"
             >
-              Đóng
+              Close
             </Button>
             <Button
               onClick={() => {
@@ -443,7 +441,7 @@ export const Quiz = () => {
               color="primary"
               autoFocus
             >
-              Bắt đầu làm bài
+              Start Quiz
             </Button>
           </DialogActions>
         </Dialog>

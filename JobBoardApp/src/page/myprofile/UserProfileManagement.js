@@ -47,9 +47,11 @@ const UserProfileManagement = () => {
   }, [dispatch, user?.id]);
 
   const handleManageCVClick = () => {
+    navigate('/list-template');
+  };
+  const handleMyprofile = () => {
     navigate('/myprofile');
   };
-
   const handleAddCertificate = () => {
     dispatch(createCertificateThunk({ ...newCertificate, userId: user.id }));
     setNewCertificate({ name: '', organization: '', issueDate: '', link: '', description: '' });
@@ -142,7 +144,7 @@ const UserProfileManagement = () => {
                     active={activeTab === 'manage'}
                     onClick={() => {
                       setActiveTab('manage');
-                      handleManageCVClick(); // Trigger navigation
+                      handleMyprofile(); // Trigger navigation
                     }}
                   >
                     Manage Profile
