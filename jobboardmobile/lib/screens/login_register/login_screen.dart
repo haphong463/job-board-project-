@@ -14,48 +14,43 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String _usernameError = '';
-  String _passwordError = '';
+  String _errorMessage = '';
 
   void _login() async {
     setState(() {
-      _usernameError = '';
-      _passwordError = '';
+      _errorMessage = '';
     });
 
     if (_usernameController.text.isEmpty) {
       setState(() {
-        _usernameError = 'Username is required';
+        _errorMessage = 'Username is required';
       });
+      return;
     }
     if (_passwordController.text.isEmpty) {
       setState(() {
-        _passwordError = 'Password is required';
+        _errorMessage = 'Password is required';
       });
+      return;
     }
 
-    if (_usernameController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      try {
-        final response = await _authService.login(
-          _usernameController.text,
-          _passwordController.text,
-        );
+    try {
+      final response = await _authService.login(
+        _usernameController.text,
+        _passwordController.text,
+      );
 
-        if (response.statusCode == 200) {
-          Navigator.pushReplacementNamed(context, '/main');
-        } else {
-          setState(() {
-            _usernameError = 'Invalid username or password';
-            _passwordError = 'Invalid username or password';
-          });
-        }
-      } catch (e) {
+      if (response.statusCode == 200) {
+        Navigator.pushReplacementNamed(context, '/main');
+      } else {
         setState(() {
-          _usernameError = 'Error occurred: $e';
-          _passwordError = 'Error occurred: $e';
+          _errorMessage = 'Incorrect username or password';
         });
       }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Incorrect username or password';
+      });
     }
   }
 
@@ -71,14 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacementNamed(context, '/main');
       } else {
         setState(() {
-          _usernameError = 'Invalid username or password';
-          _passwordError = 'Invalid username or password';
+          _errorMessage = 'Incorrect username or password';
         });
       }
     } catch (e) {
       setState(() {
-        _usernameError = 'Error occurred: $e';
-        _passwordError = 'Error occurred: $e';
+        _errorMessage = 'Error occurred: $e';
       });
     }
   }
@@ -109,39 +102,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.all(23),
                 child: Column(
                   children: <Widget>[
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Text(
+                          _errorMessage,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
                       child: Container(
                         color: const Color(0xfff5f5f5),
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _usernameController,
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'SFUIDisplay',
-                              ),
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Username',
-                                prefixIcon: Icon(Icons.person_outline),
-                                labelStyle: TextStyle(
-                                  fontSize: 15,
-                                ),
-                              ),
+                        child: TextFormField(
+                          controller: _usernameController,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'SFUIDisplay',
+                          ),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Username',
+                            prefixIcon: Icon(Icons.person_outline),
+                            labelStyle: TextStyle(
+                              fontSize: 15,
                             ),
-                            if (_usernameError.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 5),
-                                child: Text(
-                                  _usernameError,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -149,36 +138,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
                       child: Container(
                         color: const Color(0xfff5f5f5),
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _passwordController,
-                              obscureText: true,
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'SFUIDisplay',
-                              ),
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock_outline),
-                                labelStyle: TextStyle(
-                                  fontSize: 15,
-                                ),
-                              ),
+                        child: TextFormField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'SFUIDisplay',
+                          ),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock_outline),
+                            labelStyle: TextStyle(
+                              fontSize: 15,
                             ),
-                            if (_passwordError.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 5),
-                                child: Text(
-                                  _passwordError,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

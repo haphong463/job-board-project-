@@ -16,6 +16,7 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
     );
+
     if (response.statusCode == 200) {
       print(response.body);
       var jsonResponse = jsonDecode(response.body);
@@ -31,8 +32,11 @@ class AuthService {
           key: 'username', value: jsonResponse['username']); // Save username
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
       saveUserId(jsonResponse['id'].toString());
+    } else if (response.statusCode == 401) {
+      // Handle invalid credentials
+      throw Exception('Incorrect username or password');
     } else {
-      throw Exception('Failed to login');
+      throw Exception('The username and password you entered are incorrect.');
     }
 
     return response;
@@ -80,8 +84,13 @@ class AuthService {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return response;
+      } else if (response.statusCode == 400) {
+        // Handle duplicate username or email
+        final responseBody = jsonDecode(response.body);
+        final errorMessage = responseBody['message'] ?? 'Registration failed';
+        throw Exception(errorMessage);
       } else {
         throw Exception('Failed to register: ${response.statusCode}');
       }
