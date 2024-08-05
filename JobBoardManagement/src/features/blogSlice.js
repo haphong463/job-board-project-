@@ -5,9 +5,8 @@ import {
   updateBlog,
   getAllBlogsByQuery,
   getAllHashtag,
+  updateIsArchiveStatus,
 } from "../services/blog_service";
-
-
 
 export const getHashTags = createAsyncThunk(
   "blogs/hashtags",
@@ -21,16 +20,35 @@ export const getHashTags = createAsyncThunk(
   }
 );
 
+export const updateIsArchiveStatusThunk = createAsyncThunk(
+  "/blogs/archive",
+  async ({ selectedIds, status }, { rejectWithValue }) => {
+    try {
+      const data = await updateIsArchiveStatus({
+        selectedIds,
+        status,
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const searchBlogs = createAsyncThunk(
   "blogs/searchBlogs",
-  async ({ query, page, size, type, visibility }, { rejectWithValue }) => {
+  async (
+    { query, page, size, type, visibility, archive },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await getAllBlogsByQuery(
         query,
         type,
         visibility,
         page,
-        size
+        size,
+        archive
       );
       return response;
     } catch (error) {
@@ -113,7 +131,9 @@ const blogsSlice = createSlice({
           item.id === action.payload.id ? action.payload : item
         );
       })
-
+      .addCase(updateIsArchiveStatusThunk.fulfilled, (state, action) => {
+        console.log(action.payload);
+      })
       .addCase(getHashTags.fulfilled, (state, action) => {
         state.hashTags = action.payload;
       });

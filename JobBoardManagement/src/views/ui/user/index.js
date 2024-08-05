@@ -1,35 +1,36 @@
-import React, { useCallback, useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  deleteUserThunk,
-  getAllPermissionThunk,
-  getUserThunk,
-  updateUserStatusThunk,
-} from "../../../features/userSlice";
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  CardTitle,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
   Input,
-  InputGroup,
-  InputGroupText,
+  Card,
+  Badge,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
   Spinner,
 } from "reactstrap";
-import NProgress from "nprogress";
-import "nprogress/nprogress.css";
-import debounce from "lodash.debounce";
-import { ModeratorForm } from "./ModeratorForm";
-import PermissionForm from "./PermissionForm"; // Import the new component
-import "./style.css";
+import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
+import NProgress from "nprogress";
+import debounce from "lodash/debounce";
+import {
+  getUserThunk,
+  deleteUserThunk,
+  updateUserStatusThunk,
+  getAllPermissionThunk,
+  updateIsOnlineThunk,
+} from "../../../features/userSlice";
 import showToast from "../../../utils/functions/showToast";
+import { ModeratorForm } from "./ModeratorForm";
+import PermissionForm from "./PermissionForm";
+import {
+  connectWebSocket,
+  disconnectWebSocket,
+} from "../../../services/websocket_service";
+import { hasPermission } from "../../../utils/functions/hasPermission";
+import { Navigate } from "react-router-dom";
+import moment from "moment/moment";
 
 const UserList = () => {
   const dispatch = useDispatch();
@@ -38,8 +39,6 @@ const UserList = () => {
   const permissions = useSelector((state) => state.user.permissions);
   const totalPages = useSelector((state) => state.user.totalPages);
   const status = useSelector((state) => state.user.status);
-  const error = useSelector((state) => state.user.error);
-
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [dropdownOpen, setDropdownOpen] = useState({});
@@ -75,7 +74,6 @@ const UserList = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Gọi action để xóa user
         dispatch(deleteUserThunk(userId)).then((res) => {
           if (res.meta.requestStatus === "fulfilled") {
             Swal.fire("Deleted!", "The user has been deleted.", "success");
@@ -110,7 +108,7 @@ const UserList = () => {
 
   const columns = [
     {
-      name: "Image",
+      name: "",
       cell: (row) => (
         <div>
           <img
@@ -120,33 +118,43 @@ const UserList = () => {
                 : "https://i.pinimg.com/736x/0d/64/98/0d64989794b1a4c9d89bff571d3d5842.jpg"
             }
             className="rounded-circle"
+            style={{
+              objectFit: "contain",
+            }}
             width={50}
             height={50}
             alt={row.id}
           />
         </div>
       ),
+      width: "70px",
     },
     {
       name: "Username",
       selector: (row) => row.username,
       sortable: true,
       cell: (row) => <div>{row.username}</div>,
-      width: "300px",
+      width: "200px",
     },
     {
-      name: "Email",
-      selector: (row) => row.email,
+      name: "Full Name",
+      selector: (row) => row.username,
       sortable: true,
-      cell: (row) => <div>{row.email}</div>,
-      width: "300px",
+      cell: (row) => (
+        <div>
+          {row.firstName} {row.lastName}
+        </div>
+      ),
+      width: "200px",
     },
+
     {
       name: "Gender",
       cell: (row) => row.gender ?? "Not updated",
     },
+
     {
-      name: "Status",
+      name: "Active",
       selector: (row) => row.isEnabled,
       sortable: true,
       cell: (row) => (
@@ -159,6 +167,12 @@ const UserList = () => {
       name: "Role",
       cell: (row) => row.roles.map((item) => mapRoleName(item.name)).join(", "),
       width: "200px",
+    },
+    {
+      name: "Last updated at",
+      cell: (row) =>
+        moment(row.updatedAt).format("ddd, MMMM, DD, YYYY, h:mm A"),
+      width: "300px",
     },
     {
       name: "Actions",
@@ -181,7 +195,6 @@ const UserList = () => {
         const isUser = row.roles.some((role) => role.name === "ROLE_USER");
         const isCurrentUser = row.username === user.sub;
 
-        // Check if the current user is a Moderator and is attempting to manage another Moderator
         const isAttemptingToManageOtherModerator =
           isModerator && isUserModerator;
 
@@ -273,9 +286,11 @@ const UserList = () => {
     },
   };
 
-  // if (status === "rejected") {
-  //   return <Alert color="danger">Error: {error}</Alert>;
-  // }
+  if (
+    hasPermission(user.role, user.permission, "ROLE_MODERATOR", "MANAGE_USER")
+  ) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <Card>
@@ -313,11 +328,14 @@ const UserList = () => {
         paginationPerPage={pageSize}
         paginationRowsPerPageOptions={[5, 10, 15]}
         paginationServer
-        paginationTotalRows={totalPages * pageSize} // Assuming 10 items per page
+        paginationTotalRows={totalPages * pageSize}
         onChangePage={(page) => setCurrentPage(page - 1)}
         onChangeRowsPerPage={handlePerRowsChange}
         progressComponent={<Spinner />}
         progressPending={status === "loading"}
+        fixedHeader
+        fixedHeaderScrollHeight="60vh"
+        highlightOnHover
       />
       {selectedUser && (
         <PermissionForm

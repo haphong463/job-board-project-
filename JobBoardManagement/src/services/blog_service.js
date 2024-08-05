@@ -6,9 +6,16 @@ const HEADERS_FORM_DATA = {
   "Content-Type": "multipart/form-data",
 };
 
-export const getAllBlogsByQuery = async (query, type, visibility, page, size) =>
+export const getAllBlogsByQuery = async (
+  query,
+  type,
+  visibility,
+  page,
+  size,
+  archive
+) =>
   await axiosRequest.get(
-    `${URL}/search?query=${query}&type=${type}&page=${page}&size=${size}&visibility=${visibility}`
+    `${URL}/search?query=${query}&type=${type}&page=${page}&size=${size}&visibility=${visibility}&archive=${archive}`
   );
 
 export const createBlog = async (data) =>
@@ -26,6 +33,20 @@ export const updateBlog = async (data, id) =>
 
 export const getAllHashtag = async () =>
   await axiosRequest.get(`${URL}/hashtags`);
+
+export const updateIsArchiveStatus = async ({ selectedIds, status }) =>
+  await axiosRequest.put(
+    `${URL}/archive`,
+    {
+      blogIds: selectedIds,
+      isArchive: status,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
 export const getExcelData = () => {
   axiosRequest

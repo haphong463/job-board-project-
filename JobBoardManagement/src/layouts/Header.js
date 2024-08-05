@@ -93,11 +93,9 @@ const Header = ({ handleLogout }) => {
             <img
               src={userEdit?.imageUrl}
               alt="profile"
-              className="rounded-circle"
+              className="rounded-circle img-fluid"
               width="40"
-              style={{
-                objectFit: "contain",
-              }}
+              height="40"
             ></img>
           </DropdownToggle>
           <DropdownMenu>

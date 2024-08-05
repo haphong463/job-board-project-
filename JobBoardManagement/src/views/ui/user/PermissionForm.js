@@ -43,7 +43,7 @@ const PermissionForm = ({
         <ModalHeader toggle={toggle}>Assign Permissions</ModalHeader>
         <ModalBody>
           {listPermissions.map((item) => (
-            <FormGroup check>
+            <FormGroup key={item.id} check>
               <Label check>
                 <Input
                   type="checkbox"

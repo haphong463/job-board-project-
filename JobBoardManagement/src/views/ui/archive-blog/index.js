@@ -21,7 +21,7 @@ import {
   CardBody,
 } from "reactstrap";
 import { CSVLink } from "react-csv";
-import Form from "./FormBlog";
+import Form from "../blog/FormBlog";
 import { useDispatch, useSelector } from "react-redux";
 import {
   searchBlogs,
@@ -31,13 +31,13 @@ import {
 } from "../../../features/blogSlice";
 import debounce from "lodash.debounce";
 import { FaFileExcel } from "react-icons/fa";
-import "./style.css";
+import "../blog/style.css";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import Swal from "sweetalert2";
 import { Navigate, useNavigate } from "react-router-dom";
 import { getExcelData } from "../../../services/blog_service";
 import { hasPermission } from "../../../utils/functions/hasPermission";
-const isArchive = 0;
+const isArchive = 1;
 
 export function Blog(props) {
   const dispatch = useDispatch();
@@ -175,7 +175,7 @@ export function Blog(props) {
         dispatch(
           updateIsArchiveStatusThunk({
             selectedIds,
-            status: 1,
+            status: 0,
           })
         ).then((res) => {
           if (res.meta.requestStatus === "fulfilled") {
@@ -185,7 +185,7 @@ export function Blog(props) {
               "success"
             );
             setSelectedRows([]); // Clear selected rows
-            navigate("/jobportal/blog/archive");
+            navigate("/jobportal/blog");
           }
         });
       }
@@ -301,7 +301,7 @@ export function Blog(props) {
             Export CSV
           </Button>
           <Button color="warning" onClick={handleArchiveSelected}>
-            Archive Selected
+            Restore Selected
           </Button>
         </div>
       </div>

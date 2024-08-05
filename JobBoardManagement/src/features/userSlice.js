@@ -13,6 +13,10 @@ export const getUserThunk = createAsyncThunk(
     try {
       return await getAllUserAsync(query, role, page, size);
     } catch (error) {
+      const status = error.response.status;
+      if (status === 400) {
+        return rejectWithValue(error.response.data.message);
+      }
       return rejectWithValue(error.message);
     }
   }
@@ -92,7 +96,13 @@ const userSlice = createSlice({
     permissions: [],
   },
   name: "user",
-  reducers: {},
+  reducers: {
+    updateIsOnlineThunk: (state, action) => {
+      state.list = state.list.map((user) =>
+        user.id === action.payload.id ? action.payload : user
+      );
+    },
+  },
   extraReducers: (builder) =>
     builder
       .addCase(getUserThunk.pending, (state) => {
@@ -113,6 +123,7 @@ const userSlice = createSlice({
           user.id === action.payload.id ? action.payload : user
         );
       })
+
       .addCase(createModeratorThunk.fulfilled, (state, action) => {
         state.list.unshift(action.payload);
       })
@@ -129,4 +140,5 @@ const userSlice = createSlice({
       }),
 });
 
+export const { updateIsOnlineThunk } = userSlice.actions;
 export default userSlice.reducer;
