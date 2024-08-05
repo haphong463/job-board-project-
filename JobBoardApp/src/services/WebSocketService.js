@@ -25,9 +25,6 @@ export const connectWebSocket = (user) => {
           }
         }
       });
-    };
-
-    stompClient.onConnect = () => {
       stompClient.subscribe("/topic/deactivated", (message) => {
         if (message.body) {
           const res = JSON.parse(message.body);
