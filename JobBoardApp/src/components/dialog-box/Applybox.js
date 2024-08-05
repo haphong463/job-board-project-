@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axiosRequest from '../../configs/axiosConfig';
 import './applybox.css';
 
-const ApplyBox = ({ jobId, company, userId, onClose }) => {
+const ApplyBox = ({ jobId, company, userId,  }) => {
   const [name, setName] = useState('');
   const [cv, setCV] = useState(null);
   const [coverLetter, setCoverLetter] = useState('');
@@ -55,9 +55,8 @@ const ApplyBox = ({ jobId, company, userId, onClose }) => {
           
            
           setTimeout(() => {
-            onClose();  
             window.location.reload();  
-          }, 6000);  
+          }, 5000);  
         }
       } catch (error) {
         console.error('Error submitting application:', error);
@@ -70,7 +69,6 @@ const ApplyBox = ({ jobId, company, userId, onClose }) => {
   return (
     <div className="apply-box-overlay">
       <div className="apply-box">
-        <button className="close-button" onClick={onClose}>×</button>
         <h2>Apply for <i className='text-primary'>{company.title}</i></h2>
         {successMessage ? (
           <div className="alert alert-success mt-3" role="alert">

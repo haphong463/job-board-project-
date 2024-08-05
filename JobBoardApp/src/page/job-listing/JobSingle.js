@@ -66,9 +66,7 @@ export const JobSingle = () => {
       e.preventDefault();
       setShowApplyBox(true);
     };
-   const handleCloseApplyBox = () => {
-      setShowApplyBox(false);
-   };
+
 
   
 
@@ -303,7 +301,7 @@ export const JobSingle = () => {
 
 
 
-                           {showApplyBox && <ApplyBox company={jobData} jobId={jobId} userId={userId} onClose={handleCloseApplyBox} />}
+                           {showApplyBox && <ApplyBox company={jobData} jobId={jobId} userId={userId}  />}
 
 
                         </div>

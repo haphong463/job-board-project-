@@ -254,7 +254,7 @@
 
 
 .step.active + .step-indicator::after {
-  background-color: #89ba16b8;
+  background-color: #89ba16d3;
 }
 @media (max-width: 768px) {
   .step-indicator {
@@ -290,6 +290,7 @@
 }
 .text-indicator{
   font-weight: bolder;
+  color: white;
   font-family:Georgia, 'Times New Roman', Times, serif;
 }
 .text-effect-css-create {

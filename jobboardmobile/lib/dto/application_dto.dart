@@ -7,6 +7,7 @@ class ApplicationDTO {
   final int userId;
   final JobDTO jobDTO;
   final CompanyDTO companyDTO;
+  final bool approved; // Added field
 
   ApplicationDTO({
     required this.id,
@@ -14,6 +15,7 @@ class ApplicationDTO {
     required this.userId,
     required this.jobDTO,
     required this.companyDTO,
+    required this.approved, // Updated constructor
   });
 
   factory ApplicationDTO.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class ApplicationDTO {
       userId: json['userId'] ?? 0,
       jobDTO: JobDTO.fromJson(json['jobDTO'] ?? {}),
       companyDTO: CompanyDTO.fromJson(json['companyDTO'] ?? {}),
+      approved: json['approved'] ?? false, // Updated fromJson
     );
   }
 
@@ -33,6 +36,7 @@ class ApplicationDTO {
       'userId': userId,
       'jobDTO': jobDTO.toJson(),
       'companyDTO': companyDTO.toJson(),
+      'approved': approved, // Updated toJson
     };
   }
 }

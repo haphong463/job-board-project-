@@ -263,4 +263,5 @@ public class UserCvController {
 
         return ResponseEntity.ok().body("CV Update Success!");
     }
+
 }

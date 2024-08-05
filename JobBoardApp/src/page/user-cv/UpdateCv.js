@@ -13,6 +13,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -44,16 +45,227 @@ const UpdateCV = ({userId, cvId, onClose}) => {
       setCurrentSection(sections[currentIndex - 1]);
     }
   };
-
-  const handleInputChange = (e, index, field, section) => {
-    const { value } = e.target;
-    setCv(prevCv => ({
-      ...prevCv,
-      [section]: prevCv[section].map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
-    }));
+  const validateFields = (fields, validations) => {
+    const errors = {};
+    let isValid = true;
+  
+    for (const field in fields) {
+      if (validations[field]) {
+        const error = validations[field](fields[field]);
+        if (error) {
+          errors[field] = error;
+          isValid = false;
+        }
+      }
+    }
+  
+    return { isValid, errors };
   };
+  const validateCvTitle = (cvTitle) => {
+    if (!cvTitle || cvTitle.trim() === '') return 'CV Title cannot be empty.';
+    return '';
+  };
+  
+  const validateUserDetails = (userDetails) => {
+    const { fullName, email, phone, address, dob, summary } = userDetails;
+    const { isValid, errors } = validateFields(
+      { fullName, email, phone, address, dob, summary },
+      {
+        fullName: (value) => (!value || value.trim() === '') ? 'Full Name cannot be empty.' : '',
+        email: (value) => (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) ? 'Invalid email address.' : '',
+        phone: (value) => (!value || value.trim() === '') ? 'Phone cannot be empty.' : '',
+        address: (value) => (!value || value.trim() === '') ? 'Address cannot be empty.' : '',
+        dob: (value) => (!value) ? 'Date of Birth cannot be empty.' : '',
+        summary: (value) => (!value || value.trim() === '') ? 'Summary cannot be empty.' : ''
+      }
+    );
+    return { isValid, errors: { userDetails: errors } }; // Ensure the error format is consistent
+  };
+  
+  const validateEducation = (educations) => {
+    const errors = [];
+    let isValid = true;
+  
+    educations.forEach((education, index) => {
+      const { institution, degree, description, startDate, endDate } = education;
+      const entryErrors = {};
+  
+      if (!institution || institution.trim() === '') entryErrors.institution = 'Institution cannot be empty.';
+      if (!degree || degree.trim() === '') entryErrors.degree = 'Degree cannot be empty.';
+      if (!description || description.trim() === '') entryErrors.description = 'Description cannot be empty.';
+      if (!startDate) entryErrors.startDate = 'Start Date cannot be empty.';
+      if (!endDate) entryErrors.endDate = 'End Date cannot be empty.';
+  
+      if (Object.keys(entryErrors).length > 0) {
+        errors[index] = entryErrors;
+        isValid = false;
+      }
+    });
+  
+    return { isValid, errors };
+  };
+  
+  const validateExperiences = (experiences) => {
+    const errors = [];
+    let isValid = true;
+  
+    experiences.forEach((experience, index) => {
+      const { jobTitle, company, description, startDate, endDate } = experience;
+      const entryErrors = {};
+  
+      if (!jobTitle || jobTitle.trim() === '') entryErrors.jobTitle = 'Job Title cannot be empty.';
+      if (!company || company.trim() === '') entryErrors.company = 'Company cannot be empty.';
+      if (!description || description.trim() === '') entryErrors.description = 'Description cannot be empty.';
+      if (!startDate) entryErrors.startDate = 'Start Date cannot be empty.';
+      if (!endDate) entryErrors.endDate = 'End Date cannot be empty.';
+  
+      if (Object.keys(entryErrors).length > 0) {
+        errors[index] = entryErrors;
+        isValid = false;
+      }
+    });
+  
+    return { isValid, errors };
+  };
+  
+  const validateLanguages = (languages) => {
+    const errors = [];
+    let isValid = true;
+  
+    languages.forEach((language, index) => {
+      const { languageName, proficiency } = language;
+      const entryErrors = {};
+  
+      if (!languageName || languageName.trim() === '') entryErrors.languageName = 'Language Name cannot be empty.';
+      if (!proficiency || proficiency.trim() === '') entryErrors.proficiency = 'Proficiency cannot be empty.';
+  
+      if (Object.keys(entryErrors).length > 0) {
+        errors[index] = entryErrors;
+        isValid = false;
+      }
+    });
+  
+    return { isValid, errors };
+  };
+  
+  const validateProjects = (projects) => {
+    const errors = [];
+    let isValid = true;
+  
+    projects.forEach((project, index) => {
+      const { projectName, description, startDate, endDate } = project;
+      const entryErrors = {};
+  
+      if (!projectName || projectName.trim() === '') entryErrors.projectName = 'Project Name cannot be empty.';
+      if (!description || description.trim() === '') entryErrors.description = 'Description cannot be empty.';
+      if (!startDate) entryErrors.startDate = 'Start Date cannot be empty.';
+      if (!endDate) entryErrors.endDate = 'End Date cannot be empty.';
+  
+      if (Object.keys(entryErrors).length > 0) {
+        errors[index] = entryErrors;
+        isValid = false;
+      }
+    });
+  
+    return { isValid, errors };
+  };
+  
+  const validateSkills = (skills) => {
+    const errors = [];
+    let isValid = true;
+  
+    skills.forEach((skill, index) => {
+      const { skillName, proficiency } = skill;
+      const entryErrors = {};
+  
+      if (!skillName || skillName.trim() === '') entryErrors.skillName = 'Skill Name cannot be empty.';
+      if (!proficiency || proficiency.trim() === '') entryErrors.proficiency = 'Proficiency cannot be empty.';
+  
+      if (Object.keys(entryErrors).length > 0) {
+        errors[index] = entryErrors;
+        isValid = false;
+      }
+    });
+  
+    return { isValid, errors };
+  };
+  
+  const handleContinue = () => {
+    let isValid = true;
+    let errors = {};
+  
+    switch (currentSection) {
+      case 'cvTitle':
+        const cvTitleError = validateCvTitle(cv.cvTitle);
+        errors = { cvTitle: cvTitleError };
+        isValid = !cvTitleError;
+        break;
+      case 'userDetails':
+        const { isValid: userDetailsValid, errors: userDetailsErrors } = validateUserDetails(cv.userDetails[0] || {});
+        errors = userDetailsErrors;
+        isValid = userDetailsValid;
+        break;
+        case 'education':
+          const { isValid: educationValid, errors: educationErrors } = validateEducation(cv.userEducations);
+          errors.userEducations = educationErrors;
+          isValid = educationValid;
+          break;
+        case 'experiences':
+          const { isValid: experiencesValid, errors: experiencesErrors } = validateExperiences(cv.userExperiences);
+          errors.userExperiences = experiencesErrors;
+          isValid = experiencesValid;
+          break;
+          case 'languages':
+            const { isValid: languagesValid, errors: languagesErrors } = validateLanguages(cv.userLanguages);
+            errors.userLanguages = languagesErrors;
+            isValid = languagesValid;
+            break;
+          case 'projects':
+            const { isValid: projectsValid, errors: projectsErrors } = validateProjects(cv.userProjects);
+            errors.userProjects = projectsErrors;
+            isValid = projectsValid;
+            break;
+          case 'skills':
+            const { isValid: skillsValid, errors: skillsErrors } = validateSkills(cv.userSkills);
+            errors.userSkills = skillsErrors;
+            isValid = skillsValid;
+            break;
+      default:
+        break;
+    }
+  
+    if (isValid) {
+      setErrorMessage('');
+      setValidationErrors(errors);
+      const sections = ['cvTitle', 'userDetails', 'education', 'experiences', 'languages', 'projects', 'skills'];
+      const currentIndex = sections.indexOf(currentSection);
+      if (currentIndex < sections.length - 1) {
+        setCurrentSection(sections[currentIndex + 1]);
+      }
+    } else {
+      setValidationErrors(errors);
+    }
+  };
+      
+  const handleInputChange = (e, index, fieldName, section) => {
+    const value = e.target.value;
+  
+    setCv((prevCv) => {
+      const updatedSection = [...prevCv[section]];
+      updatedSection[index] = { ...updatedSection[index], [fieldName]: value };
+      return { ...prevCv, [section]: updatedSection };
+    });
+    
+    // Clear validation errors when user starts typing
+    setValidationErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      if (updatedErrors[section] && updatedErrors[section][index]) {
+        delete updatedErrors[section][index][fieldName];
+      }
+      return updatedErrors;
+    });
+  };
+  
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -121,12 +333,75 @@ const UpdateCV = ({userId, cvId, onClose}) => {
   };
   
   
-  const addNewEntry = (section) => {
-    setCv(prevCv => ({
-      ...prevCv,
-      [section]: [...prevCv[section], {}]
-    }));
+  const addNewEntry = (currentSection) => {
+    let isValid = true;
+    let errors = {};
+  
+    switch (currentSection) {
+      case 'cvTitle':
+        const cvTitleError = validateCvTitle(cv.cvTitle);
+        errors = { cvTitle: cvTitleError };
+        isValid = !cvTitleError;
+        break;
+      case 'userDetails':
+        const { isValid: userDetailsValid, errors: userDetailsErrors } = validateUserDetails(cv.userDetails[0] || {});
+        errors = userDetailsErrors;
+        isValid = userDetailsValid;
+        break;
+        case 'userEducations':
+          const { isValid: educationValid, errors: educationErrors } = validateEducation(cv.userEducations);
+          errors.userEducations = educationErrors;
+          isValid = educationValid;
+          break;
+        case 'userExperiences':
+          const { isValid: experiencesValid, errors: experiencesErrors } = validateExperiences(cv.userExperiences);
+          errors.userExperiences = experiencesErrors;
+          isValid = experiencesValid;
+          break;
+          case 'userLanguages':
+            const { isValid: languagesValid, errors: languagesErrors } = validateLanguages(cv.userLanguages);
+            errors.userLanguages = languagesErrors;
+            isValid = languagesValid;
+            break;
+          case 'userProjects':
+            const { isValid: projectsValid, errors: projectsErrors } = validateProjects(cv.userProjects);
+            errors.userProjects = projectsErrors;
+            isValid = projectsValid;
+            break;
+          case 'userSkills':
+            const { isValid: skillsValid, errors: skillsErrors } = validateSkills(cv.userSkills);
+            errors.userSkills = skillsErrors;
+            isValid = skillsValid;
+            break;
+      default:
+        break;
+    }
+    if (isValid) {
+      setErrorMessage('');
+      setValidationErrors(errors);
+      const sections = ['cvTitle', 'userDetails', 'education', 'experiences', 'languages', 'projects', 'skills'];
+      const currentIndex = sections.indexOf(currentSection);
+      if (currentIndex < sections.length - 1) {
+        setCv((prevCv) => ({
+          ...prevCv,
+          [currentSection]: [...prevCv[currentSection], {}]  // Add a new empty entry to the section
+        }));
+      }
+    } else {
+      setValidationErrors(errors);
+    }
+    // if (Object.keys(validationErrors).length === 0) {
+    //   // Add new entry if no validation errors
+    //   setCv((prevCv) => ({
+    //     ...prevCv,
+    //     [currentSection]: [...prevCv[currentSection], {}]  // Add a new empty entry to the section
+    //   }));
+    // } else {
+    //   // Set validation errors if any
+    //   setValidationErrors(validationErrors);
+    // }
   };
+  
 
   const removeEntry = (index, section) => {
     setCv(prevCv => ({
@@ -236,8 +511,9 @@ const UpdateCV = ({userId, cvId, onClose}) => {
           placeholder="CV Title"
           className="cv-input"
         />
+         {validationErrors.cvTitle && <div className="cv-error-message">{validationErrors.cvTitle}</div>}
       </div>
-      <button type="button" onClick={() => setCurrentSection('userDetails')} className="cv-continue-btn">Continue</button>
+      <button type="button" onClick={handleContinue} className="cv-continue-btn">Continue</button>
     </>
   );
 
@@ -245,47 +521,65 @@ const UpdateCV = ({userId, cvId, onClose}) => {
     <>
       <h2 className="cv-section-title">User Details</h2>
       <div className="cv-entry">
-        <input
-          type="text"
-          value={cv.userDetails[0]?.fullName || ''}
-          onChange={(e) => handleInputChange(e, 0, 'fullName', 'userDetails')}
-          placeholder="Full Name"
-          className="cv-input"
-        />
-        <input
-          type="text"
-          value={cv.userDetails[0]?.address || ''}
-          onChange={(e) => handleInputChange(e, 0, 'address', 'userDetails')}
-          placeholder="Address"
-          className="cv-input"
-        />
-        <input
-          type="date"
-          value={cv.userDetails[0]?.dob || ''}
-          onChange={(e) => handleInputChange(e, 0, 'dob', 'userDetails')}
-          className="cv-input"
-        />
-        <input
-          type="email"
-          value={cv.userDetails[0]?.email || ''}
-          onChange={(e) => handleInputChange(e, 0, 'email', 'userDetails')}
-          placeholder="Email"
-          className="cv-input"
-        />
-        <input
-          type="tel"
-          value={cv.userDetails[0]?.phone || ''}
-          onChange={(e) => handleInputChange(e, 0, 'phone', 'userDetails')}
-          placeholder="Phone"
-          className="cv-input"
-        />
-        <textarea
-          rows="5" cols="55"
-          value={cv.userDetails[0]?.summary || ''}
-          onChange={(e) => handleInputChange(e, 0, 'summary', 'userDetails')}
-          placeholder="Summary"
-          className="cv-input"
-        />
+ 
+          <input
+            type="text"
+            value={cv.userDetails[0]?.fullName || ''}
+            onChange={(e) => handleInputChange(e, 0, 'fullName', 'userDetails')}
+            placeholder="Full Name"
+            className="cv-input"
+          />
+          {validationErrors.userDetails?.fullName && <div className="cv-error-message">{validationErrors.userDetails.fullName}</div>}
+ 
+ 
+          <input
+            type="text"
+            value={cv.userDetails[0]?.address || ''}
+            onChange={(e) => handleInputChange(e, 0, 'address', 'userDetails')}
+            placeholder="Address"
+            className="cv-input"
+          />
+          {validationErrors.userDetails?.address && <div className="cv-error-message">{validationErrors.userDetails.address}</div>}
+ 
+          <input
+            type="date"
+            value={cv.userDetails[0]?.dob || ''}
+            onChange={(e) => handleInputChange(e, 0, 'dob', 'userDetails')}
+            className="cv-input"
+          />
+          {validationErrors.userDetails?.dob && <div className="cv-error-message">{validationErrors.userDetails.dob}</div>}
+ 
+          <input
+            type="email"
+            value={cv.userDetails[0]?.email || ''}
+            onChange={(e) => handleInputChange(e, 0, 'email', 'userDetails')}
+            placeholder="Email"
+            className="cv-input"
+          />
+          {validationErrors.userDetails?.email && <div className="cv-error-message">{validationErrors.userDetails.email}</div>}
+ 
+ 
+          <input
+            type="tel"
+            value={cv.userDetails[0]?.phone || ''}
+            onChange={(e) => handleInputChange(e, 0, 'phone', 'userDetails')}
+            placeholder="Phone"
+            className="cv-input"
+          />
+          {validationErrors.userDetails?.phone && <div className="cv-error-message">{validationErrors.userDetails.phone}</div>}
+ 
+  
+ 
+          <textarea
+            rows="5" cols="55"
+            value={cv.userDetails[0]?.summary || ''}
+            onChange={(e) => handleInputChange(e, 0, 'summary', 'userDetails')}
+            placeholder="Summary"
+            className="cv-input"
+          />
+          {validationErrors.userDetails?.summary && <div className="cv-error-message">{validationErrors.userDetails.summary}</div>}
+ 
+  
         <div className="cv-image-preview">
           {imagePreview ? (
             <img src={imagePreview} alt="Profile Preview" className="cv-preview-image" width={300} height={200} />
@@ -295,20 +589,21 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             <p>No image uploaded</p>
           )}
         </div>
+  
         <input
           type="file"
           onChange={handleFileChange}
           accept="image/*"
           className="cv-file-input"
         />
-
       </div>
       <div className="cv-button-group">
         <button type="button" onClick={goBack} className="cv-back-btn">Back</button>
-        <button type="button" onClick={() => setCurrentSection('education')} className="cv-continue-btn">Continue</button>
+        <button type="button" onClick={handleContinue} className="cv-continue-btn">Continue</button>
       </div>
     </>
   );
+  
 
   const renderEducation = () => (
     <>
@@ -322,6 +617,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Institution"
             className="cv-input"
           />
+          {validationErrors.userEducations?.[index]?.institution && <div className="cv-error-message">{validationErrors.userEducations[index].institution}</div>}
           <input
             type="text"
             value={education.degree || ''}
@@ -329,6 +625,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Degree"
             className="cv-input"
           />
+          {validationErrors.userEducations?.[index]?.degree && <div className="cv-error-message">{validationErrors.userEducations[index].degree}</div>}
           <textarea
             rows="5" cols="55"
             value={education.description || ''}
@@ -336,18 +633,21 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Description"
             className="cv-input"
           />
+          {validationErrors.userEducations?.[index]?.description && <div className="cv-error-message">{validationErrors.userEducations[index].description}</div>}
           <input
             type="date"
             value={education.startDate || ''}
             onChange={(e) => handleInputChange(e, index, 'startDate', 'userEducations')}
             className="cv-input"
           />
+          {validationErrors.userEducations?.[index]?.startDate && <div className="cv-error-message">{validationErrors.userEducations[index].startDate}</div>}
           <input
             type="date"
             value={education.endDate || ''}
             onChange={(e) => handleInputChange(e, index, 'endDate', 'userEducations')}
             className="cv-input"
           />
+          {validationErrors.userEducations?.[index]?.endDate && <div className="cv-error-message">{validationErrors.userEducations[index].endDate}</div>}
           <button type="button" onClick={() => removeEntry(index, 'userEducations')} className="cv-remove-btn">
             Remove
           </button>
@@ -358,11 +658,11 @@ const UpdateCV = ({userId, cvId, onClose}) => {
       </button>
       <div className="cv-button-group">
         <button type="button" onClick={goBack} className="cv-back-btn">Back</button>
-        <button type="button" onClick={() => setCurrentSection('experiences')} className="cv-continue-btn">Continue</button>
+        <button type="button" onClick={handleContinue} className="cv-continue-btn">Continue</button>
       </div>
     </>
   );
-
+  
   const renderExperiences = () => (
     <>
       <h2 className="cv-section-title">Experiences</h2>
@@ -375,6 +675,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Job Title"
             className="cv-input"
           />
+          {validationErrors.userExperiences?.[index]?.jobTitle && <div className="cv-error-message">{validationErrors.userExperiences[index].jobTitle}</div>}
           <input
             type="text"
             value={experience.company || ''}
@@ -382,6 +683,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Company"
             className="cv-input"
           />
+          {validationErrors.userExperiences?.[index]?.company && <div className="cv-error-message">{validationErrors.userExperiences[index].company}</div>}
           <textarea
             rows="5" cols="55"
             value={experience.description || ''}
@@ -389,18 +691,21 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Description"
             className="cv-input"
           />
+          {validationErrors.userExperiences?.[index]?.description && <div className="cv-error-message">{validationErrors.userExperiences[index].description}</div>}
           <input
             type="date"
             value={experience.startDate || ''}
             onChange={(e) => handleInputChange(e, index, 'startDate', 'userExperiences')}
             className="cv-input"
           />
+          {validationErrors.userExperiences?.[index]?.startDate && <div className="cv-error-message">{validationErrors.userExperiences[index].startDate}</div>}
           <input
             type="date"
             value={experience.endDate || ''}
             onChange={(e) => handleInputChange(e, index, 'endDate', 'userExperiences')}
             className="cv-input"
           />
+          {validationErrors.userExperiences?.[index]?.endDate && <div className="cv-error-message">{validationErrors.userExperiences[index].endDate}</div>}
           <button type="button" onClick={() => removeEntry(index, 'userExperiences')} className="cv-remove-btn">
             Remove
           </button>
@@ -411,11 +716,10 @@ const UpdateCV = ({userId, cvId, onClose}) => {
       </button>
       <div className="cv-button-group">
         <button type="button" onClick={goBack} className="cv-back-btn">Back</button>
-        <button type="button" onClick={() => setCurrentSection('languages')} className="cv-continue-btn">Continue</button>
+        <button type="button" onClick={handleContinue} className="cv-continue-btn">Continue</button>
       </div>
     </>
   );
-
   const renderLanguages = () => (
     <>
       <h2 className="cv-section-title">Languages</h2>
@@ -428,6 +732,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Language Name"
             className="cv-input"
           />
+          {validationErrors.userLanguages?.[index]?.languageName && <div className="cv-error-message">{validationErrors.userLanguages[index].languageName}</div>}
           <input
             type="text"
             value={language.proficiency || ''}
@@ -435,6 +740,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Proficiency"
             className="cv-input"
           />
+          {validationErrors.userLanguages?.[index]?.proficiency && <div className="cv-error-message">{validationErrors.userLanguages[index].proficiency}</div>}
           <button type="button" onClick={() => removeEntry(index, 'userLanguages')} className="cv-remove-btn">
             Remove
           </button>
@@ -445,11 +751,11 @@ const UpdateCV = ({userId, cvId, onClose}) => {
       </button>
       <div className="cv-button-group">
         <button type="button" onClick={goBack} className="cv-back-btn">Back</button>
-        <button type="button" onClick={() => setCurrentSection('projects')} className="cv-continue-btn">Continue</button>
+        <button type="button" onClick={handleContinue} className="cv-continue-btn">Continue</button>
       </div>
     </>
   );
-
+  
   const renderProjects = () => (
     <>
       <h2 className="cv-section-title">Projects</h2>
@@ -462,6 +768,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Project Name"
             className="cv-input"
           />
+          {validationErrors.userProjects?.[index]?.projectName && <div className="cv-error-message">{validationErrors.userProjects[index].projectName}</div>}
           <textarea
             rows="5" cols="55"
             value={project.description || ''}
@@ -469,18 +776,21 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Description"
             className="cv-input"
           />
+          {validationErrors.userProjects?.[index]?.description && <div className="cv-error-message">{validationErrors.userProjects[index].description}</div>}
           <input
             type="date"
             value={project.startDate || ''}
             onChange={(e) => handleInputChange(e, index, 'startDate', 'userProjects')}
             className="cv-input"
           />
+          {validationErrors.userProjects?.[index]?.startDate && <div className="cv-error-message">{validationErrors.userProjects[index].startDate}</div>}
           <input
             type="date"
             value={project.endDate || ''}
             onChange={(e) => handleInputChange(e, index, 'endDate', 'userProjects')}
             className="cv-input"
           />
+          {validationErrors.userProjects?.[index]?.endDate && <div className="cv-error-message">{validationErrors.userProjects[index].endDate}</div>}
           <button type="button" onClick={() => removeEntry(index, 'userProjects')} className="cv-remove-btn">
             Remove
           </button>
@@ -491,11 +801,11 @@ const UpdateCV = ({userId, cvId, onClose}) => {
       </button>
       <div className="cv-button-group">
         <button type="button" onClick={goBack} className="cv-back-btn">Back</button>
-        <button type="button" onClick={() => setCurrentSection('skills')} className="cv-continue-btn">Continue</button>
+        <button type="button" onClick={handleContinue} className="cv-continue-btn">Continue</button>
       </div>
     </>
   );
-
+  
   const renderSkills = () => (
     <>
       <h2 className="cv-section-title">Skills</h2>
@@ -508,6 +818,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Skill Name"
             className="cv-input"
           />
+          {validationErrors.userSkills?.[index]?.skillName && <div className="cv-error-message">{validationErrors.userSkills[index].skillName}</div>}
           <input
             type="text"
             value={skill.proficiency || ''}
@@ -515,6 +826,7 @@ const UpdateCV = ({userId, cvId, onClose}) => {
             placeholder="Proficiency"
             className="cv-input"
           />
+          {validationErrors.userSkills?.[index]?.proficiency && <div className="cv-error-message">{validationErrors.userSkills[index].proficiency}</div>}
           <button type="button" onClick={() => removeEntry(index, 'userSkills')} className="cv-remove-btn">
             Remove
           </button>
@@ -529,6 +841,8 @@ const UpdateCV = ({userId, cvId, onClose}) => {
       <button type="submit" className="cv-submit-btn">Update CV</button>
     </>
   );
+  
+  
 
   const renderSection = () => {
     switch (currentSection) {

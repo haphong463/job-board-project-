@@ -47,9 +47,9 @@
   border-bottom: none;
 }
 
-.cv-item p {
-  margin: 5px 0;
-  color: #333;
+.cv-item p,strong {
+  margin: 6px 0;
+  color: #333 !important;
 }
 
 .cv-item img {

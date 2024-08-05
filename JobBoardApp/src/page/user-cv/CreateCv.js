@@ -17,9 +17,6 @@ const CreateCV = () => {
     const [userProjects, setUserProjects] = useState([{ projectName: '', description: '', startDate: '', endDate: '' }]);
     const [userSkills, setUserSkills] = useState([{ skillName: '', proficiency: '' }]);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    // validation 
-    const [emailError, setEmailError] = useState('');
-
     const user = useSelector(state => state.auth.user)
     const [existingCVs, setExistingCVs] = useState([]);
     const [errors, setErrors] = useState({
@@ -31,6 +28,7 @@ const CreateCV = () => {
         userSkills: [],
         cvTitle: '',
     });
+
     useEffect(() => {
         const fetchExistingCVs = async () => {
             try {
@@ -42,7 +40,21 @@ const CreateCV = () => {
         };
 
         fetchExistingCVs();
-    }, [user.id]);
+        const fetchUserDetails = async () => {
+            try {
+                const response = await axiosRequest.get(`/user/${user.sub}`);
+                setUserDetails([{
+                    ...userDetails[0],
+                    fullName: response.firstName || '',
+                    email: response.email || ''
+                }]);
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+            }
+        };
+
+        fetchUserDetails();
+    }, [user.id, user.sub]);
 
     const handleInputChange = (e, index, field, section) => {
         const { value } = e.target;
@@ -598,6 +610,16 @@ const CreateCV = () => {
                                     {errors.userDetails[index]?.fullName && <div className="cv-error-message text-danger">{errors.userDetails[index].fullName}</div>}
 
                                     <input
+                                        type="email"
+                                        placeholder="Email"
+                                        value={detail.email}
+                                        onChange={(e) => handleInputChange(e, index, 'email', 'userDetails')}
+                                        required
+                                        className="cv-input"
+                                    />
+                                    {errors.userDetails[index]?.email && <div className="cv-error-message text-danger">{errors.userDetails[index].email}</div>}
+
+                                    <input
                                         type="text"
                                         placeholder="Address"
                                         value={detail.address}
@@ -617,15 +639,6 @@ const CreateCV = () => {
                                     />
                                     {errors.userDetails[index]?.dob && <div className="cv-error-message text-danger">{errors.userDetails[index].dob}</div>}
 
-                                    <input
-                                        type="email"
-                                        placeholder="Email (Exp: your-email-prefix@gmail.com)"
-                                        value={detail.email}
-                                        onChange={(e) => handleInputChange(e, index, 'email', 'userDetails')}
-                                        required
-                                        className="cv-input"
-                                    />
-                                    {errors.userDetails[index]?.email && <div className="cv-error-message text-danger">{errors.userDetails[index].email}</div>}
 
                                     <input
                                         type="tel"

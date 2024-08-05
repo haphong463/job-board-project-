@@ -133,7 +133,7 @@ const CvList = () => {
 
     return (
         <div className="cv-list-container">
-              <h2 className='applied-letter-css'>Cv Documents</h2>
+              <h2 className='list-letter-css'>Cv Documents</h2>
             <div className="filter-section-list">
                 <select
                     value={sortOrder}
