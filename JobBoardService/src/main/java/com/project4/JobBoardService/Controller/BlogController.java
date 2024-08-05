@@ -1,10 +1,7 @@
 package com.project4.JobBoardService.Controller;
 
 import com.project4.JobBoardService.Config.Annotation.CheckPermission;
-import com.project4.JobBoardService.DTO.BlogDTO;
-import com.project4.JobBoardService.DTO.BlogResponseDTO;
-import com.project4.JobBoardService.DTO.HashTagDTO;
-import com.project4.JobBoardService.DTO.UpdateArchiveRequestDTO;
+import com.project4.JobBoardService.DTO.*;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Entity.HashTag;
@@ -75,6 +72,15 @@ public class BlogController {
         int count = readingCount.getOrDefault(id, 0) + 1;
         readingCount.put(id, count);
         simpMessagingTemplate.convertAndSend("/topic/blog/" + id, count);
+    }
+
+    @GetMapping("/count-by-user-and-month")
+    public ResponseEntity<List<UserBlogCountDTO>> getBlogCountByUserAndMonth(@RequestParam int year) {
+        List<Object[]> results = blogService.getBlogCountByUserAndMonth(year);
+        List<UserBlogCountDTO> blogCounts = results.stream()
+                .map(result -> new UserBlogCountDTO((String) result[0], (int) result[1], (long) result[2]))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(blogCounts);
     }
 
     @GetMapping("/blog/{id}/leave")
