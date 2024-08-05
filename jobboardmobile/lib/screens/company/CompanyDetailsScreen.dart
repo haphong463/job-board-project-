@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:jobboardmobile/models/company_model.dart';
 import 'package:jobboardmobile/models/job_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/utils/color_util.dart';
 import '../../service/job_service.dart';
 import '../job/JobDetailsScreen.dart';
+import 'company_review_screen.dart'; // Import the new review screen
 import '../../constant/endpoint.dart'; // Import your endpoint
 
 class CompanyDetailsScreen extends StatefulWidget {
@@ -43,13 +45,26 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Replace 'http://localhost:8080' with the actual endpoint URL
-    String modifiedImageUrl = widget.company.logo
-        .replaceAll('http://localhost:8080', Endpoint.imageUrl);
+    String companyName = widget.company.companyName ?? 'Company Name';
+    String companyDescription = widget.company.description ?? 'No Description';
+    String companyLogo = widget.company.logo ?? '';
+    String companyLocation = widget.company.location ?? 'No Location';
+    String companyWebsite = widget.company.websiteLink ?? 'No Website';
+    String companyKeySkills = widget.company.keySkills ?? 'No Key Skills';
+    String companyType = widget.company.type ?? 'No Type';
+    String companySize = widget.company.companySize ?? 'No Company Size';
+    String companyCountry = widget.company.country ?? 'No Country';
+    String companyCountryCode = widget.company.countryCode ?? 'No Country Code';
+    String companyWorkingDays = widget.company.workingDays ?? 'No Working Days';
+    String companyMembershipRequired =
+        widget.company.membershipRequired ? 'Yes' : 'No';
+
+    String modifiedImageUrl =
+        companyLogo.replaceAll('http://localhost:8080', Endpoint.imageUrl);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.company.companyName),
+        title: Text(companyName),
         backgroundColor: ColorUtil.primaryColor,
       ),
       body: SingleChildScrollView(
@@ -66,21 +81,20 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Company Name', widget.company.companyName),
-            _buildInfoRow('Description', widget.company.description),
-            _buildInfoRow('Location', widget.company.location),
-            _buildInfoRow('Website', widget.company.websiteLink, isLink: true),
-            _buildInfoRow('Key Skills', widget.company.keySkills),
-            _buildInfoRow('Type', widget.company.type),
-            _buildInfoRow('Company Size', widget.company.companySize),
-            _buildInfoRow('Country', widget.company.country),
-            _buildInfoRow('Country Code', widget.company.countryCode),
-            _buildInfoRow('Working Days', widget.company.workingDays),
-            _buildInfoRow('Membership Required',
-                widget.company.membershipRequired ? 'Yes' : 'No'),
+            _buildInfoRow('', companyName),
+            _buildInfoRow('', companyDescription, isHtml: true),
+            _buildInfoRow('Location', companyLocation),
+            _buildInfoRow('Website', companyWebsite, isLink: true),
+            _buildInfoRow('Key Skills', companyKeySkills),
+            _buildInfoRow('Type', companyType),
+            _buildInfoRow('Company Size', companySize),
+            _buildInfoRow('Country', companyCountry),
+            _buildInfoRow('Country Code', companyCountryCode),
+            _buildInfoRow('Working Days', companyWorkingDays),
+            _buildInfoRow('Membership Required', companyMembershipRequired),
             const SizedBox(height: 16),
             Text(
-              'Jobs at ${widget.company.companyName}',
+              'Jobs at $companyName',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -93,33 +107,39 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
                       final job = _jobs[index];
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8.0),
-                        elevation:
-                            5, // Added elevation for better visual effect
+                        elevation: 5,
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(modifiedImageUrl),
-                            radius: 30, // Adjust size as needed
+                            radius: 30,
                           ),
-                          title: Text(job.title,
+                          title: Text(job.title ?? 'No Title',
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(job.offeredSalary,
+                              Text(job.offeredSalary ?? 'No Salary',
                                   style: TextStyle(color: Colors.green)),
-                              Text(job.description,
-                                  maxLines: 2, overflow: TextOverflow.ellipsis),
+                              const SizedBox(height: 10),
+                              Html(
+                                data: job.description ?? 'No Description',
+                                style: {
+                                  "body": Style(
+                                      fontSize: FontSize(16.0),
+                                      listStyleType: ListStyleType.none),
+                                },
+                              ),
                             ],
                           ),
                           isThreeLine: true,
                           onTap: () {
-                            // Navigate to JobDetailsScreen
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => JobDetailsScreen(
                                   job: job,
                                   company: widget.company,
+                                  isHtml: true,
                                 ),
                               ),
                             );
@@ -128,13 +148,30 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
                       );
                     },
                   ),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CompanyReviewScreen(
+                        companyId: widget.company.companyId,
+                      ),
+                    ),
+                  );
+                },
+                child: Text('Review Company'),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String title, String value, {bool isLink = false}) {
+  Widget _buildInfoRow(String title, String value,
+      {bool isLink = false, bool isHtml = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -157,10 +194,14 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
                       style: TextStyle(color: Colors.blue, fontSize: 16),
                     ),
                   )
-                : Text(
-                    value,
-                    style: TextStyle(fontSize: 16),
-                  ),
+                : isHtml
+                    ? Html(
+                        data: value,
+                      )
+                    : Text(
+                        value,
+                        style: TextStyle(fontSize: 16),
+                      ),
           ),
         ],
       ),

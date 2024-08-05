@@ -9,11 +9,19 @@ import com.project4.JobBoardService.Entity.Review;
 import java.util.List;
 
 public interface ReviewService {
-    List<Review> getAllReviews(Long companyId);
+//    List<Review> getAllReviews(Long companyId);
+//
+//    boolean addReview(Long companyId, String username, Review review);
+//    Review getReview(Long companyId, Long reviewId, String username);
+//    boolean updateReview(Long companyId, Long reviewId, String username, Review updatedReview);
+//    Company convertCompanyToEntity(CompanyDTO companyDTO);
+//    boolean hasUserReviewedCompany(Long companyId, String username);
 
-    boolean addReview(Long companyId, String username, Review review);
-    Review getReview(Long companyId, Long reviewId, String username);
-    boolean updateReview(Long companyId, Long reviewId, String username, Review updatedReview);
 
-    Company convertCompanyToEntity(CompanyDTO companyDTO);
+    List<ReviewDTO> getAllReviews(Long companyId);
+    ReviewDTO addReview(Long companyId, ReviewDTO reviewDTO);
+    ReviewDTO getReview(Long companyId, Long reviewId, String username);
+    boolean hasUserReviewedCompany(Long companyId, String username);
+    boolean likeReview(Long companyId,Long reviewId, String username);
+    boolean unlikeReview(Long reviewId, String username);
 }

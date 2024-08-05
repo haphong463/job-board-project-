@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Optional;
+import java.util.*;
 
 @Entity
 @Getter
@@ -31,4 +31,13 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewLike> likes = new ArrayList<>();
+    public int getLikeCount() {
+        return likes.size();
+    }
+    public int setLikeCount(){
+        return  likes.size();
+    }
 }

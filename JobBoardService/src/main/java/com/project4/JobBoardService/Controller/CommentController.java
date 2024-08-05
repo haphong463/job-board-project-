@@ -13,9 +13,12 @@ import com.project4.JobBoardService.Util.AuthorizationUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,7 +55,7 @@ public class CommentController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN') or hasRole('ROLE_EMPLOYER')")
     @PostMapping
     public ResponseEntity<?> createComment(@RequestBody Comment comment, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
 
@@ -100,22 +103,22 @@ public class CommentController {
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteComment(@PathVariable Long id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
-        try{
-
+        try {
             Comment existingComment = commentService.getCommentById(id);
-            ResponseEntity<?> authorizationResponse = authorizationUtils.authorize(token, existingComment.getUser().getUsername());
-            if (authorizationResponse != null) {
-                return authorizationResponse;
-            }
-            if(id != null){
+
+            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
+            if (username.equals(existingComment.getUser().getUsername()) || username.equals(existingComment.getBlog().getUser().getUsername())) {
                 commentService.deleteComment(id);
                 return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this comment.");
             }
-            return ResponseEntity.notFound().build();
-        }catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
         }
     }
+
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateComment(@PathVariable Long id, @RequestBody Comment comment, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {

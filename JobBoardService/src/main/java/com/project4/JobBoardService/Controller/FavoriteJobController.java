@@ -43,7 +43,10 @@ public class FavoriteJobController {
                 favoriteJob.setJob(job);
                 favoriteJob.setUser(user);
                 favoriteJobRepository.save(favoriteJob);
-                return ResponseEntity.ok("Job added to favorites successfully!");
+                Map<String, Object> response = new HashMap<>();
+                response.put("favoriteId", favoriteJob.getId());
+
+                return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.badRequest().body("User not found!");
             }
@@ -67,12 +70,18 @@ public class FavoriteJobController {
             for (FavoriteJob favoriteJob : favoriteJobs) {
                 Map<String, Object> responseItem = new HashMap<>();
                 responseItem.put("favoriteId", favoriteJob.getId());
+                responseItem.put("createdAt", favoriteJob.getJob().getCreatedAt());
+                responseItem.put("jobId", favoriteJob.getJob().getId());
+                responseItem.put("companyId", favoriteJob.getJob().getCompany().getCompanyId());
+                responseItem.put("companyLogo", favoriteJob.getJob().getCompany().getLogo());
                 responseItem.put("jobTitle", favoriteJob.getJob().getTitle());
+                responseItem.put("position", favoriteJob.getJob().getPosition());
+                responseItem.put("location", favoriteJob.getJob().getCompany().getLocation());
+                responseItem.put("skills", favoriteJob.getJob().getCategories());
                 responseItem.put("companyName", favoriteJob.getJob().getCompany().getCompanyName());
                 responseItem.put("username", favoriteJob.getUser().getUsername());
                 responseList.add(responseItem);
             }
-
             return ResponseEntity.ok(responseList);
         } else {
             return ResponseEntity.badRequest().body("User not found!");
@@ -83,7 +92,7 @@ public class FavoriteJobController {
     public ResponseEntity<?> deleteFavoriteJob(@PathVariable Long favoriteId) {
         Optional<FavoriteJob> optionalFavoriteJob = favoriteJobRepository.findById(favoriteId);
         if (optionalFavoriteJob.isPresent()) {
-            favoriteJobRepository.delete(optionalFavoriteJob.get());
+            favoriteJobRepository.deleteById(favoriteId);
             return ResponseEntity.ok("Favorite job deleted successfully!");
         } else {
             return ResponseEntity.badRequest().body("Favorite job not found!");

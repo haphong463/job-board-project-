@@ -11,6 +11,7 @@ import com.project4.JobBoardService.Util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PermissionRepository permissionRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
     @Override
     public User updateUserPermissions(Long userId, List<String> permissions) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
@@ -64,6 +67,20 @@ public class UserServiceImpl implements UserService {
         }
 
         return registrationCounts;
+    }
+
+    @Override
+    public User updatePassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public List<Permission> getAllPermission() {
+        return permissionRepository.findAll();
     }
 
     @Override

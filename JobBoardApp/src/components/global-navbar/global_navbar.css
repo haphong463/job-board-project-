@@ -215,12 +215,12 @@
   list-style-type: none;
 }
 
-.dropdown-item .icon {
+.dropdown-item .jb_icon {
   margin-left: 5.1em;
   font-size: 80%;
 }
 
-.dropdown-item .icon3 {
+.dropdown-item .jb_icon3 {
   margin-left: 3em;
   font-size: 80%;
 }

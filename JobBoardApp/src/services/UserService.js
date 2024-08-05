@@ -10,3 +10,8 @@ export const updateUserAsync = async (data, id) =>
       "Content-Type": "multipart/form-data",
     },
   });
+
+
+  
+export const getEducationByUserIdAsync = async (userId) =>
+  await axiosRequest.get(`/users/education/${userId}`);

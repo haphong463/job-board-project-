@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
-import { NavLink, useLocation, useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllBlog,
@@ -25,6 +25,7 @@ import { calculateReadingTime } from "../../utils/function/readingTime";
 import { BlogSideBar } from "./BlogSideBar";
 import "./style.css";
 import axiosRequest from "../../configs/axiosConfig";
+import { FaEye } from "react-icons/fa";
 export const BlogSingle = () => {
   const dispatch = useDispatch();
   const blog = useSelector((state) => state.blogs.blog);
@@ -35,7 +36,6 @@ export const BlogSingle = () => {
   const { id } = useParams();
   const [readingTime, setReadingTime] = useState(0);
   const [readingCount, setReadingCount] = useState(0);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,20 +80,17 @@ export const BlogSingle = () => {
         }
       });
 
-      // Thông báo khi người dùng truy cập vào bài post
       axiosRequest.get(`/blogs/blog/${id}`);
 
-      // Thông báo khi người dùng rời khỏi bài post
       window.addEventListener("beforeunload", handleBeforeUnload);
     };
 
     stompClient.activate();
 
-    // Lắng nghe sự thay đổi của location để gọi leave khi người dùng chuyển trang
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       stompClient.deactivate();
-      handleBeforeUnload(); // Gọi sự kiện leave khi component bị unmount
+      handleBeforeUnload();
     };
   }, [id]);
 
@@ -130,11 +127,9 @@ export const BlogSingle = () => {
                       {blog.user.firstName} {blog.user.lastName}
                     </span>
                     <span className="mx-2 slash">•</span>
-                    <span className="text-white">
-                      <strong>
-                        {moment(blog.createdAt).format("MMMM Do YYYY")}
-                      </strong>
-                    </span>
+                    <strong className="text-white">
+                      {moment(blog.createdAt).format("MMMM Do YYYY")}
+                    </strong>
                     <span className="mx-2 slash">•</span>
                     <span className="text-white">{readingTime} min read</span>
                   </div>
@@ -146,18 +141,25 @@ export const BlogSingle = () => {
           <section className="site-section" id="next-section">
             <ReadingBar />
             <div className="container">
-              <p>There are {readingCount} people reading with you.</p>
+              <div className="d-flex justify-content-between is-size-7">
+                <p>
+                  <FaEye /> There {readingCount > 1 ? "are" : "is"}{" "}
+                  {readingCount} people reading with you.
+                </p>
+                <p>Updated {moment(blog.updatedAt).format("YYYY-MM-DD")}</p>
+              </div>
               <div className="row">
                 <div className="col-lg-8 blog-content">
                   <h3 className="mb-4 title is-4">{blog.title}</h3>
                   <p className="text-center">
                     <img
                       src={blog.imageUrl}
-                      alt="Image"
+                      alt={blog.title}
                       className="img-fluid rounded"
                       style={{
                         width: "100%",
                       }}
+                      title={blog.title}
                     />
                   </p>
                   <i className="is-italic">{blog.citation}</i>

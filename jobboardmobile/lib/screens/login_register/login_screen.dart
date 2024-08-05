@@ -17,31 +17,61 @@ class _LoginScreenState extends State<LoginScreen> {
   String _errorMessage = '';
 
   void _login() async {
-    final response = await _authService.login(
-      _usernameController.text,
-      _passwordController.text,
-    );
+    setState(() {
+      _errorMessage = '';
+    });
 
-    if (response.statusCode == 200) {
-      Navigator.pushReplacementNamed(context, '/main');
-    } else {
+    if (_usernameController.text.isEmpty) {
       setState(() {
-        _errorMessage = 'Invalid username or password';
+        _errorMessage = 'Username is required';
+      });
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Password is required';
+      });
+      return;
+    }
+
+    try {
+      final response = await _authService.login(
+        _usernameController.text,
+        _passwordController.text,
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacementNamed(context, '/main');
+      } else {
+        setState(() {
+          _errorMessage = 'Incorrect username or password';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Incorrect username or password';
       });
     }
   }
 
-  Future signIn() async {
-    final result = await GoogleSignInApi.login();
-    final ggAuth = await result?.authentication;
-    print(ggAuth?.idToken);
-    print(ggAuth?.accessToken);
-    final response = await _authService.loginByGoogle(ggAuth?.accessToken);
-    if (response.statusCode == 200) {
-      Navigator.pushReplacementNamed(context, '/main');
-    } else {
+  Future<void> signIn() async {
+    try {
+      final result = await GoogleSignInApi.login();
+      final ggAuth = await result?.authentication;
+      print('Google ID Token: ${ggAuth?.idToken}');
+      print('Google Access Token: ${ggAuth?.accessToken}');
+
+      final response = await _authService.loginByGoogle(ggAuth?.accessToken);
+      if (response.statusCode == 200) {
+        Navigator.pushReplacementNamed(context, '/main');
+      } else {
+        setState(() {
+          _errorMessage = 'Incorrect username or password';
+        });
+      }
+    } catch (e) {
       setState(() {
-        _errorMessage = 'Invalid username or password';
+        _errorMessage = 'Error occurred: $e';
       });
     }
   }
@@ -72,8 +102,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.all(23),
                 child: Column(
                   children: <Widget>[
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Text(
+                          _errorMessage,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
                       child: Container(
                         color: const Color(0xfff5f5f5),
                         child: TextFormField(
@@ -93,21 +134,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    Container(
-                      color: const Color(0xfff5f5f5),
-                      child: TextFormField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'SFUIDisplay',
-                        ),
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock_outline),
-                          labelStyle: TextStyle(
-                            fontSize: 15,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
+                      child: Container(
+                        color: const Color(0xfff5f5f5),
+                        child: TextFormField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'SFUIDisplay',
+                          ),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock_outline),
+                            labelStyle: TextStyle(
+                              fontSize: 15,
+                            ),
                           ),
                         ),
                       ),
@@ -190,21 +234,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    if (_errorMessage.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: Center(
-                          child: Text(
-                            _errorMessage,
-                            style: const TextStyle(
-                              fontFamily: 'SFUIDisplay',
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ),
-                      ),
                     Padding(
                       padding: const EdgeInsets.only(top: 20),
                       child: Center(

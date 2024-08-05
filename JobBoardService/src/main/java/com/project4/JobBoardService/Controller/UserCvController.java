@@ -48,73 +48,73 @@ public class UserCvController {
     private ModelMapper modelMapper;
 
     //	@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    @PostMapping("/submit-cv")
-    public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV,
-                                           @RequestParam("profileImage") MultipartFile profileImage,
-                                           @RequestParam("dob") Long dobTimestamp) {
-        userCV.setCreatedAt(LocalDateTime.now());
-        userCV.setUpdatedAt(LocalDateTime.now());
-
-        // Set the user
-        User user = userRepository.findById(userCV.getUser().getId()).orElse(null);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user ID");
-        }
-        userCV.setUser(user);
-
-        // Convert timestamp to Date
-        Date dob = new Date(dobTimestamp);
-
-        // Set userCV reference in related entities
-        userCV.setUserDetails(userCV.getUserDetails().stream()
-                .map(detail -> userDetailRepository.save(detail))
-                .collect(Collectors.toList()));
-        userCV.setUserEducations(userCV.getUserEducations().stream()
-                .map(education -> userEducationRepository.save(education))
-                .collect(Collectors.toList()));
-        userCV.setUserExperiences(userCV.getUserExperiences().stream()
-                .map(experience -> userExperienceRepository.save(experience))
-                .collect(Collectors.toList()));
-        userCV.setUserSkills(userCV.getUserSkills().stream()
-                .map(skill -> userSkillRepository.save(skill))
-                .collect(Collectors.toList()));
-        userCV.setUserProjects(userCV.getUserProjects().stream()
-                .map(project -> userProjectRepository.save(project))
-                .collect(Collectors.toList()));
-        userCV.setUserLanguages(userCV.getUserLanguages().stream()
-                .map(language -> userLanguageRepository.save(language))
-                .collect(Collectors.toList()));
-
-
-        userCV.getUserDetails().forEach(detail -> {
-            detail.setUserCV(userCV);
-            detail.setDob(dob);
-        });
-
-        userCV.getUserEducations().forEach(education -> education.setUserCV(userCV));
-        userCV.getUserExperiences().forEach(experience -> experience.setUserCV(userCV));
-        userCV.getUserSkills().forEach(skill -> skill.setUserCV(userCV));
-        userCV.getUserProjects().forEach(project -> project.setUserCV(userCV));
-        userCV.getUserLanguages().forEach(language -> language.setUserCV(userCV));
-        // Save the userCV and its related entities
-        UserCV savedUserCV = userCvRepository.save(userCV);
-
-        // Handle the profile image upload
-        if (!profileImage.isEmpty()) {
-            try {
-                byte[] imageBytes = profileImage.getBytes();
-                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-                UserDetail userDetail = savedUserCV.getUserDetails().get(0);
-                userDetail.setProfileImageBase64(base64Image);
-                userDetailRepository.save(userDetail);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile image");
-            }
-        }
-
-        return ResponseEntity.ok().body("CV Save Success!");
-    }
+//    @PostMapping("/submit-cv")
+//    public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV,
+//                                           @RequestParam("profileImage") MultipartFile profileImage,
+//                                           @RequestParam("dob") Long dobTimestamp) {
+//        userCV.setCreatedAt(LocalDateTime.now());
+//        userCV.setUpdatedAt(LocalDateTime.now());
+//
+//        // Set the user
+//        User user = userRepository.findById(userCV.getUser().getId()).orElse(null);
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user ID");
+//        }
+//        userCV.setUser(user);
+//
+//        // Convert timestamp to Date
+//        Date dob = new Date(dobTimestamp);
+//
+//        // Set userCV reference in related entities
+//        userCV.setUserDetails(userCV.getUserDetails().stream()
+//                .map(detail -> userDetailRepository.save(detail))
+//                .collect(Collectors.toList()));
+//        userCV.setUserEducations(userCV.getUserEducations().stream()
+//                .map(education -> userEducationRepository.save(education))
+//                .collect(Collectors.toList()));
+//        userCV.setUserExperiences(userCV.getUserExperiences().stream()
+//                .map(experience -> userExperienceRepository.save(experience))
+//                .collect(Collectors.toList()));
+//        userCV.setUserSkills(userCV.getUserSkills().stream()
+//                .map(skill -> userSkillRepository.save(skill))
+//                .collect(Collectors.toList()));
+//        userCV.setUserProjects(userCV.getUserProjects().stream()
+//                .map(project -> userProjectRepository.save(project))
+//                .collect(Collectors.toList()));
+//        userCV.setUserLanguages(userCV.getUserLanguages().stream()
+//                .map(language -> userLanguageRepository.save(language))
+//                .collect(Collectors.toList()));
+//
+//
+//        userCV.getUserDetails().forEach(detail -> {
+//            detail.setUserCV(userCV);
+//            detail.setDob(dob);
+//        });
+//
+//        userCV.getUserEducations().forEach(education -> education.setUserCV(userCV));
+//        userCV.getUserExperiences().forEach(experience -> experience.setUserCV(userCV));
+//        userCV.getUserSkills().forEach(skill -> skill.setUserCV(userCV));
+//        userCV.getUserProjects().forEach(project -> project.setUserCV(userCV));
+//        userCV.getUserLanguages().forEach(language -> language.setUserCV(userCV));
+//        // Save the userCV and its related entities
+//        UserCV savedUserCV = userCvRepository.save(userCV);
+//
+//        // Handle the profile image upload
+//        if (!profileImage.isEmpty()) {
+//            try {
+//                byte[] imageBytes = profileImage.getBytes();
+//                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+//                UserDetail userDetail = savedUserCV.getUserDetails().get(0);
+//                userDetail.setProfileImageBase64(base64Image);
+//                userDetailRepository.save(userDetail);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile image");
+//            }
+//        }
+//
+//        return ResponseEntity.ok().body("CV Save Success!");
+//    }
 
     @GetMapping("/{cvId}")
     public ResponseEntity<UserCvDTO> getCvById(@PathVariable String cvId) {
@@ -263,5 +263,72 @@ public class UserCvController {
 
         return ResponseEntity.ok().body("CV Update Success!");
     }
+    public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV,
+                                           @RequestParam("profileImage") MultipartFile profileImage,
+                                           @RequestParam("dob") Long dobTimestamp) {
+        userCV.setCreatedAt(LocalDateTime.now());
+        userCV.setUpdatedAt(LocalDateTime.now());
 
+        // Set the user
+        User user = userRepository.findById(userCV.getUser().getId()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid user ID");
+        }
+        userCV.setUser(user);
+
+        // Convert timestamp to Date
+        Date dob = new Date(dobTimestamp);
+
+        // Save UserCV first
+        UserCV savedUserCV = userCvRepository.save(userCV);
+
+        // Set userCV reference and user in related entities
+        for (UserDetail detail : savedUserCV.getUserDetails()) {
+            detail.setUserCV(savedUserCV);
+            detail.setDob(dob);
+            userDetailRepository.save(detail);
+        }
+
+        for (UserEducation education : savedUserCV.getUserEducations()) {
+            education.setUserCV(savedUserCV);
+            education.setUser(user);  // Assign user ID here
+            userEducationRepository.save(education);
+        }
+
+        for (UserExperience experience : savedUserCV.getUserExperiences()) {
+            experience.setUserCV(savedUserCV);
+            userExperienceRepository.save(experience);
+        }
+
+        for (UserSkill skill : savedUserCV.getUserSkills()) {
+            skill.setUserCV(savedUserCV);
+            userSkillRepository.save(skill);
+        }
+
+        for (UserProject project : savedUserCV.getUserProjects()) {
+            project.setUserCV(savedUserCV);
+            userProjectRepository.save(project);
+        }
+
+        for (UserLanguage language : savedUserCV.getUserLanguages()) {
+            language.setUserCV(savedUserCV);
+            userLanguageRepository.save(language);
+        }
+
+        // Handle the profile image upload
+        if (!profileImage.isEmpty()) {
+            try {
+                byte[] imageBytes = profileImage.getBytes();
+                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+                UserDetail userDetail = savedUserCV.getUserDetails().get(0);
+                userDetail.setProfileImageBase64(base64Image);
+                userDetailRepository.save(userDetail);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile image");
+            }
+        }
+
+        return ResponseEntity.ok().body("CV Save Success!");
+    }
 }

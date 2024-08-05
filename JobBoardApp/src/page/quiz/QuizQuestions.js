@@ -104,78 +104,80 @@ const QuizQuestions = () => {
     };
     setSelectedAnswers(updatedAnswers);
   };
+
   const handleSubmitQuiz = async () => {
     const submission = {
-        quizId: parseInt(quizId),
-        userId: user.id,
-        questions: Object.keys(selectedAnswers).map((questionId) => ({
-            questionId: parseInt(questionId),
-            selectedAnswer: selectedAnswers[questionId].split(".")[0].trim(),
-            userAnswer: selectedAnswers[questionId],
-        })),
+      quizId: parseInt(quizId),
+      userId: user.id,
+      questions: Object.keys(selectedAnswers).map((questionId) => ({
+        questionId: parseInt(questionId),
+        selectedAnswer: selectedAnswers[questionId].split(".")[0].trim(),
+        userAnswer: selectedAnswers[questionId],
+      })),
     };
 
     try {
-        console.log("Submitting quiz with data:", submission);
-        const response = await axiosRequest.post(`/quizzes/submit`, submission);
+      console.log("Submitting quiz with data:", submission);
+      const response = await axiosRequest.post(`/quizzes/submit`, submission);
 
-        // Debug: Log the full response
-        console.log("Full response from server:", response);
+      // Debug: Log the full response
+      console.log("Full response from server:", response);
 
-        if (response) {
-            const { results, score } = response;
-            console.log("Results:", results);
-            console.log("Score:", score);
+      if (response) {
+        const { results, score } = response;
+        console.log("Results:", results);
+        console.log("Score:", score);
 
-            // Ensure results and score are present
-            if (Array.isArray(results) && typeof score === 'number') {
-                console.log("Valid response data:", response);
+        // Ensure results and score are present
+        if (Array.isArray(results) && typeof score === 'number') {
+          console.log("Valid response data:", response);
 
-                setShowModal(false);
-                setShowScoreModal(true);
-                localStorage.removeItem(`timeLeft_${quizId}`);
-                localStorage.removeItem(`selectedAnswers_${quizId}`);
-                navigate(`/quiz/${quizId}/result`, {
-                    state: {
-                        results: results,
-                        totalQuestions: questions.length,
-                        score: score,
-                        quizId: quizId, 
-                    },
-                });
-            } else {
-                console.error("Unexpected response structure:", response);
-            }
+          setShowModal(false);
+          setShowScoreModal(true);
+          localStorage.removeItem(`timeLeft_${quizId}`);
+          localStorage.removeItem(`selectedAnswers_${quizId}`);
+          navigate(`/quiz/${quizId}/result`, {
+            state: {
+              results: results,
+              totalQuestions: questions.length,
+              score: score,
+              quizId: quizId, 
+            },
+          });
         } else {
-            console.error("No data received:", response);
+          console.error("Unexpected response structure:", response);
         }
+      } else {
+        console.error("No data received:", response);
+      }
     } catch (error) {
-        console.error("Error submitting quiz:", error);
+      console.error("Error submitting quiz:", error);
     }
-};
+  };
+
   const handleExitQuiz = () => {
     setShowExitConfirmModal(true);
   };
 
   const handleConfirmExit = async () => {
     try {
-        // Call the exit endpoint to decrement the attempt count
-        await axiosRequest.post(`/quizzes/submit`, {
-            quizId: quizId,
-            userId: user.id
-        });
+      // Call the exit endpoint to decrement the attempt count
+      await axiosRequest.post(`/quizzes/submit`, {
+        quizId: quizId,
+        userId: user.id
+      });
 
-        // Remove local storage items
-        localStorage.removeItem(`timeLeft_${quizId}`);
-        localStorage.removeItem(`selectedAnswers_${quizId}`);
+      // Remove local storage items
+      localStorage.removeItem(`timeLeft_${quizId}`);
+      localStorage.removeItem(`selectedAnswers_${quizId}`);
 
-        // Navigate to another route
-        navigate("/quiz");
+      // Navigate to another route
+      navigate("/quiz");
     } catch (error) {
-        console.error("Error during exit:", error);
-        // Optionally, show an error message to the user
+      console.error("Error during exit:", error);
+      // Optionally, show an error message to the user
     }
-};
+  };
 
   const handleCancelExit = () => {
     setShowExitConfirmModal(false);
@@ -240,9 +242,9 @@ const QuizQuestions = () => {
           <div className="row">
             <div className="col-md-12">
               <div className="quiz-header">
-                <h2 className="mb-4">Bài thi {quizTitle}</h2>
+                <h2 className="mb-4">Quiz {quizTitle}</h2>
                 <div className="timer">
-                  Thời gian làm bài kiểm tra còn lại:{" "}
+                  Remaining time:{" "}
                   <strong>{formatTime(timeLeft)}</strong>
                 </div>
               </div>
@@ -251,7 +253,7 @@ const QuizQuestions = () => {
                   {questions.length > 0 ? (
                     <div className="card mb-3">
                       <div className="card-body">
-                        <h5 className="card-title">Câu hỏi {currentQuestionIndex + 1}: {questions[currentQuestionIndex].questionText}</h5>
+                        <h5 className="card-title">Question {currentQuestionIndex + 1}: {questions[currentQuestionIndex].questionText}</h5>
                         <ul className="list-group list-group-flush">
                           {(questions[currentQuestionIndex].options || "")
                             .split(",")
@@ -304,16 +306,16 @@ const QuizQuestions = () => {
                 <div className="col-md-4">
                   <div className="question-list card mb-3">
                     <div className="card-body">
-                      <h5 className="card-title">Danh sách câu hỏi</h5>
-                      <ul className="list-group list-group-flush">
+                      <h5 className="card-title">Question List</h5>
+                      <ul className="list-group list-group-flush quiz-question-list">
                         {questions.map((question, index) => (
                           <li
                             key={question.id}
-                            className={`list-group-item ${
-                              index === currentQuestionIndex ? "active" : ""
+                            className={`list-group-item quiz-question-item ${
+                              index === currentQuestionIndex ? "quiz-question-item--active" : ""
                             } ${
                               selectedAnswers[question.id]
-                                ? "answered"
+                                ? "quiz-question-item--answered"
                                 : "unanswered"
                             }`}
                             onClick={() => handleQuestionClick(index)}
@@ -327,20 +329,20 @@ const QuizQuestions = () => {
                   <div className="summary card">
                     <div className="card-body">
                       <p>
-                        Số câu hỏi chưa trả lời:{" "}
+                        Unanswered questions:{" "}
                         <strong>{getUnansweredQuestionsCount()}</strong>
                       </p>
                       <button
                         className="btn btn-primary"
                         onClick={handleOpenModal}
                       >
-                        Nộp bài kiểm tra
+                        Submit Quiz
                       </button>
                       <button
                         className="btn btn-danger"
                         onClick={handleExitQuiz}
                       >
-                        Thoát
+                        Exit
                       </button>
                     </div>
                   </div>
@@ -348,18 +350,17 @@ const QuizQuestions = () => {
               </div>
               <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
-                  <Modal.Title>Nộp bài kiểm tra</Modal.Title>
+                  <Modal.Title>Submit Quiz</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  Bạn có chắc chắn muốn nộp bài kiểm tra? Bạn sẽ không thể thay
-                  đổi câu trả lời sau khi đã nộp bài.
+                  Are you sure you want to submit the quiz? You won't be able to change your answers after submission.
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={handleCloseModal}>
-                    Hủy
+                    Cancel
                   </Button>
                   <Button variant="primary" onClick={handleSubmitQuiz}>
-                    Nộp bài
+                    Submit
                   </Button>
                 </Modal.Footer>
               </Modal>
@@ -368,8 +369,7 @@ const QuizQuestions = () => {
                   <Modal.Title>Time's up!</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  Thời gian làm bài kiểm tra đã hết. Bài kiểm tra của bạn sẽ
-                  được nộp tự động.
+                  Your quiz time is over. Your quiz will be submitted automatically.
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="primary" onClick={handleCloseTimeUpModal}>
@@ -379,10 +379,10 @@ const QuizQuestions = () => {
               </Modal>
               <Modal show={showScoreModal} onHide={handleCloseScoreModal}>
                 <Modal.Header closeButton>
-                  <Modal.Title>Kết quả bài kiểm tra</Modal.Title>
+                  <Modal.Title>Quiz Result</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  Bạn đã hoàn thành bài kiểm tra.
+                  You have completed the quiz.
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="primary" onClick={handleCloseScoreModal}>
@@ -395,17 +395,17 @@ const QuizQuestions = () => {
                 onHide={handleCancelExit}
               >
                 <Modal.Header closeButton>
-                  <Modal.Title>Xác nhận thoát</Modal.Title>
+                  <Modal.Title>Confirm Exit</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  Bạn có chắc chắn muốn thoát bài kiểm tra? Tiến trình của bạn sẽ không được lưu lại.
+                  Are you sure you want to exit the quiz? Your progress will not be saved.
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={handleCancelExit}>
-                    Hủy
+                    Cancel
                   </Button>
                   <Button variant="danger" onClick={handleConfirmExit}>
-                    Thoát
+                    Exit
                   </Button>
                 </Modal.Footer>
               </Modal>

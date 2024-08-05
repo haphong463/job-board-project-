@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   createModeratorAsync,
   deleteUserAsync,
+  getAllPermission,
   getAllUserAsync,
   updatePermissionModerator,
   updateUserEnableStatusAsync,
@@ -71,12 +72,24 @@ export const updatePermissionsThunk = createAsyncThunk(
   }
 );
 
+export const getAllPermissionThunk = createAsyncThunk(
+  "/user/permissions",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getAllPermission();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const userSlice = createSlice({
   initialState: {
     list: [],
     totalPages: 0,
     status: "idle",
     error: null,
+    permissions: [],
   },
   name: "user",
   reducers: {},
@@ -110,6 +123,9 @@ const userSlice = createSlice({
         state.list = state.list.map((user) =>
           user.id === action.payload.id ? action.payload : user
         );
+      })
+      .addCase(getAllPermissionThunk.fulfilled, (state, action) => {
+        state.permissions = action.payload;
       }),
 });
 

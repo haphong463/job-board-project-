@@ -1,4 +1,3 @@
-
 class Company {
   final int companyId;
   final String companyName;
@@ -34,22 +33,41 @@ class Company {
 
   factory Company.fromJson(Map<String, dynamic> json) {
     return Company(
-      companyId: json['companyId'],
-      companyName: json['companyName'],
-      logo: json['logo'],
-      websiteLink: json['websiteLink'],
-      description: json['description'],
-      location: json['location'],
-      keySkills: json['keySkills'],
-      type: json['type'],
-      companySize: json['companySize'],
-      country: json['country'],
-      countryCode: json['countryCode'],
-      workingDays: json['workingDays'],
-      // reviews: (json['reviews'] as List)
-      //     .map((review) => Review.fromJson(review))
-      //     .toList(),
-      membershipRequired: json['membershipRequired'],
+      companyId: json['companyId'] ?? 0,
+      companyName: json['companyName'] ?? '',
+      logo: json['logo'] ?? '',
+      websiteLink: json['websiteLink'] ?? '',
+      description: json['description'] ?? '',
+      location: json['location'] ?? '',
+      keySkills: json['keySkills'] ?? '',
+      type: json['type'] ?? '',
+      companySize: json['companySize'] ?? '',
+      country: json['country'] ?? '',
+      countryCode: json['countryCode'] ?? '',
+      workingDays: json['workingDays'] ?? '',
+      // reviews: (json['reviews'] as List?)
+      //     ?.map((review) => Review.fromJson(review))
+      //     .toList() ?? [],
+      membershipRequired: json['membershipRequired'] ?? false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'companyId': companyId,
+      'companyName': companyName,
+      'logo': logo,
+      'websiteLink': websiteLink,
+      'description': description,
+      'location': location,
+      'keySkills': keySkills,
+      'type': type,
+      'companySize': companySize,
+      'country': country,
+      'countryCode': countryCode,
+      'workingDays': workingDays,
+      // 'reviews': reviews.map((review) => review.toJson()).toList(),
+      'membershipRequired': membershipRequired,
+    };
   }
 }

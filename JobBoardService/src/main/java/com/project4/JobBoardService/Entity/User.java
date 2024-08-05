@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -41,6 +42,8 @@ public class User  extends  AbstractEntity {
     @Size(max = 120)
     private String password;
     private String numberphone;
+    private LocalDate dateOfBirth;  // New field
+    private String currentAddress;  // New field
     private String facebook;
     private String resetToken;
     private boolean verified;

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import moment from 'moment';
 import './job_company.css';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import ApplyBox from '../../components/dialog-box/Applybox';
 import { fetchJobThunk } from "../../features/jobSlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
@@ -15,109 +15,155 @@ import 'flag-icons/css/flag-icons.min.css';
 import parse from 'html-react-parser';
 import { useDispatch, useSelector } from "react-redux";
 import { CheckCircle } from 'react-bootstrap-icons';
-import axiosRequest from "../../configs/axiosConfig";
-export const JobSingle = () => {
+import axiosRequest from '../../configs/axiosConfig';
+import tagMapping from './tagMapping';
+import DOMPurify from 'dompurify';
+import ReactDOMServer from 'react-dom/server';
+
+export const JobSingle = () =>
+{
    const { id } = useParams();
    const jobId = parseInt(id ?? '0', 10);
-
-
    // const [jobs, setJobs] = useState([]);
    const dispatch = useDispatch();
    const jobs = useSelector((state) => state.job.jobs);
+
    const userId = useSelector(state => state.auth.user.id);
+
    const companies = useSelector((state) => state.company.companies);
+
    const categories = useSelector((state) => state.category.categories);
+
    const [showApplyBox, setShowApplyBox] = useState(false);
+
    const [hasApplied, setHasApplied] = useState(false);
 
-   const checkIfApplied = async () => {
-      try {
+   const [isSaved, setIsSaved] = useState(false);
+   const navigate = useNavigate();
+   const [favoriteId, setFavoriteId] = useState(null);
+
+
+   const checkIfApplied = async () =>
+   {
+      try
+      {
          const response = await axiosRequest.get(`/application/user/${userId}/job/${jobId}`);
          setHasApplied(response); // Ensure `response.data` is boolean
-      } catch (error) {
+      } catch (error)
+      {
          console.error('Error checking application status', error);
       }
    };
-   
 
-   useEffect(() => {
+
+
+
+   useEffect(() =>
+   {
       dispatch(fetchCategoryThunk());
 
-
-      if (companies.length === 0) {
+      if (companies.length === 0)
+      {
          dispatch(fetchCompanyThunk());
       }
-      if (jobs.length === 0) {
+      if (jobs.length === 0)
+      {
          dispatch(fetchJobThunk());
       }
-   checkIfApplied();
+      checkIfApplied();
    }, [dispatch, jobs.length, companies.length]);
 
+   useEffect(() =>
+   {
+      const jobData = jobs.find(job => job.id === jobId);
+      if (jobData)
+      {
+         axiosRequest.get(`/favorite-jobs/list`)
+            .then(data =>
+            {
+               const favorites = data;
+               const found = favorites.find(fav => fav.jobId === jobId);
+               if (found)
+               {
+                  setIsSaved(true);
+                  setFavoriteId(found.favoriteId);
+               }
+            })
+            .catch(error =>
+            {
+               console.error("Error checking job save status:", error);
+            });
+      }
+   }, [jobId, jobs]);
 
    const jobData = jobs.find(job => job.id === jobId);
    console.log(jobData);
    const companyData = companies.find(company => company.companyId === jobData?.companyId);
 
 
-   if (!jobData || !companyData) {
+   if (!jobData || !companyData)
+   {
       return <div>Loading...</div>; // Hoặc bạn có thể chuyển hướng đến trang lỗi
    }
-   const handleApplyClick = (e) => {
+   const handleApplyClick = (e) =>
+   {
       e.preventDefault();
       setShowApplyBox(true);
-    };
+   };
+   const handleCloseApplyBox = () =>
+   {
+      setShowApplyBox(false);
+   };
 
-
-  
-
-    
-    
-
-
-   const getLocation1String = (address) => {
-      if (typeof address !== 'string') {
+   const getLocation1String = (address) =>
+   {
+      if (typeof address !== 'string')
+      {
          return '';
       }
       const parts = address.split(", ");
       const len = parts.length;
-      if (len >= 2) {
+      if (len >= 2)
+      {
          return parts.slice(-2).join(", ");
       }
       return address;
    };
 
-
-   const handleCompanyClick = (companyId) => {
-      window.location.href = `/companyDetail/${companyId}`;
+   const handleCompanyClick = (companyId) =>
+   {
+      navigate(`/companyDetail/${companyId}`);
    };
 
-
-   const handleCategoryClick = (categoryId) => {
+   const handleCategoryClick = (categoryId) =>
+   {
       window.location.href = `/jobList/${categoryId}`;
    };
 
-
-   const handleJobDetailClick = (jobId, companyId) => {
+   const handleJobDetailClick = (jobId, companyId) =>
+   {
       window.location.href = `/jobDetail/${jobId}/${companyId}`;
    };
 
-
-   const addIconsToListItems = (htmlString) => {
+   const addIconsToListItems = (htmlString) =>
+   {
       return parse(htmlString, {
-         replace: (domNode) => {
+         replace: (domNode) =>
+         {
             return parseChildNode(domNode);
          },
       });
    };
 
-
-   const parseChildNode = (domNode) => {
-      if (domNode.type === 'text') {
+   const parseChildNode = (domNode) =>
+   {
+      if (domNode.type === 'text')
+      {
          return domNode.data;
       }
 
-
-      if (domNode.name === 'li') {
+      if (domNode.name === 'li')
+      {
          return (
             <li className="d-flex align-items-start mb-2 trf">
                <span className="icon-check_circle mr-2 text-muted" />
@@ -128,11 +174,11 @@ export const JobSingle = () => {
          );
       }
 
-
-      if (domNode.type === 'tag') {
-         const Tag = domNode.name;
+      if (domNode.type === 'tag')
+      {
+         const Tag = tagMapping[domNode.name] || domNode.name;
          return (
-            <Tag {...domNode.attribs}>
+            <Tag {...domNode.attribs} style={{ color: 'black' }}>
                {domNode.children.map((child, index) => (
                   <React.Fragment key={index}>{parseChildNode(child)}</React.Fragment>
                ))}
@@ -142,80 +188,94 @@ export const JobSingle = () => {
       return null;
    };
 
-
    // const currentJobKeySkills = jobData?.keySkills ? jobData.keySkills.split(',').map(skill => skill.trim()) : [];
-
 
    // // Filter jobs that share any key skills with the current job
    // const relatedJobs = jobs.filter(job =>
-   // job.id !== jobId &&
-   // job.keySkills && // Ensure job.keySkills is not null or undefined
-   // job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
+   //    job.id !== jobId &&
+   //    job.keySkills && // Ensure job.keySkills is not null or undefined
+   //    job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
    // );
 
-
-   // const currentJobCategoryIds = new Set(jobData.categoryId); // Chuyển List<Long> thành Set<Long>
-
+   // const currentJobCategoryIds = new Set(jobData.categoryId);  // Chuyển List<Long> thành Set<Long>
 
    // const relatedJobs = jobs.filter(job =>
    // {
-   // const jobCategoryIds = new Set(job.categoryId);
+   //    const jobCategoryIds = new Set(job.categoryId);
 
-
-   // // Kiểm tra xem có bất kỳ phần tử nào trong jobCategoryIds tồn tại trong currentJobCategoryIds
-   // for (const id of jobCategoryIds)
-   // {
-   // if (currentJobCategoryIds.has(id))
-   // {
-   // return true;
-   // }
-   // }
-   // return false;
+   //    // Kiểm tra xem có bất kỳ phần tử nào trong jobCategoryIds tồn tại trong currentJobCategoryIds
+   //    for (const id of jobCategoryIds)
+   //    {
+   //       if (currentJobCategoryIds.has(id))
+   //       {
+   //          return true;
+   //       }
+   //    }
+   //    return false;
    // });
 
-
    const categoryArray = Array.isArray(categories) ? categories : [];
-
 
    const categoryIds = Array.isArray(jobData.categoryId) ? jobData.categoryId : [];
    const currentJobCategoryIds = new Set(categoryIds);
 
-
-   const relatedJobs = jobs.filter(job => {
-      if (!Array.isArray(job.categoryId)) {
+   const relatedJobs = jobs.filter(job =>
+   {
+      if (!Array.isArray(job.categoryId))
+      {
          console.error("categoryId in job is not an array");
          return false;
       }
 
-
       // Loại bỏ job hiện tại
-      if (job.id === jobId) {
+      if (job.id === jobId)
+      {
          return false;
       }
 
-
       const jobCategoryIds = new Set(job.categoryId);
 
-
-      for (const id of jobCategoryIds) {
-         if (currentJobCategoryIds.has(id)) {
+      for (const id of jobCategoryIds)
+      {
+         if (currentJobCategoryIds.has(id))
+         {
             return true;
          }
       }
       return false;
    });
 
-
-   // const currentJobKeySkills = jobData?.keySkills ? jobData.keySkills.split(',').map(skill => skill.trim()) : [];
-
-
-   // // Filter jobs that share any key skills with the current job
-   // const relatedJobs = jobs.filter(job =>
-   // job.id !== jobId &&
-   // job.keySkills && // Ensure job.keySkills is not null or undefined
-   // job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
-   // );
-
+   const handleSaveJob = async () =>
+   {
+      try
+      {
+         if (isSaved)
+         {
+            // Remove job from favorites
+            await axiosRequest.delete(`/favorite-jobs/delete/${favoriteId}`);
+            setIsSaved(false);
+            setFavoriteId(null);
+         } else
+         {
+            // Save job
+            const data = await axiosRequest.post('/favorite-jobs/add', { jobId });
+            if (data && data.favoriteId)
+            {
+               setFavoriteId(data.favoriteId);
+               setIsSaved(true);
+            } else
+            {
+               console.error('Response does not contain favoriteId:', data);
+               alert('Failed to save job.');
+            }
+         }
+      } catch (error)
+      {
+         console.error("Error saving/removing job:", error);
+         navigate(`/login`);
+         // alert("Failed to save/remove job.");
+      }
+   };
 
    return (
       <GlobalLayoutUser>
@@ -250,13 +310,14 @@ export const JobSingle = () => {
                      <div className="col-lg-8 mb-4 mb-lg-0">
                         <div className="d-flex align-items-center">
                            <div>
-                              <h2>{jobData?.title}</h2>
+                              <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>{jobData?.title}</h2>
                               <div className="m-0 mt-3">
-                                 <span className="icon-room" />
-                                 {companyData?.location}
+                                 <span className="icon-room" style={{ fontSize: '23px', marginLeft: '-3px' }} />
+                                 <span className="text-dark ml-1">{companyData?.location}</span>
                               </div>
                               <div className="m-0 mt-3">
-                                 {jobData.categoryId.map((id) => {
+                                 {jobData.categoryId.map((id) =>
+                                 {
                                     const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
                                     return categoryName ? (
                                        <NavLink key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={""}>
@@ -266,32 +327,42 @@ export const JobSingle = () => {
                                  })}
                               </div>
 
-
                               {/* <div className="m-0 mt-3" >
-{jobData?.keySkills.split(',').map((skill, index) => (
-<span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
-))}
-</div> */}
+                                 {jobData?.keySkills.split(',').map((skill, index) => (
+                                    <span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
+                                 ))}
+                              </div> */}
                            </div>
                         </div>
                      </div>
                      <div className="col-lg-4">
                         <div className="row">
                            <div className="col-6">
-                              <a href="" className="btn btn-block btn-light btn-md">
+                              <button
+                                 // className="btn btn-block btn-light btn-md"
+                                 className={`btn btn-block ${isSaved ? 'btn_saved_job' : 'btn-light'} btn-md`}
+                                 onClick={handleSaveJob}
+                              >
                                  <span className="icon-heart-o mr-2 text-danger" />
-                                 Save Job
-                              </a>
+                                 {isSaved ? 'Saved Job' : 'Save Job'}
+                              </button>
                            </div>
                            <div className="jb-overview-content__apply-btn apply-btn">
+
                               {hasApplied ? (
+
                                  <button className="jb-apply-btn__btn btn bg-secondary text-light" disabled>
+
                                     Applied!
+
                                  </button>
+
                               ) : (
+
                                  <a
                                     href="#"
                                     className="jb-apply-btn__btn btn bg-primary text-light"
+
                                     onClick={handleApplyClick}
                                  >
                                     Apply Now
@@ -299,11 +370,7 @@ export const JobSingle = () => {
                               )}
                            </div>
 
-
-
-                           {showApplyBox && <ApplyBox company={jobData} jobId={jobId} userId={userId}  />}
-
-
+                           {showApplyBox && <ApplyBox company={jobData} jobId={jobId} userId={userId} onClose={handleCloseApplyBox} />}
                         </div>
                      </div>
                   </div>
@@ -315,9 +382,7 @@ export const JobSingle = () => {
                               Job description
                            </h3>
 
-
                            {addIconsToListItems(jobData?.description)}
-
 
                         </div>
                         <div className="mb-5">
@@ -337,7 +402,6 @@ export const JobSingle = () => {
                            <ul className="list-unstyled m-0 p-0">
                               {addIconsToListItems(jobData?.responsibilities)}
                            </ul>
-
 
                         </div>
                         <div className="mb-5">
@@ -364,7 +428,7 @@ export const JobSingle = () => {
                      </div>
                      <div className="col-lg-4">
                         <div className="bg-light p-3 border rounded mb-4">
-                           <h3 className="text-primary mt-3 h5 pl-3 mb-3 ">
+                           <h3 className="text-primary  mt-3 h5 pl-3 mb-3 ">
                               Job Summary
                            </h3>
                            <ul className="list-unstyled pl-3 mb-0">
@@ -399,7 +463,7 @@ export const JobSingle = () => {
                            </ul>
                         </div>
                         <div className="bg-light p-3 border rounded">
-                           <h3 className="text-primary mt-3 h5 pl-3 mb-3 ">Company Information</h3>
+                           <h3 className="text-primary  mt-3 h5 pl-3 mb-3 ">Company Information</h3>
                            <div className="px-3">
                               <div className="d-flex align-items-center">
                                  <img
@@ -445,33 +509,39 @@ export const JobSingle = () => {
                      </div>
                   </div>
                   <ul className="job-listings mb-5">
-                     {relatedJobs.map(job => {
+                     {relatedJobs.map(job =>
+                     {
                         const company = companies.find(company => company.companyId === job.companyId);
                         const address = getLocation1String(company?.location);
-                        if (company) {
+                        if (company)
+                        {
                            return (
-                              <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
+                              <li className="col-12 job-listing d-block d-sm-flex pb-0 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
                                  <div className="job-listing-logo">
                                     <img
                                        src={company.logo}
                                        alt="Free Website"
                                        className="img-fluid p-0 d-inline-block rounded-sm me-2 bg-white"
-                                       onClick={() => {
+                                       onClick={() =>
+                                       {
                                           handleCompanyClick(job.companyId);
                                        }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
                                     />
                                  </div>
                                  <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
                                     <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                                       <h2 className="mb-2" onClick={() => {
+                                       <h2 className="mb-2" onClick={() =>
+                                       {
                                           handleJobDetailClick(job.id, job.companyId);
                                           console.log(job.companyId);
                                        }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
-                                       <strong onClick={() => {
+                                       <strong onClick={() =>
+                                       {
                                           handleCompanyClick(job.companyId);
                                        }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
                                        <div className="m-0 mt-3">
-                                          {job.categoryId.map((id) => {
+                                          {job.categoryId.map((id) =>
+                                          {
                                              const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
                                              return categoryName ? (
                                                 <span key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">
@@ -481,10 +551,10 @@ export const JobSingle = () => {
                                           })}
                                        </div>
                                        {/* <div className='d-flex flex-wrap mt-2'>
-{job.keySkills.split(',').map((skill, index) => (
-<span key={index} className="bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
-))}
-</div> */}
+                                          {job.keySkills.split(',').map((skill, index) => (
+                                             <span key={index} className="bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
+                                          ))}
+                                       </div> */}
                                     </div>
                                     <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">
                                        <div className="justify-content-start me-3">
@@ -496,14 +566,12 @@ export const JobSingle = () => {
                                     </div>
                                  </div>
 
-
                               </li>
                            );
                         }
                         return null;
                      })}
                   </ul>
-
 
                </div>
             </section>
@@ -605,6 +673,4 @@ export const JobSingle = () => {
    );
 };
 
-
 export default JobSingle;
-

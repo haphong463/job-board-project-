@@ -22,3 +22,9 @@ export const getAllBlogFilter = async (
 
 export const findBlogById = async (blogId) =>
   await axiosRequest.get(`/blogs/${blogId}`);
+
+export const getAllHashTags = async () =>
+  await axiosRequest.get("/blogs/hashtags");
+
+export const getBlogPopular = async () =>
+  await axiosRequest.get("/blogs/popular");

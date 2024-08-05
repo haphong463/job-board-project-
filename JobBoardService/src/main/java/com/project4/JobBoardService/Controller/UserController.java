@@ -1,7 +1,10 @@
 package com.project4.JobBoardService.Controller;
 
+import com.project4.JobBoardService.Config.Annotation.CheckPermission;
 import com.project4.JobBoardService.DTO.UserDTO;
+import com.project4.JobBoardService.Entity.Permission;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Enum.EPermissions;
 import com.project4.JobBoardService.Enum.ERole;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.payload.PaginatedResponse;
@@ -17,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +39,8 @@ public class UserController {
     @Autowired
     private JwtUtils jwtUtils;
 
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @GetMapping("/registration-count/year")
     public ResponseEntity<List<Map<String, Object>>> getUserRegistrationCountsForYear(@RequestParam int year) {
         List<Map<String, Object>> registrationCounts = userService.getUserRegistrationCountsForYear(year);
@@ -81,8 +86,19 @@ public class UserController {
         }
     }
 
+    @GetMapping("/permissions")
+    public ResponseEntity<?> getAllPermission(){
+        try {
+            List<Permission> permissions = userService.getAllPermission();
+            return ResponseEntity.ok(permissions);
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/search")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    @CheckPermission(EPermissions.MANAGE_USER)
     public ResponseEntity<?> getAllUser(
             @RequestParam String query,
             @RequestParam @Nullable ERole role,
@@ -120,8 +136,40 @@ public class UserController {
         }
     }
 
+    @PutMapping("/{id}/password")
+    @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_EMPLOYER')")
+    public ResponseEntity<?> updatePassword(@PathVariable Long id, @RequestBody Map<String, String> passwordData, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            String authToken = token.replace("Bearer ", "");
+            String tokenUsername = jwtUtils.getUserNameFromJwtToken(authToken);
+
+            // Kiểm tra xem người dùng yêu cầu cập nhật mật khẩu có phải là người dùng hiện tại không
+            if (!tokenUsername.equals(userService.findById(id).orElse(null).getUsername())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this password");
+            }
+
+            // Lấy mật khẩu hiện tại và mật khẩu mới từ yêu cầu
+            String currentPassword = passwordData.get("currentPassword");
+            String newPassword = passwordData.get("newPassword");
+
+            // Xác thực mật khẩu hiện tại
+            User user = userService.findById(id).orElse(null);
+            if (user == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password is incorrect");
+            }
+
+            // Mã hóa mật khẩu mới và cập nhật
+            userService.updatePassword(id, newPassword);
+
+            return ResponseEntity.ok("Password updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error updating password: " + e.getMessage());
+        }
+    }
+
     @PutMapping("/status/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    @CheckPermission(EPermissions.MANAGE_USER)
     public ResponseEntity<?> updateUserEnableStatus(@PathVariable Long id, @RequestBody  Boolean isEnabled){
         try {
             User updateUser = userService.updateUserEnableStatus(id, isEnabled);

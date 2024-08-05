@@ -1,11 +1,10 @@
+import axios from "axios";
 import axiosRequest from "../configs/axiosConfig";
 
 const URL = "/blogs";
 const HEADERS_FORM_DATA = {
   "Content-Type": "multipart/form-data",
 };
-
-export const getAllBlogs = async () => await axiosRequest.get(URL);
 
 export const getAllBlogsByQuery = async (query, type, visibility, page, size) =>
   await axiosRequest.get(
@@ -24,3 +23,28 @@ export const updateBlog = async (data, id) =>
   await axiosRequest.put(`${URL}/${id}`, data, {
     headers: HEADERS_FORM_DATA,
   });
+
+export const getAllHashtag = async () =>
+  await axiosRequest.get(`${URL}/hashtags`);
+
+export const getExcelData = () => {
+  axiosRequest
+    .get(`${URL}/excel`, {
+      method: "GET",
+      responseType: "blob", // Ensure that the response type is blob
+      headers: {
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+    })
+    .then((data) => {
+      const url = window.URL.createObjectURL(new Blob([data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "blogs.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    })
+    .catch((error) => console.error("Error exporting data to Excel:", error));
+};

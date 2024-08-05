@@ -29,6 +29,17 @@ class User {
       imageUrl: json['imageUrl'],
     );
   }
+  factory User.empty() {
+    return User(
+      id: 0,
+      username: '',
+      email: '',
+      firstName: '',
+      lastName: '',
+      bio: '',
+      imageUrl: '',
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {

@@ -1,53 +1,88 @@
-/* .review-form {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 1em;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* src/pages/overlay.css */
+.rv_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    /* Đảm bảo overlay nằm trên tất cả các phần tử khác */
 }
 
-.review-form h2 {
+.rv_overlay-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-.form-group {
-    margin-bottom: 1em;
+.rv_overlay h4 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.5em;
+.rv_overlay p {
+    margin-bottom: 20px;
+    font-size: 1rem;
 }
 
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 0.5em;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+.rv_overlay button {
+    margin: 0 5px;
 }
 
-.form-group textarea {
-    resize: vertical;
+.rv_fade.rv_show {
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
 }
 
-button {
-    display: block;
-    width: 100%;
-    padding: 0.75em;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
+.rv_fade {
+    opacity: 0;
 }
 
-button:hover {
-    background-color: #0056b3;
+.rv_btn-reviewed {
+    background-color: #6c757d;
+    /* Màu xám */
+    border-color: #6c757d;
+    cursor: default;
 }
 
-.star-rating {
-    font-size: 2em;
+.rv_btn-reviewed:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: default;
+}
 
-} */
+.rv_btn-write {
+    background-color: #00af35;
+    /* Màu xám */
+    border-color: #00af35;
+}
+
+.rv_btn-write:hover {
+    background-color: #03d542;
+    border-color: #03d542;
+}
+
+.container {
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+iframe {
+    padding: 0rem;
+}
+
+.card {
+    background-color: white;
+}

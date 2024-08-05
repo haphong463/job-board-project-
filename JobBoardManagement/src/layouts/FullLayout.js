@@ -1,7 +1,13 @@
-import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { Container } from "reactstrap";
+import { Container, Breadcrumb, BreadcrumbItem } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import jwtDecode from "jwt-decode";
@@ -88,6 +94,12 @@ const FullLayout = () => {
     }
   }, [dispatch, localStorage.getItem("accessToken")]);
 
+  useEffect(() => {
+    if (user) {
+      dispatch(getUserByIDThunk(user.sub));
+    }
+  }, [dispatch, user]);
+
   const hasAdminOrModeratorRole = user?.role.some(
     (role) =>
       role.authority === "ROLE_ADMIN" || role.authority === "ROLE_MODERATOR"
@@ -96,6 +108,26 @@ const FullLayout = () => {
   if (!hasAdminOrModeratorRole) {
     return <Navigate to="/jobportal/login" />;
   }
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+  // Helper function to generate breadcrumb items
+  const generateBreadcrumbs = () => {
+    const pathnames = location.pathname.split("/").filter((x) => x);
+    return pathnames.map((value, index) => {
+      const last = index === pathnames.length - 1;
+      const to = `/${pathnames.slice(0, index + 1).join("/")}`;
+      return last ? (
+        <BreadcrumbItem key={to} active>
+          {capitalizeFirstLetter(value)}
+        </BreadcrumbItem>
+      ) : (
+        <BreadcrumbItem key={to}>
+          <Link to={to}>{value === "jobportal" ? "Home" : value}</Link>
+        </BreadcrumbItem>
+      );
+    });
+  };
 
   return (
     <main>
@@ -107,6 +139,7 @@ const FullLayout = () => {
         <div className="contentArea">
           <Header handleLogout={handleLogout} />
           <Container className="p-4 wrapper" fluid>
+            <Breadcrumb>{generateBreadcrumbs()}</Breadcrumb>
             <Outlet />
           </Container>
         </div>

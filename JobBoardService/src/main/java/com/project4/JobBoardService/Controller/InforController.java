@@ -2,7 +2,11 @@ package com.project4.JobBoardService.Controller;
 
 import com.project4.JobBoardService.DTO.InforUserDTO;
 import com.project4.JobBoardService.DTO.UserDTO;
+import com.project4.JobBoardService.DTO.UserEducationDTO;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Entity.UserEducation;
+import com.project4.JobBoardService.Repository.UserEducationRepository;
+import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.InforService;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.security.jwt.JwtUtils;
@@ -17,6 +21,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/users")
 public class InforController {
@@ -27,13 +35,16 @@ public class InforController {
     private InforService inforService;
     @Autowired
     private ModelMapper modelMapper;
-
+    @Autowired
+    UserEducationRepository userEducationRepository;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    UserRepository userRepository;
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ROLE_USER') OR hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_EMPLOYER')")
     public ResponseEntity<?> updateUser1(@PathVariable Long id,
-                                         @ModelAttribute InforUserDTO userDTO, @RequestParam("imageFile") @Nullable MultipartFile file,
+                                         @ModelAttribute InforUserDTO inforUserDTO, @RequestParam("imageFile") @Nullable MultipartFile file,
                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         try {
             String authToken = token.replace("Bearer ", "");
@@ -45,10 +56,10 @@ public class InforController {
                 return ResponseEntity.notFound().build();
             }
 
-            User user = modelMapper.map(userDTO, User.class);
+            User user = modelMapper.map(inforUserDTO, User.class);
             User result = inforService.updateUser1(id, user, file);
 
-            UserDTO resultDTO = modelMapper.map(result, UserDTO.class);
+            InforUserDTO resultDTO = modelMapper.map(result, InforUserDTO.class);
             return ResponseEntity.ok(resultDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -65,5 +76,14 @@ public class InforController {
 
         }
     }
+    @GetMapping("/education/{userId}")
+    public ResponseEntity<List<UserEducationDTO>> getEducationByUserId(@PathVariable Long userId) {
+        List<UserEducation> educations = userEducationRepository.findByUser_Id(userId);
+        List<UserEducationDTO> educationDTOs = educations.stream()
+                .map(education -> modelMapper.map(education, UserEducationDTO.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok().body(educationDTOs);
+    }
+
 
 }
