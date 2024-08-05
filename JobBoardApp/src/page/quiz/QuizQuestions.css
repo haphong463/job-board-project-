@@ -1,6 +1,11 @@
 /* Quiz Component Styles */
 .quiz-container {
-  /* Add any container-specific styles */
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Header Styles */
@@ -12,8 +17,9 @@
 }
 
 .quiz-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
+  color: #333;
 }
 
 .quiz-timer {
@@ -25,11 +31,16 @@
 /* Question Card Styles */
 .quiz-question-card {
   margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 .quiz-question-title {
   font-weight: bold;
   margin-bottom: 15px;
+  font-size: 1.2rem;
 }
 
 .quiz-option-list {
@@ -43,10 +54,11 @@
   border: 1px solid #ddd;
   margin-bottom: 5px;
   border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .quiz-option-item:hover {
-  background-color: #f8f9fa;
+  background-color: #f1f1f1;
 }
 
 .quiz-option-item input[type="radio"] {
@@ -62,6 +74,16 @@
 
 .quiz-nav-button {
   min-width: 100px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  transition: background-color 0.3s;
+}
+
+.quiz-nav-button:hover {
+  background-color: #0056b3;
 }
 
 /* Question List Styles */
@@ -71,6 +93,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 10px;
+  position: relative;
 }
 
 .quiz-question-item {
@@ -78,6 +101,7 @@
   padding: 5px 10px;
   margin-bottom: 5px;
   border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .quiz-question-item--active {
@@ -160,4 +184,32 @@
 
 .modal-open .modal {
   z-index: 1050;
+}
+
+/* Scroll Button Styles */
+.scroll-button {
+  position: absolute;
+  right: 10px;
+  background-color: #ddd;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.scroll-button:hover {
+  background-color: #bbb;
+}
+
+.scroll-button-up {
+  top: 10px;
+}
+
+.scroll-button-down {
+  bottom: 10px;
 }

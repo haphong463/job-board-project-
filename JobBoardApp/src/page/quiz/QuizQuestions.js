@@ -12,7 +12,6 @@ import "./QuizQuestions.css";
 import axiosRequest from "../../configs/axiosConfig";
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
-
 const QuizQuestions = () => {
   const { quizId } = useParams();
   const navigate = useNavigate();
@@ -302,28 +301,28 @@ const QuizQuestions = () => {
                   </div>
                 </div>
                 <div className="col-md-4">
-                  <div className="question-list card mb-3">
-                    <div className="card-body">
-                      <h5 className="card-title">Danh sách câu hỏi</h5>
-                      <ul className="list-group list-group-flush">
-                        {questions.map((question, index) => (
-                          <li
-                            key={question.id}
-                            className={`list-group-item ${
-                              index === currentQuestionIndex ? "active" : ""
-                            } ${
-                              selectedAnswers[question.id]
-                                ? "answered"
-                                : "unanswered"
-                            }`}
-                            onClick={() => handleQuestionClick(index)}
-                          >
-                            {index + 1}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+             <div className="question-list card mb-3">
+  <div className="card-body">
+    <h5 className="card-title">Danh sách câu hỏi</h5>
+    <ul className="list-group list-group-flush quiz-question-list">
+      {questions.map((question, index) => (
+        <li
+          key={question.id}
+          className={`list-group-item quiz-question-item ${
+            index === currentQuestionIndex ? "quiz-question-item--active" : ""
+          } ${
+            selectedAnswers[question.id]
+              ? "quiz-question-item--answered"
+              : "unanswered"
+          }`}
+          onClick={() => handleQuestionClick(index)}
+        >
+          {index + 1}
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
                   <div className="summary card">
                     <div className="card-body">
                       <p>
