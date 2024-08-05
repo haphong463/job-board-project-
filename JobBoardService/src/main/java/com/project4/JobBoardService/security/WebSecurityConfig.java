@@ -73,6 +73,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/payment/**").permitAll()
                                 .requestMatchers("/api/employer/**").permitAll()
                                 .requestMatchers("/api/certificates/**").permitAll()
+                                .requestMatchers("/api/companies/{companyId}/reviews/**").permitAll()
 
                                 .requestMatchers("/api/usercv/**").permitAll()
                                 .requestMatchers("/api/templates/**").permitAll()

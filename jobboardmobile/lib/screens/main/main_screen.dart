@@ -31,7 +31,6 @@ class _MainScreenState extends State<MainScreen> {
   final CompanyService _companyService = CompanyService();
   final JobService _jobService = JobService();
 
-
   final storage = const FlutterSecureStorage();
   String? firstName;
   String? lastName;
@@ -41,7 +40,6 @@ class _MainScreenState extends State<MainScreen> {
   List<Job> _jobs = [];
   Map<int, Company> _companyMap = <int, Company>{};
 
-
   @override
   void initState() {
     super.initState();
@@ -49,8 +47,6 @@ class _MainScreenState extends State<MainScreen> {
     _fetchUserDetails();
     _fetchCompaniesAndJobs();
   }
-
-  
 
   void _fetchUserDetails() async {
     firstName = await _authService.getFirstName();
@@ -73,6 +69,15 @@ class _MainScreenState extends State<MainScreen> {
         };
       });
     } catch (e) {}
+  }
+
+  void _navigateToProfile() async {
+    final result = await Navigator.pushNamed(context, '/myprofile');
+    if (result == true) {
+      // Profile was updated, refresh user details
+      _fetchUserDetails();
+      setState(() {}); // Trigger a rebuild of the UI
+    }
   }
 
   void _logout() async {
@@ -151,6 +156,7 @@ class _MainScreenState extends State<MainScreen> {
               color: ColorUtil.primaryColor,
             ),
           ),
+          _buildDrawerItem(Icons.note_add, 'My Profile', _navigateToProfile),
           _buildDrawerItem(Icons.business, 'Companies', () {
             Navigator.push(
               context,
@@ -390,7 +396,8 @@ class RecentlyAddedCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => JobDetailsScreen(job: job, company: company),
+            builder: (context) =>
+                JobDetailsScreen(job: job, company: company, isHtml: false),
           ),
         );
       },

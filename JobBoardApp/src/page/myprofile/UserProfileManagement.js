@@ -47,9 +47,11 @@ const UserProfileManagement = () => {
   }, [dispatch, user?.id]);
 
   const handleManageCVClick = () => {
+    navigate('/list-template');
+  };
+  const handleMyprofile = () => {
     navigate('/myprofile');
   };
-
   const handleAddCertificate = () => {
     dispatch(createCertificateThunk({ ...newCertificate, userId: user.id }));
     setNewCertificate({ name: '', organization: '', issueDate: '', link: '', description: '' });
@@ -142,7 +144,7 @@ const UserProfileManagement = () => {
                     active={activeTab === 'manage'}
                     onClick={() => {
                       setActiveTab('manage');
-                      handleManageCVClick(); // Trigger navigation
+                      handleMyprofile(); // Trigger navigation
                     }}
                   >
                     Manage Profile
@@ -167,13 +169,13 @@ const UserProfileManagement = () => {
                   <Form.Group as={Row} className="mb-3">
                     <Form.Label column sm={3}><FaCalendar /> Date of Birth</Form.Label>
                     <Col sm={9}>
-                      <Form.Control type="date" value={user?.birthDate || ''} readOnly />
+                      <Form.Control type="date" value={user?.dateOfBirth || ''} readOnly />
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row} className="mb-3">
                     <Form.Label column sm={3}><FaMapMarkerAlt /> Current Address</Form.Label>
                     <Col sm={9}>
-                      <Form.Control type="text" value={user?.address || ''} readOnly />
+                      <Form.Control type="text" value={user?.currentAddress || ''} readOnly />
                     </Col>
                   </Form.Group>
                   <Form.Group as={Row} className="mb-3">

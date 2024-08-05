@@ -51,4 +51,23 @@ class Company {
       membershipRequired: json['membershipRequired'] ?? false,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'companyId': companyId,
+      'companyName': companyName,
+      'logo': logo,
+      'websiteLink': websiteLink,
+      'description': description,
+      'location': location,
+      'keySkills': keySkills,
+      'type': type,
+      'companySize': companySize,
+      'country': country,
+      'countryCode': countryCode,
+      'workingDays': workingDays,
+      // 'reviews': reviews.map((review) => review.toJson()).toList(),
+      'membershipRequired': membershipRequired,
+    };
+  }
 }

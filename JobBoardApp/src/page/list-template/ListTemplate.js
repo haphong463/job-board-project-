@@ -212,8 +212,7 @@ const ListTemplate = () => {
                         />
                         <div className="template-details">
                           <span className="template-title">{template.templateName}</span>
-                          <span className="template-date">
-                            Created: {new Date(template.createdAt).toLocaleDateString()}
+                          <span className="template-date"> <strong>Created: {new Date(template.createdAt).toLocaleDateString()}</strong>
                           </span>
                         </div>
                       </>
@@ -221,6 +220,7 @@ const ListTemplate = () => {
                       <div className="placeholder-image">No Image Available</div>
                     )}
                   </div>
+
                 </div>
               ))
             ) : (

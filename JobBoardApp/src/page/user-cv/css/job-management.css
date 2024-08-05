@@ -8,9 +8,9 @@
   font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-weight: bolder;
   font-size: 2rem;
-  color: #89ba16b8 !important;
+  color: #ffffff !important;
   padding: 10px;
-  text-shadow: 1px 1px #000000b8 !important;
+  text-shadow: 2px 2px #89ba16dc !important;
 }
 .applied-jobs-list {
   list-style-type: none;
@@ -45,6 +45,7 @@
 }
 
 .job-title {
+  color: #000000;
   font-size: 18px;
   font-weight: bold;
 }
@@ -151,3 +152,24 @@
   pointer-events: none;
   cursor: default;
 }
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job-status-tag {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  color: white;
+}
+
+.approved {
+  background-color: green;
+}
+
+.not-approved {
+  background-color: rgb(130, 130, 130);
+}
+

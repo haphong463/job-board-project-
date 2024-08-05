@@ -130,13 +130,13 @@ function MainCv() {
           </div>
 
           <hr style={{
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             width: '100%',
           }} />
           <h2 className='mt-3'>Global Actions</h2>
           <Link to="/list-template" >
             <div className="global-action-item">
-              <i className="fas fa-list mr-2"></i> To List Template
+              <i className="fas fa-list mr-2"></i> List Template
             </div>
           </Link>
           <Link to="/quiz">

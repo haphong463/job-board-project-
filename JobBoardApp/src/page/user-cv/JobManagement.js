@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axiosRequest from '../../configs/axiosConfig';
 import './css/job-management.css';
@@ -17,6 +16,7 @@ const JobManagement = () => {
             try {
                 const response = await axiosRequest.get(`/application/user/${userId}`);
                 setAppliedJobs(response);
+                console.log("data", response);
             } catch (error) {
                 console.error('Error fetching applied jobs:', error);
             }
@@ -27,10 +27,11 @@ const JobManagement = () => {
     const indexOfLastJob = currentPage * jobsPerPage;
     const indexOfFirstJob = indexOfLastJob - jobsPerPage;
     const currentJobs = appliedJobs.slice(indexOfFirstJob, indexOfLastJob);
+
     const handleJobClick = (jobId, companyId) => {
         navigate(`/jobDetail/${jobId}/${companyId}`);
-      };
-      
+    };
+
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
@@ -42,37 +43,40 @@ const JobManagement = () => {
                 <>
                     <ul className="applied-jobs-list">
                         {currentJobs.map((application) => (
-                           <li key={application.id} className="applied-job-item" onClick={() => handleJobClick(application.jobDTO.id,application.companyDTO.companyId)}>
-                           <div className="job-header">
-                             <div className="job-title">{application.jobDTO.title}</div>
-                           </div>
-                           <div className="company-logo-name">
-                             <img src={application.companyDTO.logo} alt={`${application.companyDTO.companyName} logo`} className="company-logo" />
-                             <span className="company-name">
-                                {application.companyDTO.companyName}
-                             </span>
-                             <div className='mt-1'>
-                             <i className="fas fa-dollar-sign text-secondary"></i> Offered Salary: {application.jobDTO.offeredSalary}
-                             </div>
-                           </div>
-                           <hr className='hr-css-job'/>
-                           <div className="job-details">
-                             <span className="detail-item">
-                               <i className="fas fa-briefcase text-secondary"></i> {application.jobDTO.jobType}
-                             </span>
-                           </div>
-                           <div className="job-details">
-                             <span className="detail-item">
-                               <i className="fas fa-map-marker-alt text-secondary"></i> {application.companyDTO.location}
-                             </span>
-                           </div>
-                           <div className="job-tags">
-                             <span className="tag">
-                                {application.jobDTO.keySkills}
-                             </span> 
-                           </div>
-                         </li>
-                         
+                            <li key={application.id} className="applied-job-item" onClick={() => handleJobClick(application.jobDTO.id, application.companyDTO.companyId)}>
+                               <div className="job-header">
+                                    <div className="job-title">{application.jobDTO.title}</div>
+                                    <div className={`job-status-tag ${application.approved ? 'approved' : 'not-approved'}`}>
+                                        <i className={`fas ${application.approved ? 'fa-check-circle' : 'fa-times-circle'}`} style={{ marginRight: '5px' }}></i>
+                                        {application.approved ? 'Recruiter has seen' : 'Recruiter hasn\'t seen'}
+                                    </div>
+                                </div> 
+                                <div className="company-logo-name">
+                                    <img src={application.companyDTO.logo} alt={`${application.companyDTO.companyName} logo`} className="company-logo" />
+                                    <span className="company-name">
+                                        {application.companyDTO.companyName}
+                                    </span>
+                                    <div className='mt-1'>
+                                        <i className="fas fa-dollar-sign text-secondary"></i> Offered Salary: {application.jobDTO.offeredSalary}
+                                    </div>
+                                </div>
+                                <hr className='hr-css-job' />
+                                <div className="job-details">
+                                    <span className="detail-item">
+                                        <i className="fas fa-briefcase text-secondary"></i> {application.jobDTO.jobType}
+                                    </span>
+                                </div>
+                                <div className="job-details">
+                                    <span className="detail-item">
+                                        <i className="fas fa-map-marker-alt text-secondary"></i> {application.companyDTO.location}
+                                    </span>
+                                </div>
+                                <div className="job-tags">
+                                    <span className="tag">
+                                        {application.jobDTO.keySkills}
+                                    </span>
+                                </div>
+                            </li>
                         ))}
                     </ul>
                     <Pagination
@@ -112,6 +116,5 @@ const Pagination = ({ jobsPerPage, totalJobs, paginate, currentPage }) => {
         </nav>
     );
 };
-
 
 export default JobManagement;

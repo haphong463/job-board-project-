@@ -4,7 +4,9 @@ import com.project4.JobBoardService.Entity.Permission;
 import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Enum.Gender;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -25,4 +27,7 @@ public class InforUserDTO {
     private List<CertificateDTO> certificates;
     private List<UserEducationDTO> userEducations;
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate dateOfBirth;
+    private String currentAddress;
 }

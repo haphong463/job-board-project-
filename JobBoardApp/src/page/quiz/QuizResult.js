@@ -34,13 +34,13 @@ const QuizResult = () => {
 
   if (score <= 7) {
     image = images.bad;
-    message = `Bạn chưa nhận được chứng chỉ của hệ thống do chưa lọt Top 20% ứng viên xuất sắc nhất . Đừng nản chí, bạn vẫn còn 1 lần làm lại bài đánh giá. Hãy cố gắng vượt qua nhé!`;
+    message = `You have not received the system's certificate as you have not made it into the top 20% of outstanding candidates. Don't be discouraged, you still have one more chance to retake the assessment. Try to pass!`;
   } else {
     image = images.success;
-    message = `Chúc mừng bạn đã xuất sắc vượt qua bài đánh giá và lọt vào Top 20% ứng viên! 🎉
-Bạn đã hoàn thành tất cả các yêu cầu và chứng tỏ được sự xuất sắc của mình.
-Chúng tôi rất vui mừng thông báo rằng bạn đã nhận được chứng chỉ của hệ thống.
-Chúc bạn tiếp tục thành công trên con đường sự nghiệp của mình!`;
+    message = `Congratulations on successfully passing the assessment and making it into the top 20% of candidates! 🎉
+You have met all the requirements and demonstrated your excellence.
+We are pleased to inform you that you have received the system's certificate.
+We wish you continued success in your career!`;
   }
 
   const handleGoBack = () => {
@@ -75,20 +75,19 @@ Chúc bạn tiếp tục thành công trên con đường sự nghiệp của m�
             </div>
           </div>
         </section>
-        <div class="container">
-
-        <div className="quiz-result-container">
-          <h2>Kết quả bài thi</h2>
-          <div className="result-score">
-            <img src={image} alt="result" className="result-image" />
-            <p className="result-message">{message.split('\n').map((line, index) => (
-              <React.Fragment key={index}>{line}<br /></React.Fragment>
-            ))}</p>
+        <div className="container">
+          <div className="quiz-result-container">
+            <h2>Quiz Results</h2>
+            <div className="result-score">
+              <img src={image} alt="result" className="result-image" />
+              <p className="result-message">{message.split('\n').map((line, index) => (
+                <React.Fragment key={index}>{line}<br /></React.Fragment>
+              ))}</p>
+            </div>
+            <div className="result-actions">
+              <button className="btn btn-secondary" onClick={handleGoBack}>Back to skill list</button>
+            </div>
           </div>
-          <div className="result-actions">
-            <button className="btn btn-secondary" onClick={handleGoBack}>Quay lại trang danh sách kỹ năng</button>
-          </div>
-        </div>
         </div>
       </>
     </GlobalLayoutUser>

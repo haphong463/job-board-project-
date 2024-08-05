@@ -263,7 +263,6 @@ public class UserCvController {
 
         return ResponseEntity.ok().body("CV Update Success!");
     }
-    @PostMapping("/submit-cv")
     public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV,
                                            @RequestParam("profileImage") MultipartFile profileImage,
                                            @RequestParam("dob") Long dobTimestamp) {
