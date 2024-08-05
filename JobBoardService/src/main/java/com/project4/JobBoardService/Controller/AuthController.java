@@ -5,7 +5,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.project4.JobBoardService.Config.ErrorDetails;
 import com.project4.JobBoardService.Config.TokenRefreshException;
 import com.project4.JobBoardService.DTO.UserDTO;
 import com.project4.JobBoardService.Entity.Employer;
@@ -31,8 +30,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -73,6 +74,9 @@ public class AuthController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
 
     @Value("${app.googleClientID}")
@@ -299,30 +303,45 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid credentials! Please try again."));
+        }
+
         Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
         if (!optionalUser.isPresent()) {
             return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Invalid credentials! Please try again.")
-                    );
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid credentials! Please try again."));
         }
+
         User user = optionalUser.get();
+        // Kiểm tra tài khoản có bị vô hiệu hóa hay không
         if (!user.getIsEnabled()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Your account is deactivated."));
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse("Your account is deactivated."));
         }
-        boolean isEmployer = user.getRoles().stream()
-                .anyMatch(role -> role.getName().equals(ERole.ROLE_EMPLOYER));
-        if (!isEmployer && !user.isVerified()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Please verify your email."));
+
+        // Kiểm tra tài khoản đã được xác minh email chưa, ngoại trừ ROLE_EMPLOYER
+        if (!user.isVerified() && !user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(ERole.ROLE_EMPLOYER))) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse("Please verify your email."));
         }
 
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
@@ -338,9 +357,9 @@ public class AuthController {
                 userDetails.getLastName(),
                 roles
         );
-
         return ResponseEntity.ok(jwtResponse);
     }
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -476,7 +495,6 @@ public class AuthController {
     @PostMapping("/signout")
     public ResponseEntity<?> signOutUser(@RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
-
         refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshToken -> {
                     SecurityContextHolder.clearContext();

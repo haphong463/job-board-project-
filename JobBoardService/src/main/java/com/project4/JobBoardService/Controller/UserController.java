@@ -19,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,9 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     @GetMapping("/registration-count/year")
     public ResponseEntity<List<Map<String, Object>>> getUserRegistrationCountsForYear(@RequestParam int year) {
         List<Map<String, Object>> registrationCounts = userService.getUserRegistrationCountsForYear(year);
@@ -174,9 +178,10 @@ public class UserController {
         try {
             User updateUser = userService.updateUserEnableStatus(id, isEnabled);
             if(updateUser == null) return ResponseEntity.notFound().build();
-
             UserDTO userDTO = modelMapper.map(updateUser, UserDTO.class);
-
+            if(!userDTO.getIsEnabled()){
+                messagingTemplate.convertAndSend("/topic/deactivated", userDTO);
+            }
             return ResponseEntity.ok(userDTO);
         }catch(Exception e){
             return ResponseEntity.internalServerError().body(e.getMessage());

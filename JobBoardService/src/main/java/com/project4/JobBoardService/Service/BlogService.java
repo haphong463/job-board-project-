@@ -15,10 +15,11 @@ public interface BlogService {
     Blog getBlogById(Long id);
     void deleteBlog(Long id);
     Blog getBlogBySlug(String slug);
-    Page<Blog> searchBlogs(String query, String type, Pageable pageable, Boolean visibility);//    int getCommentCount();
+    Page<Blog> searchBlogs(String query, String type, Pageable pageable, Boolean visibility, Boolean archive);//    int getCommentCount();
     List<HashTag> getAllHashTag();
     int getCommentCountByBlog(Blog blog);  // New method for comment count
     Blog getBlogByTitle(String title);
     void incrementViewBlog(Blog blog);
     List<Blog> getPopularBlog();
+    void updateIsArchiveStatus(List<Long> blogIds, boolean isArchive);
 }

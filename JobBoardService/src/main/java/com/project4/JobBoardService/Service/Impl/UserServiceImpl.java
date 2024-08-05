@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
     @Override
     public User updateUserPermissions(Long userId, List<String> permissions) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
@@ -83,6 +84,7 @@ public class UserServiceImpl implements UserService {
         return permissionRepository.findAll();
     }
 
+
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -101,7 +103,7 @@ public class UserServiceImpl implements UserService {
             handleImageFile(existingUser, multipartFile, "update");
             return userRepository.save(existingUser);
         } else {
-            logger.warning("Blog not found: " + id);
+            logger.warning("User not found: " + id);
             return null;
         }
     }
@@ -179,13 +181,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void updateUserDetails(User existingBlog, User updatedBlog) {
-        existingBlog.setFirstName(updatedBlog.getFirstName());
-        existingBlog.setLastName(updatedBlog.getLastName());
-        existingBlog.setGender(updatedBlog.getGender());
-        existingBlog.setBio(updatedBlog.getBio());
-//        existingBlog.setStatus(updatedBlog.getStatus());
-//        existingBlog.setSlug(updatedBlog.getSlug());
-//        existingBlog.setCitation(updatedBlog.getCitation());
+    private void updateUserDetails(User existingUser, User updatedUser) {
+        existingUser.setFirstName(updatedUser.getFirstName());
+        existingUser.setLastName(updatedUser.getLastName());
+        existingUser.setGender(updatedUser.getGender());
+        existingUser.setBio(updatedUser.getBio());
     }
 }

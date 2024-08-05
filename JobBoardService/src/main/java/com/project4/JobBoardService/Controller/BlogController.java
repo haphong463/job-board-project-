@@ -4,6 +4,7 @@ import com.project4.JobBoardService.Config.Annotation.CheckPermission;
 import com.project4.JobBoardService.DTO.BlogDTO;
 import com.project4.JobBoardService.DTO.BlogResponseDTO;
 import com.project4.JobBoardService.DTO.HashTagDTO;
+import com.project4.JobBoardService.DTO.UpdateArchiveRequestDTO;
 import com.project4.JobBoardService.Entity.Blog;
 import com.project4.JobBoardService.Entity.BlogCategory;
 import com.project4.JobBoardService.Entity.HashTag;
@@ -91,15 +92,16 @@ public class BlogController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Integer visibility,
-            @RequestParam(defaultValue = "asc") String order
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(required = false, defaultValue = "false") Boolean archive // Thêm tham số này
     ) {
         Sort sort = order.equalsIgnoreCase("desc") ? Sort.by("createdAt").descending() : Sort.by("createdAt").ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Boolean visibilityFlag = visibility == 0 ? Boolean.TRUE : visibility == 1 ? Boolean.FALSE : null;
 
-
-        Page<Blog> blogsPage = blogService.searchBlogs(query, "ALL".equals(type) ? null : type, pageable, visibilityFlag);
+        // Gọi searchBlogs với tham số archive
+        Page<Blog> blogsPage = blogService.searchBlogs(query, "ALL".equals(type) ? null : type, pageable, visibilityFlag, archive);
 
         List<BlogResponseDTO> blogResponseDTOs = blogsPage.stream()
                 .map(blog -> modelMapper.map(blog, BlogResponseDTO.class))
@@ -114,6 +116,7 @@ public class BlogController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/hashtags")
     public ResponseEntity<List<HashTagDTO>> getAllHashTags(){
             try {
@@ -123,6 +126,14 @@ public class BlogController {
             }catch(Exception e){
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    @CheckPermission(EPermissions.MANAGE_BLOG)
+    @PutMapping("/archive")
+    public ResponseEntity<?> updateIsArchiveStatus(@RequestBody UpdateArchiveRequestDTO request) {
+        blogService.updateIsArchiveStatus(request.getBlogIds(), request.getIsArchive() == 1 ? Boolean.TRUE : Boolean.FALSE);
+        return ResponseEntity.ok("Blog archive status updated successfully");
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")

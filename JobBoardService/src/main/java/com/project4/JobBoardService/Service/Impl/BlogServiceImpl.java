@@ -139,8 +139,8 @@ public class BlogServiceImpl implements BlogService {
 
 
     @Override
-    public Page<Blog> searchBlogs(String query, String type, Pageable pageable, Boolean visibility) {
-        return blogRepository.searchByQuery(type, query, visibility, pageable);
+    public Page<Blog> searchBlogs(String query, String type, Pageable pageable, Boolean visibility, Boolean archive) {
+        return blogRepository.searchByQuery(type, query, visibility, archive, pageable);
     }
 
     @Override
@@ -166,6 +166,15 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public List<Blog> getPopularBlog() {
         return blogRepository.findTop4ByOrderByViewDesc();
+    }
+
+    @Override
+    public void updateIsArchiveStatus(List<Long> blogIds, boolean isArchive) {
+        List<Blog> blogs = blogRepository.findAllById(blogIds);
+        for (Blog blog : blogs) {
+            blog.setIsArchive(isArchive);
+        }
+        blogRepository.saveAll(blogs);
     }
 
     private void deleteImageFile(Blog blog) {

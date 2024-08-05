@@ -17,9 +17,13 @@ import java.util.List;
 
 public interface BlogRepository extends JpaRepository<Blog, Long> {
     long countByUserAndCreatedAtBetween(User user, LocalDateTime startDate, LocalDateTime endDate);
+
     int countByCategories(BlogCategory blogCategory);
+
     Blog findBySlug(@Param("slug") String slug);
+
     int countByComments(Comment comment);
+
     Blog findByTitle(String title);
 
     @Query("SELECT DISTINCT b FROM Blog b " +
@@ -30,11 +34,14 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
             "OR LOWER(b.content) LIKE %:query% " +
             "OR LOWER(c.name) LIKE %:query% " +
             "OR LOWER(h.name) LIKE %:query%) " +
-            "AND (:visibility IS NULL OR b.visibility = :visibility)")
+            "AND (:visibility IS NULL OR b.visibility = :visibility) " +
+            "AND (:archive IS NULL OR b.isArchive = :archive)")
     Page<Blog> searchByQuery(@Param("type") String type,
                              @Param("query") String query,
                              @Param("visibility") Boolean visibility,
+                             @Param("archive") Boolean archive,
                              Pageable pageable);
+
 
     @Modifying
     @Transactional
