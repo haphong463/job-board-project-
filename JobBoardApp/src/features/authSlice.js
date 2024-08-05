@@ -20,13 +20,13 @@ export const signIn = createAsyncThunk(
         });
       }
       if (res.userId) {
-        localStorage.setItem('userId', res.userId.toString()); // Ensure userId is stored as a string
+        localStorage.setItem("userId", res.userId.toString()); // Ensure userId is stored as a string
       }
       return res;
     } catch (error) {
       console.log(">>>error sign in: ", error);
       const status = error.response.status;
-      if (status === 400) {
+      if ((status === 401 || status === 403) && error.response.data.message) {
         return rejectWithValue(error.response.data.message);
       }
       return rejectWithValue(error.message);
@@ -41,7 +41,7 @@ export const signInOAuth2 = createAsyncThunk(
       const res = await signInOAuth2Async(data);
       return res;
     } catch (error) {
-      console.log('>>> error oauth2: ', error)
+      console.log(">>> error oauth2: ", error);
       const status = error.response.status;
       if (status === 400) {
         return rejectWithValue(error.response.data.message);
@@ -57,6 +57,7 @@ export const signOut = createAsyncThunk(
     try {
       const refreshToken = localStorage.getItem("refreshToken");
       const res = await signOutAsync(refreshToken);
+      console.log(res);
       return res;
     } catch (error) {
       console.log(error);
@@ -167,7 +168,7 @@ const authSlice = createSlice({
       state.verificationMessage = null;
     },
     resetMessages(state) {
-     state.error = null;
+      state.error = null;
     },
     setCurrentUser(state, action) {
       state.currentUser = action.payload;

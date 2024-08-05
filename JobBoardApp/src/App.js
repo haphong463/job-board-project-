@@ -4,8 +4,7 @@ import { routes } from "./utils/variables/routes";
 import "./index.css";
 import { FaThumbsUp } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import
-{
+import {
   connectWebSocket,
   disconnectWebSocket,
 } from "./services/WebSocketService";
@@ -14,24 +13,19 @@ import ThemeRoutes from "./router/Router";
 import { refreshAuthToken } from "./utils/authUtils";
 import { ToastContainer } from "react-toastify";
 
-function App ()
-{
+function App() {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  useEffect(() =>
-  {
-    if (user)
-    {
+  useEffect(() => {
+    if (user) {
       refreshAuthToken(user, dispatch, navigate);
     }
   }, []);
 
-  useEffect(() =>
-  {
-    if (user)
-    {
+  useEffect(() => {
+    if (user) {
       connectWebSocket(user);
       dispatch(getNotificationThunk(user.id));
     }

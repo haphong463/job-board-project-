@@ -26,6 +26,7 @@ import { BlogSideBar } from "./BlogSideBar";
 import "./style.css";
 import axiosRequest from "../../configs/axiosConfig";
 import { FaEye } from "react-icons/fa";
+
 export const BlogSingle = () => {
   const dispatch = useDispatch();
   const blog = useSelector((state) => state.blogs.blog);
@@ -58,6 +59,7 @@ export const BlogSingle = () => {
   useEffect(() => {
     if (blog && blog.content) {
       setReadingTime(calculateReadingTime(blog.content));
+      saveBlogToLocalStorage(blog);
     }
   }, [blog]);
 
@@ -65,7 +67,6 @@ export const BlogSingle = () => {
     const socket = new SockJS(process.env.REACT_APP_WEBSOCKET_ENDPOINT);
     const stompClient = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => console.log(str),
     });
 
     const handleBeforeUnload = () => {
@@ -105,7 +106,22 @@ export const BlogSingle = () => {
   const handleAddComment = (newComment) => {
     dispatch(addComment(newComment));
   };
-  console.log(">>>Read count: ", readingCount);
+
+  const saveBlogToLocalStorage = (blog) => {
+    let viewedBlogs = JSON.parse(localStorage.getItem("viewedBlogs")) || [];
+    const isBlogAlreadyViewed = viewedBlogs.some(
+      (viewedBlog) => viewedBlog.id === blog.id
+    );
+
+    if (!isBlogAlreadyViewed) {
+      if (viewedBlogs.length >= 4) {
+        viewedBlogs.shift(); // Remove the first item if the length is 4 or more
+      }
+      viewedBlogs.push(blog); // Add the new blog
+
+      localStorage.setItem("viewedBlogs", JSON.stringify(viewedBlogs));
+    }
+  };
 
   return (
     <GlobalLayoutUser>
@@ -219,15 +235,13 @@ export const BlogSingle = () => {
                         />
                       </>
                     ) : (
-                      <p className="font-weight-bold">No comments yet.</p>
+                      <p className="is-size-6">No comments yet.</p>
                     )}
-                    <div className="comment-form-wrap pt-5">
-                      <CommentForm
-                        blogId={blog.id}
-                        addComment={handleAddComment}
-                        user={user}
-                      />
-                    </div>
+                    <CommentForm
+                      blogId={id}
+                      addComment={handleAddComment}
+                      user={user}
+                    />
                   </div>
                 </div>
               </div>

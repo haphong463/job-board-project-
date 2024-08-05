@@ -9,7 +9,7 @@ import { signUp } from "../../features/authSlice";
 import { GlobalLayoutUser } from "../../components/global-layout-user/GlobalLayoutUser";
 import registerImage from "../../assets/images/register.png";
 import "./sign_up.css";
-import { NavLink } from "react-router-dom";
+import { Navigate, NavLink } from "react-router-dom";
 function SignUp() {
   const {
     register,
@@ -20,6 +20,7 @@ function SignUp() {
   });
   const dispatch = useDispatch();
   const signUpSuccess = useSelector((state) => state.auth.signUpSuccess);
+  const user = useSelector((state) => state.auth.user);
   const error = useSelector((state) => state.auth.error);
   const [password, setPassword] = useState("");
   const onSubmit = async (data) => {
@@ -41,6 +42,9 @@ function SignUp() {
       message: "Password cannot be empty",
     },
   ];
+  if (user) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <GlobalLayoutUser>
