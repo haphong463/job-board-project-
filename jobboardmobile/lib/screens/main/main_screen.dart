@@ -8,7 +8,6 @@ import '../../models/company_model.dart';
 import '../../models/job_model.dart';
 import '../../service/auth_service.dart';
 import '../../service/company_service.dart';
-import '../../service/jobApplication_service.dart';
 import '../../service/job_service.dart';
 import '../../widget/box_icon.dart';
 import '../../widget/custom_app_bar.dart';
@@ -16,7 +15,6 @@ import '../../core/utils/asset_path_list.dart' as assetPath;
 import '../../widget/search_icon.dart';
 import '../company/CompanyDetailsScreen.dart';
 import '../company/CompanyListScreen.dart';
-import '../job/ApplyJobsScreen.dart';
 import '../job/JobDetailsScreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -31,34 +29,57 @@ class _MainScreenState extends State<MainScreen> {
   final CompanyService _companyService = CompanyService();
   final JobService _jobService = JobService();
 
-
   final storage = const FlutterSecureStorage();
   String? firstName;
   String? lastName;
   String? email;
   String? imageUrl;
+  String? role; // Thêm biến role để lưu trữ vai trò người dùng
   List<Company> _companies = [];
   List<Job> _jobs = [];
   Map<int, Company> _companyMap = <int, Company>{};
 
-
   @override
   void initState() {
     super.initState();
-
     _fetchUserDetails();
     _fetchCompaniesAndJobs();
   }
-
+void _fetchUserDetails() async {
+  firstName = await _authService.getFirstName();
+  lastName = await _authService.getLastName();
+  email = await _authService.getEmail();
+  imageUrl = await _authService.getImageUrl();
   
-
-  void _fetchUserDetails() async {
-    firstName = await _authService.getFirstName();
-    lastName = await _authService.getLastName();
-    email = await _authService.getEmail();
-    imageUrl = await _authService.getImageUrl();
-    setState(() {});
+  try {
+    List<Map<String, dynamic>> roles = await _authService.getRoles();
+    
+    // Extract the 'authority' values from each role
+    List<String> authorities = roles.map((role) => role['authority'] as String).toList();
+    
+    print('Authorities: $authorities');
+    
+    if (authorities.contains('ROLE_EMPLOYER')) {
+      role = 'ROLE_EMPLOYER';
+      print('User role assigned: $role');
+    } else {
+      role = null;  // Or assign a default value if needed
+      print('User does not have ROLE_EMPLOYER, role is set to null');
+    }
+    
+  } catch (e) {
+    print('Error fetching user details or roles: $e');
   }
+
+  print('First Name: $firstName');
+  print('Last Name: $lastName');
+  print('Email: $email');
+  print('Image URL: $imageUrl');
+  print('Role: $role');
+  
+  setState(() {});
+}
+
 
   void _fetchCompaniesAndJobs() async {
     try {
@@ -72,7 +93,9 @@ class _MainScreenState extends State<MainScreen> {
           for (var company in companies) company.companyId: company
         };
       });
-    } catch (e) {}
+    } catch (e) {
+      // Handle errors here
+    }
   }
 
   void _logout() async {
@@ -132,32 +155,27 @@ class _MainScreenState extends State<MainScreen> {
                     size: 48.0,
                     color: Colors.white,
                   ),
-            otherAccountsPictures: [
-              const Icon(
+            otherAccountsPictures: const [
+              Icon(
                 Icons.bookmark_border,
                 color: Colors.white,
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/applied_jobs');
-                },
-                child: const Icon(
-                  Icons.assignment_turned_in,
-                  color: Colors.white,
-                ),
               ),
             ],
             decoration: BoxDecoration(
               color: ColorUtil.primaryColor,
             ),
           ),
-          _buildDrawerItem(Icons.business, 'Companies', () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const CompanyListScreen()),
-            );
-          }),
+          if (role == 'ROLE_EMPLOYER') ...[
+            _buildDrawerItem(Icons.visibility, 'Employer Dashboard', () {
+              Navigator.pushNamed(context, '/chart');
+            }),
+              _buildDrawerItem(Icons.work, 'Employer Job', () {
+              Navigator.pushNamed(context, '/joblist'); 
+            }),
+            const Divider(),
+          ],
+
+          
           _buildDrawerItem(Icons.note_add, 'Blog', () {
             Navigator.pushNamed(context, '/blog');
           }),
@@ -166,9 +184,6 @@ class _MainScreenState extends State<MainScreen> {
           }),
           _buildDrawerItem(Icons.note_add, 'Quiz', () {
             Navigator.pushNamed(context, '/quizzes');
-          }),
-          _buildDrawerItem(Icons.document_scanner, 'Cv-management', () {
-            Navigator.pushNamed(context, '/document_list');
           }),
           const Divider(),
           _buildDrawerItem(Icons.settings, 'Settings', () {
@@ -357,10 +372,9 @@ class ForYouCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                company.location,
+                company.description,
                 style: const TextStyle(
                   fontSize: 10,
-                  color: Colors.grey,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -377,11 +391,7 @@ class RecentlyAddedCard extends StatelessWidget {
   final Job job;
   final Company company;
 
-  const RecentlyAddedCard({
-    Key? key,
-    required this.job,
-    required this.company,
-  }) : super(key: key);
+  const RecentlyAddedCard({super.key, required this.job, required this.company});
 
   @override
   Widget build(BuildContext context) {
@@ -444,12 +454,11 @@ class RecentlyAddedCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                job.offeredSalary,
+                company.companyName,
                 style: const TextStyle(
                   fontSize: 10,
-                  color: Colors.grey,
                 ),
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/comment_model.dart';
-import 'package:jobboardmobile/models/content_model.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/comment_service.dart';
 
@@ -11,15 +10,14 @@ class CommentWidget extends StatefulWidget {
   final int level;
   final void Function(String) deleteComment;
   final void Function(bool) toggleMainCommentField; // Add this parameter
-  final ContentModel blog;
 
-  const CommentWidget(
-      {super.key,
-      required this.comment,
-      this.level = 0,
-      required this.deleteComment,
-      required this.toggleMainCommentField,
-      required this.blog});
+  const CommentWidget({
+    super.key,
+    required this.comment,
+    this.level = 0,
+    required this.deleteComment,
+    required this.toggleMainCommentField,
+  });
 
   @override
   _CommentWidgetState createState() => _CommentWidgetState();
@@ -62,10 +60,7 @@ class _CommentWidgetState extends State<CommentWidget> {
 
       var reply = {
         'id': temporaryCommentId,
-        'blog': {
-          'id': parentComment.blog.id,
-          'user': {'username': widget.blog.user.username}
-        },
+        'blog': {'id': parentComment.blog.id},
         'parent': {'id': parentComment.id},
         'content': content,
         'user': {'username': username},
@@ -102,9 +97,12 @@ class _CommentWidgetState extends State<CommentWidget> {
       _replying = !_replying;
 
       if (!_replying) {
+        widget.toggleMainCommentField(
+            true); // Call the function to hide/show main comment TextField
         replyFocusNode.unfocus();
         replyEditingController.clear();
       } else {
+        widget.toggleMainCommentField(false);
         replyFocusNode.requestFocus();
       }
     });
@@ -295,8 +293,8 @@ class _CommentWidgetState extends State<CommentWidget> {
                 comment: child,
                 level: widget.level + 1,
                 deleteComment: widget.deleteComment,
-                toggleMainCommentField: widget.toggleMainCommentField,
-                blog: widget.blog, // Pass the toggle function
+                toggleMainCommentField:
+                    widget.toggleMainCommentField, // Pass the toggle function
               )),
         ],
       ),

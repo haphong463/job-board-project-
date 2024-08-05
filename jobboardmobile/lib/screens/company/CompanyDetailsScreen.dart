@@ -105,8 +105,8 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(job.offeredSalary,
-                                  style: TextStyle(color: Colors.green)),
+                              // Text(job.offeredSalary,
+                              //     style: TextStyle(color: Colors.green)),
                               Text(job.description,
                                   maxLines: 2, overflow: TextOverflow.ellipsis),
                             ],

@@ -16,19 +16,19 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'username': username, 'password': password}),
     );
+
     if (response.statusCode == 200) {
       print(response.body);
       var jsonResponse = jsonDecode(response.body);
       await storage.write(key: 'accessToken', value: jsonResponse['token']);
-      Map<String, dynamic> decodedToken =
-          JwtDecoder.decode(jsonResponse['token']);
-      await storage.write(
-          key: 'refreshToken', value: jsonResponse['refreshToken']);
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(jsonResponse['token']);
+      await storage.write(key: 'refreshToken', value: jsonResponse['refreshToken']);
       await storage.write(key: 'firstName', value: decodedToken['firstName']);
       await storage.write(key: 'lastName', value: decodedToken['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
       await storage.write(key: 'username', value: jsonResponse['username']);
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      await storage.write(key: 'role', value: jsonEncode(decodedToken['role']));
       saveUserId(jsonResponse['id'].toString());
     } else {
       throw Exception('Failed to login');
@@ -48,19 +48,19 @@ class AuthService {
       print(response.body);
       var jsonResponse = jsonDecode(response.body);
       await storage.write(key: 'accessToken', value: jsonResponse['token']);
-      Map<String, dynamic> decodedToken =
-          JwtDecoder.decode(jsonResponse['token']);
-      await storage.write(
-          key: 'refreshToken', value: jsonResponse['refreshToken']);
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(jsonResponse['token']);
+      await storage.write(key: 'refreshToken', value: jsonResponse['refreshToken']);
       await storage.write(key: 'firstName', value: decodedToken['firstName']);
       await storage.write(key: 'lastName', value: decodedToken['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
       await storage.write(key: 'username', value: jsonResponse['username']);
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      await storage.write(key: 'role', value: jsonEncode(decodedToken['role'])); // Convert list to JSON string
       saveUserId(jsonResponse['id'].toString());
     } else {
       throw Exception('Failed to login');
     }
+
     return response;
   }
 
@@ -105,8 +105,7 @@ class AuthService {
         print('Invalid token or bad request: ${response.body}');
         throw Exception('Invalid token or bad request');
       } else {
-        throw Exception(
-            'Failed to send forgot password request: ${response.statusCode}');
+        throw Exception('Failed to send forgot password request: ${response.statusCode}');
       }
     } catch (error) {
       throw Exception('Failed to send forgot password request: $error');
@@ -204,17 +203,16 @@ class AuthService {
 
     if (response.statusCode == 200) {
       var jsonResponse = jsonDecode(response.body);
-      print("JsonRepsonse: $jsonResponse");
+      print("JsonResponse: $jsonResponse");
       await storage.write(key: 'accessToken', value: jsonResponse['token']);
-      Map<String, dynamic> decodedToken =
-          JwtDecoder.decode(jsonResponse['token']);
-      await storage.write(
-          key: 'refreshToken', value: jsonResponse['refreshToken']);
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(jsonResponse['token']);
+      await storage.write(key: 'refreshToken', value: jsonResponse['refreshToken']);
       await storage.write(key: 'firstName', value: decodedToken['firstName']);
       await storage.write(key: 'lastName', value: decodedToken['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
       await storage.write(key: 'username', value: jsonResponse['username']);
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      await storage.write(key: 'role', value: jsonEncode(decodedToken['role'])); // Convert list to JSON string
       saveUserId(jsonResponse['id'].toString());
     } else {
       _showSessionExpiredDialog(context);
@@ -256,10 +254,10 @@ class AuthService {
   }
 
   Future<http.Response> getProtectedResource(BuildContext context) async {
-    return await AuthService().sendRequestWithRetry(
+    return await sendRequestWithRetry(
       context,
       () async {
-        final accessToken = await AuthService().getAccessToken();
+        final accessToken = await getAccessToken();
         return http.get(
           Uri.parse('${Endpoint.baseUrl}/protected-resource'),
           headers: {
@@ -305,4 +303,28 @@ class AuthService {
   Future<String?> getUsername() async {
     return await storage.read(key: 'username');
   }
+
+ Future<List<Map<String, dynamic>>> getRoles() async {
+  String? roleJson = await storage.read(key: 'role');
+  if (roleJson != null) {
+    print('Role JSON: $roleJson');  // Debugging line
+
+    // Decode the JSON string into a List<dynamic>
+    List<dynamic> roleList = jsonDecode(roleJson);
+
+    // Ensure each item is a Map<String, dynamic>
+    return roleList.map((role) {
+      if (role is Map<String, dynamic>) {
+        return role;
+      } else {
+        throw Exception('Unexpected role format: $role');
+      }
+    }).toList();
+  } else {
+    return [];
+  }
 }
+
+}
+
+

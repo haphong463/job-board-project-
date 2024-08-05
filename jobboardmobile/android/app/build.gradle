@@ -49,7 +49,7 @@ android {
 
     signingConfigs {
         debug {
-            keyAlias 'androiddebugkey'
+            keyAlias 'mykey'
             keyPassword '123456'
             storeFile file('mykey.jks')
             storePassword '123456'
