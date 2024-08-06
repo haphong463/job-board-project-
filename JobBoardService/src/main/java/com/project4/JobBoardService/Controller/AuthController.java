@@ -464,9 +464,10 @@ public class AuthController {
         emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
 
         // Cập nhật permissions cho user
-        userService.updateUserPermissions(userCreated.getId(), permissions);
 
-        return ResponseEntity.ok(userCreatedDto);
+
+
+        return ResponseEntity.ok(modelMapper.map(userService.updateUserPermissions(userCreated.getId(), permissions), UserDTO.class));
     }
 
 
