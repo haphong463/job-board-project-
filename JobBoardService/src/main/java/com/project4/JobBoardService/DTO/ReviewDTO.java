@@ -12,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewDTO {
+    private Long id;
     @NotBlank(message = "Title is required")
     private String title;
 

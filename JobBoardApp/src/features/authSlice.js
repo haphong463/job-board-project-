@@ -22,14 +22,14 @@ export const signIn = createAsyncThunk(
       if (res.userId) {
         localStorage.setItem("userId", res.userId.toString());
       }
-        if (res.username) {
-        localStorage.setItem('username', res.username);
+      if (res.username) {
+        localStorage.setItem("username", res.username);
       }
       return res;
     } catch (error) {
       console.log(">>>error sign in: ", error);
       const status = error.response.status;
-      if (status === 400) {
+      if (status === 401 || status === 403) {
         return rejectWithValue(error.response.data.message);
       }
       return rejectWithValue(error.message);
@@ -44,7 +44,7 @@ export const signInOAuth2 = createAsyncThunk(
       const res = await signInOAuth2Async(data);
       return res;
     } catch (error) {
-      console.log('>>> error oauth2: ', error)
+      console.log(">>> error oauth2: ", error);
       const status = error.response.status;
       if (status === 400) {
         return rejectWithValue(error.response.data.message);
@@ -170,7 +170,7 @@ const authSlice = createSlice({
       state.verificationMessage = null;
     },
     resetMessages(state) {
-     state.error = null;
+      state.error = null;
     },
     setCurrentUser(state, action) {
       state.currentUser = action.payload;
