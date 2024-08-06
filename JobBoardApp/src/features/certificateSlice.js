@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getCertificatesByUserId, createCertificate, updateCertificate, deleteCertificate } from "../services/certificateService";
+import { getCertificatesByUserId, createCertificate, updateCertificate, deleteCertificate,getCertificateAsync } from "../services/certificateService";
 
 // Thunk for fetching certificates by user ID
 export const fetchCertificatesByUserIdThunk = createAsyncThunk(
@@ -53,8 +53,23 @@ export const deleteCertificateThunk = createAsyncThunk(
     }
 );
 
+export const fetchCertificateThunk = createAsyncThunk(
+    "certificates/fetchCertificate",
+    async (filename, { rejectWithValue }) => {
+      try {
+        const response = await getCertificateAsync(filename);
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        return url;
+      } catch (error) {
+        return rejectWithValue(error.message);
+      }
+    }
+  );
+
 const initialState = {
     certificates: [],
+    certificate: null,  // Add certificate to initial state
     status: "idle",
     error: null,
 };
@@ -112,6 +127,18 @@ const certificateSlice = createSlice({
                 state.status = "succeeded";
             })
             .addCase(deleteCertificateThunk.rejected, (state, action) => {
+                state.error = action.payload;
+                state.status = "failed";
+            })
+            .addCase(fetchCertificateThunk.pending, (state) => {
+                state.status = "loading";
+                state.error = null;
+            })
+            .addCase(fetchCertificateThunk.fulfilled, (state, action) => {
+                state.certificate = action.payload;
+                state.status = "succeeded";
+            })
+            .addCase(fetchCertificateThunk.rejected, (state, action) => {
                 state.error = action.payload;
                 state.status = "failed";
             });

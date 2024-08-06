@@ -20,6 +20,9 @@ public class UserProject {
     private String description;
     private String startDate;
     private String endDate;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // Getters and setters
 }

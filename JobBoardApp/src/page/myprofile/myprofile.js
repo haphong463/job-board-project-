@@ -6,6 +6,8 @@ import Swal from "sweetalert2";
 import { Form, FormGroup, Label, Input, Button, Col, Row, Card, CardBody, CardTitle, CardText } from "reactstrap";
 import { FaCamera } from 'react-icons/fa';
 import "./myprofile.css";
+import { jwtDecode } from "jwt-decode";
+
 export const UserProfile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -17,7 +19,6 @@ export const UserProfile = () => {
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
-    gender: "",
     bio: "",
     facebook: "",
     numberphone: "",
@@ -35,10 +36,11 @@ export const UserProfile = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    const username = localStorage.getItem("username");
-    if (!token || !username) {
+    if (!token) {
       navigate("/login");
     } else {
+      const decodedToken = jwtDecode(token);
+      const username = decodedToken.sub;
       setLoggedIn(true);
       dispatch(fetchUserThunk({ username, token }));
     }
@@ -49,7 +51,6 @@ export const UserProfile = () => {
       setUserData({
         firstName: user.firstName,
         lastName: user.lastName,
-        gender: user.gender || "", // Đặt giá trị giới tính từ backend
         bio: user.bio,
         facebook: user.facebook || "",
         numberphone: user.numberphone || "",
@@ -60,14 +61,6 @@ export const UserProfile = () => {
   }, [user]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUserData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (e) => {
     const { name, value } = e.target;
     setUserData((prevState) => ({
       ...prevState,
@@ -94,7 +87,6 @@ export const UserProfile = () => {
     const formData = new FormData();
     formData.append("firstName", userData.firstName);
     formData.append("lastName", userData.lastName);
-    formData.append("gender", userData.gender);
     formData.append("bio", userData.bio);
     formData.append("facebook", userData.facebook);
     formData.append("numberphone", userData.numberphone);
@@ -106,9 +98,12 @@ export const UserProfile = () => {
 
     dispatch(updateUserThunk({ formData, userId: user.id }))
       .unwrap()
-      .then(() => {
+      .then((updatedUser) => {
         Swal.fire("Success", "Profile updated successfully", "success");
-        dispatch(fetchUserThunk({ username: localStorage.getItem("username"), token: localStorage.getItem("accessToken") }));
+        setUserData({
+          ...userData,
+          imageUrl: updatedUser.imageUrl
+        });
         setOverallEditMode(false);
         setImageFile(null);
       })
@@ -127,6 +122,14 @@ export const UserProfile = () => {
       ...prevState,
       [field]: !prevState[field],
     }));
+  };
+
+  const getMaxDateForBirth = () => {
+    const today = new Date();
+    const year = today.getFullYear() - 18;
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   return (
@@ -226,24 +229,7 @@ export const UserProfile = () => {
                         />
                       </Col>
                     </FormGroup>
-                    <FormGroup row>
-  <Label for="gender" sm={3}>Gender</Label>
-  <Col sm={9}>
-    <Input
-      type="select"
-      name="gender"
-      value={userData.gender}
-      onChange={handleSelectChange}
-      className="custom-select"
-      required
-    >
-      <option value="">Select Gender</option>
-      <option value="MALE">Male</option>
-      <option value="FEMALE">Female</option>
-      <option value="OTHER">Other</option>
-    </Input>
-  </Col>
-</FormGroup>
+           
                     <FormGroup row>
                       <Label for="bio" sm={3}>Bio</Label>
                       <Col sm={9}>
@@ -267,23 +253,13 @@ export const UserProfile = () => {
                       </Col>
                     </FormGroup>
                     <FormGroup row>
-                      <Label for="facebook" sm={3}>Facebook</Label>
-                      <Col sm={9}>
-                        <Input
-                          type="text"
-                          name="facebook"
-                          value={userData.facebook}
-                          onChange={handleInputChange}
-                        />
-                      </Col>
-                    </FormGroup>
-                    <FormGroup row>
                       <Label for="dateOfBirth" sm={3}>Date of Birth</Label>
                       <Col sm={9}>
                         <Input
                           type="date"
                           name="dateOfBirth"
                           value={userData.dateOfBirth}
+                          max={getMaxDateForBirth()}
                           onChange={handleInputChange}
                         />
                       </Col>
@@ -299,9 +275,11 @@ export const UserProfile = () => {
                         />
                       </Col>
                     </FormGroup>
-                    <Button color="primary" type="submit">
-                      Save Changes
-                    </Button>
+                    <FormGroup check row>
+                      <Col sm={{ size: 9, offset: 3 }}>
+                        <Button type="submit" color="primary">Save Changes</Button>
+                      </Col>
+                    </FormGroup>
                   </Form>
                 </CardBody>
               </Card>

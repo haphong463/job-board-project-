@@ -1,4 +1,4 @@
-package com.project4.JobBoardService.ServiceImpl;
+package com.project4.JobBoardService.Service.Impl;
 
 import com.project4.JobBoardService.DTO.CertificateDTO;
 import com.project4.JobBoardService.Entity.Certificate;
@@ -64,5 +64,10 @@ public class CertificateServiceImpl implements CertificateService {
         Certificate existingCertificate = certificateRepository.findById(certificateId)
                 .orElseThrow(() -> new RuntimeException("Certificate not found"));
         certificateRepository.delete(existingCertificate);
+    }
+
+    @Override
+    public Certificate saveCertificate(Certificate certificate) {
+        return certificateRepository.save(certificate);
     }
 }

@@ -20,10 +20,7 @@ export const signIn = createAsyncThunk(
         });
       }
       if (res.userId) {
-        localStorage.setItem("userId", res.userId.toString()); // Ensure userId is stored as a string
-      }
-        if (res.username) {
-        localStorage.setItem('username', res.username);
+        localStorage.setItem("userId", res.userId.toString());
       }
       return res;
     } catch (error) {

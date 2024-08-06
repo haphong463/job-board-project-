@@ -35,6 +35,7 @@ import { ReviewPage } from "../../page/job-listing/company_review_write";
 import { SavedJobs } from "../../page/job-listing/saved_job";
 import UpdateCv from "../../page/user-cv/UpdateCv";
 import ManagementProfile from "../../page/myprofile/UserProfileManagement";
+import PDFViewerPage from "../../page/myprofile/PDFViewerPage";
 import React from "react";
 
 export const routes = [
@@ -75,4 +76,5 @@ export const routes = [
   { path: "/savedJob", component: <SavedJobs /> },
   { path: "/myprofile", component: <MyProfile /> },
   { path: "/managementprofile", component: <ManagementProfile /> },
+  {path:"/view-pdf/:filename", component:<PDFViewerPage/>},
 ];

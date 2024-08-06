@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -194,6 +195,7 @@ public class UserCvController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid CV ID");
         }
 
+
                 // Update CV fields
         existingCv.setCvTitle(updatedUserCV.getCvTitle());
         existingCv.setUpdatedAt(LocalDateTime.now());
@@ -208,8 +210,10 @@ public class UserCvController {
 
         // Handle Education
         existingCv.getUserEducations().clear();
+        User user = existingCv.getUser();
         for (UserEducation education : updatedUserCV.getUserEducations()) {
             education.setUserCV(existingCv);
+            education.setUser(user);
             existingCv.getUserEducations().add(education);
         }
 
@@ -217,6 +221,8 @@ public class UserCvController {
         existingCv.getUserExperiences().clear();
         for (UserExperience experience : updatedUserCV.getUserExperiences()) {
             experience.setUserCV(existingCv);
+            experience.setUser(user);
+
             existingCv.getUserExperiences().add(experience);
         }
 
@@ -224,6 +230,8 @@ public class UserCvController {
         existingCv.getUserSkills().clear();
         for (UserSkill skill : updatedUserCV.getUserSkills()) {
             skill.setUserCV(existingCv);
+            skill.setUser(user);
+
             existingCv.getUserSkills().add(skill);
         }
 
@@ -231,6 +239,8 @@ public class UserCvController {
         existingCv.getUserProjects().clear();
         for (UserProject project : updatedUserCV.getUserProjects()) {
             project.setUserCV(existingCv);
+            project.setUser(user);
+
             existingCv.getUserProjects().add(project);
         }
 
@@ -238,6 +248,7 @@ public class UserCvController {
         existingCv.getUserLanguages().clear();
         for (UserLanguage language : updatedUserCV.getUserLanguages()) {
             language.setUserCV(existingCv);
+            language.setUser(user);
             existingCv.getUserLanguages().add(language);
         }
 
@@ -263,6 +274,8 @@ public class UserCvController {
 
         return ResponseEntity.ok().body("CV Update Success!");
     }
+    	@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PostMapping("/submit-cv")
     public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV,
                                            @RequestParam("profileImage") MultipartFile profileImage,
                                            @RequestParam("dob") Long dobTimestamp) {
@@ -297,21 +310,28 @@ public class UserCvController {
 
         for (UserExperience experience : savedUserCV.getUserExperiences()) {
             experience.setUserCV(savedUserCV);
+            experience.setUser(user);  // Assign user ID here
+
             userExperienceRepository.save(experience);
         }
 
         for (UserSkill skill : savedUserCV.getUserSkills()) {
             skill.setUserCV(savedUserCV);
+            skill.setUser(user);  // Assign user ID here
+
             userSkillRepository.save(skill);
         }
 
         for (UserProject project : savedUserCV.getUserProjects()) {
             project.setUserCV(savedUserCV);
+            project.setUser(user);  // Assign user ID here
+
             userProjectRepository.save(project);
         }
 
         for (UserLanguage language : savedUserCV.getUserLanguages()) {
             language.setUserCV(savedUserCV);
+            language.setUser(user);
             userLanguageRepository.save(language);
         }
 

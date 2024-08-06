@@ -14,6 +14,9 @@ public class UserExperience {
     @ManyToOne
     @JoinColumn(name = "cv_id")
     private UserCV userCV;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private String jobTitle;
     private String company;

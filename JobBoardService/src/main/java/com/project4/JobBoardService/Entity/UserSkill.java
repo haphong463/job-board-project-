@@ -23,6 +23,9 @@ public class UserSkill {
 
     private String skillName;
     private String proficiency;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // Getters and setters
 }

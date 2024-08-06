@@ -26,6 +26,10 @@ public class InforUserDTO {
     private String facebook;
     private List<CertificateDTO> certificates;
     private List<UserEducationDTO> userEducations;
+    private List<UserExperienceDTO> userExperiences;
+    private List<UserSkillDTO> userSkills;
+    private List<UserProjectDTO> userProjects;
+    private List<UserLanguageDTO> userLanguages;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dateOfBirth;
