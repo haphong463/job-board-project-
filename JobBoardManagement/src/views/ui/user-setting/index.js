@@ -334,7 +334,9 @@ const User = () => {
                                   type="file"
                                   accept="image/*"
                                   onChange={(e) => {
-                                    setValue("imageFile", e.target.files[0]);
+                                    setValue("imageFile", e.target.files[0], {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                 />
                               )}
