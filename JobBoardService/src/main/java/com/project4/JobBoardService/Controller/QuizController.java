@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
@@ -391,10 +392,12 @@ public class QuizController {
                 Certificate certificate = new Certificate();
                 certificate.setName(quiz.getTitle() + " Certificate");
                 certificate.setOrganization("IT Grove");
-                certificate.setIssueDate(YearMonth.now());
+                certificate.setIssueDate(LocalDate.now()); // Thay đổi từ YearMonth.now() thành LocalDate.now()
                 certificate.setUser(user);
                 certificate.setLink( certificateFile.getName());
                 certificate.setDescription("Certificate for successfully passing the quiz " + quiz.getTitle());
+                certificate.setSource("quiz");
+
                 certificateService.saveCertificate(certificate);
 
                 user.addCompletedQuiz(quiz);

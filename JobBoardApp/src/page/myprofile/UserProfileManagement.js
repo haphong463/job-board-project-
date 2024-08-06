@@ -19,6 +19,7 @@ const UserProfileManagement = () => {
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [pdfLink, setPdfLink] = useState('');
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const today = new Date().toISOString().split('T')[0]; 
 
   const [loggedIn, setLoggedIn] = useState(false);
 
@@ -259,17 +260,29 @@ const [pdfError, setPdfError] = useState(null);
                     <p>Organization: {certificate.organization}</p>
                     <p>Issue Date: {new Date(certificate.issueDate).toLocaleDateString()}</p>
                     <p>
-                      Link: 
-                      <a
-                       href="#"
-  onClick={(e) => {
-    e.preventDefault();
-    handleViewPdf(certificate.link);
-  }}
-  aria-label={`View PDF for ${certificate.name}`}
->
-  {certificate.link}
-</a>
+                      {certificate.source === 'quiz' ? (
+                        <>
+                          <Button
+                            variant="outline-info"
+                            onClick={() => handleViewPdf(certificate.link)}
+                            aria-label={`View PDF of ${certificate.name}`}
+                          >
+                            View PDF
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          Link: 
+                          <a
+                            href={certificate.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`View Certificate ${certificate.name}`}
+                          >
+                            {certificate.link}
+                          </a>
+                        </>
+                      )}
                     </p>
                     <p>Description: {certificate.description}</p>
                     <Button
@@ -437,64 +450,65 @@ const [pdfError, setPdfError] = useState(null);
 
       {/* Add Certificate Modal */}
       <Modal show={showAddCertificateModal} onHide={() => setShowAddCertificateModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add Certificate</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="certificateName">
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={newCertificate.name}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="certificateOrganization" className="mt-3">
-              <Form.Label>Organization</Form.Label>
-              <Form.Control
-                type="text"
-                name="organization"
-                value={newCertificate.organization}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="certificateIssueDate" className="mt-3">
-              <Form.Label>Issue Date</Form.Label>
-              <Form.Control
-                type="date"
-                name="issueDate"
-                value={newCertificate.issueDate}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="certificateLink" className="mt-3">
-              <Form.Label>Link</Form.Label>
-              <Form.Control
-                type="text"
-                name="link"
-                value={newCertificate.link}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-            <Form.Group controlId="certificateDescription" className="mt-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="description"
-                value={newCertificate.description}
-                onChange={handleModalChange}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddCertificateModal(false)}>Close</Button>
-          <Button variant="primary" onClick={handleAddCertificate}>Add Certificate</Button>
-        </Modal.Footer>
-      </Modal>
+      <Modal.Header closeButton>
+        <Modal.Title>Add Certificate</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          <Form.Group controlId="certificateName">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="text"
+              name="name"
+              value={newCertificate.name}
+              onChange={handleModalChange}
+            />
+          </Form.Group>
+          <Form.Group controlId="certificateOrganization" className="mt-3">
+            <Form.Label>Organization</Form.Label>
+            <Form.Control
+              type="text"
+              name="organization"
+              value={newCertificate.organization}
+              onChange={handleModalChange}
+            />
+          </Form.Group>
+          <Form.Group controlId="certificateIssueDate" className="mt-3">
+            <Form.Label>Issue Date</Form.Label>
+            <Form.Control
+              type="date"
+              name="issueDate"
+              value={newCertificate.issueDate}
+              onChange={handleModalChange}
+              max={today} 
+            />
+          </Form.Group>
+          <Form.Group controlId="certificateLink" className="mt-3">
+            <Form.Label>Link</Form.Label>
+            <Form.Control
+              type="text"
+              name="link"
+              value={newCertificate.link}
+              onChange={handleModalChange}
+            />
+          </Form.Group>
+          <Form.Group controlId="certificateDescription" className="mt-3">
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="description"
+              value={newCertificate.description}
+              onChange={handleModalChange}
+            />
+          </Form.Group>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowAddCertificateModal(false)}>Close</Button>
+        <Button variant="primary" onClick={() => handleAddCertificate(newCertificate)}>Add Certificate</Button>
+      </Modal.Footer>
+    </Modal>
 
       {/* Edit Certificate Modal */}
       <Modal show={showEditCertificateModal} onHide={() => setShowEditCertificateModal(false)}>

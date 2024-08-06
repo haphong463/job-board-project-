@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 
 @Entity
@@ -31,7 +32,11 @@ public class Certificate extends AbstractEntity {
     private String organization;
 
     @NotNull
-    private YearMonth issueDate;
+    private LocalDate issueDate;
+    @NotBlank
+    @Size(max = 50)
+    private String source;
+
 
     @Size(max = 255)
     private String link;

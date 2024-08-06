@@ -100,12 +100,14 @@ export const UserProfile = () => {
       .unwrap()
       .then((updatedUser) => {
         Swal.fire("Success", "Profile updated successfully", "success");
+
         setUserData({
           ...userData,
           imageUrl: updatedUser.imageUrl
         });
         setOverallEditMode(false);
         setImageFile(null);
+
       })
       .catch((error) => {
         Swal.fire("Error", error.message, "error");

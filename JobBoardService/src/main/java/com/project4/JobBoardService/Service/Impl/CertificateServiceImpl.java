@@ -42,6 +42,8 @@ public class CertificateServiceImpl implements CertificateService {
         Certificate certificate = modelMapper.map(certificateDTO, Certificate.class);
         User user = userRepository.findById(certificateDTO.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
         certificate.setUser(user);
+        certificate.setSource("manual");
+
         Certificate savedCertificate = certificateRepository.save(certificate);
         return modelMapper.map(savedCertificate, CertificateDTO.class);
     }
