@@ -16,7 +16,6 @@ import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
 import { JobSingle } from "../../page/job-listing/JobSingle";
 import { JobSingle1 } from "../../page/job-single/JobSingle";
-import  {JobListing}  from "../../page/job-listing/JobListing";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import ListTemplate from "../../page/list-template/ListTemplate";
 import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
@@ -49,7 +48,6 @@ export const routes = [
   // { path: "/jobSkillList/:id", component: <JobList /> },
   { path: "/jobList/:id", component: <JobList /> },
   { path: "/jobDetail/:id/:companyId", component: <JobSingle /> },
-  { path: "/jobListing", component: <JobListing /> },
   { path: "/viewAllJobs/:searchTerm?", component: <JobList /> },
   { path: "/viewAllJobs", component: <JobList /> },
   { path: "/viewAllSkill", component: <ViewAllSkill /> },

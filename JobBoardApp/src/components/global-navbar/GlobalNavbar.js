@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, signOut } from "../../features/authSlice";
-import {
+import
+{
   Dropdown,
   DropdownToggle,
   DropdownMenu,
@@ -12,7 +13,8 @@ import { FaBell, FaChevronRight, FaUserCircle } from "react-icons/fa";
 import "./global_navbar.css";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
-import {
+import
+{
   deleteNotificationThunk,
   markNotificationAsRead,
   readNotificationThunk,
@@ -20,13 +22,11 @@ import {
 import { fetchAllCategories } from "../../features/blogSlice";
 import { debounce } from "@mui/material";
 import { MdDelete, MdMessage } from "react-icons/md";
-
 import { Link } from "react-scroll";
-import categoryData from "./category.json";
-import companyData from "../../page/job-listing/company_data.json";
 import Swal from "sweetalert2";
 
-export function GlobalNavbar() {
+export function GlobalNavbar ()
+{
   const [searchParams] = useSearchParams();
   // const [categories, setCategories] = useState([]);
   // const [companies, setCompanies] = useState([]);
@@ -37,15 +37,19 @@ export function GlobalNavbar() {
   const categories = useSelector((state) => state.category.categories);
   const companies = useSelector((state) => state.company.companies);
 
-  const handleLogout = () => {
-    dispatch(signOut()).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
+  const handleLogout = () =>
+  {
+    dispatch(signOut()).then((res) =>
+    {
+      if (res.meta.requestStatus === "fulfilled")
+      {
         navigate("/login");
       }
     });
   };
 
-  const handleCvManagementClick = () => {
+  const handleCvManagementClick = () =>
+  {
     navigate("/cv-management");
   };
   const handleSavedJobClick = () =>
@@ -64,28 +68,35 @@ export function GlobalNavbar() {
   const unreadCount = useSelector((state) => state.notification.unreadCount);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     dispatch(fetchCategoryThunk());
     dispatch(fetchCompanyThunk());
     dispatch(fetchAllCategories());
   }, []);
 
-  const handleCategoryClick = (categoryId) => {
-    window.location.href = `/jobList/${categoryId}`;
+  const handleCategoryClick = (e, categoryId) =>
+  {
+    e.preventDefault();
+    navigate(`/jobList/${categoryId}`);
   };
 
-  const handleCompanyClick = (companyId) => {
-    window.location.href = `/companyDetail/${companyId}`;
+  const handleCompanyClick = (e, companyId) =>
+  {
+    e.preventDefault();
+    navigate(`/companyDetail/${companyId}`);
   };
 
   const handleMarkNotification = useCallback(
-    debounce((id) => {
+    debounce((id) =>
+    {
       dispatch(readNotificationThunk(id));
     }, 500),
     [dispatch]
   );
 
-  const handleDeleteNotification = (id) => {
+  const handleDeleteNotification = (id) =>
+  {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -94,8 +105,10 @@ export function GlobalNavbar() {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
+    }).then((result) =>
+    {
+      if (result.isConfirmed)
+      {
         dispatch(deleteNotificationThunk(id));
         Swal.fire("Deleted!", "Your notification has been deleted.", "success");
       }
@@ -145,8 +158,8 @@ export function GlobalNavbar() {
                                 .map((category) => (
                                   <li
                                     key={category.categoryId}
-                                    onClick={() =>
-                                      handleCategoryClick(category.categoryId)
+                                    onClick={(e) =>
+                                      handleCategoryClick(e, category.categoryId)
                                     }
                                   >
                                     {category.categoryName}
@@ -186,8 +199,8 @@ export function GlobalNavbar() {
                                 .map((company) => (
                                   <li
                                     key={company.companyId}
-                                    onClick={() =>
-                                      handleCompanyClick(company.companyId)
+                                    onClick={(e) =>
+                                      handleCompanyClick(e, company.companyId)
                                     }
                                   >
                                     {company.companyName}
@@ -303,13 +316,15 @@ export function GlobalNavbar() {
                           className="notifications-item"
                           onClick={
                             !notification.read
-                              ? () => {
-                                  handleMarkNotification(notification.id);
-                                  navigate(notification.url);
-                                }
-                              : () => {
-                                  navigate(notification.url);
-                                }
+                              ? () =>
+                              {
+                                handleMarkNotification(notification.id);
+                                navigate(notification.url);
+                              }
+                              : () =>
+                              {
+                                navigate(notification.url);
+                              }
                           }
                         >
                           <div className="avatar-container">
@@ -322,17 +337,15 @@ export function GlobalNavbar() {
                           </div>
                           <div className="text">
                             <h4
-                              className={`${
-                                notification.read ? "" : "font-weight-bold"
-                              }`}
+                              className={`${notification.read ? "" : "font-weight-bold"
+                                }`}
                             >
                               {notification.sender.firstName}{" "}
                               {notification.sender.lastName}
                             </h4>
                             <p
-                              className={`${
-                                notification.read ? "" : "font-weight-bold"
-                              }`}
+                              className={`${notification.read ? "" : "font-weight-bold"
+                                }`}
                             >
                               {notification.message}
                             </p>
@@ -340,7 +353,8 @@ export function GlobalNavbar() {
                         </div>
                         <button
                           className="delete-button"
-                          onClick={(e) => {
+                          onClick={(e) =>
+                          {
                             handleDeleteNotification(notification.id);
                           }}
                         >
@@ -376,19 +390,19 @@ export function GlobalNavbar() {
                         className="text-uppercase font-weight-bold"
                       >
                         {user.firstName} {user.lastName}
-                          
-                 
+
+
                       </DropdownItem>
-                      <DropdownItem onClick={handleMyProfileClick}>
+                      <DropdownItem onClick={handleMyProfileClick} className="dropdown-item-main">
                         My Profile
                       </DropdownItem>
-                      <DropdownItem onClick={handleCvManagementClick}>
+                      <DropdownItem onClick={handleCvManagementClick} className="dropdown-item-main">
                         CV Management
                       </DropdownItem>
-                      <DropdownItem onClick={handleSavedJobClick}>
+                      <DropdownItem onClick={handleSavedJobClick} className="dropdown-item-main">
                         Saved Jobs
                       </DropdownItem>
-                      <DropdownItem onClick={handleLogout}>
+                      <DropdownItem onClick={handleLogout} className="dropdown-item-main">
                         Log out
                       </DropdownItem>
                     </>

@@ -2,26 +2,35 @@ import React, { useEffect, useState } from 'react';
 import axiosRequest from '../../configs/axiosConfig';
 import "./job_company.css";
 import moment from 'moment';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { fetchCategoryThunk } from "../../features/categorySlice";
+import { fetchJobThunk } from "../../features/jobSlice";
 import { useDispatch, useSelector } from 'react-redux';
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
+import ApplyBox from '../../components/dialog-box/Applybox';
 
 export const SavedJobs = () =>
 {
+    const { jobId } = useParams();
     const dispatch = useDispatch();
     const [savedJobs, setSavedJobs] = useState([]);
     const [favoriteJobs, setFavoriteJobs] = useState([]);
-
-    console.log(">>>save job: ", savedJobs.map(item => item.jobId))
-
+    const navigate = useNavigate();
+    const user = useSelector(state => state.auth.user);
+    const userId = user ? user.id : null;
+    const jobs = useSelector((state) => state.job.jobs);
 
     useEffect(() =>
     {
+        if (!userId)
+        {
+            navigate(`/login`);
+        }
         dispatch(fetchCategoryThunk());
+        dispatch(fetchJobThunk());
         fetchSavedJobs();
-    }, [dispatch]);
+    }, [userId]);
 
     const fetchSavedJobs = async () =>
     {
@@ -44,8 +53,9 @@ export const SavedJobs = () =>
         }
     };
 
-    const handleSaveJob = async (favoriteId) =>
+    const handleSaveJob = async (e, favoriteId) =>
     {
+        e.preventDefault();
         try
         {
             await axiosRequest.delete(`/favorite-jobs/delete/${favoriteId}`);
@@ -112,20 +122,22 @@ export const SavedJobs = () =>
         return `Posted ${secondsAgo} second${secondsAgo > 1 ? 's' : ''} ago`;
     };
 
-    const handleCategoryClick = (categoryId) =>
+    const handleCategoryClick = (e, categoryId) =>
     {
-        window.location.href = `/jobList/${categoryId}`;
+        e.preventDefault();
+        navigate(`/jobList/${categoryId}`);
     };
 
-    const handleCompanyClick = (companyId) =>
+    const handleCompanyClick = (e, companyId) =>
     {
-        window.location.href = `/companyDetail/${companyId}`;
+        e.preventDefault();
+        navigate(`/companyDetail/${companyId}`);
     };
 
     const handleJobDetailClick = (e, jobId, companyId) =>
     {
         e.preventDefault();
-        window.location.href = `/jobDetail/${jobId}/${companyId}`;
+        navigate(`/jobDetail/${jobId}/${companyId}`);
     };
 
     return (
@@ -161,10 +173,10 @@ export const SavedJobs = () =>
                                             <div className="text-dark mb-2">{timeAgo}</div>
                                             <a href='' className="h5 mb-3 d-block text-dark" onClick={(e) => handleJobDetailClick(e, job.jobId, job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.jobTitle}</a>
                                             <div className="d-flex align-items-center mb-3">
-                                                <NavLink to={''} target="_blank" rel="noopener noreferrer" onClick={() => handleCompanyClick(job.companyId)}>
+                                                <NavLink to='' onClick={(e) => handleCompanyClick(e, job.companyId)}>
                                                     <img src={job.companyLogo} className="img-fluid p-0 d-inline-block rounded-sm border border-gray me-2 bg-white" style={{ width: '4em', height: '4em', objectFit: 'contain' }} />
                                                 </NavLink>
-                                                <NavLink to={''} className="text-dark ml-2" onClick={() => handleCompanyClick(job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.companyName}</NavLink>
+                                                <NavLink to='' className="text-dark ml-2" onClick={(e) => handleCompanyClick(e, job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.companyName}</NavLink>
                                             </div>
                                             <div className="mb-2">{job.position}</div>
                                             <div className="mb-2">
@@ -176,7 +188,7 @@ export const SavedJobs = () =>
                                                     const categoryName = skill.categoryName;
                                                     const categoryId = skill.categoryId;
                                                     return categoryName ? (
-                                                        <NavLink key={categoryId} onClick={() => handleCategoryClick(categoryId)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={''}>
+                                                        <NavLink key={categoryId} onClick={(e) => handleCategoryClick(e, categoryId)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={''}>
                                                             {categoryName}
                                                         </NavLink>
                                                     ) : null;
@@ -184,22 +196,18 @@ export const SavedJobs = () =>
                                             </div>
 
                                             <div className="d-flex justify-content-end align-items-center mt-auto mb-2">
-                                                <button className="btn btn-primary me-3 mr-3">
-                                                    Apply Now
-                                                </button>
                                                 <a
                                                     href='#'
                                                     className='d-flex align-items-center justify-content-center'
-                                                    onClick={() =>
+                                                    onClick={(e) =>
 
-                                                        handleSaveJob(job.favoriteId)
+                                                        handleSaveJob(e, job.favoriteId)
                                                     }
                                                     style={{ textDecoration: 'none', fontSize: '1.5em', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                                 >
                                                     <span className={`${favoriteJobs.has(job.favoriteId) ? 'icon-heart text-danger' : 'icon-heart-o text-danger'}`} />
                                                 </a>
                                             </div>
-
                                         </div>
                                     </div>
                                 );

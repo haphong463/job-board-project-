@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import axiosRequest from "../../configs/axiosConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
@@ -20,6 +20,7 @@ export function ViewAllCompany ()
     const user = useSelector((state) => state.auth.user);
     const roles = useSelector((state) => state.auth.roles);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleLogout = () =>
     {
@@ -43,9 +44,10 @@ export function ViewAllCompany ()
     //     }
     // };
 
-    const handleCompanyClick = (companyId) =>
+    const handleCompanyClick = (e, companyId) =>
     {
-        window.location.href = `/companyDetail/${companyId}`;
+        e.preventDefault();
+        navigate(`/companyDetail/${companyId}`);
     };
 
     const alphabetGroups = ['#', 'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR', 'STUV', 'WXYZ'];
@@ -108,7 +110,7 @@ export function ViewAllCompany ()
                             <h2 style={{ fontWeight: 'bold', fontSize: '25px' }}>{initial}</h2>
                             {groupedCompanies[initial].map(company => (
                                 <div key={company.companyId} className="jb_category-item">
-                                    <NavLink to={''} className="jb_item" onClick={() => handleCompanyClick(company.companyId)}>
+                                    <NavLink to={''} className="jb_item" onClick={(e) => handleCompanyClick(e, company.companyId)}>
                                         {company.companyName}
                                     </NavLink>
                                 </div>

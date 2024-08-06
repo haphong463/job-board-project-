@@ -86,3 +86,7 @@ iframe {
 .card {
     background-color: white;
 }
+
+strong {
+    color: black;
+}

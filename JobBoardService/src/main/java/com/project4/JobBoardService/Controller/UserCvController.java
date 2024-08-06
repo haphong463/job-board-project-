@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -115,7 +116,7 @@ public class UserCvController {
 //
 //        return ResponseEntity.ok().body("CV Save Success!");
 //    }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     @GetMapping("/{cvId}")
     public ResponseEntity<UserCvDTO> getCvById(@PathVariable String cvId) {
         UserCV userCv;
@@ -132,7 +133,7 @@ public class UserCvController {
         UserCvDTO userCvDTO = modelMapper.map(userCv, UserCvDTO.class);
         return ResponseEntity.ok().body(userCvDTO);
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     @GetMapping("/check-cvs/{userId}")
     public ResponseEntity<Boolean> checkCvsByUserId(@PathVariable Long userId) {
         try {
@@ -143,7 +144,7 @@ public class UserCvController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
         }
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     @GetMapping("/list-cvs/{userId}")
     public ResponseEntity<List<UserCvDTO>> listCvs(@PathVariable Long userId) {
         List<UserCV> userCvs = userCvRepository.findAllByUserId(userId);
@@ -157,7 +158,7 @@ public class UserCvController {
 
         return ResponseEntity.ok().body(userCvDTOs);
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     @GetMapping("/view-cv/{cvId}")
     public ResponseEntity<UserCvDTO> viewCv(@PathVariable Long cvId) {
         UserCV existingCv = userCvRepository.findById(cvId).orElse(null);
@@ -168,7 +169,7 @@ public class UserCvController {
         UserCvDTO userCvDTO = modelMapper.map(existingCv, UserCvDTO.class);
         return ResponseEntity.ok().body(userCvDTO);
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     @DeleteMapping("/delete-cv/{cvId}")
     public ResponseEntity<String> deleteCv(@PathVariable Long cvId) {
         try {
@@ -183,7 +184,7 @@ public class UserCvController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting CV");
         }
     }
-
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     @PutMapping("/update-cv/{cvId}")
     public ResponseEntity<String> updateCv(@PathVariable Long cvId,
                                            @ModelAttribute UserCV updatedUserCV,
@@ -263,6 +264,8 @@ public class UserCvController {
 
         return ResponseEntity.ok().body("CV Update Success!");
     }
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    @PostMapping("/submit-cv")
     public ResponseEntity<String> submitCv(@ModelAttribute UserCV userCV,
                                            @RequestParam("profileImage") MultipartFile profileImage,
                                            @RequestParam("dob") Long dobTimestamp) {
