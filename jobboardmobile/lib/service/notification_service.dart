@@ -36,10 +36,10 @@ class NotificationService {
     String? accessToken = await authService.getAccessToken();
     final response = await http.get(Uri.parse('$baseUrl/$id'),
         headers: {'Authorization': 'Bearer $accessToken'});
-
+    
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
-      print(body);
+      print("body: $body");
       return body.map((json) => NotificationModel.fromJson(json)).toList();
     } else {
       // Handle error

@@ -87,6 +87,11 @@ class _BlogDetailState extends State<BlogDetail> {
   }
 
   void _addComment(String content) async {
+    if (content.trim().isEmpty) {
+      // Không thực hiện hành động nào nếu bình luận là trống
+      return;
+    }
+
     try {
       String temporaryCommentId = '${DateTime.now().millisecondsSinceEpoch}';
 

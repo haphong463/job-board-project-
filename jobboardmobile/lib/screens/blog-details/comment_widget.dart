@@ -136,6 +136,14 @@ class _CommentWidgetState extends State<CommentWidget> {
     );
   }
 
+  String _getDefaultAvatarUrl(String gender) {
+    if (gender == 'MALE') {
+      return 'https://w7.pngwing.com/pngs/613/636/png-transparent-computer-icons-user-profile-male-avatar-avatar-heroes-logo-black-thumbnail.png';
+    } else {
+      return 'https://w7.pngwing.com/pngs/671/695/png-transparent-user-profile-computer-icons-avatar.png';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -151,13 +159,23 @@ class _CommentWidgetState extends State<CommentWidget> {
               CircleAvatar(
                 child: ClipOval(
                   child: Image.network(
-                    widget.comment.user.imageUrl.replaceFirst(
-                      'http://localhost:8080',
-                      Endpoint.imageUrl,
-                    ),
+                    widget.comment.user.imageUrl?.isNotEmpty == true
+                        ? widget.comment.user.imageUrl!.replaceFirst(
+                            'http://localhost:8080',
+                            Endpoint.imageUrl,
+                          )
+                        : _getDefaultAvatarUrl("MALE"),
                     fit: BoxFit.cover,
                     width: 40,
                     height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.network(
+                        _getDefaultAvatarUrl("MALE"),
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                      );
+                    },
                   ),
                 ),
               ),
