@@ -5,6 +5,8 @@ import 'package:jobboardmobile/models/comment_model.dart';
 import 'package:jobboardmobile/models/content_model.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/comment_service.dart';
+import 'package:moment_dart/moment_dart.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 
 class CommentWidget extends StatefulWidget {
   final Comment comment;
@@ -36,6 +38,8 @@ class _CommentWidgetState extends State<CommentWidget> {
   TextEditingController editEditingController = TextEditingController();
   TextEditingController replyEditingController = TextEditingController();
   FocusNode replyFocusNode = FocusNode();
+  final ProfanityFilter _profanityFilter =
+      ProfanityFilter(); // Profanity filter instance
 
   void _fetchUserDetails() async {
     username = await _authService.getUsername();
@@ -58,6 +62,10 @@ class _CommentWidgetState extends State<CommentWidget> {
 
   void _addReply(String content, Comment parentComment) async {
     try {
+      if (content.trim().isEmpty) {
+        // Không thực hiện hành động nào nếu bình luận là trống
+        return;
+      }
       String temporaryCommentId = '${DateTime.now().millisecondsSinceEpoch}';
 
       var reply = {
@@ -164,7 +172,10 @@ class _CommentWidgetState extends State<CommentWidget> {
                             'http://localhost:8080',
                             Endpoint.imageUrl,
                           )
-                        : _getDefaultAvatarUrl("MALE"),
+                        : _getDefaultAvatarUrl(
+                            widget.comment.user.gender.isNotEmpty == true
+                                ? widget.comment.user.gender
+                                : "MALE"),
                     fit: BoxFit.cover,
                     width: 40,
                     height: 40,
@@ -246,7 +257,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                         ),
                       )
                     else
-                      Text(widget.comment.content),
+                      Text(_profanityFilter.censor(widget.comment.content)),
                     if (_isEditing)
                       Row(
                         children: [
@@ -266,7 +277,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                         ],
                       ),
                     Text(
-                      DateFormat.yMMMd().format(widget.comment.createdAt),
+                      Moment(widget.comment.createdAt).fromNow(),
                       style: const TextStyle(color: Colors.grey),
                     ),
                     if (_replying)

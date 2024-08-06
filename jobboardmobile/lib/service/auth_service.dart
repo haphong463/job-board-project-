@@ -32,9 +32,12 @@ class AuthService {
           key: 'username', value: jsonResponse['username']); // Save username
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
       saveUserId(jsonResponse['id'].toString());
-    } else if (response.statusCode == 401) {
+    } else if (response.statusCode == 401 || response.statusCode == 403) {
       // Handle invalid credentials
-      throw Exception('Incorrect username or password');
+      var errorResponse = jsonDecode(response.body);
+      String errorMessage = errorResponse['message'];
+      print(errorMessage);
+      throw Exception(errorMessage);
     } else {
       throw Exception('The username and password you entered are incorrect.');
     }

@@ -688,6 +688,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  moment_dart:
+    dependency: "direct main"
+    description:
+      name: moment_dart
+      sha256: "721f008251341578a818140afe402be827bc29951846575598426f4039a0799b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1+beta.0"
   package_config:
     dependency: transitive
     description:
@@ -784,6 +792,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  profanity_filter:
+    dependency: "direct main"
+    description:
+      name: profanity_filter
+      sha256: afe466d42a2763a5b86849192bee3337de45a9566d5915a0fe4aa5f9cd2e8ac4
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   pub_semver:
     dependency: transitive
     description:

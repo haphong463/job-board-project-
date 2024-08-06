@@ -62,6 +62,8 @@ dependencies:
   dropdown_search: ^5.0.6
   url_launcher: ^6.3.0
   image_picker: ^1.1.2
+  profanity_filter: ^2.0.0
+  moment_dart: ^2.2.1+beta.0
 
 dev_dependencies:
   flutter_test:

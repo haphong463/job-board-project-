@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:jobboardmobile/config/GoogleSignInApi.dart';
@@ -43,13 +45,22 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         Navigator.pushReplacementNamed(context, '/main');
       } else {
-        setState(() {
-          _errorMessage = 'Incorrect username or password';
-        });
+        if (response.statusCode == 401 || response.statusCode == 403) {
+          setState(() {
+            _errorMessage = jsonDecode(response.body)['message'];
+          });
+        }
+        // setState(() {
+        //   _errorMessage = 'Incorrect username or password';
+        // });
       }
     } catch (e) {
+      String errorMessage =
+          e.toString(); // Get error message from the exception
       setState(() {
-        _errorMessage = 'Incorrect username or password';
+        _errorMessage = errorMessage.contains('Exception: ')
+            ? errorMessage.replaceFirst('Exception: ', '')
+            : 'Oops! Something went wrong. Please try again';
       });
     }
   }

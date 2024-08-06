@@ -17,7 +17,7 @@ export const login = createAsyncThunk(
     } catch (error) {
       const status = error.response.status;
       console.log(error);
-      if (status === 403 || status === 400) {
+      if (status === 403 || status === 400 || status === 401) {
         return rejectWithValue(error.response.data.message);
       }
       return rejectWithValue(error.message);

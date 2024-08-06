@@ -13,6 +13,7 @@ import 'package:jobboardmobile/screens/blog/blog_screen_widget.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/comment_service.dart';
 import 'package:jobboardmobile/service/notification_service.dart';
+import 'package:moment_dart/moment_dart.dart';
 
 class BlogDetail extends StatefulWidget {
   final ContentModel blog;
@@ -58,6 +59,13 @@ class _BlogDetailState extends State<BlogDetail> {
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToComment();
+    });
+  }
+
+  Future<void> _refreshComments() async {
+    // Fetch latest comments
+    setState(() {
+      _loadComments();
     });
   }
 
@@ -186,12 +194,19 @@ class _BlogDetailState extends State<BlogDetail> {
     });
   }
 
+  String _calculateReadingTime(String content) {
+    const int wordsPerMinute = 200; // Average reading speed
+    final int words = content.split(' ').length;
+    final int minutes = (words / wordsPerMinute).ceil();
+    return '$minutes min read';
+  }
+
   void _navigateToBlogScreenWithFilter(String filterType, String filterValue) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => BlogScreenWidget(
           query: filterType == 'tag' ? filterValue : "",
-          category: filterType == 'category' ? filterValue : "",
+          category: filterType == 'category' ? filterValue : null,
         ),
       ),
     );
@@ -199,6 +214,9 @@ class _BlogDetailState extends State<BlogDetail> {
 
   @override
   Widget build(BuildContext context) {
+    const String defaultAvatarUrl =
+        'https://w7.pngwing.com/pngs/613/636/png-transparent-computer-icons-user-profile-male-avatar-avatar-heroes-logo-black-thumbnail.png';
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -208,108 +226,134 @@ class _BlogDetailState extends State<BlogDetail> {
         backgroundColor: ColorUtil.primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        controller: _scrollController,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        FullScreenImage(imageUrl: widget.blog.imageUrl),
+      body: RefreshIndicator(
+        onRefresh: _refreshComments,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          controller: _scrollController,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          FullScreenImage(imageUrl: widget.blog.imageUrl),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: widget.blog.imageUrl,
+                  child: Image.network(widget.blog.imageUrl),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                widget.blog.title,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${Moment(widget.blog.createdAt).clone()} · ${_calculateReadingTime(widget.blog.content)}',
+                style: const TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: widget.blog.user.imageUrl != null
+                        ? NetworkImage(widget.blog.user.imageUrl!.replaceFirst(
+                            "http://localhost:8080", Endpoint.imageUrl))
+                        : const NetworkImage(defaultAvatarUrl),
+                    radius: 20,
                   ),
-                );
-              },
-              child: Hero(
-                tag: widget.blog.imageUrl,
-                child: Image.network(widget.blog.imageUrl),
+                  const SizedBox(width: 8),
+                  Text(
+                    "${widget.blog.user.firstName} ${widget.blog.user.lastName}",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              widget.blog.title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              DateFormat.yMMMd().format(widget.blog.createdAt),
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            Html(
-              data: widget.blog.content,
-              style: {
-                "body": Style(
-                    fontSize: FontSize(16.0),
-                    listStyleType: ListStyleType.none),
-                "img": Style(
-                  width: Width(345, Unit.percent), // Set the width to 100%
-                  height: Height(200, Unit.px), // Maintain aspect ratio
-                  display: Display.block,
-                  margin: Margins.symmetric(vertical: 10),
-                  alignment: Alignment.center, // Center the image
-                ),
-              },
-            ),
-            if (widget.blog.categories.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Wrap(
-                  spacing: 8.0,
-                  children: widget.blog.categories.map((category) {
-                    return GestureDetector(
-                      onTap: () => _navigateToBlogScreenWithFilter(
-                          'category', category.name),
-                      child: Chip(
-                        label: Text(category.name),
-                        backgroundColor: Colors.blue.shade100,
-                      ),
-                    );
-                  }).toList(),
-                ),
+              const SizedBox(height: 16),
+              Text(
+                widget.blog.citation,
+                style: const TextStyle(fontStyle: FontStyle.italic),
               ),
-            const SizedBox(height: 16),
-            if (widget.blog.hashtags.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Wrap(
-                  spacing: 8.0,
-                  children: widget.blog.hashtags.map((hashtag) {
-                    return GestureDetector(
-                      onTap: () =>
-                          _navigateToBlogScreenWithFilter('tag', hashtag.name),
-                      child: Chip(
-                        label: Text('#${hashtag.name}'),
-                        backgroundColor: Colors.green.shade100,
-                      ),
-                    );
-                  }).toList(),
-                ),
+              const SizedBox(height: 16),
+              Html(
+                data: widget.blog.content,
+                style: {
+                  "body": Style(
+                      fontSize: FontSize(16.0),
+                      listStyleType: ListStyleType.none),
+                  "img": Style(
+                    width: Width(345, Unit.percent), // Set the width to 100%
+                    height: Height(200, Unit.px), // Maintain aspect ratio
+                    display: Display.block,
+                    margin: Margins.symmetric(vertical: 10),
+                    alignment: Alignment.center, // Center the image
+                  ),
+                },
               ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const Text(
-              'Comments',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Column(
-              children: _comments.map((comment) {
-                // final key = GlobalKey();
-                // _commentKeys[comment.id] = key;
-                // print(_commentKeys[comment.id]);
-                return CommentWidget(
-                  // key: key,
-                  comment: comment,
-                  deleteComment: _deleteComment,
-                  toggleMainCommentField: _toggleCommentField,
-                  blog: widget.blog,
-                );
-              }).toList(),
-            ),
-          ],
+              if (widget.blog.categories.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Wrap(
+                    spacing: 8.0,
+                    children: widget.blog.categories.map((category) {
+                      return GestureDetector(
+                        onTap: () => _navigateToBlogScreenWithFilter(
+                            'category', category.name),
+                        child: Chip(
+                          label: Text(category.name),
+                          backgroundColor: Colors.blue.shade100,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              if (widget.blog.hashtags.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Wrap(
+                    spacing: 8.0,
+                    children: widget.blog.hashtags.map((hashtag) {
+                      return GestureDetector(
+                        onTap: () => _navigateToBlogScreenWithFilter(
+                            'tag', hashtag.name),
+                        child: Chip(
+                          label: Text('#${hashtag.name}'),
+                          backgroundColor: Colors.green.shade100,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              const Divider(),
+              const Text(
+                'Comments',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Column(
+                children: _comments.map((comment) {
+                  // final key = GlobalKey();
+                  // _commentKeys[comment.id] = key;
+                  // print(_commentKeys[comment.id]);
+                  return CommentWidget(
+                    // key: key,
+                    comment: comment,
+                    deleteComment: _deleteComment,
+                    toggleMainCommentField: _toggleCommentField,
+                    blog: widget.blog,
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: Padding(

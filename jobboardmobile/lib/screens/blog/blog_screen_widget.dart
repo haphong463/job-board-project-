@@ -31,6 +31,7 @@ class _BlogScreenWidgetState extends State<BlogScreenWidget> {
     super.initState();
     _fetchCategories();
     if (widget.query != null) {
+      _queryController.text = widget.query!;
       _query = widget.query!;
     }
     if (widget.category != null) {
@@ -203,12 +204,6 @@ class _BlogScreenWidgetState extends State<BlogScreenWidget> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 0),
-                        child: Text(
-                            'Result found: ${snapshot.data!.content.length}'),
-                      ),
                       Expanded(
                         child: BlogList(
                           blogs: snapshot.data!.content.map((content) {

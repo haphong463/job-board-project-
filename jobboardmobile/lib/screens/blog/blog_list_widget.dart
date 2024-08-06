@@ -5,6 +5,7 @@ import 'package:jobboardmobile/models/blog_model.dart';
 import 'package:jobboardmobile/models/content_model.dart';
 import 'package:jobboardmobile/models/user_model.dart';
 import 'package:jobboardmobile/screens/blog-details/blog_detail_screen_widget.dart';
+import 'package:moment_dart/moment_dart.dart';
 
 class BlogList extends StatelessWidget {
   final List<ContentModel> blogs;
@@ -43,6 +44,12 @@ class BlogList extends StatelessWidget {
 
 class BlogCard extends StatelessWidget {
   final ContentModel blog;
+  String _calculateReadingTime(String content) {
+    const int wordsPerMinute = 200; // Average reading speed
+    final int words = content.split(' ').length;
+    final int minutes = (words / wordsPerMinute).ceil();
+    return '$minutes min read';
+  }
 
   const BlogCard({super.key, required this.blog});
 
@@ -94,7 +101,7 @@ class BlogCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                DateFormat.yMMMd().format(blog.createdAt),
+                '${Moment(blog.createdAt).format("YYYY-MM-DD")} · ${_calculateReadingTime(blog.content)}',
                 style: const TextStyle(color: Colors.grey),
               ),
             ],

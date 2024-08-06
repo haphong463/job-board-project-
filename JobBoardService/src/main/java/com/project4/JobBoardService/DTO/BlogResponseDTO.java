@@ -1,5 +1,8 @@
 package com.project4.JobBoardService.DTO;
 
+import com.project4.JobBoardService.Enum.Gender;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,6 +55,7 @@ public class BlogResponseDTO {
         private String lastName;
         private String bio;
         private String imageUrl;
+        private Gender gender;
         // Getters and setters
     }
 }

@@ -48,39 +48,3 @@ class Comment {
     };
   }
 }
-
-class User {
-  String username;
-  String firstName;
-  String lastName;
-  String? imageUrl; // Allow imageUrl to be nullable
-  String gender;
-
-  User({
-    required this.username,
-    required this.firstName,
-    required this.lastName,
-    this.imageUrl,
-    required this.gender,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      username: json['username'] ?? '',
-      firstName: json['firstName'] ?? '',
-      lastName: json['lastName'] ?? '',
-      imageUrl: json['imageUrl'],
-      gender: json['gender'] ?? 'MALE', // Provide a default value for gender
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'username': username,
-      'firstName': firstName,
-      'lastName': lastName,
-      'imageUrl': imageUrl,
-      'gender': gender,
-    };
-  }
-}

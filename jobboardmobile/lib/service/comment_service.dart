@@ -13,7 +13,6 @@ class CommentService {
       final response = await http.get(Uri.parse('$baseUrl/blog/$slug'));
       if (response.statusCode == 200) {
         List<dynamic> jsonList = jsonDecode(response.body);
-        print(jsonList);
         List<Comment> comments =
             jsonList.map((json) => Comment.fromJson(json)).toList();
 
