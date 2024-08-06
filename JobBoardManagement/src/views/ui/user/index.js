@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownItem,
   Spinner,
+  Table,
 } from "reactstrap";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
@@ -31,6 +32,64 @@ import {
 import { hasPermission } from "../../../utils/functions/hasPermission";
 import { Navigate } from "react-router-dom";
 import moment from "moment/moment";
+import { formatPermissionName } from "../../../utils/functions/formatPermission";
+
+const ExpandableRow = ({ data }) => {
+  const isModerator = data.roles.some((role) => role.name === "ROLE_MODERATOR");
+
+  return (
+    <div style={{ padding: "10px", background: "#f9f9f9" }}>
+      <Table bordered responsive>
+        <tbody>
+          <tr>
+            <th>Full Name</th>
+            <td>
+              {data.firstName} {data.lastName}
+            </td>
+          </tr>
+          <tr>
+            <th>Username</th>
+            <td>{data.username}</td>
+          </tr>
+          <tr>
+            <th>Email</th>
+            <td>{data.email}</td>
+          </tr>
+          <tr>
+            <th>Gender</th>
+            <td>{data.gender ?? "Not updated"}</td>
+          </tr>
+          <tr>
+            <th>Last Updated At</th>
+            <td>{moment(data.updatedAt).format("DD MMM YYYY, h:mm A")}</td>
+          </tr>
+          <tr>
+            <th>Verified</th>
+            <td>
+              {data.verified ? (
+                <Badge color="success">Verified</Badge>
+              ) : (
+                <Badge color="danger">Not Verified</Badge>
+              )}
+            </td>
+          </tr>
+          {isModerator && (
+            <tr>
+              <th>Permissions</th>
+              <td>
+                {data.permissions.map((permission) => (
+                  <Badge key={permission.name} color="info" className="me-2">
+                    {formatPermissionName(permission.name)}
+                  </Badge>
+                ))}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
+    </div>
+  );
+};
 
 const UserList = () => {
   const dispatch = useDispatch();
@@ -147,12 +206,6 @@ const UserList = () => {
       ),
       width: "200px",
     },
-
-    {
-      name: "Gender",
-      cell: (row) => row.gender ?? "Not updated",
-    },
-
     {
       name: "Active",
       selector: (row) => row.isEnabled,
@@ -281,7 +334,7 @@ const UserList = () => {
   const customStyles = {
     rows: {
       style: {
-        padding: "15px 0",
+        padding: "10px 0",
       },
     },
   };
@@ -296,7 +349,9 @@ const UserList = () => {
     <Card>
       <div className="d-flex justify-content-between align-items-center p-3 gap-3">
         <h4>User List</h4>
-        <ModeratorForm />
+        {user.role.map((item) => item.authority).includes("ROLE_ADMIN") && (
+          <ModeratorForm listPermissions={permissions} />
+        )}
       </div>
       <div className="d-flex w-100 gap-2 p-2">
         <div className="form-floating" style={{ flex: 1, maxWidth: "400px" }}>
@@ -323,8 +378,8 @@ const UserList = () => {
       <DataTable
         columns={columns}
         data={users}
-        customStyles={customStyles}
         pagination
+        customStyles={customStyles}
         paginationPerPage={pageSize}
         paginationRowsPerPageOptions={[5, 10, 15]}
         paginationServer
@@ -333,8 +388,8 @@ const UserList = () => {
         onChangeRowsPerPage={handlePerRowsChange}
         progressComponent={<Spinner />}
         progressPending={status === "loading"}
-        fixedHeader
-        fixedHeaderScrollHeight="60vh"
+        expandableRows
+        expandableRowsComponent={ExpandableRow}
         highlightOnHover
       />
       {selectedUser && (

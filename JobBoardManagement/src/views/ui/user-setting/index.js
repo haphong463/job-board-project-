@@ -42,6 +42,7 @@ const profileSchema = yup.object().shape({
     .oneOf(["MALE", "FEMALE", "OTHER"])
     .required("Gender is required"),
   imageFile: yup.mixed().test("fileSize", "File is too large", (value) => {
+    console.log("value: ", value);
     return !value || (value && value.size <= 2000000); // 2MB
   }),
 });
@@ -129,7 +130,7 @@ const User = () => {
         const reqStatus = res.meta.requestStatus;
         const payload = res.payload;
         if (reqStatus === "fulfilled") {
-          setValue("bio", payload.bio);
+          setValue("bio", payload.bio ? payload.bio : "");
           setValue("firstName", payload.firstName);
           setValue("lastName", payload.lastName);
           setValue("gender", payload.gender);
@@ -330,9 +331,11 @@ const User = () => {
                               control={control}
                               render={({ field }) => (
                                 <Input
-                                  {...field}
                                   type="file"
                                   accept="image/*"
+                                  onChange={(e) => {
+                                    setValue("imageFile", e.target.files[0]);
+                                  }}
                                 />
                               )}
                             />

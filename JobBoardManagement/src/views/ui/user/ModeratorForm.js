@@ -22,13 +22,14 @@ import { IoMdAdd } from "react-icons/io";
 import { FaUser, FaEnvelope, FaLock, FaUserAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { createModeratorThunk } from "../../../features/userSlice";
-// import your actions here, e.g., addModerator
 
-export function ModeratorForm() {
+export function ModeratorForm({ listPermissions }) {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.user.list);
 
   const [newModeratorModal, setNewModeratorModal] = useState(false);
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
+
   const moderatorSchema = yup.object().shape({
     firstName: yup.string().required("First Name is required"),
     lastName: yup.string().required("Last Name is required"),
@@ -48,7 +49,6 @@ export function ModeratorForm() {
       .email("Invalid email format")
       .required("Email is required")
       .test("unique-email", "Email already exists", async function (value) {
-        // Check if email already exists in users list
         const existingUser = users.find((user) => user.email === value);
         return !existingUser;
       }),
@@ -57,6 +57,7 @@ export function ModeratorForm() {
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
   });
+
   const toggleNewModeratorModal = () => {
     setNewModeratorModal(!newModeratorModal);
     if (newModeratorModal) {
@@ -67,6 +68,7 @@ export function ModeratorForm() {
         email: "",
         password: "",
       });
+      setSelectedPermissions([]);
     }
   };
 
@@ -87,27 +89,20 @@ export function ModeratorForm() {
     },
   });
 
+  const handleChange = (event) => {
+    const { value, checked } = event.target;
+    setSelectedPermissions((prev) =>
+      checked ? [...prev, value] : prev.filter((perm) => perm !== value)
+    );
+  };
+
   const onSubmit = (data) => {
     console.log(">>> data create moderator: ", data);
-
-    // const checkExistEmail = users.some((item) => item.email === data.email);
-    // const checkExistUsername = users.some(
-    //   (item) => item.username === data.username
-    // );
-    // if (checkExistEmail) {
-    //   setError("email", {
-    //     message: "Email already exists!",
-    //   });
-    //   return;
-    // }
-    // if (checkExistUsername) {
-    //   setError("username", {
-    //     message: "Username already exists!",
-    //   });
-    //   return;
-    // }
-
-    dispatch(createModeratorThunk(data)).then(() => {
+    const moderatorData = {
+      signupRequest: data,
+      permissions: selectedPermissions,
+    };
+    dispatch(createModeratorThunk(moderatorData)).then(() => {
       toggleNewModeratorModal();
     });
   };
@@ -120,7 +115,11 @@ export function ModeratorForm() {
           New Moderator
         </Button>
       </div>
-      <Modal isOpen={newModeratorModal} toggle={toggleNewModeratorModal}>
+      <Modal
+        isOpen={newModeratorModal}
+        size="xl"
+        toggle={toggleNewModeratorModal}
+      >
         <Form onSubmit={handleSubmit(onSubmit)}>
           <ModalHeader toggle={toggleNewModeratorModal}>
             Create New Moderator
@@ -256,6 +255,18 @@ export function ModeratorForm() {
                 <FormText color="danger">{errors.password.message}</FormText>
               )}
             </FormGroup>
+            {listPermissions.map((item) => (
+              <FormGroup key={item.id} check>
+                <Label check>
+                  <Input
+                    type="checkbox"
+                    value={item.name}
+                    onChange={handleChange}
+                  />
+                  {item.name}
+                </Label>
+              </FormGroup>
+            ))}
           </ModalBody>
           <ModalFooter>
             <Button color="primary" type="submit">
