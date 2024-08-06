@@ -18,6 +18,18 @@ import java.util.List;
 public interface BlogRepository extends JpaRepository<Blog, Long> {
     long countByUserAndCreatedAtBetween(User user, LocalDateTime startDate, LocalDateTime endDate);
 
+    @Query("SELECT b.user.username, MONTH(b.createdAt), COUNT(b) " +
+            "FROM Blog b " +
+            "JOIN b.user u " +
+            "LEFT JOIN u.roles r " +
+            "LEFT JOIN u.permissions p " +
+            "WHERE YEAR(b.createdAt) = :year " +
+            "AND (r.name = 'ROLE_ADMIN' " +
+            "     OR (r.name = 'ROLE_MODERATOR' AND p.name = 'MANAGE_BLOG')) " +
+            "GROUP BY b.user.username, MONTH(b.createdAt)")
+    List<Object[]> countBlogsByUserAndMonth(@Param("year") int year);
+
+
     int countByCategories(BlogCategory blogCategory);
 
     Blog findBySlug(@Param("slug") String slug);

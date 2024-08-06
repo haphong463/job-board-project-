@@ -24,6 +24,9 @@ export const CompanyDetail = () =>
    const categories = useSelector((state) => state.category.categories);
    const { hasReviewed } = useSelector((state) => state.review);
    const reviews = useSelector((state) => state.review.reviews) ?? [];
+
+   const user = useSelector(state => state.auth.user);
+   const userId = user ? user.id : null;
    const jobsPerPage = 5; // Number of jobs per page
    const [currentPage, setCurrentPage] = useState(1);
 
@@ -99,10 +102,15 @@ export const CompanyDetail = () =>
    const indexOfLastJob = currentPage * jobsPerPage;
    const indexOfFirstJob = indexOfLastJob - jobsPerPage;
 
-   const currentJobs = useMemo(() =>
+   const safeReviews = Array.isArray(reviews) ? reviews : [];
+   const currentReviews = useMemo(() =>
    {
-      return reviews.slice(indexOfFirstJob, indexOfLastJob);
-   }, [currentPage, jobsPerPage]);
+      const sanitizedReviews = safeReviews.map(review => ({
+         ...review,
+         description: review.description ? DOMPurify.sanitize(review.description, { USE_PROFILES: { html: true } }) : ''
+      }));
+      return sanitizedReviews.slice(indexOfFirstJob, indexOfLastJob);
+   }, [reviews, indexOfFirstJob, indexOfLastJob]);
 
    const renderPaginationButtons = () =>
    {
@@ -183,21 +191,28 @@ export const CompanyDetail = () =>
 
    const handleWriteReviewClick = () =>
    {
+      if (!userId)
+      {
+         navigate(`/login`);
+      }
       navigate(`/companyDetail/${companyId}/writeReview`);
    };
 
-   const handleCompanyClick = (companyId) =>
+   const handleCompanyClick = (e, companyId) =>
    {
+      e.preventDefault();
       navigate(`/companyDetail/${companyId}`);
    };
 
-   const handleJobDetailClick = (jobId, companyId) =>
+   const handleJobDetailClick = (e, jobId, companyId) =>
    {
+      e.preventDefault();
       navigate(`/jobDetail/${jobId}/${companyId}`);
    };
 
-   const handleCategoryClick = (categoryId) =>
+   const handleCategoryClick = (e, categoryId) =>
    {
+      e.preventDefault();
       navigate(`/jobList/${categoryId}`);
    };
 
@@ -352,17 +367,21 @@ export const CompanyDetail = () =>
                                     </div>
                                  </div>
                                  <ul className="list-unstyled">
-                                    {reviews.length === 0 ? (
+                                    {currentReviews.length === 0 ? (
                                        <li className="text-center">No reviews for this company.</li>
                                     ) : (
-                                       reviews.map(review => (
+                                       currentReviews.map(review => (
+                                          // review ? (
                                           <li key={review.id}>
                                              <ReviewComponent
+                                                imageUrl={review.imageUrl}
+                                                username={review.username}
                                                 title={review.title}
                                                 rating={review.rating}
                                                 description={review.description}
                                              />
                                           </li>
+                                          // ) : null
                                        ))
                                     )}
                                  </ul>
@@ -407,29 +426,29 @@ export const CompanyDetail = () =>
                                           src={company.logo}
                                           alt="Free Website"
                                           className="img-fluid p-0 d-inline-block rounded-sm me-2 bg-white"
-                                          onClick={() =>
+                                          onClick={(e) =>
                                           {
-                                             handleCompanyClick(job.companyId);
+                                             handleCompanyClick(e, job.companyId);
                                           }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
                                        />
                                     </div>
                                     <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
                                        <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                                          <h2 className="mb-2" onClick={() =>
+                                          <h2 className="mb-2" onClick={(e) =>
                                           {
-                                             handleJobDetailClick(job.id, job.companyId);
+                                             handleJobDetailClick(e, job.id, job.companyId);
                                              console.log(job.companyId);
                                           }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
-                                          <strong onClick={() =>
+                                          <strong onClick={(e) =>
                                           {
-                                             handleCompanyClick(job.companyId);
+                                             handleCompanyClick(e, job.companyId);
                                           }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
                                           <div className="m-0 mt-3">
                                              {job.categoryId.map((id) =>
                                              {
                                                 const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
                                                 return categoryName ? (
-                                                   <span key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" style={{ textDecoration: 'none', cursor: 'pointer' }}>
+                                                   <span key={id} onClick={(e) => handleCategoryClick(e, id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" style={{ textDecoration: 'none', cursor: 'pointer' }}>
                                                       {categoryName}
                                                    </span>
                                                 ) : null;

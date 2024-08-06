@@ -29,10 +29,11 @@ class Comment {
         : [];
 
     return Comment(
-      id: json['id'].toString(), // Ensure id is treated as a String
+      id: json['id']?.toString() ??
+          '', // Ensure id is treated as a String and provide a default value
       blog: BlogDTO.fromJson(json['blog']),
       children: children,
-      content: json['content'],
+      content: json['content'] ?? '', // Provide a default value for content
       user: User.fromJson(json['user']),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
@@ -44,6 +45,42 @@ class Comment {
       'blog': blog.toJson(),
       'content': content,
       'user': user.toJson(),
+    };
+  }
+}
+
+class User {
+  String username;
+  String firstName;
+  String lastName;
+  String? imageUrl; // Allow imageUrl to be nullable
+  String gender;
+
+  User({
+    required this.username,
+    required this.firstName,
+    required this.lastName,
+    this.imageUrl,
+    required this.gender,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      username: json['username'] ?? '',
+      firstName: json['firstName'] ?? '',
+      lastName: json['lastName'] ?? '',
+      imageUrl: json['imageUrl'],
+      gender: json['gender'] ?? 'MALE', // Provide a default value for gender
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'firstName': firstName,
+      'lastName': lastName,
+      'imageUrl': imageUrl,
+      'gender': gender,
     };
   }
 }

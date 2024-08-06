@@ -12,6 +12,7 @@ import com.project4.JobBoardService.Entity.RefreshToken;
 import com.project4.JobBoardService.Entity.Role;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Enum.ERole;
+import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.payload.*;
 import com.project4.JobBoardService.Repository.EmployerRepository;
 import com.project4.JobBoardService.Repository.RoleRepository;
@@ -78,6 +79,8 @@ public class AuthController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private UserService userService;
 
     @Value("${app.googleClientID}")
     private String CLIENT_ID; // Replace with your actual client ID
@@ -423,17 +426,17 @@ public class AuthController {
 
     @PostMapping("/add-moderator")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> registerModerator(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> registerModerator(@RequestBody RegisterModeratorRequest registerRequest) {
+        SignupRequest signUpRequest = registerRequest.getSignupRequest();
+        List<String> permissions = registerRequest.getPermissions();
+
+        // Phần còn lại của logic để đăng ký moderator và cập nhật permissions
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
         User user = new User(signUpRequest.getUsername(),
@@ -460,8 +463,13 @@ public class AuthController {
         UserDTO userCreatedDto = modelMapper.map(userCreated, UserDTO.class);
         emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
 
-        return ResponseEntity.ok(userCreatedDto);
+        // Cập nhật permissions cho user
+
+
+
+        return ResponseEntity.ok(modelMapper.map(userService.updateUserPermissions(userCreated.getId(), permissions), UserDTO.class));
     }
+
 
     //Employer
     @PostMapping("/registerEmployer")

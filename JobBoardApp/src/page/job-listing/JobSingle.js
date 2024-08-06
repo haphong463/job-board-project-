@@ -28,40 +28,33 @@ export const JobSingle = () =>
    const dispatch = useDispatch();
    const jobs = useSelector((state) => state.job.jobs);
 
-   const userId = useSelector(state => state.auth.user.id);
+   const user = useSelector(state => state.auth.user);
+   const userId = user ? user.id : null;
 
    const companies = useSelector((state) => state.company.companies);
-
    const categories = useSelector((state) => state.category.categories);
 
    const [showApplyBox, setShowApplyBox] = useState(false);
-
    const [hasApplied, setHasApplied] = useState(false);
-
    const [isSaved, setIsSaved] = useState(false);
    const navigate = useNavigate();
    const [favoriteId, setFavoriteId] = useState(null);
-
 
    const checkIfApplied = async () =>
    {
       try
       {
          const response = await axiosRequest.get(`/application/user/${userId}/job/${jobId}`);
-         setHasApplied(response); // Ensure `response.data` is boolean
+         setHasApplied(response === true); // Ensure `response.data` is boolean
       } catch (error)
       {
          console.error('Error checking application status', error);
       }
    };
 
-
-
-
    useEffect(() =>
    {
       dispatch(fetchCategoryThunk());
-
       if (companies.length === 0)
       {
          dispatch(fetchCompanyThunk());
@@ -70,8 +63,11 @@ export const JobSingle = () =>
       {
          dispatch(fetchJobThunk());
       }
-      checkIfApplied();
-   }, [dispatch, jobs.length, companies.length]);
+      if (userId)
+      {
+         checkIfApplied();
+      }
+   }, [jobs.length, companies.length, userId, jobId]);
 
    useEffect(() =>
    {
@@ -108,6 +104,11 @@ export const JobSingle = () =>
    const handleApplyClick = (e) =>
    {
       e.preventDefault();
+      if (!userId)
+      {
+         navigate(`/login`);  // Redirect to login if user is not logged in
+         return;  // Exit the function to prevent further actions
+      }
       setShowApplyBox(true);
    };
    const handleCloseApplyBox = () =>
@@ -130,19 +131,22 @@ export const JobSingle = () =>
       return address;
    };
 
-   const handleCompanyClick = (companyId) =>
+   const handleCompanyClick = (e, companyId) =>
    {
+      e.preventDefault();
       navigate(`/companyDetail/${companyId}`);
    };
 
-   const handleCategoryClick = (categoryId) =>
+   const handleCategoryClick = (e, categoryId) =>
    {
-      window.location.href = `/jobList/${categoryId}`;
+      e.preventDefault();
+      navigate(`/jobList/${categoryId}`);
    };
 
-   const handleJobDetailClick = (jobId, companyId) =>
+   const handleJobDetailClick = (e, jobId, companyId) =>
    {
-      window.location.href = `/jobDetail/${jobId}/${companyId}`;
+      e.preventDefault();
+      navigate(`/jobDetail/${jobId}/${companyId}`);
    };
 
    const addIconsToListItems = (htmlString) =>
@@ -188,32 +192,6 @@ export const JobSingle = () =>
       return null;
    };
 
-   // const currentJobKeySkills = jobData?.keySkills ? jobData.keySkills.split(',').map(skill => skill.trim()) : [];
-
-   // // Filter jobs that share any key skills with the current job
-   // const relatedJobs = jobs.filter(job =>
-   //    job.id !== jobId &&
-   //    job.keySkills && // Ensure job.keySkills is not null or undefined
-   //    job.keySkills.split(',').map(skill => skill.trim()).some(skill => currentJobKeySkills.includes(skill))
-   // );
-
-   // const currentJobCategoryIds = new Set(jobData.categoryId);  // Chuyển List<Long> thành Set<Long>
-
-   // const relatedJobs = jobs.filter(job =>
-   // {
-   //    const jobCategoryIds = new Set(job.categoryId);
-
-   //    // Kiểm tra xem có bất kỳ phần tử nào trong jobCategoryIds tồn tại trong currentJobCategoryIds
-   //    for (const id of jobCategoryIds)
-   //    {
-   //       if (currentJobCategoryIds.has(id))
-   //       {
-   //          return true;
-   //       }
-   //    }
-   //    return false;
-   // });
-
    const categoryArray = Array.isArray(categories) ? categories : [];
 
    const categoryIds = Array.isArray(jobData.categoryId) ? jobData.categoryId : [];
@@ -245,8 +223,9 @@ export const JobSingle = () =>
       return false;
    });
 
-   const handleSaveJob = async () =>
+   const handleSaveJob = async (e) =>
    {
+      e.preventDefault();
       try
       {
          if (isSaved)
@@ -310,7 +289,7 @@ export const JobSingle = () =>
                      <div className="col-lg-8 mb-4 mb-lg-0">
                         <div className="d-flex align-items-center">
                            <div>
-                              <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>{jobData?.title}</h2>
+                              <h2 style={{ fontSize: '25px', fontWeight: 'bold' }}>{jobData?.title}</h2>
                               <div className="m-0 mt-3">
                                  <span className="icon-room" style={{ fontSize: '23px', marginLeft: '-3px' }} />
                                  <span className="text-dark ml-1">{companyData?.location}</span>
@@ -320,18 +299,12 @@ export const JobSingle = () =>
                                  {
                                     const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
                                     return categoryName ? (
-                                       <NavLink key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={""}>
+                                       <NavLink key={id} onClick={(e) => handleCategoryClick(e, id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={""}>
                                           {categoryName}
                                        </NavLink>
                                     ) : null;
                                  })}
                               </div>
-
-                              {/* <div className="m-0 mt-3" >
-                                 {jobData?.keySkills.split(',').map((skill, index) => (
-                                    <span key={index} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
-                                 ))}
-                              </div> */}
                            </div>
                         </div>
                      </div>
@@ -341,35 +314,26 @@ export const JobSingle = () =>
                               <button
                                  // className="btn btn-block btn-light btn-md"
                                  className={`btn btn-block ${isSaved ? 'btn_saved_job' : 'btn-light'} btn-md`}
-                                 onClick={handleSaveJob}
+                                 onClick={(e) => handleSaveJob(e)}
                               >
                                  <span className="icon-heart-o mr-2 text-danger" />
                                  {isSaved ? 'Saved Job' : 'Save Job'}
                               </button>
                            </div>
-                           <div className="jb-overview-content__apply-btn apply-btn">
-
+                           <div className="col-6 jb-overview-content__apply-btn apply-btn">
                               {hasApplied ? (
-
                                  <button className="jb-apply-btn__btn btn bg-secondary text-light" disabled>
-
                                     Applied!
-
                                  </button>
-
                               ) : (
-
                                  <a
                                     href="#"
                                     className="jb-apply-btn__btn btn bg-primary text-light"
-
-                                    onClick={handleApplyClick}
-                                 >
+                                    onClick={handleApplyClick}>
                                     Apply Now
                                  </a>
                               )}
                            </div>
-
                            {showApplyBox && <ApplyBox company={jobData} jobId={jobId} userId={userId} onClose={handleCloseApplyBox} />}
                         </div>
                      </div>
@@ -381,9 +345,7 @@ export const JobSingle = () =>
                               <span className="icon-align-left mr-3" />
                               Job description
                            </h3>
-
                            {addIconsToListItems(jobData?.description)}
-
                         </div>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
@@ -402,7 +364,6 @@ export const JobSingle = () =>
                            <ul className="list-unstyled m-0 p-0">
                               {addIconsToListItems(jobData?.responsibilities)}
                            </ul>
-
                         </div>
                         <div className="mb-5">
                            <h3 className="h5 d-flex align-items-center mb-4 text-primary">
@@ -472,7 +433,7 @@ export const JobSingle = () =>
                                     className="img-fluid border p-0 d-inline-block mr-3 rounded-sm bg-white"
                                     style={{ width: '8em', height: '8em', objectFit: 'contain' }}
                                  />
-                                 <NavLink to={`/companyDetail/${jobData?.companyId}`} className="pt-3 pb-3 pr-3 pl-0" onClick={() => handleCompanyClick(jobData?.companyId)}>
+                                 <NavLink to={`/companyDetail/${jobData?.companyId}`} className="pt-3 pb-3 pr-3 pl-0" onClick={(e) => handleCompanyClick(e, jobData?.companyId)}>
                                     {companyData?.companyName}
                                  </NavLink>
                               </div>
@@ -522,39 +483,34 @@ export const JobSingle = () =>
                                        src={company.logo}
                                        alt="Free Website"
                                        className="img-fluid p-0 d-inline-block rounded-sm me-2 bg-white"
-                                       onClick={() =>
+                                       onClick={(e) =>
                                        {
-                                          handleCompanyClick(job.companyId);
+                                          handleCompanyClick(e, job.companyId);
                                        }} style={{ width: '7em', height: '7em', objectFit: 'contain', cursor: 'pointer' }}
                                     />
                                  </div>
                                  <div className="job-listing-about d-sm-flex custom-width w-100 justify-content-between mx-4 gap-3 mt-4 mb-4">
                                     <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
-                                       <h2 className="mb-2" onClick={() =>
+                                       <h2 className="mb-2" onClick={(e) =>
                                        {
-                                          handleJobDetailClick(job.id, job.companyId);
+                                          handleJobDetailClick(e, job.id, job.companyId);
                                           console.log(job.companyId);
                                        }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</h2>
-                                       <strong onClick={() =>
+                                       <strong onClick={(e) =>
                                        {
-                                          handleCompanyClick(job.companyId);
+                                          handleCompanyClick(e, job.companyId);
                                        }} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</strong>
                                        <div className="m-0 mt-3">
                                           {job.categoryId.map((id) =>
                                           {
                                              const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
                                              return categoryName ? (
-                                                <span key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">
+                                                <span key={id} onClick={(e) => handleCategoryClick(e, id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark">
                                                    {categoryName}
                                                 </span>
                                              ) : null;
                                           })}
                                        </div>
-                                       {/* <div className='d-flex flex-wrap mt-2'>
-                                          {job.keySkills.split(',').map((skill, index) => (
-                                             <span key={index} className="bg-white border border-gray p-2 mr-2 rounded-pill text-dark">{skill.trim()}</span>
-                                          ))}
-                                       </div> */}
                                     </div>
                                     <div className="d-flex flex-column flex-sm-row align-items-start flex-grow-1 gap-3">
                                        <div className="justify-content-start me-3">
@@ -565,14 +521,12 @@ export const JobSingle = () =>
                                        <span className="badge bg-danger">{job.contractType}</span>
                                     </div>
                                  </div>
-
                               </li>
                            );
                         }
                         return null;
                      })}
                   </ul>
-
                </div>
             </section>
             <section className="bg-light pt-5 testimony-full">
@@ -672,5 +626,4 @@ export const JobSingle = () =>
       </GlobalLayoutUser >
    );
 };
-
 export default JobSingle;

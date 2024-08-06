@@ -5,7 +5,7 @@ class User {
   String firstName;
   String lastName;
   String bio;
-  String imageUrl;
+  String? imageUrl;
 
   User({
     required this.id,
@@ -14,7 +14,7 @@ class User {
     required this.firstName,
     required this.lastName,
     required this.bio,
-    required this.imageUrl,
+    this.imageUrl,
   });
 
   // Factory method to create a User from JSON
@@ -46,6 +46,7 @@ class User {
       'id': id,
       'username': username,
       'email': email,
+      'imageUrl': imageUrl
     };
   }
 }

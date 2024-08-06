@@ -177,6 +177,11 @@ public class BlogServiceImpl implements BlogService {
         blogRepository.saveAll(blogs);
     }
 
+    @Override
+    public List<Object[]> getBlogCountByUserAndMonth(int year) {
+        return blogRepository.countBlogsByUserAndMonth(year);
+    }
+
     private void deleteImageFile(Blog blog) {
         String imageUrl = blog.getImageUrl();
         if (imageUrl != null && !imageUrl.isEmpty()) {

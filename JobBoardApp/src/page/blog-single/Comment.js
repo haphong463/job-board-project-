@@ -17,6 +17,8 @@ import {
 } from "../../features/commentSlice";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import avatarDefault from "../../assets/default_avatar.png";
+
 export const Comment = ({
   comment,
   addComment,
@@ -121,7 +123,10 @@ export const Comment = ({
   return (
     <li className={`comment level-${level}`} id={`comment-${comment.id}`}>
       <div className="vcard bio">
-        <img src={comment.user.imageUrl} alt="Image placeholder" />
+        <img
+          src={comment.user.imageUrl ?? avatarDefault}
+          alt="Image placeholder"
+        />
       </div>
       <div className="comment-body">
         <div className="d-flex justify-content-between">

@@ -5,6 +5,8 @@ import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/review_service.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
 import 'dart:math';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter/src/painting/edge_insets.dart';
 
 import '../../dto/LikeResponse.dart';
 import '../../dto/LikeStorage.dart';
@@ -387,11 +389,9 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                       Text(
                         review.username,
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      Text(
-                        review.title,
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color.fromARGB(205, 98, 98, 98)),
                       ),
                     ],
                   ),
@@ -400,8 +400,20 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
             ),
             SizedBox(height: 16),
             Text(
-              review.description,
-              style: TextStyle(fontSize: 16),
+              review.title,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            // Sử dụng widget Html để render nội dung HTML
+            Html(
+              data: review.description,
+              style: {
+                "html": Style(
+                  fontSize: FontSize(16.0),
+                  color: Colors.black,
+                  padding: HtmlPaddings.all(0),
+                ),
+              },
             ),
             SizedBox(height: 16),
             Row(

@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -80,6 +81,7 @@ public class ApplicationController {
 //            return ResponseEntity.status(500).body("An error occurred while submitting the application: " + e.getMessage());
 //        }
 //    }
+@PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
 @PostMapping("/{jobId}/{companyId}")
 public ResponseEntity<String> applyJob(
         @PathVariable Long jobId,
@@ -131,6 +133,8 @@ public ResponseEntity<String> applyJob(
         return ResponseEntity.status(500).body("An error occurred while submitting the application: " + e.getMessage());
     }
 }
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ApplicationDTO>> getApplicationsByUser(@PathVariable Long userId) {
         List<JobApplication> applications = jobApplicationRepository.findByUserId(userId);
@@ -141,6 +145,7 @@ public ResponseEntity<String> applyJob(
 
         return ResponseEntity.ok(applicationDTOs);
     }
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
 
     @GetMapping("/user/{userId}/job/{jobId}")
     public ResponseEntity<Boolean> hasAppliedForJob(

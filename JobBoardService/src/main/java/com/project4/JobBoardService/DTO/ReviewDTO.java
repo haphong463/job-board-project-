@@ -6,16 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.List;
-
 @Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewDTO {
-    private Long id;
-
     @NotBlank(message = "Title is required")
     private String title;
 
@@ -26,11 +22,8 @@ public class ReviewDTO {
     @Min(value = 0, message = "Rating must be greater than or equal to 0")
     @Max(value = 5, message = "Rating must be less than or equal to 5")
     private double rating;
-
-    @NotBlank(message = "Username is required") // Add this validation
-    private String username; // Add this field
     private String imageUrl;
+    private String username;
     private int likeCount;
     private boolean likedByCurrentUser;
-
 }

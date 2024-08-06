@@ -4,9 +4,6 @@ import moment from 'moment';
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import { fetchJobThunk } from "../../features/jobSlice";
 import { fetchCompanyThunk } from "../../features/companySlice";
-// import jobData from './job_data.json';
-import companyData from './company_data.json';
-import categoryData from '../../components/global-navbar/category.json';
 import "./job_company.css";
 import { NavLink, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
@@ -41,25 +38,6 @@ export const JobList = () =>
    const [searchTerms, setSearchTerms] = useState('');
    const decodedSearchTerm = decodeURIComponent(searchTerms || '');
    const [open, setOpen] = useState(false);
-   // function useDebounce (value, delay)
-   // {
-   //    const [debouncedValue, setDebouncedValue] = useState(value);
-
-   //    useEffect(() =>
-   //    {
-   //       const handler = setTimeout(() =>
-   //       {
-   //          setDebouncedValue(value);
-   //       }, delay);
-
-   //       return () =>
-   //       {
-   //          clearTimeout(handler);
-   //       };
-   //    }, [value, delay]);
-
-   //    return debouncedValue;
-   // };
 
    const [filters, setFilters] = useState({
       title: '',
@@ -138,20 +116,22 @@ export const JobList = () =>
       setCurrentPage(pageNumber);
    }, []);
 
-   const handleCategoryClick = (categoryId) =>
+   const handleCategoryClick = (e, categoryId) =>
    {
-      window.location.href = `/jobList/${categoryId}`;
+      e.preventDefault();
+      navigate(`/jobList/${categoryId}`);
    };
 
-   const handleCompanyClick = (companyId) =>
+   const handleCompanyClick = (e, companyId) =>
    {
-      window.location.href = `/companyDetail/${companyId}`;
+      e.preventDefault();
+      navigate(`/companyDetail/${companyId}`);
    };
 
    const handleJobDetailClick = (e, jobId, companyId) =>
    {
       e.preventDefault();
-      window.location.href = `/jobDetail/${jobId}/${companyId}`;
+      navigate(`/jobDetail/${jobId}/${companyId}`);
    };
 
    const getLocation1String = (address) =>
@@ -659,11 +639,11 @@ export const JobList = () =>
                                  <div className="text-dark mb-2">{timeAgo}</div>
                                  <a href='' className="h5 mb-3 d-block text-dark" onClick={(e) => handleJobDetailClick(e, job.id, job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{job.title}</a>
                                  <div className="d-flex align-items-center mb-3">
-                                    <NavLink to={''} target="_blank" rel="noopener noreferrer" onClick={() => handleCompanyClick(job.companyId)}>
+                                    <NavLink to={''} target="_blank" rel="noopener noreferrer" onClick={(e) => handleCompanyClick(e, job.companyId)}>
                                        <img src={company.logo} className="img-fluid p-0 d-inline-block rounded-sm border border-gray me-2 bg-white" style={{ width: '4em', height: '4em', objectFit: 'contain' }} />
 
                                     </NavLink>
-                                    <NavLink to={''} className="text-dark ml-2" onClick={() => handleCompanyClick(job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</NavLink>
+                                    <NavLink to={''} className="text-dark ml-2" onClick={(e) => handleCompanyClick(e, job.companyId)} style={{ textDecoration: 'none', cursor: 'pointer' }}>{company.companyName}</NavLink>
                                  </div>
                                  <div className="mb-2">{job.position}</div>
                                  <div className="mb-2">
@@ -674,7 +654,7 @@ export const JobList = () =>
                                     {
                                        const categoryName = categoryArray.find(category => category.categoryId === id)?.categoryName;
                                        return categoryName ? (
-                                          <NavLink key={id} onClick={() => handleCategoryClick(id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={''}>
+                                          <NavLink key={id} onClick={(e) => handleCategoryClick(e, id)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={''}>
                                              {categoryName}
                                           </NavLink>
                                        ) : null;

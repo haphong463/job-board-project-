@@ -23,7 +23,7 @@ export const CommentForm = ({ blogId, parentId = null, addComment, user }) => {
 
     const comment = {
       id: temporaryCommentId,
-      blog: { id: blogId, user: blog.user, slug: blog.slug },
+      blog: { id: blog.id, user: blog.user, slug: blog.slug },
       content,
       parent: parentId ? { id: parentId } : null,
       user: {

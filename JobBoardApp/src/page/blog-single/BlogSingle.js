@@ -143,9 +143,7 @@ export const BlogSingle = () => {
                       {blog.user.firstName} {blog.user.lastName}
                     </span>
                     <span className="mx-2 slash">•</span>
-                    <strong className="text-white">
-                      {moment(blog.createdAt).format("MMMM Do YYYY")}
-                    </strong>
+                    {moment(blog.createdAt).format("MMMM Do YYYY")}
                     <span className="mx-2 slash">•</span>
                     <span className="text-white">{readingTime} min read</span>
                   </div>
