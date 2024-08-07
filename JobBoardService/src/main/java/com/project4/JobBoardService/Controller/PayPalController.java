@@ -2,6 +2,7 @@ package com.project4.JobBoardService.Controller;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
+import com.project4.JobBoardService.DTO.SubscriptionDTO;
 import com.project4.JobBoardService.Entity.Subscription;
 import com.project4.JobBoardService.Entity.User;
 import com.project4.JobBoardService.Service.EmailService;
@@ -21,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -95,7 +97,8 @@ public class PayPalController {
             Payment payment = payPalService.executePayment(paymentId, payerId);
             if ("approved".equals(payment.getState())) {
                 double totalAmount = Double.parseDouble(payment.getTransactions().get(0).getAmount().getTotal());
-                int postLimit;
+                int postLimit = 0;
+                String services = "";
 
                 // Determine post limit based on the total amount
                 if (totalAmount == 10.0) {
@@ -104,13 +107,20 @@ public class PayPalController {
                     postLimit = 70;
                 } else if (totalAmount == 29.0) {
                     postLimit = 100;
-                } else {
+                } else if(totalAmount==15.0){
+                    services = "CVFULL";
+                }
+                else if(totalAmount==9.0){
+                    services = "HOT";
+                }
+                else {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid payment amount");
                 }
 
                 Subscription subscription = new Subscription();
                 subscription.setUser(user);
                 subscription.setPostLimit(postLimit);
+                subscription.setService(services);
                 subscription.setStartDate(LocalDate.now());
                 subscription.setEndDate(LocalDate.now().plusMonths(1)); // 1 month
                 subscription.setAmount(totalAmount);
@@ -172,14 +182,13 @@ public class PayPalController {
         }
 
         User user = userOptional.get();
-        Optional<Subscription> subscription = transactionService.findActiveSubscriptionByUser(user, LocalDate.now());
+        List<SubscriptionDTO> subscriptions = transactionService.findActiveSubscriptionByUserService(user, LocalDate.now());
 
-        if (subscription.isPresent()) {
-            return ResponseEntity.ok(subscription.get());
-        } else {
+        if (subscriptions.isEmpty()) {
             return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(subscriptions);
         }
-
     }
 
 }

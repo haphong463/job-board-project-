@@ -4,14 +4,11 @@ import { findAllJob, postJob, jobbyid, deleteJob as deleteJobService, searchJobs
 // Thunk để lấy thông tin job theo id
 export const fetchJobById = createAsyncThunk(
   "jobs/getOne",
-  async (id, { rejectWithValue }) =>
-  {
-    try
-    {
+  async (id, { rejectWithValue }) => {
+    try {
       const res = await findAllJob(id);
       return res;
-    } catch (error)
-    {
+    } catch (error) {
       return rejectWithValue(error.message);
     }
   }
@@ -20,14 +17,11 @@ export const fetchJobById = createAsyncThunk(
 // Thunk để lấy thông tin job theo id
 export const updateJobById = createAsyncThunk(
   "jobs/update",
-  async ({ jobId, data }, { rejectWithValue }) =>
-  {
-    try
-    {
+  async ({ jobId, data }, { rejectWithValue }) => {
+    try {
       const res = await updateJob(jobId, data);
       return res;
-    } catch (error)
-    {
+    } catch (error) {
       return rejectWithValue(error.message);
     }
   }
@@ -36,14 +30,11 @@ export const updateJobById = createAsyncThunk(
 // Thunk để thêm job
 export const addJob = createAsyncThunk(
   'job/create',
-  async ({ categoryId, companyId, data }, { rejectWithValue }) =>
-  {
-    try
-    {
-      const response = await postJob(categoryId, companyId, data);
+  async ({ userId, data }, { rejectWithValue }) => {
+    try {
+      const response = await postJob(userId, data);
       return response.data;
-    } catch (error)
-    {
+    } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
@@ -52,14 +43,11 @@ export const addJob = createAsyncThunk(
 // Thunk để xóa job
 export const deleteJob = createAsyncThunk(
   'jobs/delete',
-  async (jobId, { rejectWithValue }) =>
-  {
-    try
-    {
+  async (jobId, { rejectWithValue }) => {
+    try {
       const response = await deleteJobService(jobId); // Call deleteJobService with jobId
       return jobId; // Return jobId to know which job was deleted
-    } catch (error)
-    {
+    } catch (error) {
       return rejectWithValue(error.message);
     }
   }
@@ -68,14 +56,11 @@ export const deleteJob = createAsyncThunk(
 // Thunk để lấy thông tin chi tiết job theo jobId
 export const getJobById = createAsyncThunk(
   "jobs/getJobById",
-  async (jobId, { rejectWithValue }) =>
-  {
-    try
-    {
+  async (jobId, { rejectWithValue }) => {
+    try {
       const res = await jobbyid(jobId);
       return res;
-    } catch (error)
-    {
+    } catch (error) {
       return rejectWithValue(error.message);
     }
   }
@@ -84,14 +69,11 @@ export const getJobById = createAsyncThunk(
 // Thunk để search job
 export const searchJobsByQuery = createAsyncThunk(
   'jobs/search',
-  async ({ userId, searchText }, { rejectWithValue }) =>
-  {
-    try
-    {
+  async ({ userId, searchText }, { rejectWithValue }) => {
+    try {
       const response = await searchJobs(userId, searchText);
       return response.data;
-    } catch (error)
-    {
+    } catch (error) {
       return rejectWithValue(error.message);
     }
   }
@@ -107,98 +89,78 @@ const jobSlice = createSlice({
     lastUpdated: null,
   },
   reducers: {
-    addJobBySocket: (state, action) =>
-    {
+    addJobBySocket: (state, action) => {
       state.jobs.push(action.payload);
     },
-    updateJobBySocket: (state, action) =>
-    {
+    updateJobBySocket: (state, action) => {
       state.jobs = state.jobs.map((job) =>
         job.id === action.payload.id ? action.payload : job
       );
     },
-    deleteJobBySocket: (state, action) =>
-    {
+    deleteJobBySocket: (state, action) => {
       state.jobs = state.jobs.filter((job) => job.id !== action.payload);
     },
-    updateLastUpdated: (state, action) =>
-    {
+    updateLastUpdated: (state, action) => {
       state.lastUpdated = action.payload;
     },
   },
-  extraReducers: (builder) =>
-  {
+  extraReducers: (builder) => {
     builder
-      .addCase(fetchJobById.pending, (state) =>
-      {
+      .addCase(fetchJobById.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchJobById.fulfilled, (state, action) =>
-      {
+      .addCase(fetchJobById.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.job = action.payload;
         state.lastUpdated = Date.now();
       })
-      .addCase(fetchJobById.rejected, (state, action) =>
-      {
+      .addCase(fetchJobById.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       })
-      .addCase(addJob.pending, (state) =>
-      {
+      .addCase(addJob.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(addJob.fulfilled, (state, action) =>
-      {
+      .addCase(addJob.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.jobs.push(action.payload);
       })
-      .addCase(addJob.rejected, (state, action) =>
-      {
+      .addCase(addJob.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       })
-      .addCase(deleteJob.pending, (state) =>
-      {
+      .addCase(deleteJob.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(deleteJob.fulfilled, (state, action) =>
-      {
+      .addCase(deleteJob.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.jobs = state.jobs.filter(job => job.id !== action.payload);
       })
-      .addCase(deleteJob.rejected, (state, action) =>
-      {
+      .addCase(deleteJob.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       })
-      .addCase(getJobById.pending, (state) =>
-      {
+      .addCase(getJobById.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(getJobById.fulfilled, (state, action) =>
-      {
+      .addCase(getJobById.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.job = action.payload;
         state.lastUpdated = Date.now();
       })
-      .addCase(getJobById.rejected, (state, action) =>
-      {
+      .addCase(getJobById.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       })
-      .addCase(searchJobsByQuery.pending, (state) =>
-      {
+      .addCase(searchJobsByQuery.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(searchJobsByQuery.fulfilled, (state, action) =>
-      {
+      .addCase(searchJobsByQuery.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.jobs = action.payload;
         state.lastUpdated = Date.now();
       })
-      .addCase(searchJobsByQuery.rejected, (state, action) =>
-      {
+      .addCase(searchJobsByQuery.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       });

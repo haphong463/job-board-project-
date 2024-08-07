@@ -34,6 +34,8 @@ public class Job {
     @Column(columnDefinition = "text")
     private String description;
 
+    private String city;
+
     @Column(columnDefinition = "text")
     private String responsibilities;
 
@@ -92,6 +94,17 @@ public class Job {
     private Company company;
 
     private String expire;
+
+    @ManyToOne
+    @JoinColumn(name = "user", nullable = false)
+    private User user;
+
+    @Column(name = "expired")
+    private LocalDateTime expired;
+
+    @Builder.Default
+    @Column(name = "is_hidden", nullable = false)
+    private Boolean isHidden = false;
 
     @PrePersist
     protected void onCreate() {

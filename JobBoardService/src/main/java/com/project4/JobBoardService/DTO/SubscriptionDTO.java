@@ -13,6 +13,7 @@ public class SubscriptionDTO {
     private Long id;
     private Long userId;
     private int postLimit;
+    private String service;
     private LocalDate startDate;
     private LocalDate endDate;
     private double amount;

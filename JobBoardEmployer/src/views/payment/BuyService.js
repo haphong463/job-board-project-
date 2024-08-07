@@ -3,7 +3,6 @@ import {
   CButton,
   CCard,
   CCardBody,
-  CCardImage,
   CCardTitle,
   CCardText,
   CCol,
@@ -11,11 +10,9 @@ import {
 } from '@coreui/react';
 import axios from 'axios';
 
-import ReactImg from 'src/assets/images/react.png';
-
 const BuyServices = () => {
-  const [loading, setLoading] = useState(false);
-  const [subscription, setSubscription] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [loadingStates, setLoadingStates] = useState({});
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -27,7 +24,8 @@ const BuyServices = () => {
               Authorization: `Bearer ${token}`,
             },
           });
-          setSubscription(response.data);
+          console.log('Subscriptions:', response.data);  // Thêm dòng này
+          setSubscriptions(response.data);
         } catch (error) {
           console.error('Failed to fetch subscription status:', error);
         }
@@ -37,8 +35,21 @@ const BuyServices = () => {
     fetchSubscription();
   }, []);
 
-  const handleBuyNow = async (total) => {
-    setLoading(true);
+
+  useEffect(() => {
+    if (subscriptions.length > 0) {
+      console.log('Checking if services are purchased:');
+      [30, 70, 100, 'CVFULL', 'HOT'].forEach(serviceName => {
+        isServicePurchased(serviceName);
+      });
+    }
+  }, [subscriptions]);
+
+  const handleBuyNow = async (total, packageId) => {
+    setLoadingStates(prevState => ({
+      ...prevState,
+      [packageId]: true,
+    }));
     const token = localStorage.getItem('accessToken');
     if (token) {
       try {
@@ -54,33 +65,54 @@ const BuyServices = () => {
         window.location.href = response.data;
       } catch (error) {
         console.error('Payment failed:', error);
-        setLoading(false);
+        setLoadingStates(prevState => ({
+          ...prevState,
+          [packageId]: false,
+        }));
       }
     } else {
       console.error('Token not found. User not authenticated.');
-      setLoading(false);
+      setLoadingStates(prevState => ({
+        ...prevState,
+        [packageId]: false,
+      }));
       window.location.href = '/login';
     }
   };
 
-  const renderPackageCard = (title, description, price) => (
-    <CCol xs={12} md={4}>
+  const isServicePurchased = (serviceName) => {
+    const purchased = subscriptions.some(sub => {
+      if (serviceName === '30' || serviceName === '70' || serviceName === '100') {
+        return sub.postLimit === parseInt(serviceName.split('_')[0]);
+      } else {
+        return sub.service === serviceName;
+      }
+    });
+    console.log(`Service: ${serviceName}, Purchased: ${purchased}`);
+    return purchased;
+  };
+
+
+
+  const renderPackageCard = (title, money, description, price, packageId, serviceName) => (
+    <CCol xs={12} md={4} key={packageId}>
       <CCard className="service-card">
-        <CCardImage orientation="top" src={ReactImg} />
         <CCardBody>
-          <CCardTitle>{title}</CCardTitle>
+          <CCardTitle className="package-title">{title}</CCardTitle>
+          <CCardTitle className="package-money">{money}</CCardTitle>
           <CCardText>{description}</CCardText>
-          {subscription ? (
+          {isServicePurchased(serviceName) ? (
             <CButton color="secondary" disabled>
               You have already purchased this package. Please wait until it expires.
             </CButton>
           ) : (
             <CButton
               color="primary"
-              onClick={() => handleBuyNow(price)}
-              disabled={loading}
+              className="buy-now-button"
+              onClick={() => handleBuyNow(price, packageId)}
+              disabled={loadingStates[packageId]}
             >
-              {loading ? 'Processing...' : 'Buy Now'}
+              {loadingStates[packageId] ? 'Processing...' : 'Buy Now'}
             </CButton>
           )}
         </CCardBody>
@@ -99,19 +131,44 @@ const BuyServices = () => {
 
             <CRow>
               {renderPackageCard(
-                'Package of 30 posts per month',
-                'The price is only $10 but you can post 30 posts in 1 month, easy payment via PayPal.',
-                10
+                '30 POSTS PER MONTH PACKAGE',
+                '10$',
+                'Enjoy 30 posts per month for just $10. Easy payment via PayPal.',
+                10,
+                'package1',
+                '30'
+                              )}
+              {renderPackageCard(
+                '70 POSTS PER MONTH PACKAGE',
+                '20$',
+                'Get 70 posts per month for only $20. Simple PayPal payment.',
+                20,
+                'package2',
+                '70'
               )}
               {renderPackageCard(
-                'Package of 70 posts per month',
-                'The price is only $20 but you can post 70 posts in 1 month, easy payment via PayPal.',
-                20
+                '100 POSTS PER MONTH PACKAGE',
+                '29$',
+                'Post 100 jobs per month for just $29. Convenient PayPal payment.',
+                29,
+                'package3',
+                '100'
               )}
               {renderPackageCard(
-                'Package of 100 posts per month',
-                'The price is only $29 but you can post 100 posts in 1 month, easy payment via PayPal.',
-                29
+                'FULL CANDIDATE INFO PACKAGE',
+                '15$',
+                'Access complete candidate profiles for only $15. PayPal payment available.',
+                15,
+                'package4',
+                'CVFULL'
+              )}
+              {renderPackageCard(
+                'HOT LABEL RECRUITMENT PACKAGE',
+                '9$',
+                'Add a hot label to your job title for just $9. Easy payment via PayPal.',
+                9,
+                'package5',
+                'HOT'
               )}
             </CRow>
           </CCardBody>
@@ -132,15 +189,47 @@ style.textContent = `
     flex-direction: column;
     align-items: center;
     margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
   }
 
-  .service-card .CButton {
+  .service-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .package-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .package-money {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 1rem;
+  }
+
+  .buy-now-button {
     margin-top: auto; /* Push button to the bottom of the card */
+    background-color: #28a745;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.3s ease;
   }
 
-  .service-card img {
-    max-width: 100%;
-    height: auto;
+  .buy-now-button:hover {
+    background-color: #218838;
+  }
+
+  .service-card .CCardBody {
+    padding: 1.5rem;
+    text-align: center;
   }
 
   .text-body-secondary {

@@ -136,9 +136,12 @@ public class AuthController {
                             user.getId(),
                             user.getUsername(),
                             user.getEmail(),
-                            user.getLastName(),
                             user.getFirstName(),
-                            rolesSignIn));
+                            user.getLastName(),
+                            rolesSignIn,
+                            user.getCompany() != null ? user.getCompany().getCompanyId() : null // Check for null company
+
+                    ));
 
 
                 }
@@ -152,6 +155,7 @@ public class AuthController {
                 user.setVerified(emailVerified);
                 user.setPassword(encoder.encode("google-password"));
                 user.setImageUrl(pictureUrl);
+                user.setIsEnabled(true);
                 Set<Role> roles = new HashSet<>();
                 Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                         .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -171,12 +175,15 @@ public class AuthController {
 
                 return ResponseEntity.ok(new JwtResponse(jwt,
                         refreshToken.getToken(),
-                        userDetails.getId(),
-                        userDetails.getUsername(),
-                        userDetails.getEmail(),
-                        userDetails.getFirstName(),
-                        userDetails.getLastName(),
-                        rolesSignIn));
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        rolesSignIn,
+                        user.getCompany().getCompanyId()
+
+                ));
             } else {
                 System.out.println("Invalid ID token.");
                 return ResponseEntity.badRequest().body("Invalid token!");
@@ -229,15 +236,17 @@ public class AuthController {
                                 .map(GrantedAuthority::getAuthority)
                                 .collect(Collectors.toList());
                         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
                         return ResponseEntity.ok(new JwtResponse(jwt,
                                 refreshToken.getToken(),
-                                userDetails.getId(),
-                                userDetails.getUsername(),
-                                userDetails.getEmail(),
-                                userDetails.getFirstName(),
-                                userDetails.getLastName(),
-                                rolesSignIn));
+                                user.getId(),
+                                user.getUsername(),
+                                user.getEmail(),
+                                user.getFirstName(),
+                                user.getLastName(),
+                                rolesSignIn,
+                                user.getCompany().getCompanyId()
+
+                        ));
                     }
 
                     // Create new user
@@ -249,6 +258,7 @@ public class AuthController {
                     user.setVerified(emailVerified);
                     user.setPassword(encoder.encode("google-password"));
                     user.setImageUrl(pictureUrl);
+                    user.setIsEnabled(true);
                     Set<Role> roles = new HashSet<>();
                     Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                             .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -265,15 +275,17 @@ public class AuthController {
                             .map(GrantedAuthority::getAuthority)
                             .collect(Collectors.toList());
                     RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
                     return ResponseEntity.ok(new JwtResponse(jwt,
                             refreshToken.getToken(),
-                            userDetails.getId(),
-                            userDetails.getUsername(),
-                            userDetails.getEmail(),
-                            userDetails.getFirstName(),
-                            userDetails.getLastName(),
-                            rolesSignIn));
+                            user.getId(),
+                            user.getUsername(),
+                            user.getEmail(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            rolesSignIn,
+                            user.getCompany() != null ? user.getCompany().getCompanyId() : null // Check for null company
+
+                    ));
                 } else {
                     return ResponseEntity.badRequest().body("Invalid token payload!");
                 }
@@ -358,7 +370,8 @@ public class AuthController {
                 userDetails.getEmail(),
                 userDetails.getFirstName(),
                 userDetails.getLastName(),
-                roles
+                roles,
+                userDetails.getCompanyId()
         );
         return ResponseEntity.ok(jwtResponse);
     }
@@ -417,8 +430,8 @@ public class AuthController {
         user.setIsEnabled(true);
         String verificationCode = generateVerificationCode();
         user.setVerificationCode(verificationCode);
-//        user.setVerificationCodeExpiry(LocalDateTime.now().plusDays(2));
-        user.setVerificationCodeExpiry(LocalDateTime.now().plusSeconds(30));
+        user.setVerificationCodeExpiry(LocalDateTime.now().plusDays(2));
+//        user.setVerificationCodeExpiry(LocalDateTime.now().plusSeconds(30));
 
         userRepository.save(user);
         emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());

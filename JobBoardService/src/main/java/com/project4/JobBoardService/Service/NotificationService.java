@@ -11,4 +11,6 @@ public interface NotificationService {
     Notification createNotification(Notification notification);
     Notification updateIsRead(Long id);
     void deleteNotification(Long id);
+
+    public void sendNotification(String destination, Object message);
 }

@@ -9,7 +9,9 @@ import com.project4.JobBoardService.Repository.UserRepository;
 import com.project4.JobBoardService.Service.EmailService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -153,6 +155,28 @@ public ResponseEntity<String> applyJob(
             @PathVariable Long jobId) {
         boolean hasApplied = jobApplicationRepository.existsByUserIdAndJobId(userId, jobId);
         return ResponseEntity.ok(hasApplied);
+    }
+
+    @GetMapping("/download-pdf/{applicationId}")
+    public ResponseEntity<byte[]> downloadCvPdf(@PathVariable Long applicationId) {
+        try {
+            // Find job application by ID
+            JobApplication jobApplication = jobApplicationRepository.findById(applicationId)
+                    .orElseThrow(() -> new RuntimeException("Job Application not found"));
+
+            // Get the CV file byte array
+            byte[] cvFileBytes = jobApplication.getCvFile();
+
+            // Set headers to indicate a file download
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "cv.pdf");
+            headers.setContentLength(cvFileBytes.length);
+
+            return new ResponseEntity<>(cvFileBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
 }
