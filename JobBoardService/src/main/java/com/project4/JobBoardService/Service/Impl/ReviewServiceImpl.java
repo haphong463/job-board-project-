@@ -40,13 +40,153 @@ public class ReviewServiceImpl implements ReviewService {
         this.reviewLikeRepository = reviewLikeRepository;
     }
 
+//    @Override
+//    public List<ReviewDTO> getAllReviews(Long companyId) {
+//        List<Review> reviews = reviewRepository.findByCompany_CompanyId(companyId);
+//        return reviews.stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
+
+//    @Override
+//    public ReviewDTO addReview(Long companyId, ReviewDTO reviewDTO) {
+//        Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
+//        Optional<User> userOptional = userRepository.findByUsername(reviewDTO.getUsername());
+//
+//        if (companyOptional.isPresent() && userOptional.isPresent()) {
+//            Company company = companyOptional.get();
+//            User user = userOptional.get();
+//
+//            // Combine words from title and description into a single list
+//            List<String> wordsToCheck = Arrays.asList(
+//                    reviewDTO.getTitle().split("\\s+"),
+//                    reviewDTO.getDescription().split("\\s+")
+//            ).stream().flatMap(Arrays::stream).distinct().collect(Collectors.toList());
+//
+//            // Filter banned words from the combined list
+//            List<String> bannedWords = bannedWordService.filterBannedWords(wordsToCheck);
+//
+//            System.out.println("Banned words found: " + bannedWords); // Debugging log
+//
+//            String cleanTitle = reviewDTO.getTitle();
+//            String cleanDescription = reviewDTO.getDescription();
+//
+//            // Flag to check if any banned words are found
+//            boolean hasBannedWords = false;
+//
+//            // Replace banned words with a single '*'
+//            for (String bannedWord : bannedWords) {
+//                String regex = "(?i)\\b" + Pattern.quote(bannedWord) + "\\b";
+//                if (cleanTitle.matches(".*" + regex + ".*")) {
+//                    hasBannedWords = true;
+//                    cleanTitle = cleanTitle.replaceAll(regex, "*");
+//                }
+//                if (cleanDescription.matches(".*" + regex + ".*")) {
+//                    hasBannedWords = true;
+//                    cleanDescription = cleanDescription.replaceAll(regex, "*");
+//                }
+//            }
+//
+//            // Clean up extra spaces
+//            cleanTitle = cleanTitle.trim().replaceAll(" +", " ");
+//            cleanDescription = cleanDescription.trim().replaceAll(" +", " ");
+//
+//            // Only save the review if there are banned words (or if the review is clean)
+//            Review review = new Review();
+//            review.setTitle(cleanTitle); // Remove leading/trailing spaces if any
+//            review.setDescription(cleanDescription); // Remove leading/trailing spaces if any
+//            review.setRating(reviewDTO.getRating());
+//            review.setCompany(company);
+//            review.setUser(user);
+//
+//            Review savedReview = reviewRepository.save(review);
+//            return convertToDTO(savedReview); // Return the DTO
+//        }
+//        return null;
+//    }
+
+
+//    @Override
+//    public ReviewDTO addReview(Long companyId, ReviewDTO reviewDTO) {
+//        Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
+//        Optional<User> userOptional = userRepository.findByUsername(reviewDTO.getUsername());
+//
+//        if (companyOptional.isPresent() && userOptional.isPresent()) {
+//            Company company = companyOptional.get();
+//            User user = userOptional.get();
+//
+//            // Combine words from title and description into a single list
+//            List<String> wordsToCheck = Arrays.asList(
+//                    reviewDTO.getTitle().split("\\s+"),
+//                    reviewDTO.getDescription().split("\\s+")
+//            ).stream().flatMap(Arrays::stream).distinct().collect(Collectors.toList());
+//
+//            // Filter banned words from the combined list
+//            List<String> bannedWords = bannedWordService.filterBannedWords(wordsToCheck);
+//
+//            System.out.println("Banned words found: " + bannedWords); // Debugging log
+//
+//            String cleanTitle = reviewDTO.getTitle();
+//            String cleanDescription = reviewDTO.getDescription();
+//
+//            // Flag to check if any banned words are found
+//            boolean hasBannedWords = false;
+//
+//            // Replace banned words with empty strings in title and description
+//            for (String bannedWord : bannedWords) {
+//                String regex = "(?i)\\b" + Pattern.quote(bannedWord) + "\\b";
+//                if (cleanTitle.matches(".*" + regex + ".*")) {
+//                    hasBannedWords = true;
+//                    cleanTitle = cleanTitle.replaceAll(regex, "");
+//                }
+//                if (cleanDescription.matches(".*" + regex + ".*")) {
+//                    hasBannedWords = true;
+//                    cleanDescription = cleanDescription.replaceAll(regex, "");
+//                }
+//            }
+//
+//            // Clean up extra spaces
+//            cleanTitle = cleanTitle.trim().replaceAll(" +", " ");
+//            cleanDescription = cleanDescription.trim().replaceAll(" +", " ");
+//
+//            // Only save the review if there are banned words (or if the review is clean)
+//            Review review = new Review();
+//            review.setTitle(cleanTitle); // Remove leading/trailing spaces if any
+//            review.setDescription(cleanDescription); // Remove leading/trailing spaces if any
+//            review.setRating(reviewDTO.getRating());
+//            review.setCompany(company);
+//            review.setUser(user);
+//
+//            Review savedReview = reviewRepository.save(review);
+//            return convertToDTO(savedReview); // Return the DTO
+//        }
+//        return null;
+//    }
+
+
     @Override
     public List<ReviewDTO> getAllReviews(Long companyId) {
+        // Lấy danh sách các review từ cơ sở dữ liệu
         List<Review> reviews = reviewRepository.findByCompany_CompanyId(companyId);
+
+        // Lấy danh sách các từ cấm từ dịch vụ
+        List<String> bannedWords = bannedWordService.getBannedWords();
+
+        // Duyệt qua từng review và thay thế các từ cấm trong tiêu đề và mô tả review
         return reviews.stream()
-                .map(this::convertToDTO)
+                .map(review -> {
+                    String cleanTitle = bannedWordService.filterBannedWordsInText(review.getTitle(), bannedWords);
+                    String cleanDescription = bannedWordService.filterBannedWordsInText(review.getDescription(), bannedWords);
+
+                    // Tạo đối tượng ReviewDTO với tiêu đề và mô tả đã được thay thế
+                    ReviewDTO reviewDTO = convertToDTO(review);
+                    reviewDTO.setTitle(cleanTitle);
+                    reviewDTO.setDescription(cleanDescription);
+                    return reviewDTO;
+                })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public ReviewDTO addReview(Long companyId, ReviewDTO reviewDTO) {
@@ -57,44 +197,10 @@ public class ReviewServiceImpl implements ReviewService {
             Company company = companyOptional.get();
             User user = userOptional.get();
 
-            // Combine words from title and description into a single list
-            List<String> wordsToCheck = Arrays.asList(
-                    reviewDTO.getTitle().split("\\s+"),
-                    reviewDTO.getDescription().split("\\s+")
-            ).stream().flatMap(Arrays::stream).distinct().collect(Collectors.toList());
-
-            // Filter banned words from the combined list
-            List<String> bannedWords = bannedWordService.filterBannedWords(wordsToCheck);
-
-            System.out.println("Banned words found: " + bannedWords); // Debugging log
-
-            String cleanTitle = reviewDTO.getTitle();
-            String cleanDescription = reviewDTO.getDescription();
-
-            // Flag to check if any banned words are found
-            boolean hasBannedWords = false;
-
-            // Replace banned words with empty strings in title and description
-            for (String bannedWord : bannedWords) {
-                String regex = "(?i)\\b" + Pattern.quote(bannedWord) + "\\b";
-                if (cleanTitle.matches(".*" + regex + ".*")) {
-                    hasBannedWords = true;
-                    cleanTitle = cleanTitle.replaceAll(regex, "");
-                }
-                if (cleanDescription.matches(".*" + regex + ".*")) {
-                    hasBannedWords = true;
-                    cleanDescription = cleanDescription.replaceAll(regex, "");
-                }
-            }
-
-            // Clean up extra spaces
-            cleanTitle = cleanTitle.trim().replaceAll(" +", " ");
-            cleanDescription = cleanDescription.trim().replaceAll(" +", " ");
-
             // Only save the review if there are banned words (or if the review is clean)
             Review review = new Review();
-            review.setTitle(cleanTitle); // Remove leading/trailing spaces if any
-            review.setDescription(cleanDescription); // Remove leading/trailing spaces if any
+            review.setTitle(reviewDTO.getTitle()); // Remove leading/trailing spaces if any
+            review.setDescription(reviewDTO.getDescription()); // Remove leading/trailing spaces if any
             review.setRating(reviewDTO.getRating());
             review.setCompany(company);
             review.setUser(user);
@@ -104,6 +210,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
         return null;
     }
+
 
     @Override
     public Review getReview(Long companyId, Long reviewId, String username) {

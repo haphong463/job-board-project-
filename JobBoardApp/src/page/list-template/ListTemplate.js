@@ -18,6 +18,8 @@ const ListTemplate = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [showCVSelectionDialog, setShowCVSelectionDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const templatesPerPage = 6;
 
   const fetchTemplates = async () => {
     try {
@@ -66,7 +68,28 @@ const ListTemplate = () => {
   const handleDialogClose = () => {
     setShowDialog(false);
   };
+  const filteredTemplates = templates.filter((template) =>
+    template.templateName.toLowerCase().includes(searchQuery.toLowerCase()) && !template.disabled
+  );
+  const indexOfLastTemplate = currentPage * templatesPerPage;
+  const indexOfFirstTemplate = indexOfLastTemplate - templatesPerPage;
+  const currentTemplates = filteredTemplates.slice(indexOfFirstTemplate, indexOfLastTemplate);
 
+  const totalPages = Math.ceil(filteredTemplates.length / templatesPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
   const handleTemplateClick = async (templateId, templateName, disabled) => {
     if (disabled) {
       alert('This template is expired and cannot be used.');
@@ -100,7 +123,7 @@ const ListTemplate = () => {
           templateId: templateId,
         }
       });
-      navigate(`/review-template/${templateName}/${user.id}/${cvId}/${templateId}`);
+     navigate(`/review-template/${templateName}/${user.id}/${cvId}/${templateId}`);
     } catch (error) {
       console.error('Error selecting template:', error);
     }
@@ -113,9 +136,7 @@ const ListTemplate = () => {
     }
   };
 
-  const filteredTemplates = templates.filter((template) =>
-    template.templateName.toLowerCase().includes(searchQuery.toLowerCase()) && !template.disabled
-  );
+   
 
   return (
     <GlobalLayoutUser>
@@ -196,8 +217,8 @@ const ListTemplate = () => {
                 </div>
               )}
             </div>
-            {filteredTemplates.length > 0 ? (
-              filteredTemplates.map((template) => (
+            {currentTemplates.length > 0 ? (
+              currentTemplates.map((template) => (
                 <div key={template.templateId} className="col-md-4 mb-4">
                   <div
                     className="template-card"
@@ -226,7 +247,18 @@ const ListTemplate = () => {
             ) : (
               <div className="text-center">No templates found</div>
             )}
-          </div>
+            </div>
+          <div className="pagination">
+              <button onClick={handlePrevious} className="page-link" disabled={currentPage === 1}>
+                Previous
+              </button>
+              <span className="page-number">
+                {currentPage}/{totalPages}
+              </span>
+              <button onClick={handleNext} className="page-link" disabled={currentPage === totalPages}>
+                Next
+              </button>
+            </div>
         </div>
       </section>
       <DialogBox isOpen={showDialog} onClose={handleDialogClose} />

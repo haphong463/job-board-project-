@@ -16,6 +16,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
+    @Query("SELECT count(u) FROM User u JOIN u.roles r WHERE r.name = 'ROLE_USER'")
+    long findUsersWithRoleUser();
+
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName AND " +
             "(LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
