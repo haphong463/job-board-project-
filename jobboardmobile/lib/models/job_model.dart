@@ -71,4 +71,30 @@ class Job {
       expire: json['expire'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'offeredSalary': offeredSalary,
+      'description': description,
+      'responsibilities': responsibilities,
+      'requiredSkills': requiredSkills,
+      'workSchedule': workSchedule,
+      'keySkills': keySkills,
+      'position': position,
+      'experience': experience,
+      'qualification': qualification,
+      'jobType': jobType,
+      'contractType': contractType,
+      'benefit': benefit,
+      'createdAt': createdAt.toIso8601String(),
+      'slot': slot,
+      'profileApproved': profileApproved,
+      'isSuperHot': isSuperHot,
+      'categoryId': categoryId,
+      'companyId': companyId,
+      'expire': expire,
+    };
+  }
 }

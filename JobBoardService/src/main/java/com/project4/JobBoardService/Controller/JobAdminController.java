@@ -67,6 +67,11 @@ public class JobAdminController {
         return jobService.getAllJobs();
     }
 
+    @GetMapping("/super-hot")
+    public List<JobDTO> getSuperHotJobs() {
+        return jobService.getSuperHotJobs();
+    }
+
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
     @PostMapping("/companies/{companyId}/categories")
     public ResponseEntity<String> createJob(@PathVariable("companyId") Long companyId,
