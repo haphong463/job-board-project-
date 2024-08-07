@@ -107,7 +107,8 @@ class _BlogDetailState extends State<BlogDetail> {
         'id': temporaryCommentId,
         'blog': {
           'id': widget.blog.id,
-          'user': {'username': widget.blog.user.username}
+          'user': {'username': widget.blog.user.username},
+          'slug': widget.blog.slug
         },
         'content': content,
         'user': {'username': username},

@@ -72,7 +72,8 @@ class _CommentWidgetState extends State<CommentWidget> {
         'id': temporaryCommentId,
         'blog': {
           'id': parentComment.blog.id,
-          'user': {'username': widget.blog.user.username}
+          'user': {'username': widget.blog.user.username},
+          'slug': widget.blog.slug
         },
         'parent': {'id': parentComment.id},
         'content': content,
