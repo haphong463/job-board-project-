@@ -287,8 +287,8 @@ public class TemplateController {
 		}
 	}
 
-	@GetMapping("/review-template/{key}/{userId}/{cvId}")
-	public Mono<ResponseEntity<String>> getTemplate(@PathVariable("key") String key, @PathVariable("userId") Long userId, @PathVariable("cvId") Long cvId) {
+	@GetMapping("/review-template/{key}/{userId}/{cvId}/{templateId}")
+	public Mono<ResponseEntity<String>> getTemplate(@PathVariable("key") String key, @PathVariable("userId") Long userId, @PathVariable("cvId") Long cvId, @PathVariable("templateId") Long templateId) {
 		return Mono.fromSupplier(() -> userCvRepository.findByCvIdAndUserId(cvId, userId))
 				.flatMap(userCV -> {
 					if (userCV == null) {

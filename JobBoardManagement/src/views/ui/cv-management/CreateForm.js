@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Button, Form, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
 import { createCVAsync, uploadCVAsync } from '../../../features/cvSlice';
 
-const CreateForm = ({ toggle, isOpen }) => {
+const CreateForm = ({ toggle, isOpen, setSuccessMessage }) => {
   const dispatch = useDispatch();
 
   const [uploadTemplateName, setUploadTemplateName] = useState('');
@@ -23,14 +23,20 @@ const CreateForm = ({ toggle, isOpen }) => {
     setCreateTemplateName(uploadTemplateName);
   }, [uploadTemplateName]);
 
-  const validateForm = () => {
+  const validateUploadForm = () => {
     const newErrors = {};
     if (!uploadTemplateName.trim()) newErrors.uploadTemplateName = "Template name is required";
+    if (!uploadFile) newErrors.uploadFile = "HTML file is required";
+    if (uploadFile && !uploadFile.name.endsWith('.html')) newErrors.uploadFile = "Only HTML files are allowed";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateCreateForm = () => {
+    const newErrors = {};
     if (!createTemplateName.trim()) newErrors.createTemplateName = "Template name is required";
     if (!templateDescription.trim()) newErrors.templateDescription = "Template description is required";
     if (!templateFilePath.trim()) newErrors.templateFilePath = "Template file path is required";
-    if (!uploadFile) newErrors.uploadFile = "HTML file is required";
-    if (uploadFile && !uploadFile.name.endsWith('.html')) newErrors.uploadFile = "Only HTML files are allowed";
     if (!templateImage) newErrors.templateImage = "Template image is required";
     if (templateImage && !templateImage.type.startsWith('image/')) newErrors.templateImage = "Only image files are allowed";
     setErrors(newErrors);
@@ -41,10 +47,10 @@ const CreateForm = ({ toggle, isOpen }) => {
     const file = e.target.files[0];
     if (file && file.name.endsWith('.html')) {
       setUploadFile(file);
-      setErrors({...errors, uploadFile: null});
+      setErrors({ ...errors, uploadFile: null });
     } else {
       setUploadFile(null);
-      setErrors({...errors, uploadFile: "Only HTML files are allowed"});
+      setErrors({ ...errors, uploadFile: "Only HTML files are allowed" });
     }
   };
 
@@ -52,15 +58,15 @@ const CreateForm = ({ toggle, isOpen }) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
       setTemplateImage(file);
-      setErrors({...errors, templateImage: null});
+      setErrors({ ...errors, templateImage: null });
     } else {
       setTemplateImage(null);
-      setErrors({...errors, templateImage: "Only image files are allowed"});
+      setErrors({ ...errors, templateImage: "Only image files are allowed" });
     }
   };
 
   const handleUpload = async () => {
-    if (!validateForm()) return;
+    if (!validateUploadForm()) return;
     setLoadingUpload(true);
 
     try {
@@ -82,7 +88,7 @@ const CreateForm = ({ toggle, isOpen }) => {
   };
 
   const handleCreate = async () => {
-    if (!validateForm()) return;
+    if (!validateCreateForm()) return;
     setLoadingCreate(true);
 
     try {
@@ -100,7 +106,8 @@ const CreateForm = ({ toggle, isOpen }) => {
       setTemplateImage(null);
 
       setCreateButtonDisabled(true);
-
+      setSuccessMessage('CV created successfully');
+      setTimeout(() => setSuccessMessage(""), 3000);
       toggle();
     } catch (error) {
       console.error('Error creating template:', error);

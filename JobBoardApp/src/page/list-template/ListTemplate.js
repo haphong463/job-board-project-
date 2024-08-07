@@ -100,7 +100,7 @@ const ListTemplate = () => {
           templateId: templateId,
         }
       });
-      navigate(`/review-template/${templateName}/${user.id}/${cvId}`);
+      navigate(`/review-template/${templateName}/${user.id}/${cvId}/${templateId}`);
     } catch (error) {
       console.error('Error selecting template:', error);
     }

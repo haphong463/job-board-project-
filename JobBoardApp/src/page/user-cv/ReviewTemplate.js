@@ -27,7 +27,7 @@ const CVSelector = ({ cvs, currentCvId, onCVChange }) => (
 );
 
 const TemplateViewer = () => {
-  const { templateName: key, cvId } = useParams();
+  const { templateName: key, cvId, templateId } = useParams();
   const [templateContent, setTemplateContent] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const userId = useSelector(state => state.auth.user.id);
@@ -46,7 +46,7 @@ const TemplateViewer = () => {
   const fetchTemplate = async () => {
     try {
       setIsLoading(true);
-      const response = await axiosRequest.get(`/templates/review-template/${key}/${userId}/${cvId}`);
+      const response = await axiosRequest.get(`/templates/review-template/${key}/${userId}/${cvId}/${templateId}`);
       setTemplateContent(response);
     } catch (error) {
       console.error('Error fetching template:', error);
@@ -169,9 +169,16 @@ const TemplateViewer = () => {
   const handleCVChange = async (newCvId) => {
     try {
       setIsLoading(true);
-      const response = await axiosRequest.get(`/templates/review-template/${key}/${userId}/${newCvId}`);
+      const response = await axiosRequest.get(`/templates/review-template/${key}/${userId}/${newCvId}/${templateId}`);
       setTemplateContent(response);
-      navigate(`/review-template/${key}/${userId}/${newCvId}`, { replace: true });
+      await axiosRequest.put('/templates/select-template', null, {
+        params: {
+          userId: userId,
+          cvId: newCvId,
+          templateId: templateId,
+        }
+      });
+      navigate(`/review-template/${key}/${userId}/${newCvId}/${templateId}`, { replace: true });
     } catch (error) {
       console.error('Error changing CV:', error);
     } finally {

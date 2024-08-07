@@ -160,6 +160,16 @@ const CreateCV = () => {
     };
 
 
+    const is18OrOlder = (dob) => {
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age >= 18;
+    };
 
 
     const SuccessModal = ({ show, onClose, onTemplate }) => {
@@ -269,7 +279,11 @@ const CreateCV = () => {
 
                     if (!detail.fullName) detailErrors.fullName = "Full Name is required";
                     if (!detail.address) detailErrors.address = "Address is required";
-                    if (!detail.dob) detailErrors.dob = "Date of Birth is required";
+                    if (!detail.dob) {
+                        detailErrors.dob = "Date of Birth is required";
+                    } else if (!is18OrOlder(detail.dob)) {
+                        detailErrors.dob = "User must be 18 years or older";
+                    }
                     if (!detail.summary) detailErrors.summary = "Summary is required";
 
                     if (!detail.email) {
@@ -638,7 +652,6 @@ const CreateCV = () => {
                                         className="cv-input"
                                     />
                                     {errors.userDetails[index]?.dob && <div className="cv-error-message text-danger">{errors.userDetails[index].dob}</div>}
-
 
                                     <input
                                         type="tel"

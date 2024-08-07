@@ -61,7 +61,7 @@ function MainCv() {
                 <div className="default-info">
                   <div className="welcome-overlay">
                     <h2 className="welcome fade-in">
-                      Welcome back <i className="userName">{user.lastName}</i>!
+                      Welcome back <i className="userName">{user.lastName}</i> !
                     </h2>
                   </div>
                 </div>

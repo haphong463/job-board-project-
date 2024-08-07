@@ -59,7 +59,7 @@ export const routes = [
   { path: "/list-template", component: <ListTemplate /> },
   { path: "/list-pdf", component: <ListPdf /> },
   { path: "/pdf-cv/:id", component: <PdfDetail /> },
-  { path: "/review-template/:templateName/:userId/:cvId", component: <ReviewTemplate /> },
+  { path: "/review-template/:templateName/:userId/:cvId/:templateId", component: <ReviewTemplate /> },
   { path: "/ResetPassword", component: <ResetPassword /> },
   { path: "/ForgotPassword", component: <ForgotPassword /> },
   { path: "/job", component: <JobSingle1 /> },

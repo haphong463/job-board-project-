@@ -8,7 +8,7 @@ import {
 } from "../../../features/cvSlice";
 import CreateForm from "./CreateForm";
 import UpdateForm from "./UpdateForm";
-import DetailsForm from "./DetailsForm"; // Import the DetailsForm component
+import DetailsForm from "./DetailsForm";
 import DataTable from "react-data-table-component";
 import {
   Row,
@@ -25,14 +25,14 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-// import './css/cvManagement.css'
+
 const CVManagement = () => {
   const dispatch = useDispatch();
   const cvs = useSelector(selectAllCVs);
   const [searchTerm, setSearchTerm] = useState("");
   const [newCVModal, setNewCVModal] = useState(false);
   const [updateCVModal, setUpdateCVModal] = useState(false);
-  const [detailsModal, setDetailsModal] = useState(false); // State for DetailsForm modal
+  const [detailsModal, setDetailsModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -46,11 +46,11 @@ const CVManagement = () => {
       .catch(() => setLoading(false));
   }, [dispatch, refreshTrigger]);
 
-
   const toggleNewCVModal = () => {
     setNewCVModal(!newCVModal);
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
+
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   const toggleDropdown = (templateId) => {
@@ -60,13 +60,13 @@ const CVManagement = () => {
       setOpenDropdownId(templateId);
     }
   };
+
   const toggleUpdateCVModal = () => {
     setUpdateCVModal(!updateCVModal);
     if (updateCVModal) {
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     }
   };
-
 
   const toggleDetailsModal = () => {
     setDetailsModal(!detailsModal);
@@ -77,26 +77,26 @@ const CVManagement = () => {
       await dispatch(disableCVAsync(id)).unwrap();
       setSuccessMessage("CV successfully disabled");
       setTimeout(() => setSuccessMessage(""), 3000);
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Error disabling CV:", error);
       setErrorMessage("Error disabling CV");
       setTimeout(() => setErrorMessage(""), 3000);
     }
   };
+
   const handleUndisable = async (id) => {
     try {
       await dispatch(unDisableCVAsync(id)).unwrap();
       setSuccessMessage("CV successfully undisabled");
       setTimeout(() => setSuccessMessage(""), 3000);
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Error undisabling CV:", error);
       setErrorMessage("Error undisabling CV");
       setTimeout(() => setErrorMessage(""), 3000);
     }
   };
-
 
   const handleEdit = (template) => {
     setSelectedTemplate(template);
@@ -107,9 +107,6 @@ const CVManagement = () => {
     setSelectedTemplate(template);
     toggleDetailsModal();
   };
-
-
-
 
   const columns = [
     {
@@ -187,7 +184,11 @@ const CVManagement = () => {
           <Button color="danger" onClick={toggleNewCVModal}>
             New CV
           </Button>
-          <CreateForm isOpen={newCVModal} toggle={toggleNewCVModal} />
+          <CreateForm
+            isOpen={newCVModal}
+            toggle={toggleNewCVModal}
+            setSuccessMessage={setSuccessMessage}
+          />
         </div>
       </Col>
       <Col lg="12">
@@ -210,10 +211,10 @@ const CVManagement = () => {
               data={
                 cvs
                   ? cvs.filter((cv) =>
-                    cv.templateName
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase())
-                  )
+                      cv.templateName
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
+                    )
                   : []
               }
               pagination
@@ -233,7 +234,6 @@ const CVManagement = () => {
           setSuccessMessage={setSuccessMessage}
           setRefreshTrigger={setRefreshTrigger}
         />
-
       )}
       {selectedTemplate && (
         <DetailsForm

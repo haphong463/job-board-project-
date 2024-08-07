@@ -136,7 +136,9 @@
   }
   .userName{
     font-size: larger;
-    color: #89ba16b8;
+    color: #89ba16;
+  text-shadow: 2px 2px 2px rgba(43, 43, 43, 0.953) !important;
+
   }
   .green-text {
     color: #89ba16;
