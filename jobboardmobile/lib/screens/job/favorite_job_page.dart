@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/company_model.dart';
 import 'package:jobboardmobile/models/job_model.dart';
-import 'package:jobboardmobile/models/skill_model.dart';
 import 'package:jobboardmobile/screens/job/JobDetailsScreen.dart';
 import 'package:jobboardmobile/service/favoriteJob_service.dart';
 import 'package:jobboardmobile/models/favorite_job_model.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
+import 'package:jobboardmobile/screens/job/JobListScreen.dart';
 import 'package:jobboardmobile/service/quiz_service.dart';
 
 import '../../core/utils/color_util.dart';
@@ -163,6 +164,20 @@ class _MainScreenState extends State<MainScreen> {
               MaterialPageRoute(
                   builder: (context) => const CompanyListScreen()),
             );
+          }),
+          _buildDrawerItem(Icons.business, 'Jobs', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => JobListScreen(
+                  jobs: _jobs, // Pass the actual list of jobs
+                  companies: _companies, // Pass the actual list of companies
+                ),
+              ),
+            );
+          }),
+          _buildDrawerItem(Icons.note_add, 'Saved jobs', () {
+            Navigator.pushNamed(context, '/save_jobs');
           }),
           _buildDrawerItem(Icons.note_add, 'Blog', () {
             Navigator.pushNamed(context, '/blog');
