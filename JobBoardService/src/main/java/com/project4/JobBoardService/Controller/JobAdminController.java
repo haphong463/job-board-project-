@@ -66,6 +66,12 @@ public class JobAdminController {
     public List<JobDTO> getAllJobs() {
         return jobService.getAllJobs();
     }
+    @GetMapping("/super-hot")
+    public List<JobDTO> getSuperHotJobs() {
+        return jobService.getSuperHotJobs();
+    }
+
+
 
 //    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
 //    @PostMapping("/companies/{companyId}/categories")

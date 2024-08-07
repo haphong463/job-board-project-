@@ -6,10 +6,7 @@ import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
 import com.project4.JobBoardService.Enum.Position;
 import com.project4.JobBoardService.Enum.WorkSchedule;
-import com.project4.JobBoardService.Repository.CategoryRepository;
-import com.project4.JobBoardService.Repository.CompanyRepository;
-import com.project4.JobBoardService.Repository.JobRepository;
-import com.project4.JobBoardService.Repository.TransactionRepository;
+import com.project4.JobBoardService.Repository.*;
 import com.project4.JobBoardService.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +15,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +27,8 @@ public class JobServiceImpl   implements JobService {
     private final TransactionService transactionService;
     private  final CategoryRepository categoryRepository;
 
+    @Autowired
+    TrendingSkillRepository trendingSkillRepository;
     @Autowired
     private TransactionRepository transactionRepository;
 
@@ -228,6 +229,53 @@ public class JobServiceImpl   implements JobService {
         job.setExpired(createdAt.plusDays(7));
         job.setIsSuperHot(isSuperHot); // Thiết lập isSuperHot
         return job;
+    }
+
+    @Override
+    public List<JobDTO> getSuperHotJobs() {
+        // Get list of hot skills from TrendingSkill
+        List<TrendingSkill> trendingSkills = trendingSkillRepository.findAll();
+        Set<String> trendingSkillNames = trendingSkills.stream()
+                .map(TrendingSkill::getSkillName)
+                .collect(Collectors.toSet());
+
+        // Get all jobs from jobRepository
+        List<Job> jobs = jobRepository.findAll();
+
+        // Process and filter the job list according to the required conditions
+        return jobs.stream()
+                .filter(job -> {
+                    // Filter jobs by hot skills
+                    boolean hasTrendingSkill = job.getCategories().stream()
+                            .anyMatch(category -> trendingSkillNames.contains(category.getCategoryName()));
+                    // Filter jobs by number of slots
+                    boolean hasSufficientSlots = job.getSlot() >= 10;
+                    // Filter jobs by offeredSalary
+                    boolean hasHighSalary = getSalaryFromString(job.getOfferedSalary()) >= 2000;
+                    return hasTrendingSkill || hasSufficientSlots || hasHighSalary;
+                })
+                .sorted(Comparator.comparing(Job::getCreatedAt).reversed())
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+
+
+    private int getSalaryFromString(String salaryString) {
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(salaryString);
+
+        if (matcher.find()) {
+            String numberString = matcher.group();
+            try {
+                return Integer.parseInt(numberString);
+            } catch (NumberFormatException e) {
+                // If conversion is not possible, return 0
+                return 0;
+            }
+        }
+        // If the number is not found, return 0
+        return 0;
     }
 
     @Override

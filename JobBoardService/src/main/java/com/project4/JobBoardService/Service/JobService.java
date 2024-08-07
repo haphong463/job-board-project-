@@ -20,7 +20,7 @@ public interface JobService {
     Optional<JobDTO> findJobById(Long jobId);
 
     List<JobDTO> getAllJobs();
-
+    List<JobDTO> getSuperHotJobs();
 
     int countJobsForUserInMonth(Long userId, int year, int month);
 

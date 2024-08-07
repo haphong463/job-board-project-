@@ -61,6 +61,7 @@ public class JobController {
         return ResponseEntity.ok(jobs);
     }
 
+
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
     @GetMapping("/{userId}/filter")
     public ResponseEntity<List<JobDTO>> filterJobsByExpirationStatus(@PathVariable Long userId, @RequestParam boolean isExpired) {
