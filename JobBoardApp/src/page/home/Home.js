@@ -9,7 +9,6 @@ import { fetchCompanyThunk } from "../../features/companySlice";
 import { fetchCategoryThunk } from "../../features/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import "../job-listing/listSkillAll";
-import jobData from "../job-listing/job_data.json";
 
 export const Home = () =>
 {
@@ -17,9 +16,12 @@ export const Home = () =>
   const navigate = useNavigate(); // Correct usage of useNavigate
   const [message, setMessage] = useState("");
   const dispatch = useDispatch();
-  const jobs = useSelector((state) => state.job.jobs);
+  // const jobs = useSelector((state) => state.job.jobs);
   const companies = useSelector((state) => state.company.companies);
   const categories = useSelector((state) => state.category.categories);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() =>
   {
@@ -28,16 +30,35 @@ export const Home = () =>
     {
       dispatch(fetchCompanyThunk());
     }
-    if (jobs.length === 0)
-    {
-      dispatch(fetchJobThunk());
-    }
-  }, [dispatch, jobs.length, companies.length]);
+  }, [dispatch, companies.length]);
 
-  const filteredJobs = useMemo(() =>
+  useEffect(() =>
   {
-    return jobs.filter((job) => job.isSuperHot == 1);
-  }, [jobs]);
+    const fetchJobs = async () =>
+    {
+      try
+      {
+        const response = await fetch('http://localhost:8080/api/jobs/super-hot');
+        if (!response.ok)
+        {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setJobs(data);
+      } catch (error)
+      {
+        setError(error.message);
+      } finally
+      {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   const getLocation1String = (address) =>
   {
@@ -120,7 +141,7 @@ export const Home = () =>
               </div>
             </div>
             <ul className="job-listings mb-5">
-              {filteredJobs.map((job) =>
+              {jobs.map((job) =>
               {
                 const company = companies.find(
                   (company) => company.companyId === job.companyId
@@ -132,7 +153,7 @@ export const Home = () =>
                 if (company)
                 {
                   return (
-                    <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
+                    <li key={job.id} className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
                       {/* <a href={`/jobDetail/${job.id}`} /> */}
                       <div className="job-listing-logo">
                         <img

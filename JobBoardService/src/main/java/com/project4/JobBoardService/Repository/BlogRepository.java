@@ -17,6 +17,9 @@ import java.util.List;
 
 public interface BlogRepository extends JpaRepository<Blog, Long> {
     long countByUserAndCreatedAtBetween(User user, LocalDateTime startDate, LocalDateTime endDate);
+    @Query("SELECT COUNT(b) FROM Blog b")
+    long countBlogs();
+
 
     @Query("SELECT b.user.username, MONTH(b.createdAt), COUNT(b) " +
             "FROM Blog b " +

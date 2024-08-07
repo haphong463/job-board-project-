@@ -189,15 +189,47 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id){
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MODERATOR')")
+    @CheckPermission(EPermissions.MANAGE_USER)
+    public ResponseEntity<?> deleteUser(@PathVariable Long id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token){
         try {
+            // Retrieve the user to be deleted
+            User userToDelete = userService.findById(id).orElse(null);
+            if (userToDelete == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Check if the user to be deleted is an admin
+            boolean isUserToDeleteAdmin = userToDelete.getRoles().stream()
+                    .anyMatch(role -> role.getName().equals(ERole.ROLE_ADMIN.name()));
+
+            // Get the username of the requester
+            String authToken = token.replace("Bearer ", "");
+            String tokenUsername = jwtUtils.getUserNameFromJwtToken(authToken);
+
+            // Retrieve the requesting user
+            User requestingUser = userService.findByUsername(tokenUsername).orElse(null);
+            if (requestingUser == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Requesting user not found");
+            }
+
+            // Check if the requesting user is a moderator
+            boolean isRequestingUserModerator = requestingUser.getRoles().stream()
+                    .anyMatch(role -> role.getName().equals(ERole.ROLE_MODERATOR.name()));
+
+            // If the user to be deleted is an admin and the requesting user is a moderator, deny the request
+            if (isUserToDeleteAdmin && isRequestingUserModerator) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Moderators cannot delete administrators");
+            }
+
+            // Proceed with the deletion
             userService.deleteUser(id);
             return ResponseEntity.noContent().build();
-        }catch(Exception e){
+        } catch(Exception e){
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
 
 
 }

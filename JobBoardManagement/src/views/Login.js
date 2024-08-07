@@ -55,7 +55,7 @@ const Login = () => {
               (item) => item === "ROLE_ADMIN" || item === "ROLE_MODERATOR"
             )
           ) {
-            navigate("/jobportal");
+            navigate("/jobportal/starter");
           } else {
             showToast("You don't have access rights!", "error");
             dispatch(signOut());

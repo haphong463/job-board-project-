@@ -1,5 +1,6 @@
 package com.project4.JobBoardService.Controller;
 
+import com.project4.JobBoardService.Entity.Category;
 import com.project4.JobBoardService.Entity.FavoriteJob;
 import com.project4.JobBoardService.Entity.Job;
 import com.project4.JobBoardService.Entity.User;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/favorite-jobs")
@@ -75,10 +77,33 @@ public class FavoriteJobController {
                 responseItem.put("companyId", favoriteJob.getJob().getCompany().getCompanyId());
                 responseItem.put("companyLogo", favoriteJob.getJob().getCompany().getLogo());
                 responseItem.put("jobTitle", favoriteJob.getJob().getTitle());
+                responseItem.put("offeredSalary", favoriteJob.getJob().getOfferedSalary());
+                responseItem.put("jobDescription", favoriteJob.getJob().getDescription());
+                responseItem.put("responsibilities", favoriteJob.getJob().getResponsibilities());
+                responseItem.put("requiredSkills", favoriteJob.getJob().getRequiredSkills());
+                responseItem.put("workSchedule", favoriteJob.getJob().getWorkSchedule());
+                responseItem.put("experience", favoriteJob.getJob().getExperience());
+                responseItem.put("qualification", favoriteJob.getJob().getQualification());
+                responseItem.put("jobType", favoriteJob.getJob().getJobType());
+                responseItem.put("contractType", favoriteJob.getJob().getContractType());
+                responseItem.put("benefit", favoriteJob.getJob().getBenefit());
+                responseItem.put("slot", favoriteJob.getJob().getSlot());
+                responseItem.put("expire", favoriteJob.getJob().getExpire());
                 responseItem.put("position", favoriteJob.getJob().getPosition());
                 responseItem.put("location", favoriteJob.getJob().getCompany().getLocation());
-                responseItem.put("skills", favoriteJob.getJob().getCategories());
+                responseItem.put("categoryId", favoriteJob.getJob().getCategories().stream()
+                        .map(Category::getCategoryId)
+                        .collect(Collectors.toList()));
                 responseItem.put("companyName", favoriteJob.getJob().getCompany().getCompanyName());
+                responseItem.put("websiteLink", favoriteJob.getJob().getCompany().getWebsiteLink());
+                responseItem.put("companyDescription", favoriteJob.getJob().getCompany().getDescription());
+                responseItem.put("keySkills", favoriteJob.getJob().getCompany().getKeySkills());
+                responseItem.put("type", favoriteJob.getJob().getCompany().getType());
+                responseItem.put("companySize", favoriteJob.getJob().getCompany().getCompanySize());
+                responseItem.put("country", favoriteJob.getJob().getCompany().getCountry());
+                responseItem.put("countryCode", favoriteJob.getJob().getCompany().getCountryCode());
+                responseItem.put("workingDays", favoriteJob.getJob().getCompany().getWorkingDays());
+
                 responseItem.put("username", favoriteJob.getUser().getUsername());
                 responseList.add(responseItem);
             }

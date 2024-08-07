@@ -20,6 +20,7 @@ export const SavedJobs = () =>
     const user = useSelector(state => state.auth.user);
     const userId = user ? user.id : null;
     const jobs = useSelector((state) => state.job.jobs);
+    const categories = useSelector((state) => state.category.categories);
 
     useEffect(() =>
     {
@@ -166,6 +167,16 @@ export const SavedJobs = () =>
                             {
                                 const address = getLocation1String(job?.location);
                                 let timeAgo = job.createdAt ? formatJobPostedTime(job.createdAt) : '';
+                                const categoryMap = categories.reduce((map, category) =>
+
+                                    {
+    
+                                        map[category.categoryId] = category.categoryName;
+    
+                                        return map;
+    
+                                    }, {});
+    
 
                                 return (
                                     <div key={job.favoriteId} className="col-md-4 mb-4">
@@ -183,12 +194,16 @@ export const SavedJobs = () =>
                                                 <FaMapMarkerAlt className="text-dark" /> {address}
                                             </div>
                                             <div className="m-0 mt-3 mb-4">
-                                                {job.skills && Array.isArray(job.skills) && job.skills.map((skill) =>
+                                                {job.categoryId && Array.isArray(job.categoryId) && job.categoryId.map((categoryId) =>
                                                 {
-                                                    const categoryName = skill.categoryName;
-                                                    const categoryId = skill.categoryId;
+                                                    const categoryName = categoryMap[categoryId];
                                                     return categoryName ? (
-                                                        <NavLink key={categoryId} onClick={(e) => handleCategoryClick(e, categoryId)} className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark" to={''}>
+                                                        <NavLink
+                                                            key={categoryId}
+                                                            onClick={(e) => handleCategoryClick(e, categoryId)}
+                                                            className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark"
+                                                            to={''}
+                                                        >
                                                             {categoryName}
                                                         </NavLink>
                                                     ) : null;

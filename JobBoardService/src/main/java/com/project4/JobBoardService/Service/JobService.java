@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface JobService {
     List<JobDTO> getAllJobs();
+    List<JobDTO> getSuperHotJobs();
 //    List<JobDTO> findAllJobsByCompanyId(Long userId);
 //    List<JobDTO> searchJobsByCompanyId(Long userId, String query);
 //    List<JobDTO> filterJobsByExpirationStatus(Long userId, boolean isExpired);
@@ -17,5 +18,4 @@ public interface JobService {
     JobDTO updateJob(Long jobId, JobDTO jobDTO);
     void deleteJob(Long jobId);
     Optional<JobDTO> findJobById(Long jobId);
-//    boolean updateJob(Long companyId, Long categoryId, JobDTO jobDTO);
 }
