@@ -417,8 +417,8 @@ public class AuthController {
         user.setIsEnabled(true);
         String verificationCode = generateVerificationCode();
         user.setVerificationCode(verificationCode);
-        user.setVerificationCodeExpiry(LocalDateTime.now().plusDays(2));
-//        user.setVerificationCodeExpiry(LocalDateTime.now().plusSeconds(30));
+//        user.setVerificationCodeExpiry(LocalDateTime.now().plusDays(2));
+        user.setVerificationCodeExpiry(LocalDateTime.now().plusSeconds(30));
 
         userRepository.save(user);
         emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
@@ -481,11 +481,7 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        Company company = new Company();
-        company.setCompanyName(signUpRequest.getCompanyName());
-        company.setWebsiteLink(signUpRequest.getCompanyWebsite());
-        Company savedCompany = companyRepository.save(company);
-
+        // Tạo đối tượng Employer nhưng chưa lưu thông tin công ty
         Employer employer = new Employer();
         employer.setName(signUpRequest.getName());
         employer.setTitle(signUpRequest.getTitle());
@@ -494,15 +490,19 @@ public class AuthController {
         employer.setCompanyName(signUpRequest.getCompanyName());
         employer.setCompanyAddress(signUpRequest.getCompanyAddress());
         employer.setWebsiteLink(signUpRequest.getCompanyWebsite());
-        employer.setCompany(savedCompany);
-
-        String verificationCode = UUID.randomUUID().toString();
-        employer.setVerificationCode(verificationCode);
         employer.setVerified(false);
         employer.setApproved(false);
+
+        // Tạo mã xác thực
+        String verificationCode = UUID.randomUUID().toString();
+        employer.setVerificationCode(verificationCode);
+
+        // Lưu nhà tuyển dụng chưa có công ty
         employerRepository.save(employer);
+
         return ResponseEntity.ok(new MessageResponse("Employer registered successfully! Please check your email for verification instructions."));
     }
+
 
     @PostMapping("/signout")
     public ResponseEntity<?> signOutUser(@RequestBody TokenRefreshRequest request) {
