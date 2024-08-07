@@ -1,6 +1,7 @@
 package com.project4.JobBoardService.payload;
 
 
+import com.project4.JobBoardService.Entity.Company;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,19 +18,23 @@ public class JwtResponse {
     private String username;
     private String email;
     private List<String> roles;
+    private Long CompanyId;
 
 
 
 
-    public JwtResponse(String accessToken, String refreshToken, Long id, String username, String email, String firstName, String lastName, List<String> roles) {
+
+    public JwtResponse(String accessToken, String refreshToken, Long id, String username, String email, String firstName, String lastName, List<String> roles, Long companyId) {
         this.token = accessToken;
         this.refreshToken = refreshToken;
         this.id = id;
         this.username = username;
         this.email = email;
-        this.firstName = firstName;  // Add this
+        this.firstName = firstName;
         this.lastName = lastName;    // Add this
         this.roles = roles;
+        this.CompanyId = companyId;
+
     }
     public String getAccessToken() {
         return token;
@@ -94,4 +99,6 @@ public class JwtResponse {
     public void setLastName(String lastName) {  // Add this
         this.lastName = lastName;
     }
+
+
 }

@@ -13,9 +13,20 @@ import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Subscription, Long> {
 
-    Optional<Subscription> findByUserAndEndDateAfter(User user, LocalDate date);
+    @Query("SELECT s FROM Subscription s WHERE s.user = :user AND s.endDate > :now AND (s.service IS NULL OR s.service = '')")
+    Optional<Subscription> findByUserAndEndDateAfter(@Param("user") User user, @Param("now") LocalDate now);
 
 
     @Query(value = "SELECT * FROM Subscription s WHERE s.user_id = :userId", nativeQuery = true)
     List<Subscription> findAllSubscriptionByUserId(@Param("userId") Long userId);
+
+
+    @Query("SELECT s.service FROM Subscription s WHERE s.user.id = :userId AND s.endDate > CURRENT_DATE")
+    List<String> findServicesByUserId(Long userId);
+
+
+    @Query("SELECT s FROM Subscription s WHERE s.user = :user AND s.endDate > :now")
+    List<Subscription> findByUserEndDate(@Param("user") User user, @Param("now") LocalDate now);
+
+
 }

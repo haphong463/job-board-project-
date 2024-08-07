@@ -66,42 +66,43 @@ public class JobAdminController {
     public List<JobDTO> getAllJobs() {
         return jobService.getAllJobs();
     }
-
     @GetMapping("/super-hot")
     public List<JobDTO> getSuperHotJobs() {
         return jobService.getSuperHotJobs();
     }
 
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
-    @PostMapping("/companies/{companyId}/categories")
-    public ResponseEntity<String> createJob(@PathVariable("companyId") Long companyId,
-                                            @RequestParam List<Long> categoryId,
-                                            @RequestBody JobDTO jobDTO) {
-        boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
-        return ResponseEntity.ok("Job created successfully");
-    }
 
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
-    @GetMapping("/job/{id}")
-    public ResponseEntity<JobDTO> getJobById(@PathVariable Long id) {
-        Optional<JobDTO> job = jobService.findJobById(id);
-        return job.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
 
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')" )
-    @PutMapping("/edit/{jobId}")
-    public ResponseEntity<JobDTO> updateJob(@PathVariable Long jobId, @RequestBody JobDTO jobDTO) {
-        JobDTO updatedJob = jobService.updateJob(jobId, jobDTO);
-        if (updatedJob != null) {
-            return ResponseEntity.ok(updatedJob);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    @DeleteMapping("/{jobId}")
-    public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
-        jobService.deleteJob(jobId);
-        return ResponseEntity.ok().build();
-    }
+//    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+//    @PostMapping("/companies/{companyId}/categories")
+//    public ResponseEntity<String> createJob(@PathVariable("companyId") Long companyId,
+//                                            @RequestParam List<Long> categoryId,
+//                                            @RequestBody JobDTO jobDTO) {
+//        boolean createdJob = jobService.createJob(companyId, categoryId, jobDTO);
+//        return ResponseEntity.ok("Job created successfully");
+//    }
+//
+//    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
+//    @GetMapping("/job/{id}")
+//    public ResponseEntity<JobDTO> getJobById(@PathVariable Long id) {
+//        Optional<JobDTO> job = jobService.findJobById(id);
+//        return job.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+//    }
+//
+//    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')" )
+//    @PutMapping("/edit/{jobId}")
+//    public ResponseEntity<JobDTO> updateJob(@PathVariable Long jobId, @RequestBody JobDTO jobDTO) {
+//        JobDTO updatedJob = jobService.updateJob(jobId, jobDTO);
+//        if (updatedJob != null) {
+//            return ResponseEntity.ok(updatedJob);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+//    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+//    @DeleteMapping("/{jobId}")
+//    public ResponseEntity<Void> deleteJob(@PathVariable Long jobId) {
+//        jobService.deleteJob(jobId);
+//        return ResponseEntity.ok().build();
+//    }
 }

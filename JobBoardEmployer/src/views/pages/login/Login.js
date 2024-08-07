@@ -22,24 +22,20 @@ const Login = () => {
   const { register, handleSubmit, errors, onSubmit } = useLoginForm();
   const verificationMessage = useSelector((state) => state.auth?.verificationMessage);
   const loginError = useSelector((state) => state.auth?.error);
-
   const user = useSelector((state) => state.auth?.user);
   const dispatch = useDispatch();
-
   const [showPassword, setShowPassword] = useState(false);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   useEffect(() => {
+    console.log('Login component mounted or updated'); // Debugging
     dispatch(resetVerificationMessage());
     return () => {
+      console.log('Login component unmounted'); // Debugging
       dispatch(clearAuthError());
     };
   }, [dispatch]);
 
-  if (user) return <Navigate to="/" replace={true} />;
+  if (user) return <Navigate to="/" replace />;
 
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
@@ -78,7 +74,7 @@ const Login = () => {
                       autoComplete="current-password"
                     />
                     <div className="input-group-append">
-                      <span className="input-group-text" onClick={togglePasswordVisibility}>
+                      <span className="input-group-text" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? "Hide" : "Show"}
                       </span>
                     </div>

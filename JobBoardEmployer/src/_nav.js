@@ -3,6 +3,7 @@ import CIcon from '@coreui/icons-react'
 import {
   cilBell,
   cilCalculator,
+  cilCart,
   cilChartPie,
   cilCursor,
   cilDescription,
@@ -12,6 +13,8 @@ import {
   cilPuzzle,
   cilSpeedometer,
   cilStar,
+  cilFile,
+  cilBriefcase,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -34,7 +37,7 @@ const _nav = [
     component: CNavItem,
     name: 'Job',
     to: '/job',
-    icon: <CIcon icon={cilDrop} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilBriefcase} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,
@@ -44,38 +47,35 @@ const _nav = [
     component: CNavItem,
     name: 'Buy services',
     to: '/buy',
-    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-   },
-   {
+    icon: <CIcon icon={cilCart} customClassName="nav-icon" />,
+  },
+  {
     component: CNavItem,
-    name: 'List Packages ',
+    name: 'List Packages',
     to: '/transcation',
-    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-   },
-   {
+    icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
+  },
+  {
     component: CNavTitle,
     name: 'CV',
   },
   {
     component: CNavItem,
-    name: 'List CV ',
-    to: '/transcation',
-    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-   },
-   {
+    name: 'List CV',
+    to: '/cv',
+    icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
+  },
+  {
     component: CNavTitle,
-    name: 'Nofication',
+    name: 'Notification',
   },
   {
     component: CNavItem,
-    name: 'Nofication System ',
-    to: '/transcation',
-    icon: <CIcon icon={cilPencil} customClassName="nav-icon" />,
-   },
-  // {
-  //   component: CNavTitle,
-  //   name: 'Components',
-  // },
+    name: 'Notification System',
+    to: '/notification',
+    icon: <CIcon icon={cilBell} customClassName="nav-icon" />,
+  },
+  // Uncomment and edit these sections if you want more groups and items
   // {
   //   component: CNavGroup,
   //   name: 'Base',
@@ -92,72 +92,8 @@ const _nav = [
   //       name: 'Breadcrumb',
   //       to: '/base/breadcrumbs',
   //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Cards',
-  //       to: '/base/cards',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Carousel',
-  //       to: '/base/carousels',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Collapse',
-  //       to: '/base/collapses',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'List group',
-  //       to: '/base/list-groups',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Navs & Tabs',
-  //       to: '/base/navs',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Pagination',
-  //       to: '/base/paginations',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Placeholders',
-  //       to: '/base/placeholders',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Popovers',
-  //       to: '/base/popovers',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Progress',
-  //       to: '/base/progress',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Spinners',
-  //       to: '/base/spinners',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Tables',
-  //       to: '/base/tables',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Tabs',
-  //       to: '/base/tabs',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Tooltips',
-  //       to: '/base/tooltips',
-  //     },
-    ]
+  //     // ... more items
+  //   ],
   // },
   // {
   //   component: CNavGroup,
@@ -170,16 +106,7 @@ const _nav = [
   //       name: 'Buttons',
   //       to: '/buttons/buttons',
   //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Buttons groups',
-  //       to: '/buttons/button-groups',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Dropdowns',
-  //       to: '/buttons/dropdowns',
-  //     },
+  //     // ... more items
   //   ],
   // },
   // {
@@ -192,41 +119,7 @@ const _nav = [
   //       name: 'Form Control',
   //       to: '/forms/form-control',
   //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Select',
-  //       to: '/forms/select',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Checks & Radios',
-  //       to: '/forms/checks-radios',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Range',
-  //       to: '/forms/range',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Input Group',
-  //       to: '/forms/input-group',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Floating Labels',
-  //       to: '/forms/floating-labels',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Layout',
-  //       to: '/forms/layout',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Validation',
-  //       to: '/forms/validation',
-  //     },
+  //     // ... more items
   //   ],
   // },
   // {
@@ -249,16 +142,7 @@ const _nav = [
   //         text: 'NEW',
   //       },
   //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'CoreUI Flags',
-  //       to: '/icons/flags',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'CoreUI Brands',
-  //       to: '/icons/brands',
-  //     },
+  //     // ... more items
   //   ],
   // },
   // {
@@ -271,21 +155,7 @@ const _nav = [
   //       name: 'Alerts',
   //       to: '/notifications/alerts',
   //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Badges',
-  //       to: '/notifications/badges',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Modal',
-  //       to: '/notifications/modals',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Toasts',
-  //       to: '/notifications/toasts',
-  //     },
+  //     // ... more items
   //   ],
   // },
   // {
@@ -312,21 +182,7 @@ const _nav = [
   //       name: 'Login',
   //       to: '/login',
   //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Register',
-  //       to: '/register',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Error 404',
-  //       to: '/404',
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: 'Error 500',
-  //       to: '/500',
-  //     },
+  //     // ... more items
   //   ],
   // },
   // {
@@ -335,6 +191,6 @@ const _nav = [
   //   href: 'https://coreui.io/react/docs/templates/installation/',
   //   icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
   // },
-// ]
+]
 
 export default _nav

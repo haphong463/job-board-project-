@@ -30,4 +30,7 @@ public class Category {
     @ManyToMany(mappedBy = "categories")
     @JsonIgnore
     private Set<Job> jobs;
+
+    public Category(Long categoryId, String categoryName) {
+    }
 }

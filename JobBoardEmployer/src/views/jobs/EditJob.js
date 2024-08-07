@@ -17,13 +17,15 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate, useParams } from 'react-router-dom'; // Import useParams
 import { fetchCategoryThunk } from '../../features/categorySlice'; // Import fetchCategoryThunk
+import Select from 'react-select'; // Import react-select
+
 
 const EditJob = () => {
   const { jobId } = useParams(); // Lấy jobId từ URL
   const dispatch = useDispatch();
   const navigate = useNavigate(); // Khởi tạo useNavigate
   const jobDetails = useSelector((state) => state.jobs.job); // Lấy thông tin công việc từ Redux store
-  console.log(jobDetails)
+  console.log(jobDetails);
   const [formData, setFormData] = useState({
     title: '',
     offeredSalary: '',
@@ -31,15 +33,16 @@ const EditJob = () => {
     city: '',
     responsibilities: '',
     requiredSkills: '',
-    workSchedule: 'FULL_TIME',
+    workSchedule: '',
     keySkills: '',
     position: '',
     experience: '',
     quantity: '',
     qualification: '',
-    categoryId: '',
+    categoryIds: [], // Update categoryId to categoryIds
     workingDays: '',
   });
+
 
   const [errors, setErrors] = useState({});
   const [provinces, setProvinces] = useState([]);
@@ -72,10 +75,23 @@ const EditJob = () => {
     }
   }, [dispatch, jobId]);
 
-
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setFormData(prevData => ({
+          ...prevData,
+          companyId: decodedToken.company // Set companyId from token
+        }));
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+  }, []);
   useEffect(() => {
     if (jobDetails) {
-      console.log(jobDetails)
+      console.log(jobDetails);
       setFormData({
         title: jobDetails.title || '',
         offeredSalary: jobDetails.offeredSalary || '',
@@ -83,17 +99,31 @@ const EditJob = () => {
         city: jobDetails.city || '',
         responsibilities: jobDetails.responsibilities || '',
         requiredSkills: jobDetails.requiredSkills || '',
-        workSchedule: jobDetails.workSchedule || 'FULL_TIME',
+        workSchedule: jobDetails.workSchedule || '',
         keySkills: jobDetails.keySkills || '',
         position: jobDetails.position || '',
         experience: jobDetails.experience || '',
-        quantity: jobDetails.quantity || '',
+        slot: jobDetails.slot || '',
         qualification: jobDetails.qualification || '',
-        categoryId: jobDetails.categoryId || '',
+        categoryIds: jobDetails.categoryIds || [], // Update categoryId to categoryIds
         workingDays: jobDetails.workingDays || '',
       });
     }
   }, [jobDetails]);
+
+
+
+  const handleSelectChange = (selectedOptions) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      categoryIds: selectedOptions.map(option => option.value),
+    }));
+  };
+
+  useEffect(() => {
+    console.log('Categories State:', categories);
+  }, [categories]);
+
 
   const fetchProvinces = async () => {
     try {
@@ -168,13 +198,12 @@ const EditJob = () => {
     if (!formData.description) tempErrors.description = "Description is required";
     if (!formData.city) tempErrors.city = "City is required";
     if (!formData.responsibilities) tempErrors.responsibilities = "Responsibilities are required";
-    if (!formData.requiredSkills) tempErrors.requiredSkills = "Required Skills are required";
-    if (!formData.keySkills) tempErrors.keySkills = "Key Skills are required";
     if (!formData.position) tempErrors.position = "Position is required";
     if (!formData.experience) tempErrors.experience = "Experience is required";
     if (!formData.qualification) tempErrors.qualification = "Qualification is required";
-    if (!formData.categoryId) tempErrors.categoryId = "Category is required";
-    if (!formData.quantity) tempErrors.quantity = "Quantity is required";
+    if (!formData.benefit) tempErrors.benefit = "Benefit is required";
+    if (!formData.categoryIds) tempErrors.categoryIds = "Category is required";
+    if (!formData.slot) tempErrors.slot = "Quantity is required";
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
@@ -236,145 +265,152 @@ const EditJob = () => {
                       </CCol>
                     </CRow>
                     <CRow>
-                      <CCol md={6}>
+                    <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="workSchedule" className="form-label">Work Schedule</CFormLabel>
-                          <select
-                            className="form-select"
+                          <CFormLabel htmlFor="workSchedule" className="form-label">workSchedule</CFormLabel>
+                          <CFormInput
+                            type="text"
                             id="workSchedule"
+                            placeholder="Enter workSchedule"
                             value={formData.workSchedule}
                             onChange={handleChange}
-                          >
-                            <option value="FULL_TIME">Full Time</option>
-                            <option value="PART_TIME">Part Time</option>
-                          </select>
+                            invalid={!!errors.workSchedule}
+                          />
+                          {errors.workSchedule && <div className="invalid-feedback">{errors.workSchedule}</div>}
                         </div>
                       </CCol>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="quantity" className="form-label">Quantity</CFormLabel>
+                          <CFormLabel htmlFor="slot" className="form-label">Quantity</CFormLabel>
                           <CFormInput
                             type="number"
-                            id="quantity"
+                            id="slot"
                             placeholder="Enter quantity"
-                            value={formData.quantity}
+                            value={formData.slot}
                             onChange={handleChange}
-                            invalid={!!errors.quantity}
+                            invalid={!!errors.slot}
                           />
-                          {errors.quantity && <div className="invalid-feedback">{errors.quantity}</div>}
+                          {errors.slot && <div className="invalid-feedback">{errors.slot}</div>}
                         </div>
                       </CCol>
                     </CRow>
-
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="position" className="form-label">Position</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="position"
-                        placeholder="Enter Position"
-                        value={formData.position}
-                        onChange={handleChange}
-                        invalid={!!errors.position}
-                      />
-                      {errors.position && <div className="invalid-feedback">{errors.position}</div>}
-                    </div>
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="experience" className="form-label">Experience</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="experience"
-                        placeholder="Enter Experience"
-                        value={formData.experience}
-                        onChange={handleChange}
-                        invalid={!!errors.experience}
-                      />
-                      {errors.experience && <div className="invalid-feedback">{errors.experience}</div>}
-                    </div>
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="qualification" className="form-label">Qualification</CFormLabel>
-                      <CFormInput
-                        type="text"
-                        id="qualification"
-                        placeholder="Enter Qualification"
-                        value={formData.qualification}
-                        onChange={handleChange}
-                        invalid={!!errors.qualification}
-                      />
-                      {errors.qualification && <div className="invalid-feedback">{errors.qualification}</div>}
-                    </div>
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="description" className="form-label">Job Description</CFormLabel>
-                      <ReactQuill
-                        value={formData.description}
-                        onChange={(value) => handleQuillChange('description', value)}
-                      />
-                      {errors.description && <div className="invalid-feedback">{errors.description}</div>}
-                    </div>
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="city" className="form-label">City</CFormLabel>
-                      <select
-                        className="form-select"
-                        id="city"
-                        value={formData.city}
-                        onChange={handleChange}
-                        invalid={!!errors.city}
-                      >
-                        <option value="">Select City</option>
-                        {provinces.map((province) => (
-                          <option key={province.id} value={province.name}>
-                            {province.name}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.city && <div className="invalid-feedback">{errors.city}</div>}
-                    </div>
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="responsibilities" className="form-label">Responsibilities</CFormLabel>
-                      <ReactQuill
-                        value={formData.responsibilities}
-                        onChange={(value) => handleQuillChange('responsibilities', value)}
-                      />
-                      {errors.responsibilities && <div className="invalid-feedback">{errors.responsibilities}</div>}
-                    </div>
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="requiredSkills" className="form-label">Required Skills</CFormLabel>
-                      <ReactQuill
-                        value={formData.requiredSkills}
-                        onChange={(value) => handleQuillChange('requiredSkills', value)}
-                      />
-                      {errors.requiredSkills && <div className="invalid-feedback">{errors.requiredSkills}</div>}
-                    </div>
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="keySkills" className="form-label">Key Skills</CFormLabel>
-                      <ReactQuill
-                        value={formData.keySkills}
-                        onChange={(value) => handleQuillChange('keySkills', value)}
-                      />
-                      {errors.keySkills && <div className="invalid-feedback">{errors.keySkills}</div>}
-                    </div>
-
-                    <div className="mb-3">
-                      <CFormLabel htmlFor="categoryId" className="form-label">Category</CFormLabel>
-                      <select
-                        className={`form-select ${errors.categoryId ? 'is-invalid' : ''}`}
-                        id="categoryId"
-                        value={formData.categoryId}
-                        onChange={handleChange}
-                        onBlur={validateForm}
-                      >
-                        <option key="" value="">Select Category</option>
-                        {categories.map((category) => (
-                          <option key={category.categoryId
-                          } value={category.categoryId}>
-                            {category.categoryName}
-                          </option>
-                        ))}
-                      </select>
-
-                      {errors.categoryId && <div className="invalid-feedback">{errors.categoryId}</div>}
-                      {console.log('Categories:', categories)}
-                    </div>
-                    <CButton type="submit" className="btn btn-primary">Submit</CButton>
+                    <CRow>
+                    <CCol md={6}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="categoryIds" className="form-label">Key Skills</CFormLabel>
+                          <Select
+                            isMulti
+                            name="categoryIds"
+                            options={categories.map(cat => ({ value: cat.categoryId, label: cat.categoryName }))}
+                            onChange={handleSelectChange}
+                            value={formData.categoryIds.map(id => {
+                              const category = categories.find(cat => cat.categoryId === id);
+                              return category ? { value: category.categoryId, label: category.categoryName } : null;
+                            }).filter(Boolean)}
+                          />
+                          {errors.categoryIds && <div className="invalid-feedback">{errors.categoryIds}</div>}
+                        </div>
+                      </CCol>
+                      <CCol md={6}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="position" className="form-label">Position</CFormLabel>
+                          <CFormInput
+                            type="text"
+                            id="position"
+                            placeholder="Enter position"
+                            value={formData.position}
+                            onChange={handleChange}
+                            invalid={!!errors.position}
+                          />
+                          {errors.position && <div className="invalid-feedback">{errors.position}</div>}
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol md={6}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="experience" className="form-label">Experience</CFormLabel>
+                          <CFormInput
+                            type="text"
+                            id="experience"
+                            placeholder="Enter experience"
+                            value={formData.experience}
+                            onChange={handleChange}
+                            invalid={!!errors.experience}
+                          />
+                          {errors.experience && <div className="invalid-feedback">{errors.experience}</div>}
+                        </div>
+                      </CCol>
+                      <CCol md={6}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="qualification" className="form-label">Qualification</CFormLabel>
+                          <CFormInput
+                            type="text"
+                            id="qualification"
+                            placeholder="Enter qualification"
+                            value={formData.qualification}
+                            onChange={handleChange}
+                            invalid={!!errors.qualification}
+                          />
+                          {errors.qualification && <div className="invalid-feedback">{errors.qualification}</div>}
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol md={12}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="description" className="form-label">Job Description</CFormLabel>
+                          <ReactQuill
+                            value={formData.description}
+                            onChange={(value) => handleQuillChange('description', value)}
+                          />
+                          {errors.description && <div className="invalid-feedback">{errors.description}</div>}
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol md={12}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="responsibilities" className="form-label">Job Responsibilities</CFormLabel>
+                          <ReactQuill
+                            value={formData.responsibilities}
+                            onChange={(value) => handleQuillChange('responsibilities', value)}
+                          />
+                          {errors.responsibilities && <div className="invalid-feedback">{errors.responsibilities}</div>}
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol md={12}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="benefit" className="form-label">Benefit</CFormLabel>
+                          <ReactQuill
+                            value={formData.benefit}
+                            onChange={(value) => handleQuillChange('benefit', value)}
+                          />
+                          {errors.benefit && <div className="invalid-feedback">{errors.benefit}</div>}
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CRow>
+                      <CCol md={12}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="city" className="form-label">City</CFormLabel>
+                          <select
+                            className="form-select"
+                            id="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                          >
+                            {provinces.map(province => (
+                              <option key={province.id} value={province.name}>{province.name}</option>
+                            ))}
+                          </select>
+                          {errors.city && <div className="invalid-feedback">{errors.city}</div>}
+                        </div>
+                      </CCol>
+                    </CRow>
+                    <CButton type="submit" color="primary">Submit</CButton>
                   </CForm>
                 </CCardBody>
               </CCard>

@@ -21,6 +21,7 @@ public class JobDTO {
     private String offeredSalary;
     private String description;
     private String responsibilities;
+    private String city;
     private String requiredSkills;
     private String workSchedule;
     private String keySkills;
@@ -35,6 +36,9 @@ public class JobDTO {
     private Integer profileApproved = 0;
     private Boolean isSuperHot;
     private List<Long> categoryId = new ArrayList<>();
+    private Boolean isHidden;
     private Long companyId;
     private String expire;
+    private LocalDateTime expired;
+    private Long userId;
 }

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useEffect, useRef, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   CContainer,
   CDropdown,
@@ -12,35 +12,94 @@ import {
   CHeaderToggler,
   CNavLink,
   CNavItem,
-  useColorModes,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+  CBadge,
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
 import {
   cilBell,
-  cilContrast,
-  cilEnvelopeOpen,
-  cilList,
   cilMenu,
-  cilMoon,
-  cilSun,
-} from '@coreui/icons'
-
-import { AppBreadcrumb } from './index'
-import { AppHeaderDropdown } from './header/index'
+  cilUser, // Use a different icon if cilLogOut is not available
+} from '@coreui/icons';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { Stomp } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { AppBreadcrumb } from './index';
+import { AppHeaderDropdown } from './header/index';
 
 const AppHeader = () => {
-  const headerRef = useRef()
-  const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
+  const headerRef = useRef();
+  const [notifications, setNotifications] = useState([]);
 
-  const dispatch = useDispatch()
-  const sidebarShow = useSelector((state) => state.sidebarShow)
+  const dispatch = useDispatch();
+  const sidebarShow = useSelector((state) => state.sidebarShow);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
       headerRef.current &&
-        headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0)
-    })
-  }, [])
+        headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0);
+    });
+
+    // Fetch notifications from API
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const decodedToken = jwtDecode(token);
+        const companyId = decodedToken.company;
+
+        const response = await axios.get(`http://localhost:8080/api/job-applications/company/${companyId}/new`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setNotifications(response.data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+
+    // Connect to WebSocket
+    const socket = new SockJS('http://localhost:8080/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+      stompClient.subscribe('/topic/notifications', (message) => {
+        const notification = JSON.parse(message.body);
+        setNotifications((prevNotifications) => [...prevNotifications, notification]);
+      });
+    });
+
+    return () => {
+      stompClient.disconnect();
+    };
+  }, []);
+
+  const handleNotificationClick = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      await axios.post(`http://localhost:8080/api/job-applications/${notificationId}/mark-as-read`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setNotifications(notifications.filter((notification) => notification.id !== notificationId));
+
+      // Navigate to the /cv page
+      navigate('/cv');
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    navigate('/login'); // Navigate to login page after logout
+  };
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
@@ -66,19 +125,30 @@ const AppHeader = () => {
         </CHeaderNav>
         <CHeaderNav className="ms-auto">
           <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilBell} size="lg" />
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilList} size="lg" />
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">
-              <CIcon icon={cilEnvelopeOpen} size="lg" />
-            </CNavLink>
+            <CDropdown variant="nav-item">
+              <CDropdownToggle caret={false}>
+                <CIcon icon={cilBell} size="lg" />
+                {notifications.length > 0 && (
+                  <CBadge color="danger" shape="rounded-pill">
+                    {notifications.length}
+                  </CBadge>
+                )}
+              </CDropdownToggle>
+              <CDropdownMenu>
+                {notifications.length === 0 ? (
+                  <CDropdownItem disabled>No new notifications</CDropdownItem>
+                ) : (
+                  notifications.map((notification) => (
+                    <CDropdownItem
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification.id)}
+                    >
+                      <span>You have just received a CV from the job: {notification.title}. Click to view it now.</span>
+                    </CDropdownItem>
+                  ))
+                )}
+              </CDropdownMenu>
+            </CDropdown>
           </CNavItem>
         </CHeaderNav>
         <CHeaderNav>
@@ -87,41 +157,16 @@ const AppHeader = () => {
           </li>
           <CDropdown variant="nav-item" placement="bottom-end">
             <CDropdownToggle caret={false}>
-              {colorMode === 'dark' ? (
-                <CIcon icon={cilMoon} size="lg" />
-              ) : colorMode === 'auto' ? (
-                <CIcon icon={cilContrast} size="lg" />
-              ) : (
-                <CIcon icon={cilSun} size="lg" />
-              )}
+              <CIcon icon={cilUser} size="lg" /> {/* Replace with appropriate icon */}
             </CDropdownToggle>
             <CDropdownMenu>
               <CDropdownItem
-                active={colorMode === 'light'}
                 className="d-flex align-items-center"
                 as="button"
                 type="button"
-                onClick={() => setColorMode('light')}
+                onClick={handleLogout}
               >
-                <CIcon className="me-2" icon={cilSun} size="lg" /> Light
-              </CDropdownItem>
-              <CDropdownItem
-                active={colorMode === 'dark'}
-                className="d-flex align-items-center"
-                as="button"
-                type="button"
-                onClick={() => setColorMode('dark')}
-              >
-                <CIcon className="me-2" icon={cilMoon} size="lg" /> Dark
-              </CDropdownItem>
-              <CDropdownItem
-                active={colorMode === 'auto'}
-                className="d-flex align-items-center"
-                as="button"
-                type="button"
-                onClick={() => setColorMode('auto')}
-              >
-                <CIcon className="me-2" icon={cilContrast} size="lg" /> Auto
+                <CIcon className="me-2" icon={cilUser} size="lg" /> Logout
               </CDropdownItem>
             </CDropdownMenu>
           </CDropdown>
@@ -135,7 +180,7 @@ const AppHeader = () => {
         <AppBreadcrumb />
       </CContainer>
     </CHeader>
-  )
-}
+  );
+};
 
-export default AppHeader
+export default AppHeader;
