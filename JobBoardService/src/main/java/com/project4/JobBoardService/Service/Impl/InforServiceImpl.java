@@ -50,7 +50,6 @@ public class InforServiceImpl implements InforService {
     private void updateUserDetails(User existingBlog, User updatedBlog) {
         existingBlog.setFirstName(updatedBlog.getFirstName());
         existingBlog.setLastName(updatedBlog.getLastName());
-        existingBlog.setGender(updatedBlog.getGender());
         existingBlog.setBio(updatedBlog.getBio());
         existingBlog.setNumberphone(updatedBlog.getNumberphone());
         existingBlog.setFacebook(updatedBlog.getFacebook());

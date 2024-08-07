@@ -61,7 +61,6 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
   @override
   void initState() {
     super.initState();
-    _refreshFavoriteJobs();
     _categoryFuture = fetchCategories().then((categories) {
       print('Categories fetched: $categories'); // Debug line
       return categories;
@@ -69,18 +68,13 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
       print('Error fetching categories: $error'); // Debug line
       return {}; // Provide an empty map in case of error
     });
+    _refreshFavoriteJobs();
   }
 
   Future<void> _refreshFavoriteJobs() async {
-    try {
-      final jobs = await _favoriteJobService.getFavoriteJobsForUser();
-      setState(() {
-        _favoriteJobsFuture =
-            Future.value(jobs); // Use Future.value to update immediately
-      });
-    } catch (error) {
-      print('Error refreshing favorite jobs: $error');
-    }
+    setState(() {
+      _favoriteJobsFuture = _favoriteJobService.getFavoriteJobsForUser();
+    });
   }
 
   @override
@@ -124,6 +118,8 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
                           : const SizedBox(
                               width: 50,
                               height: 50, // Placeholder if no logo
+                              child: Icon(Icons
+                                  .image_not_supported), // Hiển thị icon nếu không có logo
                             ),
                       title: Text(favoriteJob.jobTitle),
                       subtitle: Column(
@@ -161,69 +157,42 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
                               job: Job(
                                 id: favoriteJob.jobId,
                                 title: favoriteJob.jobTitle,
-                                offeredSalary: favoriteJob
-                                    .offeredSalary, // Sửa từ favoriteJob.salary thành favoriteJob.offeredSalary
+                                offeredSalary: favoriteJob.offeredSalary,
                                 description: favoriteJob.jobDescription,
-                                responsibilities: favoriteJob
-                                    .responsibilities, // Sửa từ '' thành favoriteJob.responsibilities
-                                requiredSkills: favoriteJob
-                                    .requiredSkills, // Sửa từ '' thành favoriteJob.requiredSkills
-                                workSchedule: favoriteJob
-                                    .workSchedule, // Sửa từ '' thành favoriteJob.workSchedule
-                                // keySkills: favoriteJob.skills
-                                //     .map((skill) => skill.categoryName)
-                                //     .join(
-                                //         ', '), // Chuyển đổi danh sách kỹ năng thành chuỗi
-                                position: favoriteJob
-                                    .position, // Sửa từ '' thành favoriteJob.position
-                                experience: favoriteJob
-                                    .experience, // Sửa từ '' thành favoriteJob.experience
-                                qualification: favoriteJob
-                                    .qualification, // Sửa từ '' thành favoriteJob.qualification
-                                jobType: favoriteJob
-                                    .jobType, // Sửa từ '' thành favoriteJob.jobType
-                                contractType: favoriteJob
-                                    .contractType, // Sửa từ '' thành favoriteJob.contractType
-                                benefit: favoriteJob
-                                    .benefit, // Sửa từ '' thành favoriteJob.benefit
-                                createdAt: DateTime.parse(favoriteJob
-                                    .createdAt), // Chuyển đổi từ chuỗi thành DateTime
+                                responsibilities: favoriteJob.responsibilities,
+                                requiredSkills: favoriteJob.requiredSkills,
+                                workSchedule: favoriteJob.workSchedule,
+                                position: favoriteJob.position,
+                                experience: favoriteJob.experience,
+                                qualification: favoriteJob.qualification,
+                                jobType: favoriteJob.jobType,
+                                contractType: favoriteJob.contractType,
+                                benefit: favoriteJob.benefit,
+                                createdAt:
+                                    DateTime.parse(favoriteJob.createdAt),
                                 slot: favoriteJob.slot,
-                                profileApproved:
-                                    0, // Giữ nguyên giá trị mặc định nếu không có thông tin
-                                isSuperHot:
-                                    false, // Giữ nguyên giá trị mặc định nếu không có thông tin
-
+                                profileApproved: 0,
+                                isSuperHot: false,
                                 companyId: favoriteJob.companyId,
                                 expire: favoriteJob.expire,
                                 categoryId: favoriteJob.categoryId,
                                 keySkills: '',
+                                isHidden: false,
                               ),
                               company: Company(
                                 companyId: favoriteJob.companyId,
                                 companyName: favoriteJob.companyName,
-                                logo: favoriteJob
-                                    .companyLogo, // Sửa từ '' thành favoriteJob.companyLogo
-                                websiteLink: favoriteJob
-                                    .websiteLink, // Sửa từ '' thành favoriteJob.websiteLink
-                                description: favoriteJob
-                                    .companyDescription, // Sửa từ '' thành favoriteJob.companyDescription
-                                location: favoriteJob
-                                    .location, // Sửa từ '' thành favoriteJob.location
-                                keySkills: favoriteJob
-                                    .keySkills, // Sửa từ '' thành favoriteJob.keySkills
-                                type: favoriteJob
-                                    .type, // Sửa từ '' thành favoriteJob.type
-                                companySize: favoriteJob
-                                    .companySize, // Sửa từ '' thành favoriteJob.companySize
-                                country: favoriteJob
-                                    .country, // Sửa từ '' thành favoriteJob.country
-                                countryCode: favoriteJob
-                                    .countryCode, // Sửa từ '' thành favoriteJob.countryCode
-                                workingDays: favoriteJob
-                                    .workingDays, // Sửa từ '' thành favoriteJob.workingDays
-                                membershipRequired:
-                                    false, // Giữ nguyên giá trị mặc định nếu không có thông tin
+                                logo: favoriteJob.companyLogo,
+                                websiteLink: favoriteJob.websiteLink,
+                                description: favoriteJob.companyDescription,
+                                location: favoriteJob.location,
+                                keySkills: favoriteJob.keySkills,
+                                type: favoriteJob.type,
+                                companySize: favoriteJob.companySize,
+                                country: favoriteJob.country,
+                                countryCode: favoriteJob.countryCode,
+                                workingDays: favoriteJob.workingDays,
+                                membershipRequired: false,
                               ),
                               isHtml: true,
                             ),

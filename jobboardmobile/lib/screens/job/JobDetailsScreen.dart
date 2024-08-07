@@ -193,6 +193,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           workingDays: '',
         ),
       );
+      print("favoriteJobId: ${favoriteJob.id}");
 
       if (favoriteJob.id != 0) {
         // If the job is already a favorite, delete it

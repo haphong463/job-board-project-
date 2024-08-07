@@ -79,7 +79,7 @@ class Recipient {
       username: json['username'],
       firstName: json['firstName'],
       lastName: json['lastName'],
-      gender: json['gender'],
+      gender: json['gender'] ?? "",
       imageUrl: json['imageUrl'],
       bio: json['bio'],
       isEnabled: json['isEnabled'],

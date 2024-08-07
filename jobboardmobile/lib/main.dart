@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jobboardmobile/screens/employer/chartscreen.dart';
 import 'package:jobboardmobile/screens/employer/jobscreen.dart';
 import 'package:jobboardmobile/screens/job/ApplyJobsScreen.dart';
+import 'package:jobboardmobile/screens/job/favorite_job_page.dart';
 import 'package:jobboardmobile/screens/notification/notification_screen.dart';
 import 'package:kommunicate_flutter/kommunicate_flutter.dart';
 import 'package:jobboardmobile/screens/blog/blog_screen_widget.dart';
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         '/chart': (context) => const ChartScreen(),
         '/joblist': (context) => const JobListScreen(),
         '/search': (context) => SearchPage(),
+        '/save_jobs': (context) => const FavoriteJobsScreen(),
         '/application': (context) => const MainScreen(),
         '/job': (context) => JobInfoPage(),
         '/quizzes': (context) => QuizListScreen(),
