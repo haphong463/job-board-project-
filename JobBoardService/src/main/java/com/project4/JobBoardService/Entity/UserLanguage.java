@@ -23,6 +23,9 @@ public class UserLanguage {
 
     private String languageName;
     private String proficiency;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // Getters and setters
 }

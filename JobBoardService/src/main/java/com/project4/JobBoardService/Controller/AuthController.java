@@ -5,14 +5,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.project4.JobBoardService.Config.ErrorDetails;
 import com.project4.JobBoardService.Config.TokenRefreshException;
 import com.project4.JobBoardService.DTO.UserDTO;
-import com.project4.JobBoardService.Entity.Employer;
-import com.project4.JobBoardService.Entity.RefreshToken;
-import com.project4.JobBoardService.Entity.Role;
-import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Entity.*;
 import com.project4.JobBoardService.Enum.ERole;
+import com.project4.JobBoardService.Repository.CompanyRepository;
+import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.payload.*;
 import com.project4.JobBoardService.Repository.EmployerRepository;
 import com.project4.JobBoardService.Repository.RoleRepository;
@@ -31,8 +29,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,7 +75,13 @@ public class AuthController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    CompanyRepository companyRepository;
+    @Autowired
+    private UserService userService;
     @Value("${app.googleClientID}")
     private String CLIENT_ID; // Replace with your actual client ID
 
@@ -299,30 +306,45 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid credentials! Please try again."));
+        }
+
         Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
         if (!optionalUser.isPresent()) {
             return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Invalid credentials! Please try again.")
-                    );
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid credentials! Please try again."));
         }
+
         User user = optionalUser.get();
+        // Kiểm tra tài khoản có bị vô hiệu hóa hay không
         if (!user.getIsEnabled()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Your account is deactivated."));
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse("Your account is deactivated."));
         }
-        boolean isEmployer = user.getRoles().stream()
-                .anyMatch(role -> role.getName().equals(ERole.ROLE_EMPLOYER));
-        if (!isEmployer && !user.isVerified()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Please verify your email."));
+
+        // Kiểm tra tài khoản đã được xác minh email chưa, ngoại trừ ROLE_EMPLOYER
+        if (!user.isVerified() && !user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(ERole.ROLE_EMPLOYER))) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new MessageResponse("Please verify your email."));
         }
 
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
@@ -338,9 +360,9 @@ public class AuthController {
                 userDetails.getLastName(),
                 roles
         );
-
         return ResponseEntity.ok(jwtResponse);
     }
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -395,6 +417,8 @@ public class AuthController {
         user.setIsEnabled(true);
         String verificationCode = generateVerificationCode();
         user.setVerificationCode(verificationCode);
+//        user.setVerificationCodeExpiry(LocalDateTime.now().plusDays(2));
+        user.setVerificationCodeExpiry(LocalDateTime.now().plusSeconds(30));
 
         userRepository.save(user);
         emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
@@ -404,17 +428,17 @@ public class AuthController {
 
     @PostMapping("/add-moderator")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> registerModerator(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> registerModerator(@RequestBody RegisterModeratorRequest registerRequest) {
+        SignupRequest signUpRequest = registerRequest.getSignupRequest();
+        List<String> permissions = registerRequest.getPermissions();
+
+        // Phần còn lại của logic để đăng ký moderator và cập nhật permissions
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
         User user = new User(signUpRequest.getUsername(),
@@ -441,7 +465,11 @@ public class AuthController {
         UserDTO userCreatedDto = modelMapper.map(userCreated, UserDTO.class);
         emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
 
-        return ResponseEntity.ok(userCreatedDto);
+        // Cập nhật permissions cho user
+
+
+
+        return ResponseEntity.ok(modelMapper.map(userService.updateUserPermissions(userCreated.getId(), permissions), UserDTO.class));
     }
 
     //Employer
@@ -453,6 +481,7 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
+        // Tạo đối tượng Employer nhưng chưa lưu thông tin công ty
         Employer employer = new Employer();
         employer.setName(signUpRequest.getName());
         employer.setTitle(signUpRequest.getTitle());
@@ -460,23 +489,24 @@ public class AuthController {
         employer.setPhoneNumber(signUpRequest.getPhoneNumber());
         employer.setCompanyName(signUpRequest.getCompanyName());
         employer.setCompanyAddress(signUpRequest.getCompanyAddress());
-        employer.setCompanyWebsite(signUpRequest.getCompanyWebsite());
+        employer.setWebsiteLink(signUpRequest.getCompanyWebsite());
+        employer.setVerified(false);
+        employer.setApproved(false);
 
+        // Tạo mã xác thực
         String verificationCode = UUID.randomUUID().toString();
         employer.setVerificationCode(verificationCode);
-        employer.setVerified(false);
-        employer.setApproved(false); // Employer chưa được phê duyệt
 
+        // Lưu nhà tuyển dụng chưa có công ty
         employerRepository.save(employer);
-
 
         return ResponseEntity.ok(new MessageResponse("Employer registered successfully! Please check your email for verification instructions."));
     }
 
+
     @PostMapping("/signout")
     public ResponseEntity<?> signOutUser(@RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
-
         refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshToken -> {
                     SecurityContextHolder.clearContext();
@@ -562,6 +592,14 @@ public class AuthController {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             String latestVerificationCode = user.getVerificationCode();
+            LocalDateTime verificationCodeExpiry = user.getVerificationCodeExpiry();
+
+            if (verificationCodeExpiry != null && LocalDateTime.now().isAfter(verificationCodeExpiry)) {
+                userRepository.delete(user);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Verification code has expired. Please register again.");
+                return;
+            }
+
             if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
                 user.setVerified(true);
                 userRepository.save(user);
@@ -627,6 +665,7 @@ public class AuthController {
         user.setLastName(employer.getTitle());
         user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
         user.setIsEnabled(true);
+        user.setCompany(employer.getCompany());  // Set the company reference
 
         Set<Role> roles = new HashSet<>();
         Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)

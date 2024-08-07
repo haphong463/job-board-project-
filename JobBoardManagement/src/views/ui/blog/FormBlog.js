@@ -134,8 +134,10 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
       setValue("visibility", isEdit.visibility);
       setValue("citation", isEdit.citation);
 
-      setTags(isEdit.hashtags.map((item) => item.name));
-      setValue("hashtags", tags);
+      const tagEdit = isEdit.hashtags.map((item) => item.name);
+
+      setTags(tagEdit);
+      setValue("hashtags", tagEdit);
     }
   }, [isEdit, setValue]);
 

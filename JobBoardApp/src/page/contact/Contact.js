@@ -6,7 +6,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./contact.css";
 
-export const Contact = () => {
+export const Contact = () =>
+{
   const dispatch = useDispatch();
   const contactState = useSelector((state) => state.contacts);
 
@@ -28,7 +29,8 @@ export const Contact = () => {
     message: Yup.string().required("Message is required"),
   });
 
-  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+  const handleSubmit = async (values, { setSubmitting, resetForm }) =>
+  {
     await dispatch(postContactThunk(values));
     setSubmitting(false);
     resetForm();
@@ -109,7 +111,7 @@ export const Contact = () => {
                             Email
                           </label>
                           <Field
-                            type="email"
+                            type="text"
                             id="email"
                             name="email"
                             className="form-control"

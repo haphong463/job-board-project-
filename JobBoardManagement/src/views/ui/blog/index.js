@@ -18,6 +18,7 @@ import {
   Label,
   Select,
   Spinner,
+  CardBody,
 } from "reactstrap";
 import { CSVLink } from "react-csv";
 import Form from "./FormBlog";
@@ -26,25 +27,27 @@ import {
   searchBlogs,
   deleteBlog,
   getHashTags,
+  updateIsArchiveStatusThunk,
 } from "../../../features/blogSlice";
 import debounce from "lodash.debounce";
 import { FaFileExcel } from "react-icons/fa";
 import "./style.css";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import Swal from "sweetalert2";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { getExcelData } from "../../../services/blog_service";
+import { hasPermission } from "../../../utils/functions/hasPermission";
+const isArchive = 0;
 
 export function Blog(props) {
   const dispatch = useDispatch();
   const blogData = useSelector((state) => state.blogs.blogs);
-  const excelData = useSelector((state) => state.blogs.exportExcel);
   const totalPages = useSelector((state) => state.blogs.totalPages);
   const status = useSelector((state) => state.blogs.status);
   const blogCategoryData = useSelector(
     (state) => state.blogCategory.blogCategory
   );
-
+  const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedVisibility, setSelectedVisibility] = useState(2); // Default to 'All'
@@ -52,10 +55,11 @@ export function Blog(props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [isEdit, setIsEdit] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]); // New state for selected rows
   const encodedCategoryValue = encodeURIComponent(selectedCategory);
 
   const debouncedSearch = useCallback(
-    debounce((query, type, visibility, page, size) => {
+    debounce((query, type, visibility, archive, page, size) => {
       dispatch(
         searchBlogs({
           query,
@@ -63,6 +67,7 @@ export function Blog(props) {
           page,
           size,
           visibility,
+          archive,
         })
       );
     }, 300),
@@ -74,6 +79,7 @@ export function Blog(props) {
       searchTerm,
       encodedCategoryValue,
       selectedVisibility,
+      isArchive,
       currentPage,
       pageSize
     );
@@ -141,12 +147,56 @@ export function Blog(props) {
     setCurrentPage(page - 1);
   };
 
+  const handleRowSelected = (selectedRows) => {
+    setSelectedRows(selectedRows.selectedRows);
+  };
+
+  const handleArchiveSelected = () => {
+    const selectedIds = selectedRows.map((row) => row.id);
+    if (selectedIds.length === 0) {
+      Swal.fire(
+        "Warning",
+        "Please select at least one blog to archive.",
+        "warning"
+      );
+      return;
+    }
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to archive the selected blogs.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, archive it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(
+          updateIsArchiveStatusThunk({
+            selectedIds,
+            status: 1,
+          })
+        ).then((res) => {
+          if (res.meta.requestStatus === "fulfilled") {
+            Swal.fire(
+              "Archived!",
+              "The selected blogs have been archived.",
+              "success"
+            );
+            setSelectedRows([]); // Clear selected rows
+            navigate("/jobportal/blog/archive");
+          }
+        });
+      }
+    });
+  };
+
   const columns = [
     {
       name: "Title",
       selector: (row) => row.title,
       width: "300px",
-
       sortable: true,
       cell: (row) => (
         <div
@@ -164,9 +214,6 @@ export function Blog(props) {
       selector: (row) => row.categories.length,
       sortable: true,
       cell: (row) => {
-        // const displayCategories = row.categories.slice(0, 2);
-        // const hasMore = row.categories.length > 2;
-
         return (
           <div>
             {row.categories.map((item) => (
@@ -178,7 +225,6 @@ export function Blog(props) {
                 {item.name}
               </Badge>
             ))}
-            {/* {hasMore && <span>...</span>} */}
           </div>
         );
       },
@@ -198,51 +244,49 @@ export function Blog(props) {
     {
       name: "Posted By",
       width: "300px",
-      cell: (row) => <div>{row.user.email}</div>,
+      cell: (row) => (
+        <div>
+          {row.user.firstName} {row.user.lastName}
+        </div>
+      ),
     },
-
     {
       name: "Actions",
-      cell: (row) =>
-        user.sub === row.user.username ? (
-          <Dropdown
-            isOpen={dropdownOpen[row.id]}
-            toggle={() => toggleDropdown(row.id)}
-          >
-            <DropdownToggle caret color="info">
-              Actions
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem onClick={() => handleEdit(row.id)}>
-                Edit
-              </DropdownItem>
-              <DropdownItem onClick={() => handleDelete(row.id)}>
-                Delete
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-        ) : null,
+      cell: (row) => (
+        <Dropdown
+          isOpen={dropdownOpen[row.id]}
+          toggle={() => toggleDropdown(row.id)}
+        >
+          <DropdownToggle caret color="info">
+            Actions
+          </DropdownToggle>
+          <DropdownMenu>
+            <DropdownItem onClick={() => handleEdit(row.id)}>Edit</DropdownItem>
+            <DropdownItem onClick={() => handleDelete(row.id)}>
+              Delete
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      ),
     },
   ];
 
   const customStyles = {
     rows: {
       style: {
-        margin: "15px 0", // Adjust the margin to create spacing between rows
+        padding: "15px 0",
       },
     },
   };
   const user = useSelector((state) => state.auth.user);
-  const roles = user?.role.map((item) => item.authority) || [];
-  const permissions = user?.permission.map((item) => item.name) || [];
-  const isModerator = roles.includes("ROLE_MODERATOR");
-  const hasManageBlogPermission = permissions.includes("MANAGE_BLOG");
 
   useEffect(() => {
     dispatch(getHashTags());
   }, []);
 
-  if (isModerator && !hasManageBlogPermission) {
+  if (
+    hasPermission(user.role, user.permission, "ROLE_MODERATOR", "MANAGE_BLOG")
+  ) {
     return <Navigate to="/" />;
   }
 
@@ -252,10 +296,12 @@ export function Blog(props) {
         <h4>Blog List</h4>
         <div className="d-flex  p-3 gap-3">
           <Form isEdit={isEdit} setIsEdit={setIsEdit} />
-
           <Button color="success" onClick={getExcelData}>
             <FaFileExcel />
             Export CSV
+          </Button>
+          <Button color="warning" onClick={handleArchiveSelected}>
+            Archive Selected
           </Button>
         </div>
       </div>
@@ -271,57 +317,55 @@ export function Blog(props) {
           />
           <label htmlFor="floatingSearch">Search</label>
         </div>
-
         <div className="form-floating" style={{ flex: 1, maxWidth: "200px" }}>
           <Input
             type="select"
             name="categorySelect"
-            id="floatingCategorySelect"
-            onChange={handleCategoryChange}
+            id="categorySelect"
             value={selectedCategory}
-            className="form-select"
+            onChange={handleCategoryChange}
+            className="form-control"
           >
-            <option value="">All</option>
+            <option value="ALL">All</option>
             {blogCategoryData.map((category) => (
               <option key={category.id} value={category.name}>
                 {category.name}
               </option>
             ))}
           </Input>
-          <label htmlFor="floatingCategorySelect">Category</label>
+          <label htmlFor="categorySelect">Category</label>
         </div>
-
         <div className="form-floating" style={{ flex: 1, maxWidth: "200px" }}>
           <Input
             type="select"
             name="visibilitySelect"
-            id="floatingVisibilitySelect"
-            onChange={handleVisibilityChange}
+            id="visibilitySelect"
             value={selectedVisibility}
-            className="form-select"
+            onChange={handleVisibilityChange}
+            className="form-control"
           >
             <option value={2}>All</option>
             <option value={0}>Show</option>
             <option value={1}>Hide</option>
           </Input>
-          <label htmlFor="floatingVisibilitySelect">Visibility</label>
+          <label htmlFor="visibilitySelect">Visibility</label>
         </div>
       </div>
-      <DataTable
-        columns={columns}
-        data={blogData}
-        customStyles={customStyles}
-        pagination
-        paginationPerPage={pageSize}
-        paginationRowsPerPageOptions={[5, 10, 15]}
-        paginationTotalRows={totalPages * pageSize}
-        paginationServer
-        onChangePage={(page) => setCurrentPage(page - 1)}
-        onChangeRowsPerPage={handlePerRowsChange}
-        responsive
-        progressPending={status === "loading"}
-        progressComponent={<Spinner />}
-      />
+      <CardBody>
+        <DataTable
+          columns={columns}
+          data={blogData}
+          pagination
+          paginationServer
+          paginationTotalRows={totalPages * pageSize}
+          onChangeRowsPerPage={handlePerRowsChange}
+          onChangePage={(page) => setCurrentPage(page - 1)}
+          progressPending={status === "loading"}
+          selectableRows
+          onSelectedRowsChange={handleRowSelected}
+          customStyles={customStyles} // Apply the customStyles here
+        />
+      </CardBody>
     </Card>
   );
 }

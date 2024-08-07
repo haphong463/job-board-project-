@@ -7,6 +7,7 @@ import com.project4.JobBoardService.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,14 @@ public class ReviewController {
         this.companyService = companyService;
     }
 
-    @GetMapping
+    @GetMapping()
     public ResponseEntity<List<ReviewDTO>> getAllReviews(@PathVariable("companyId") Long companyId) {
         List<ReviewDTO> reviews = reviewService.getAllReviews(companyId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
-    @PostMapping
+
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PostMapping()
     public ResponseEntity<?> addReview(@PathVariable Long companyId,
                                        @RequestBody ReviewDTO reviewDTO,
                                        @AuthenticationPrincipal UserDetails userDetails) {
@@ -49,22 +52,38 @@ public class ReviewController {
         }
     }
 
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/{reviewId}")
     public ResponseEntity<?> getReview(@PathVariable Long companyId,
                                        @PathVariable Long reviewId,
                                        @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
 
-        ReviewDTO reviewDTO = reviewService.getReview(companyId, reviewId, username);
-        if (reviewDTO != null) {
-            return ResponseEntity.ok(reviewDTO);
+        Review review = reviewService.getReview(companyId, reviewId, username);
+        if (review != null) {
+            return ResponseEntity.ok(review);
         } else {
             return ResponseEntity.badRequest().body("Review not found.");
         }
     }
 
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PutMapping("/{reviewId}")
+    public ResponseEntity<?> updateReview(@PathVariable Long companyId,
+                                          @PathVariable Long reviewId,
+                                          @RequestBody Review updatedReview,
+                                          @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
 
+        boolean success = reviewService.updateReview( companyId,  reviewId,  username,  updatedReview);
+        if (success) {
+            return ResponseEntity.ok("Review updated successfully!");
+        } else {
+            return ResponseEntity.badRequest().body("Failed to update review. Company or user not found.");
+        }
+    }
 
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/hasReviewed")
     public ResponseEntity<?> hasUserReviewedCompany(@PathVariable Long companyId,
                                                     @AuthenticationPrincipal UserDetails userDetails) {
@@ -99,5 +118,4 @@ public class ReviewController {
             return ResponseEntity.badRequest().body("Failed to unlike review. Review not found or not liked.");
         }
     }
-
 }

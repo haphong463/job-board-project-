@@ -9,10 +9,17 @@ const containsForbiddenWord = (value) => {
 
 // Define validation schema
 export const signUpSchema = yup.object().shape({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
+  firstName: yup
+    .string()
+    .max(50, "First name cannot exceed 50 characters")
+    .required("First name is required"),
+  lastName: yup
+    .string()
+    .max(50, "Last name cannot exceed 50 characters")
+    .required("Last name is required"),
   username: yup
     .string()
+    .max(50, "Username cannot exceed 50 characters")
     .test(
       "forbidden-words",
       "Username contains forbidden words",
@@ -23,10 +30,10 @@ export const signUpSchema = yup.object().shape({
       "Username cannot contain spaces",
       (value) => !/\s/.test(value)
     )
-
     .required("Username is required"),
   email: yup
     .string()
+    .max(50, "Email cannot exceed 50 characters")
     .email("Invalid email")
     .test(
       "forbidden-words",
@@ -36,6 +43,7 @@ export const signUpSchema = yup.object().shape({
     .required("Email is required"),
   password: yup
     .string()
+    .max(120, "Password cannot exceed 120 characters")
     .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
   confirmPassword: yup

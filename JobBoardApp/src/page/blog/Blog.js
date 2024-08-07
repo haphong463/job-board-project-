@@ -12,6 +12,9 @@ import "./style.css";
 import { FaHome } from "react-icons/fa";
 import { BlogPagination } from "./BlogPagination";
 import { Spinner } from "react-bootstrap";
+import { PopularBlogCard } from "./PopularBlogCard";
+import { BlogCard } from "./BlogCard";
+import { ViewedBlogCard } from "./ViewedBlogCard";
 
 export const Blog = () => {
   const dispatch = useDispatch();
@@ -58,6 +61,8 @@ export const Blog = () => {
   useEffect(() => {
     dispatch(fetchBlogPopular());
   }, [dispatch]);
+
+  const viewedBlogs = JSON.parse(localStorage.getItem("viewedBlogs")) || [];
 
   const paginate = (pageNumber) => {
     if (pageNumber >= 0 && pageNumber < totalPages) {
@@ -124,7 +129,7 @@ export const Blog = () => {
             </div>
           </div>
         </motion.section>
-        <section className="section is-medium">
+        <section className="section is-small">
           <div className="container">
             <h3 className="title is-3 mb-4">
               #{order === "desc" ? "Newest" : "Oldest"}
@@ -133,65 +138,7 @@ export const Blog = () => {
               <React.Fragment>
                 <div className="row mb-5">
                   {blogs.map((blog) => (
-                    <motion.div
-                      key={blog.id}
-                      className="mb-5 card-container col-lg-3 col-md-6 col-sm-12"
-                      whileHover={{ y: -10 }}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div className="card h-100">
-                        <NavLink to={`/blog/${blog.slug}`}>
-                          <img
-                            src={blog.thumbnailUrl}
-                            alt={blog.title}
-                            className="rounded mb-4 card-img-top"
-                            style={{
-                              height: "auto",
-                              width: "100%",
-                            }}
-                          />
-                        </NavLink>
-                        <div className="card-body d-flex flex-column">
-                          <h6 className="card-title text-truncate-two title is-6">
-                            <NavLink
-                              to={`/blog/${blog.slug}`}
-                              className="text-black"
-                            >
-                              {blog.title}
-                            </NavLink>
-                          </h6>
-                          <div>
-                            {blog.categories.slice(0, 3).map((item, index) => (
-                              <Badge
-                                key={item.id}
-                                color="primary"
-                                style={{
-                                  color: "white",
-                                  marginRight:
-                                    index !== blog.categories.length - 1
-                                      ? "10px"
-                                      : "0px",
-                                }}
-                              >
-                                {item.name}
-                              </Badge>
-                            ))}
-                          </div>
-                          <div className="card-text mb-4 flex-grow-1 text-truncate-multiline">
-                            {blog.citation}
-                          </div>
-                          <div>
-                            {moment(blog.createdAt).format("MMMM DD, YYYY")}{" "}
-                            <span className="mx-2 slash">•</span>
-                            <span className="mx-2">
-                              {`${calculateReadingTime(blog.content)} min`}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
+                    <BlogCard key={blog.id} blog={blog} />
                   ))}
                 </div>
 
@@ -215,7 +162,7 @@ export const Blog = () => {
                   </p>
                   <button
                     className="btn btn-primary mt-3 "
-                    onClick={() => navigate("/")} // Or useHistory() for react-router
+                    onClick={() => navigate("/")}
                   >
                     <div className="d-flex justify-content-center align-items-center">
                       <FaHome className="mr-2" /> Go back to home
@@ -236,75 +183,27 @@ export const Blog = () => {
               <Spinner />
             </div>
           )}
-
           <div className="container">
             <h3 className="title is-3 mb-4">#Most view</h3>
             {status === "succeeded" && popular.length > 0 && (
               <div className="row mb-5">
                 {popular.map((blog) => (
-                  <motion.div
-                    key={blog.id}
-                    className="mb-5 card-container col-lg-3 col-md-6 col-sm-12"
-                    whileHover={{ y: -10 }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <div className="card h-100">
-                      <NavLink to={`/blog/${blog.slug}`}>
-                        <img
-                          src={blog.thumbnailUrl}
-                          alt={blog.title}
-                          className="rounded mb-4 card-img-top"
-                          style={{
-                            height: "auto",
-                            width: "100%",
-                          }}
-                        />
-                      </NavLink>
-                      <div className="card-body d-flex flex-column">
-                        <h6 className="card-title text-truncate-two title is-6">
-                          <NavLink
-                            to={`/blog/${blog.slug}`}
-                            className="text-black"
-                          >
-                            {blog.title}
-                          </NavLink>
-                        </h6>
-                        <div>
-                          {blog.categories.slice(0, 3).map((item, index) => (
-                            <Badge
-                              key={item.id}
-                              color="primary"
-                              style={{
-                                color: "white",
-                                marginRight:
-                                  index !== blog.categories.length - 1
-                                    ? "10px"
-                                    : "0px",
-                              }}
-                            >
-                              {item.name}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="card-text mb-4 flex-grow-1 text-truncate-multiline">
-                          {blog.citation}
-                        </div>
-                        <div>
-                          {moment(blog.createdAt).format("MMMM DD, YYYY")}{" "}
-                          <span className="mx-2 slash">•</span>
-                          <span className="mx-2">
-                            {`${calculateReadingTime(blog.content)} min`}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                  <PopularBlogCard key={blog.id} blog={blog} />
                 ))}
               </div>
             )}
           </div>
+
+          {status === "succeeded" && viewedBlogs.length > 0 && (
+            <div className="container">
+              <h3 className="title is-3 mb-4">#Recently viewed blogs</h3>
+              <div className="row mb-5">
+                {viewedBlogs.map((blog) => (
+                  <ViewedBlogCard key={blog.id} blog={blog} />
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       </>
     </GlobalLayoutUser>

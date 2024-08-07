@@ -8,24 +8,26 @@ class NotificationModel {
   bool read;
   String type;
 
-  NotificationModel(
-      {required this.id,
-      required this.sender,
-      required this.recipient,
-      required this.message,
-      required this.url,
-      required this.read,
-      required this.type});
+  NotificationModel({
+    required this.id,
+    required this.sender,
+    required this.recipient,
+    required this.message,
+    required this.url,
+    required this.read,
+    required this.type,
+  });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-        id: json['id'],
-        sender: Recipient.fromJson(json['sender']),
-        recipient: Recipient.fromJson(json['recipient']),
-        message: json['message'],
-        url: json['url'],
-        read: json['read'],
-        type: json['type']);
+      id: json['id'],
+      sender: Recipient.fromJson(json['sender']),
+      recipient: Recipient.fromJson(json['recipient']),
+      message: json['message'],
+      url: json['url'],
+      read: json['read'],
+      type: json['type'],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -36,7 +38,7 @@ class NotificationModel {
       'message': message,
       'url': url,
       'read': read,
-      'type': type
+      'type': type,
     };
   }
 }
@@ -48,8 +50,8 @@ class Recipient {
   String firstName;
   String lastName;
   String gender;
-  String imageUrl;
-  String bio;
+  String? imageUrl;
+  String? bio;
   bool isEnabled;
   List<Role> roles;
 
@@ -60,8 +62,8 @@ class Recipient {
     required this.firstName,
     required this.lastName,
     required this.gender,
-    required this.imageUrl,
-    required this.bio,
+    this.imageUrl,
+    this.bio,
     required this.isEnabled,
     required this.roles,
   });

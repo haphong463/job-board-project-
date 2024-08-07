@@ -1,22 +1,23 @@
 package com.project4.JobBoardService.Service.Impl;
-
-import com.project4.JobBoardService.Entity.ReviewLike;
-import com.project4.JobBoardService.Repository.ReviewLikeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.project4.JobBoardService.DTO.CompanyDTO;
 import com.project4.JobBoardService.DTO.ReviewDTO;
 import com.project4.JobBoardService.Entity.Company;
 import com.project4.JobBoardService.Entity.Review;
+import com.project4.JobBoardService.Entity.ReviewLike;
 import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Repository.ReviewLikeRepository;
 import com.project4.JobBoardService.Repository.ReviewRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
+import com.project4.JobBoardService.Service.BannedWordService;
 import com.project4.JobBoardService.Service.CompanyService;
 import com.project4.JobBoardService.Service.ReviewService;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,14 +25,16 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final CompanyService companyService;
+    private final BannedWordService bannedWordService;
     private final UserRepository userRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     private final ModelMapper modelMapper;
 
-    private final ReviewLikeRepository reviewLikeRepository;
     @Autowired
-    public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService, UserRepository userRepository, ModelMapper modelMapper, ReviewLikeRepository reviewLikeRepository) {
+    public ReviewServiceImpl(ReviewRepository reviewRepository, CompanyService companyService, UserRepository userRepository, BannedWordService bannedWordService, ModelMapper modelMapper, ReviewLikeRepository reviewLikeRepository) {
         this.reviewRepository = reviewRepository;
         this.companyService = companyService;
+        this.bannedWordService = bannedWordService;
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.reviewLikeRepository = reviewLikeRepository;
@@ -54,37 +57,118 @@ public class ReviewServiceImpl implements ReviewService {
             Company company = companyOptional.get();
             User user = userOptional.get();
 
+            // Combine words from title and description into a single list
+            List<String> wordsToCheck = Arrays.asList(
+                    reviewDTO.getTitle().split("\\s+"),
+                    reviewDTO.getDescription().split("\\s+")
+            ).stream().flatMap(Arrays::stream).distinct().collect(Collectors.toList());
+
+            // Filter banned words from the combined list
+            List<String> bannedWords = bannedWordService.filterBannedWords(wordsToCheck);
+
+            System.out.println("Banned words found: " + bannedWords); // Debugging log
+
+            String cleanTitle = reviewDTO.getTitle();
+            String cleanDescription = reviewDTO.getDescription();
+
+            // Flag to check if any banned words are found
+            boolean hasBannedWords = false;
+
+            // Replace banned words with empty strings in title and description
+            for (String bannedWord : bannedWords) {
+                String regex = "(?i)\\b" + Pattern.quote(bannedWord) + "\\b";
+                if (cleanTitle.matches(".*" + regex + ".*")) {
+                    hasBannedWords = true;
+                    cleanTitle = cleanTitle.replaceAll(regex, "");
+                }
+                if (cleanDescription.matches(".*" + regex + ".*")) {
+                    hasBannedWords = true;
+                    cleanDescription = cleanDescription.replaceAll(regex, "");
+                }
+            }
+
+            // Clean up extra spaces
+            cleanTitle = cleanTitle.trim().replaceAll(" +", " ");
+            cleanDescription = cleanDescription.trim().replaceAll(" +", " ");
+
+            // Only save the review if there are banned words (or if the review is clean)
             Review review = new Review();
-            review.setTitle(reviewDTO.getTitle());
-            review.setDescription(reviewDTO.getDescription());
+            review.setTitle(cleanTitle); // Remove leading/trailing spaces if any
+            review.setDescription(cleanDescription); // Remove leading/trailing spaces if any
             review.setRating(reviewDTO.getRating());
             review.setCompany(company);
             review.setUser(user);
 
             Review savedReview = reviewRepository.save(review);
-
             return convertToDTO(savedReview); // Return the DTO
         }
-        return null; // Or throw an exception if needed
+        return null;
     }
 
     @Override
-    public ReviewDTO getReview(Long companyId, Long reviewId, String username) {
+    public Review getReview(Long companyId, Long reviewId, String username) {
         Optional<CompanyDTO> companyOptional = companyService.getCompanyById(companyId);
         Optional<User> userOptional = userRepository.findByUsername(username);
 
         if (companyOptional.isPresent() && userOptional.isPresent()) {
             List<Review> reviews = reviewRepository.findByCompany_CompanyId(companyId);
-            Review review = reviews.stream()
-                    .filter(r -> r.getId().equals(reviewId) && r.getUser().equals(userOptional.get()))
+            return reviews.stream()
+                    .filter(review -> review.getId().equals(reviewId) && review.getUser().equals(userOptional.get()))
                     .findFirst()
                     .orElse(null);
-            return review != null ? convertToDTO(review) : null;
         }
         return null;
     }
 
+    @Override
+    public boolean updateReview(Long companyId, Long reviewId, String username, Review updatedReview) {
+        Optional<Company> companyOptional = companyService.getCompanyById(companyId).map(this::convertCompanyToEntity);
+        Optional<User> userOptional = userRepository.findByUsername(username);
 
+        if (companyOptional.isPresent() && userOptional.isPresent()) {
+            Company company = companyOptional.get(); // Unwrap the Optional
+            User user = userOptional.get(); // Unwrap the Optional
+
+            updatedReview.setCompany(company);
+            updatedReview.setUser(user);
+            updatedReview.setId(reviewId);
+            reviewRepository.save(updatedReview);
+
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Company convertCompanyToEntity(CompanyDTO companyDTO) {
+        Company company = new Company();
+        company.setCompanyId(companyDTO.getCompanyId());
+        company.setCompanyName(companyDTO.getCompanyName());
+        company.setLogo(companyDTO.getLogo());
+        company.setWebsiteLink(companyDTO.getWebsiteLink());
+        company.setDescription(companyDTO.getDescription());
+        company.setLocation(companyDTO.getLocation());
+        company.setType(companyDTO.getType());
+        return company;
+    }
+
+    private ReviewDTO convertToDTO(Review review) {
+        ReviewDTO reviewDTO = modelMapper.map(review, ReviewDTO.class);
+        reviewDTO.setId(review.getId());
+        reviewDTO.setUsername(review.getUser().getUsername());
+        reviewDTO.setImageUrl(review.getUser().getImageUrl());
+        reviewDTO.setLikeCount(review.getLikeCount());
+        return reviewDTO;
+    }
+
+    public boolean hasUserReviewedCompany(Long companyId, String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return !reviewRepository.findByCompany_CompanyIdAndUserId(companyId, user.getId()).isEmpty();
+        }
+        return false;
+    }
 
     @Override
     public boolean likeReview(Long companyId, Long reviewId, String username) {
@@ -124,40 +208,4 @@ public class ReviewServiceImpl implements ReviewService {
         }
         return false;
     }
-
-
-    @Override
-    public boolean hasUserReviewedCompany(Long companyId, String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            // Check if the list is empty or not
-            return !reviewRepository.findByCompany_CompanyIdAndUserId(companyId, user.getId()).isEmpty();
-        }
-        return false;
-    }
-    private ReviewDTO convertToDTO(Review review) {
-        ReviewDTO reviewDTO = modelMapper.map(review, ReviewDTO.class);
-        reviewDTO.setId(review.getId());
-        reviewDTO.setUsername(review.getUser().getUsername());
-        reviewDTO.setImageUrl(review.getUser().getImageUrl());
-        reviewDTO.setLikeCount(review.getLikeCount());
-        return reviewDTO;
-    }
-
-    private Company convertCompanyToEntity(CompanyDTO companyDTO) {
-        Company company = new Company();
-        company.setCompanyId(companyDTO.getCompanyId());
-        company.setCompanyName(companyDTO.getCompanyName());
-        company.setLogo(companyDTO.getLogo());
-        company.setWebsiteLink(companyDTO.getWebsiteLink());
-        company.setDescription(companyDTO.getDescription());
-        company.setLocation(companyDTO.getLocation());
-        company.setType(companyDTO.getType());
-        return company;
-    }
-
-
-
-
 }

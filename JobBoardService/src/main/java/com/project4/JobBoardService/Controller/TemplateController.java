@@ -14,8 +14,10 @@ import java.util.zip.GZIPOutputStream;
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.io.source.ByteArrayOutputStream;
+import com.project4.JobBoardService.Config.Annotation.CheckPermission;
 import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.Entity.PdfDocument;
+import com.project4.JobBoardService.Enum.EPermissions;
 import com.project4.JobBoardService.Repository.PdfDocumentRepository;
 import com.project4.JobBoardService.Service.CloudflareConfig;
 //import com.project4.JobBoardService.Util.PdfUtil;
@@ -24,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -67,6 +70,8 @@ public class TemplateController {
 		this.templateEngine = templateEngine;
 
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
 	@PatchMapping("/disable/{id}")
 	public ResponseEntity<String> disableTemplate(@PathVariable Long id) {
 		try {
@@ -83,6 +88,10 @@ public class TemplateController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
 		}
 	}
+
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
+
 	@PatchMapping("/un_disable/{id}")
 	public ResponseEntity<String> undisableTemplate(@PathVariable Long id) {
 		try {
@@ -99,11 +108,16 @@ public class TemplateController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
 		}
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
+
 	@GetMapping
 	public ResponseEntity<List<Template>> getAllTemplate() {
 		List<Template> templates = templateRepository.findAll();
 		return ResponseEntity.ok(templates);
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Template> getTemplateById(@PathVariable Long id) {
@@ -114,6 +128,8 @@ public class TemplateController {
 			return ResponseEntity.notFound().build();
 		}
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
 
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Map<String, String>> deleteTemplate(@PathVariable("id") Long id) {
@@ -131,6 +147,8 @@ public class TemplateController {
 
 		return ResponseEntity.ok(response);
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
 
 	@PutMapping("/update/{id}")
 	public Mono<ResponseEntity<Map<String, String>>> updateTemplate(@PathVariable("id") Long id,
@@ -182,6 +200,8 @@ public class TemplateController {
 		}
 	}
 
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
 
 	@PostMapping("/create")
 	public ResponseEntity<Map<String, String>> createTemplate(@ModelAttribute("template") Template template,
@@ -206,6 +226,8 @@ public class TemplateController {
 
 		return ResponseEntity.ok(response);
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+	@CheckPermission(EPermissions.MANAGE_TEMPLATE)
 
 	@PostMapping("/upload")
 	public Mono<ResponseEntity<Map<String, String>>> uploadTemplate(@RequestParam("file") MultipartFile file,
@@ -230,7 +252,7 @@ public class TemplateController {
 				});
 	}
 
-
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@GetMapping("/selected")
 	public ResponseEntity<String> getTemplateContent(@RequestParam Long templateId) {
 		// Find the template by templateId
@@ -246,12 +268,12 @@ public class TemplateController {
 
 		return ResponseEntity.ok(response.getBody());
 	}
-
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@GetMapping("/list-template")
 	public List<Template> listTemplates() {
 		return templateRepository.findAll();
 	}
-
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@PutMapping("/select-template")
 	public ResponseEntity selectTemplate(@RequestParam("userId") Long userId,
 										 @RequestParam("cvId") Long cvId,
@@ -286,9 +308,9 @@ public class TemplateController {
 			return ResponseEntity.badRequest().body("Failed to update UserCV: " + e.getMessage());
 		}
 	}
-
-	@GetMapping("/review-template/{key}/{userId}/{cvId}/{templateId}")
-	public Mono<ResponseEntity<String>> getTemplate(@PathVariable("key") String key, @PathVariable("userId") Long userId, @PathVariable("cvId") Long cvId, @PathVariable("templateId") Long templateId) {
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
+	@GetMapping("/review-template/{key}/{userId}/{cvId}")
+	public Mono<ResponseEntity<String>> getTemplate(@PathVariable("key") String key, @PathVariable("userId") Long userId, @PathVariable("cvId") Long cvId) {
 		return Mono.fromSupplier(() -> userCvRepository.findByCvIdAndUserId(cvId, userId))
 				.flatMap(userCV -> {
 					if (userCV == null) {
@@ -310,7 +332,7 @@ public class TemplateController {
 									.body("Error retrieving template: " + e.getMessage())));
 				});
 	}
-
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@GetMapping("/generate/{userId}/{cvId}")
 	public Mono<ResponseEntity<byte[]>> generatePDF(@PathVariable Long userId, @PathVariable Long cvId) {
 		// Log input parameters for debugging
@@ -361,7 +383,7 @@ public class TemplateController {
 							.body(("Error generating PDF: " + e.getMessage()).getBytes()));
 				});
 	}
-
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@PostMapping("/pdf-document/save/{userId}")
 	public ResponseEntity<String> savePdfDocument(
 			@PathVariable Long userId,
@@ -383,7 +405,7 @@ public class TemplateController {
 					.body("Error saving PDF document: " + e.getMessage());
 		}
 	}
-
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@GetMapping("/list-document/{userId}")
 	public ResponseEntity<List<PdfDocument>> getPdfsByUserId(@PathVariable Long userId) {
 		List<PdfDocument> pdfs = pdfDocumentRepository.findByUserId(userId);
@@ -392,10 +414,12 @@ public class TemplateController {
 		}
 		return ResponseEntity.ok(pdfs);
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@GetMapping("/count/{userId}")
 	public int countPdfDocumentsByUserId(@PathVariable Long userId) {
 		return pdfDocumentRepository.countByUserId(userId);
 	}
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('USER') or hasRole('ADMIN')")
 	@GetMapping("/document/{id}")
 	public ResponseEntity<PdfDocument> getPdfById(@PathVariable Long id) {
 		Optional<PdfDocument> optionalPdfDocument = pdfDocumentRepository.findById(id);

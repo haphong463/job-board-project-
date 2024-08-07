@@ -3,13 +3,11 @@ package com.project4.JobBoardService.Controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project4.JobBoardService.DTO.*;
 import com.project4.JobBoardService.Entity.*;
+import com.project4.JobBoardService.Repository.CertificateRepository;
 import com.project4.JobBoardService.Repository.QuizRepository;
 import com.project4.JobBoardService.Repository.QuizScoreRepository;
 import com.project4.JobBoardService.Repository.UserRepository;
-import com.project4.JobBoardService.Service.CategoryQuizService;
-import com.project4.JobBoardService.Service.EmailService;
-import com.project4.JobBoardService.Service.QuestionService;
-import com.project4.JobBoardService.Service.QuizService;
+import com.project4.JobBoardService.Service.*;
 import com.project4.JobBoardService.Util.Variables.CertificateGenerator;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.Row;
@@ -33,8 +31,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -64,11 +65,16 @@ public class QuizController {
     private CategoryQuizService categoryQuizService;
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    CertificateRepository certificateRepository;
     public QuizController(QuizService quizService, ModelMapper modelMapper) {
         this.quizService = quizService;
         this.modelMapper = modelMapper;
     }
 
+    @Autowired
+    CertificateService certificateService;
 
 
     @PostMapping("/createQuiz")
@@ -158,203 +164,102 @@ public class QuizController {
 
 
 
-//        @PreAuthorize("permitAll()")
-//        @PostMapping("/submit")
-//        public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
-//            List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
-//
-//            int correctAnswersCount = (int) results.stream()
-//                    .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
-//                    .count();
-//            double totalQuestions = results.size();
-//            double scorePerQuestion;
-//
-//
-//            if (totalQuestions == 20) {
-//                scorePerQuestion = 0.5;
-//            } else if (totalQuestions == 15) {
-//                scorePerQuestion = 0.67;
-//            } else if (totalQuestions == 10) {
-//                scorePerQuestion = 1.0;
-//            } else {
-//                scorePerQuestion = 1.0;
-//            }
-//
-//            double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
-//
-//            User user = userRepository.findById(quizSubmission.getUserId())
-//                    .orElseThrow(() -> new RuntimeException("User not found"));
-//            Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
-//                    .orElseThrow(() -> new RuntimeException("Quiz not found"));
-//
-//            QuizScore quizScore = new QuizScore();
-//            quizScore.setUser(user);
-//            quizScore.setQuiz(quiz);
-//            quizScore.setScore(score);
-//            quizScoreRepository.save(quizScore);
-//
-//            QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
-//            responseDTO.setResults(results);
-//            responseDTO.setScore(score);
-//
-//            System.out.println("Response DTO: " + responseDTO);
-//
-//            return ResponseEntity.ok(responseDTO);
-//        }
 
-
-
-
-//    @PreAuthorize("hasRole('ADMIN')")
-@GetMapping("/{quizId}/export")
-public ResponseEntity<Resource> exportQuizToExcel(@PathVariable Long quizId ) {
-    Quiz quiz = quizService.getQuizById(quizId);
-    if (quiz == null) {
-        return ResponseEntity.notFound().build();
-    }
-
-    List<Question> questions = quiz.getQuestions();
-
-    try (Workbook workbook = new XSSFWorkbook()) {
-        Sheet sheet = workbook.createSheet("Quiz");
-
-        // Create header row
-        Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("Question Text");
-        headerRow.createCell(1).setCellValue("Option A");
-        headerRow.createCell(2).setCellValue("Option B");
-        headerRow.createCell(3).setCellValue("Option C");
-        headerRow.createCell(4).setCellValue("Option D");
-        headerRow.createCell(5).setCellValue("Correct Answer");
-
-        int rowNum = 1;
-        for (Question question : questions) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(question.getQuestionText());
-
-            String[] options = question.getOptions().split(", ");
-            row.createCell(1).setCellValue(options.length > 0 ? options[0].substring(3) : "");
-            row.createCell(2).setCellValue(options.length > 1 ? options[1].substring(3) : "");
-            row.createCell(3).setCellValue(options.length > 2 ? options[2].substring(3) : "");
-            row.createCell(4).setCellValue(options.length > 3 ? options[3].substring(3) : "");
-            row.createCell(5).setCellValue(question.getCorrectAnswer());
+    //    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{quizId}/export")
+    public ResponseEntity<Resource> exportQuizToExcel(@PathVariable Long quizId ) {
+        Quiz quiz = quizService.getQuizById(quizId);
+        if (quiz == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        workbook.write(outputStream);
-        byte[] bytes = outputStream.toByteArray();
+        List<Question> questions = quiz.getQuestions();
 
-        ByteArrayResource resource = new ByteArrayResource(bytes);
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Quiz");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quiz_" + quizId + quiz.getTitle().replaceAll("\\s+", "_")  + ".xls" );
-        headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            // Create header row
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("Question Text");
+            headerRow.createCell(1).setCellValue("Option A");
+            headerRow.createCell(2).setCellValue("Option B");
+            headerRow.createCell(3).setCellValue("Option C");
+            headerRow.createCell(4).setCellValue("Option D");
+            headerRow.createCell(5).setCellValue("Correct Answer");
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(bytes.length)
-                .body(resource);
+            int rowNum = 1;
+            for (Question question : questions) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(question.getQuestionText());
 
-    } catch (IOException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-}
+                String[] options = question.getOptions().split(", ");
+                row.createCell(1).setCellValue(options.length > 0 ? options[0].substring(3) : "");
+                row.createCell(2).setCellValue(options.length > 1 ? options[1].substring(3) : "");
+                row.createCell(3).setCellValue(options.length > 2 ? options[2].substring(3) : "");
+                row.createCell(4).setCellValue(options.length > 3 ? options[3].substring(3) : "");
+                row.createCell(5).setCellValue(question.getCorrectAnswer());
+            }
 
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            byte[] bytes = outputStream.toByteArray();
 
+            ByteArrayResource resource = new ByteArrayResource(bytes);
 
-//
-@GetMapping("/{quizId}/attempts")
-public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long quizId, @RequestParam Long userId) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-    Quiz quiz = quizRepository.findById(quizId)
-            .orElseThrow(() -> new RuntimeException("Quiz not found"));
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=quiz_" + quizId + quiz.getTitle().replaceAll("\\s+", "_")  + ".xls" );
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-    QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(bytes.length)
+                    .body(resource);
 
-    QuizAttemptResponseDTO responseDTO = new QuizAttemptResponseDTO();
-
-    int attemptsDone = quizScore != null ? quizScore.getAttempts() : 0;
-
-    int maxAttempts = 3;
-
-    if (attemptsDone >= maxAttempts) {
-        attemptsDone = 0;
-        if (quizScore != null) {
-            quizScore.setAttempts(attemptsDone);
-            quizScoreRepository.save(quizScore);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    responseDTO.setAttemptsLeft(maxAttempts - attemptsDone);
 
-    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
-        responseDTO.setLocked(true);
-        responseDTO.setLockEndTime(quizScore.getLockEndTime());
-        long timeLeft = Duration.between(LocalDateTime.now(), quizScore.getLockEndTime()).getSeconds();
-        responseDTO.setTimeLeft(timeLeft > 0 ? timeLeft : 0);
-    } else {
-        responseDTO.setLocked(false);
+
+    //
+    @GetMapping("/{quizId}/attempts")
+    public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long quizId, @RequestParam Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+
+        QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
+
+        QuizAttemptResponseDTO responseDTO = new QuizAttemptResponseDTO();
+
+        int attemptsDone = quizScore != null ? quizScore.getAttempts() : 0;
+
+        int maxAttempts = 3;
+
+        if (attemptsDone >= maxAttempts) {
+            attemptsDone = 0;
+            if (quizScore != null) {
+                quizScore.setAttempts(attemptsDone);
+                quizScoreRepository.save(quizScore);
+            }
+        }
+
+        responseDTO.setAttemptsLeft(maxAttempts - attemptsDone);
+
+        if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
+            responseDTO.setLocked(true);
+            responseDTO.setLockEndTime(quizScore.getLockEndTime());
+            long timeLeft = Duration.between(LocalDateTime.now(), quizScore.getLockEndTime()).getSeconds();
+            responseDTO.setTimeLeft(timeLeft > 0 ? timeLeft : 0);
+        } else {
+            responseDTO.setLocked(false);
+        }
+
+        return ResponseEntity.ok(responseDTO);
     }
 
-    return ResponseEntity.ok(responseDTO);
-}
-//
-//@PreAuthorize("permitAll()")
-//@PostMapping("/submit")
-//public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
-//    User user = userRepository.findById(quizSubmission.getUserId())
-//            .orElseThrow(() -> new RuntimeException("User not found"));
-//    Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
-//            .orElseThrow(() -> new RuntimeException("Quiz not found"));
-//
-//    QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
-//
-//    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
-//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-//    }
-//
-//    if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isBefore(LocalDateTime.now())) {
-//        quizScore.setLocked(false);
-//        quizScore.setLockEndTime(null);
-//        quizScoreRepository.save(quizScore);
-//    }
-//
-//    List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
-//    int correctAnswersCount = (int) results.stream()
-//            .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
-//            .count();
-//    double totalQuestions = results.size();
-//    double scorePerQuestion = totalQuestions == 20 ? 0.5 : totalQuestions == 15 ? 0.67 : 1.0;
-//    double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
-//
-//    if (quizScore == null) {
-//        quizScore = new QuizScore();
-//        quizScore.setUser(user);
-//        quizScore.setQuiz(quiz);
-//        quizScore.setAttempts(0);
-//    }
-//
-//    quizScore.setScore(score);
-//    quizScore.setAttempts(quizScore.getAttempts() + 1);
-//
-//    double passingScore = 7.0;
-//    if (score < passingScore && quizScore.getAttempts() >= 3) {
-//        quizScore.setLocked(true);
-////        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
-//
-//        quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
-//    }
-//
-//    quizScoreRepository.save(quizScore);
-//
-//    QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
-//    responseDTO.setResults(results);
-//    responseDTO.setScore(score);
-//
-//    return ResponseEntity.ok(responseDTO);
-//}
-//
 
     @PostMapping("/{quizId}/complete")
     public ResponseEntity<Void> completeQuiz(@PathVariable Long quizId, @RequestBody QuizCompletionRequest request) {
@@ -365,6 +270,75 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+//    @PostMapping("/submit")
+//    public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
+//        User user = userRepository.findById(quizSubmission.getUserId())
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//        Quiz quiz = quizRepository.findById(quizSubmission.getQuizId())
+//                .orElseThrow(() -> new RuntimeException("Quiz not found"));
+//
+//        QuizScore quizScore = quizScoreRepository.findTopByUserAndQuizOrderByIdDesc(user, quiz);
+//
+//        if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isAfter(LocalDateTime.now())) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+//        }
+//
+//        if (quizScore != null && quizScore.isLocked() && quizScore.getLockEndTime().isBefore(LocalDateTime.now())) {
+//            quizScore.setLocked(false);
+//            quizScore.setLockEndTime(null);
+//            quizScoreRepository.save(quizScore);
+//        }
+//
+//        List<QuestionResultDTO> results = quizService.calculateDetailedScore(quizSubmission);
+//        int correctAnswersCount = (int) results.stream()
+//                .filter(result -> result.getSelectedAnswer().equals(result.getCorrectAnswer()))
+//                .count();
+//        double totalQuestions = results.size();
+//        double scorePerQuestion = totalQuestions == 20 ? 0.5 : totalQuestions == 15 ? 0.67 : 1.0;
+//        double score = totalQuestions > 0 ? scorePerQuestion * correctAnswersCount : 0;
+//
+//        if (quizScore == null) {
+//            quizScore = new QuizScore();
+//            quizScore.setUser(user);
+//            quizScore.setQuiz(quiz);
+//            quizScore.setAttempts(0);
+//        }
+//
+//        quizScore.setScore(score);
+//        quizScore.setAttempts(quizScore.getAttempts() + 1);
+//
+//        double passingScore = 7.0;
+//        if (score < passingScore && quizScore.getAttempts() >= 3) {
+//            quizScore.setLocked(true);
+////        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
+//
+//            quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
+//        }
+//
+//        quizScoreRepository.save(quizScore);
+//
+//        if (score >= 8) {
+//            try {
+//                File certificate = CertificateGenerator.generateCertificate(user.getUsername(), quiz.getTitle(), user.getLastName(), user.getFirstName());
+//                certificateGenerator.sendCertificateEmail(user.getEmail(), user.getUsername(), certificate);
+//
+//
+//
+//                user.addCompletedQuiz(quiz);
+//                userRepository.save(user);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        QuizSubmissionResponseDTO responseDTO = new QuizSubmissionResponseDTO();
+//        responseDTO.setResults(results);
+//        responseDTO.setScore(score);
+//
+//        return ResponseEntity.ok(responseDTO);
+//    }
+
 
     @PostMapping("/submit")
     public ResponseEntity<QuizSubmissionResponseDTO> submitQuiz(@RequestBody QuizSubmissionDTO quizSubmission) {
@@ -406,8 +380,6 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
         double passingScore = 7.0;
         if (score < passingScore && quizScore.getAttempts() >= 3) {
             quizScore.setLocked(true);
-//        quizScore.setLockEndTime(LocalDateTime.now().plusDays(6));
-
             quizScore.setLockEndTime(LocalDateTime.now().plusSeconds(10));
         }
 
@@ -415,8 +387,19 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
 
         if (score >= 8) {
             try {
-                File certificate = CertificateGenerator.generateCertificate(user.getUsername(), quiz.getTitle(), user.getLastName(), user.getFirstName());
-                certificateGenerator.sendCertificateEmail(user.getEmail(), user.getUsername(), certificate);
+                File certificateFile = certificateGenerator.generateCertificate(user.getUsername(), quiz.getTitle(), user.getFirstName(), user.getLastName());
+                certificateGenerator.sendCertificateEmail(user.getEmail(), user.getUsername(), certificateFile);
+                Certificate certificate = new Certificate();
+                certificate.setName(quiz.getTitle() + " Certificate");
+                certificate.setOrganization("IT Grove");
+                certificate.setIssueDate(LocalDate.now()); // Thay đổi từ YearMonth.now() thành LocalDate.now()
+                certificate.setUser(user);
+                certificate.setLink( certificateFile.getName());
+                certificate.setDescription("Certificate for successfully passing the quiz " + quiz.getTitle());
+                certificate.setSource("quiz");
+
+                certificateService.saveCertificate(certificate);
+
                 user.addCompletedQuiz(quiz);
                 userRepository.save(user);
             } catch (Exception e) {
@@ -430,6 +413,8 @@ public ResponseEntity<QuizAttemptResponseDTO> getQuizAttempts(@PathVariable Long
 
         return ResponseEntity.ok(responseDTO);
     }
+
+
 
     @GetMapping("/{userId}/completed-quizzes")
     public ResponseEntity<List<Long>> getCompletedQuizzes(@PathVariable Long userId) {

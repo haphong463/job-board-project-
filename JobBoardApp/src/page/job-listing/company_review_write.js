@@ -1,16 +1,21 @@
 // src/pages/ReviewPage.js
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosRequest from '../../configs/axiosConfig'; // Đảm bảo đường dẫn đúng
+import axiosRequest from '../../configs/axiosConfig';
 import { StarRating } from './StarRating';
 import { checkUserReviewThunk, createReviewThunk } from "../../features/reviewSlice";
 import { GlobalLayoutUser } from '../../components/global-layout-user/GlobalLayoutUser';
-import './company-review.css'; // Import file CSS riêng của bạn
+import './company-review.css';
 import { useDispatch, useSelector } from 'react-redux';
+import { Editor } from '@tinymce/tinymce-react';
+import DOMPurify from 'dompurify';
 
 export const ReviewPage = () =>
 {
     const { id } = useParams();
+    const user = useSelector(state => state.auth.user);
+    const userId = user ? user.id : null;
+
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -29,9 +34,12 @@ export const ReviewPage = () =>
             try
             {
                 await dispatch(checkUserReviewThunk(id));
-                if (hasReviewed)
+                if (!userId)
                 {
-                    // Nếu đã viết đánh giá, chuyển hướng về trang chi tiết công ty
+                    navigate(`/login`);
+                }
+                else if (hasReviewed)
+                {
                     navigate(`/companyDetail/${id}`);
                 }
             } catch (err)
@@ -40,7 +48,7 @@ export const ReviewPage = () =>
             }
         };
         checkIfReviewed();
-    }, [id, dispatch, hasReviewed, navigate]);
+    }, [id, userId, dispatch, hasReviewed, navigate]);
 
     const handleRatingChange = (newRating) =>
     {
@@ -50,6 +58,7 @@ export const ReviewPage = () =>
     const handleSubmit = async (e) =>
     {
         e.preventDefault();
+
         if (!title.trim() || !description.trim() || rating === 0)
         {
             setError({
@@ -61,7 +70,7 @@ export const ReviewPage = () =>
         }
         try
         {
-            const actionResult = await dispatch(createReviewThunk({ companyId: id, review: { title, description, rating } }));
+            const actionResult = await dispatch(createReviewThunk({ companyId: id, review: { title, description: DOMPurify.sanitize(description), rating } }));
             if (createReviewThunk.fulfilled.match(actionResult))
             {
                 // Xóa lỗi khi gửi thành công
@@ -73,7 +82,9 @@ export const ReviewPage = () =>
             {
                 setError(null);
                 setShowOverlay(false);
-                navigate(`/login`);
+                setError({
+                    title: 'Failed!'
+                });
             }
         } catch (err)
         {
@@ -93,8 +104,7 @@ export const ReviewPage = () =>
 
     const handleConfirmExit = () =>
     {
-        navigate(`/companyDetail/${companyId}`); // Quay lại trang trước đó
-
+        navigate(`/companyDetail/${companyId}`);
     };
 
     const handleContinueReviewing = () =>
@@ -123,6 +133,11 @@ export const ReviewPage = () =>
         };
     }, []);
 
+    const handleEditorChange = (content) =>
+    {
+        setDescription(content);
+    };
+
     return (
         <GlobalLayoutUser>
             <>
@@ -147,7 +162,6 @@ export const ReviewPage = () =>
                             &lt; Back
                         </button>
                     </div>
-
                     {showOverlay && error && (
                         <div className="rv_overlay overlay fade rv_fade show rv_show">
                             <div className="rv_overlay-content overlay-content" ref={overlayRef}>
@@ -167,7 +181,7 @@ export const ReviewPage = () =>
                             </div>
                         </div>
                     )}
-                    <form onSubmit={handleSubmit} noValidate>
+                    <form noValidate>
                         <div className="form-group">
                             <label htmlFor="title">Title</label>
                             <input
@@ -181,19 +195,30 @@ export const ReviewPage = () =>
                         </div>
                         <div className="form-group mt-3">
                             <label htmlFor="description">Description</label>
-                            <textarea
+                            <Editor
+                                apiKey="6cb07sce109376hijr18r8vibbm3h5qjhh4qa8gc9pw8rvn0"
+                                value={description}
+                                init={{
+                                    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
+                                    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                                }}
+                                onEditorChange={handleEditorChange}
+                                required
+                            />
+
+                            {/* <textarea
                                 id="description"
                                 className="form-control"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 required
-                            />
+                            /> */}
                         </div>
                         <div className="form-group mt-3">
                             <label htmlFor="rating">Rating</label>
                             <StarRating rating={rating} onRatingChange={handleRatingChange} />
                         </div>
-                        <button type="submit" className="btn btn-primary mt-3 mb-5">Submit Review</button>
+                        <button onClick={(e) => handleSubmit(e)} type="submit" className="btn btn-primary mt-3 mb-5">Submit Review</button>
                     </form>
                 </div>
             </>

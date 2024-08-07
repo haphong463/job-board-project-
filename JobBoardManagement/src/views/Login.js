@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -16,8 +16,8 @@ import {
 } from "reactstrap";
 import logo from "../assets/images/logos/logo.png";
 import { useDispatch, useSelector } from "react-redux";
-import { login, signOut, updateUserAndRoles } from "../features/authSlice";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { login, signOut } from "../features/authSlice";
+import { Navigate, useNavigate } from "react-router-dom";
 import showToast from "../utils/functions/showToast";
 import nprogress from "nprogress";
 
@@ -31,8 +31,6 @@ const Login = () => {
   const dispatch = useDispatch();
   const authStatus = useSelector((state) => state.auth.status);
   const messageError = useSelector((state) => state.auth.verificationMessage);
-  const user = useSelector((state) => state.auth.user);
-  const locationState = useSelector((state) => state.auth.location);
   const navigate = useNavigate();
   const {
     control,
@@ -72,24 +70,12 @@ const Login = () => {
       });
   };
 
-  // if (
-  //   user &&
-  //   user.role.some(
-  //     (role) =>
-  //       role.authority === "ROLE_ADMIN" || role.authority === "ROLE_MODERATOR"
-  //   )
-  // ) {
-  //   const redirectPath = locationState || "/jobportal";
-  //   return <Navigate to={redirectPath} />;
-  // }
-
   return (
-    <Container className="d-flex justify-content-center align-items-center min-vh-100">
+    <Container className="d-flex justify-content-center align-items-center min-vh-100 position-relative">
+      <div className="login-background"></div>
       <Row className="w-100">
-        <Col md={6} lg={4} className="mx-auto">
-          <div className="text-center mb-4">
-            <img src={logo} alt="Logo" style={{ width: "150px" }} />
-          </div>
+        <Col md={6} lg={4} className="mx-auto login-container">
+          <div className="text-center mb-4">ITGrove</div>
           <h2 className="text-center mb-4">Login</h2>
           {messageError && <Alert color="danger">{messageError}</Alert>}
           <Form onSubmit={handleSubmit(onSubmit)}>
@@ -131,17 +117,7 @@ const Login = () => {
                 <FormFeedback>{errors.password.message}</FormFeedback>
               )}
             </FormGroup>
-            <FormGroup check className="mb-4">
-              <Controller
-                name="rememberMe"
-                control={control}
-                render={({ field }) => (
-                  <Label check>
-                    <Input type="checkbox" {...field} /> Remember me
-                  </Label>
-                )}
-              />
-            </FormGroup>
+
             <Button color="primary" block disabled={authStatus === "loading"}>
               {authStatus === "loading" ? "Logging in..." : "Login"}
             </Button>

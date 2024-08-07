@@ -10,9 +10,9 @@ import { fetchCategoryThunk } from "../../features/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import "../job-listing/listSkillAll";
 import jobData from "../job-listing/job_data.json";
-import companyData from "../job-listing/company_data.json";
 
-export const Home = () => {
+export const Home = () =>
+{
   const location = useLocation();
   const navigate = useNavigate(); // Correct usage of useNavigate
   const [message, setMessage] = useState("");
@@ -21,43 +21,56 @@ export const Home = () => {
   const companies = useSelector((state) => state.company.companies);
   const categories = useSelector((state) => state.category.categories);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     dispatch(fetchCategoryThunk());
-    if (companies.length === 0) {
+    if (companies.length === 0)
+    {
       dispatch(fetchCompanyThunk());
     }
-    if (jobs.length === 0) {
+    if (jobs.length === 0)
+    {
       dispatch(fetchJobThunk());
     }
   }, [dispatch, jobs.length, companies.length]);
 
-  const filteredJobs = useMemo(() => {
+  const filteredJobs = useMemo(() =>
+  {
     return jobs.filter((job) => job.isSuperHot == 1);
   }, [jobs]);
 
-  const getLocation1String = (address) => {
-    if (typeof address !== "string") {
+  const getLocation1String = (address) =>
+  {
+    if (typeof address !== "string")
+    {
       return "";
     }
 
     const parts = address.split(", ");
     const len = parts.length;
-    if (len >= 2) {
+    if (len >= 2)
+    {
       return parts.slice(-2).join(", ");
     }
     return address;
   };
 
-  const handleCompanyClick = (companyId) => {
-    window.location.href = `/companyDetail/${companyId}`;
+  const handleCompanyClick = (e, companyId) =>
+  {
+    e.preventDefault();
+    navigate(`/companyDetail/${companyId}`);
   };
 
-  const handleCategoryClick = (categoryId) => {
-    window.location.href = `/jobList/${categoryId}`;
+  const handleCategoryClick = (e, categoryId) =>
+  {
+    e.preventDefault();
+    navigate(`/jobList/${categoryId}`);
   };
 
-  const handleJobClick = (jobId) => {
-    window.location.href = `/jobDetail/${jobId}`;
+  const handleJobClick = (e, jobId, companyId) =>
+  {
+    e.preventDefault();
+    navigate(`/jobDetail/${jobId}/${companyId}`);
   };
 
   return (
@@ -107,7 +120,8 @@ export const Home = () => {
               </div>
             </div>
             <ul className="job-listings mb-5">
-              {filteredJobs.map((job) => {
+              {filteredJobs.map((job) =>
+              {
                 const company = companies.find(
                   (company) => company.companyId === job.companyId
                 );
@@ -115,7 +129,8 @@ export const Home = () => {
                   ? categories
                   : [];
                 const address = getLocation1String(company?.location);
-                if (company) {
+                if (company)
+                {
                   return (
                     <li className="col-12 job-listing d-block d-sm-flex pb-3 pb-sm-0 align-items-center mb-3 jb_bg-light border border-gray rounded">
                       {/* <a href={`/jobDetail/${job.id}`} /> */}
@@ -124,8 +139,9 @@ export const Home = () => {
                           src={company.logo}
                           alt="Free Website Template"
                           className="img-fluid p-0 d-inline-block rounded-sm bg-white"
-                          onClick={() => {
-                            handleCompanyClick(job.companyId);
+                          onClick={(e) =>
+                          {
+                            handleCompanyClick(e, job.companyId);
                           }}
                           style={{
                             width: "7em",
@@ -139,8 +155,9 @@ export const Home = () => {
                         <div className="job-listing-position custom-width w-50 mb-3 mb-sm-0">
                           <h2
                             className="mb-2"
-                            onClick={() => {
-                              handleJobClick(job.id);
+                            onClick={(e) =>
+                            {
+                              handleJobClick(e, job.id, job.companyId);
                             }}
                             style={{
                               textDecoration: "none",
@@ -150,8 +167,9 @@ export const Home = () => {
                             {job.title}
                           </h2>
                           <strong
-                            onClick={() => {
-                              handleCompanyClick(job.companyId);
+                            onClick={(e) =>
+                            {
+                              handleCompanyClick(e, job.companyId);
                             }}
                             style={{
                               textDecoration: "none",
@@ -161,15 +179,17 @@ export const Home = () => {
                             {company.companyName}
                           </strong>
                           <div className="m-0 mt-3">
-                            {job.categoryId.map((id) => {
+                            {job.categoryId.map((id) =>
+                            {
                               const categoryName = categoryArray.find(
                                 (category) => category.categoryId === id
                               )?.categoryName;
                               return categoryName ? (
                                 <span
                                   key={id}
-                                  onClick={() => handleCategoryClick(id)}
+                                  onClick={(e) => handleCategoryClick(e, id)}
                                   className="jb_text1 bg-white border border-gray p-2 mr-2 rounded-pill text-dark"
+                                  style={{ cursor: 'pointer' }}
                                 >
                                   {categoryName}
                                 </span>

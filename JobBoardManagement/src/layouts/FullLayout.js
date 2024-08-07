@@ -123,7 +123,9 @@ const FullLayout = () => {
         </BreadcrumbItem>
       ) : (
         <BreadcrumbItem key={to}>
-          <Link to={to}>{value === "jobportal" ? "Home" : value}</Link>
+          <Link to={to}>
+            {value === "jobportal" ? "Home" : capitalizeFirstLetter(value)}
+          </Link>
         </BreadcrumbItem>
       );
     });

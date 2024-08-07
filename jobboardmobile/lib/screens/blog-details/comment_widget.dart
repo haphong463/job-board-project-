@@ -2,22 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/comment_model.dart';
+import 'package:jobboardmobile/models/content_model.dart';
 import 'package:jobboardmobile/service/auth_service.dart';
 import 'package:jobboardmobile/service/comment_service.dart';
+import 'package:moment_dart/moment_dart.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 
 class CommentWidget extends StatefulWidget {
   final Comment comment;
   final int level;
   final void Function(String) deleteComment;
   final void Function(bool) toggleMainCommentField; // Add this parameter
+  final ContentModel blog;
 
-  const CommentWidget({
-    super.key,
-    required this.comment,
-    this.level = 0,
-    required this.deleteComment,
-    required this.toggleMainCommentField,
-  });
+  const CommentWidget(
+      {super.key,
+      required this.comment,
+      this.level = 0,
+      required this.deleteComment,
+      required this.toggleMainCommentField,
+      required this.blog});
 
   @override
   _CommentWidgetState createState() => _CommentWidgetState();
@@ -34,6 +38,8 @@ class _CommentWidgetState extends State<CommentWidget> {
   TextEditingController editEditingController = TextEditingController();
   TextEditingController replyEditingController = TextEditingController();
   FocusNode replyFocusNode = FocusNode();
+  final ProfanityFilter _profanityFilter =
+      ProfanityFilter(); // Profanity filter instance
 
   void _fetchUserDetails() async {
     username = await _authService.getUsername();
@@ -56,11 +62,18 @@ class _CommentWidgetState extends State<CommentWidget> {
 
   void _addReply(String content, Comment parentComment) async {
     try {
+      if (content.trim().isEmpty) {
+        // Không thực hiện hành động nào nếu bình luận là trống
+        return;
+      }
       String temporaryCommentId = '${DateTime.now().millisecondsSinceEpoch}';
 
       var reply = {
         'id': temporaryCommentId,
-        'blog': {'id': parentComment.blog.id},
+        'blog': {
+          'id': parentComment.blog.id,
+          'user': {'username': widget.blog.user.username}
+        },
         'parent': {'id': parentComment.id},
         'content': content,
         'user': {'username': username},
@@ -97,12 +110,9 @@ class _CommentWidgetState extends State<CommentWidget> {
       _replying = !_replying;
 
       if (!_replying) {
-        widget.toggleMainCommentField(
-            true); // Call the function to hide/show main comment TextField
         replyFocusNode.unfocus();
         replyEditingController.clear();
       } else {
-        widget.toggleMainCommentField(false);
         replyFocusNode.requestFocus();
       }
     });
@@ -134,6 +144,14 @@ class _CommentWidgetState extends State<CommentWidget> {
     );
   }
 
+  String _getDefaultAvatarUrl(String gender) {
+    if (gender == 'MALE') {
+      return 'https://w7.pngwing.com/pngs/613/636/png-transparent-computer-icons-user-profile-male-avatar-avatar-heroes-logo-black-thumbnail.png';
+    } else {
+      return 'https://w7.pngwing.com/pngs/671/695/png-transparent-user-profile-computer-icons-avatar.png';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -149,13 +167,26 @@ class _CommentWidgetState extends State<CommentWidget> {
               CircleAvatar(
                 child: ClipOval(
                   child: Image.network(
-                    widget.comment.user.imageUrl.replaceFirst(
-                      'http://localhost:8080',
-                      Endpoint.imageUrl,
-                    ),
+                    widget.comment.user.imageUrl?.isNotEmpty == true
+                        ? widget.comment.user.imageUrl!.replaceFirst(
+                            'http://localhost:8080',
+                            Endpoint.imageUrl,
+                          )
+                        : _getDefaultAvatarUrl(
+                            widget.comment.user.gender.isNotEmpty == true
+                                ? widget.comment.user.gender
+                                : "MALE"),
                     fit: BoxFit.cover,
                     width: 40,
                     height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.network(
+                        _getDefaultAvatarUrl("MALE"),
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -226,7 +257,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                         ),
                       )
                     else
-                      Text(widget.comment.content),
+                      Text(_profanityFilter.censor(widget.comment.content)),
                     if (_isEditing)
                       Row(
                         children: [
@@ -246,7 +277,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                         ],
                       ),
                     Text(
-                      DateFormat.yMMMd().format(widget.comment.createdAt),
+                      Moment(widget.comment.createdAt).fromNow(),
                       style: const TextStyle(color: Colors.grey),
                     ),
                     if (_replying)
@@ -293,8 +324,8 @@ class _CommentWidgetState extends State<CommentWidget> {
                 comment: child,
                 level: widget.level + 1,
                 deleteComment: widget.deleteComment,
-                toggleMainCommentField:
-                    widget.toggleMainCommentField, // Pass the toggle function
+                toggleMainCommentField: widget.toggleMainCommentField,
+                blog: widget.blog, // Pass the toggle function
               )),
         ],
       ),

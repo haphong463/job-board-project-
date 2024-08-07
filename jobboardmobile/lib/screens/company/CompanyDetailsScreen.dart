@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/utils/color_util.dart';
 import '../../service/job_service.dart';
 import '../job/JobDetailsScreen.dart';
-import 'company_review_screen.dart'; // Import the new review screen
+import 'company_review_screen.dart';
 import '../../constant/endpoint.dart'; // Import your endpoint
 
 class CompanyDetailsScreen extends StatefulWidget {
@@ -54,10 +54,7 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
     String companyType = widget.company.type ?? 'No Type';
     String companySize = widget.company.companySize ?? 'No Company Size';
     String companyCountry = widget.company.country ?? 'No Country';
-    String companyCountryCode = widget.company.countryCode ?? 'No Country Code';
     String companyWorkingDays = widget.company.workingDays ?? 'No Working Days';
-    String companyMembershipRequired =
-        widget.company.membershipRequired ? 'Yes' : 'No';
 
     String modifiedImageUrl =
         companyLogo.replaceAll('http://localhost:8080', Endpoint.imageUrl);
@@ -73,25 +70,91 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.network(
-                modifiedImageUrl,
-                height: 100,
-                width: 100,
-                fit: BoxFit.cover,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey[300]!, width: 2),
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    modifiedImageUrl,
+                    fit: BoxFit.cover,
+                    width: 120,
+                    height: 120,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('', companyName),
-            _buildInfoRow('', companyDescription, isHtml: true),
-            _buildInfoRow('Location', companyLocation),
-            _buildInfoRow('Website', companyWebsite, isLink: true),
-            _buildInfoRow('Key Skills', companyKeySkills),
-            _buildInfoRow('Type', companyType),
-            _buildInfoRow('Company Size', companySize),
-            _buildInfoRow('Country', companyCountry),
-            _buildInfoRow('Country Code', companyCountryCode),
-            _buildInfoRow('Working Days', companyWorkingDays),
-            _buildInfoRow('Membership Required', companyMembershipRequired),
+            _buildInfoCard(
+              'Company Name',
+              companyName,
+              icon: Icons.business,
+              iconColor: Colors.blue,
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CompanyReviewScreen(
+                        companyId: widget.company.companyId,
+                      ),
+                    ),
+                  );
+                },
+                child: Text('Review Company'),
+              ),
+            ),
+            _buildInfoCard(
+              'Description',
+              companyDescription,
+              isHtml: true,
+              icon: Icons.description,
+              iconColor: Colors.green,
+            ),
+            _buildInfoCard(
+              'Location',
+              companyLocation,
+              icon: Icons.location_on,
+              iconColor: Colors.blue,
+            ),
+            _buildInfoCard(
+              'Website',
+              companyWebsite,
+              isLink: true,
+              icon: Icons.web,
+              iconColor: Colors.blue,
+            ),
+            _buildInfoCard(
+              'Key Skills',
+              companyKeySkills,
+              icon: Icons.star,
+              iconColor: Colors.orange,
+            ),
+            _buildInfoCard(
+              'Type',
+              companyType,
+              icon: Icons.business_center,
+              iconColor: Colors.purple,
+            ),
+            _buildInfoCard(
+              'Company Size',
+              companySize,
+              icon: Icons.group,
+              iconColor: Colors.teal,
+            ),
+            _buildInfoCard('Country', companyCountry, icon: Icons.public),
+            _buildInfoCard(
+              'Working Days',
+              companyWorkingDays,
+              icon: Icons.calendar_today,
+              iconColor: Colors.deepOrange,
+            ),
             const SizedBox(height: 16),
             Text(
               'Jobs at $companyName',
@@ -100,7 +163,8 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
             const SizedBox(height: 16),
             _jobs.isEmpty
                 ? Center(child: Text('No jobs available'))
-                : ListView.builder(
+                : ListView.separated(
+                    separatorBuilder: (context, index) => Divider(),
                     shrinkWrap: true,
                     itemCount: _jobs.length,
                     itemBuilder: (context, index) {
@@ -108,27 +172,33 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8.0),
                         elevation: 5,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(modifiedImageUrl),
                             radius: 30,
                           ),
-                          title: Text(job.title ?? 'No Title',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(
+                            job.title ?? 'No Title',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(job.offeredSalary ?? 'No Salary',
-                                  style: TextStyle(color: Colors.green)),
-                              const SizedBox(height: 10),
-                              Html(
-                                data: job.description ?? 'No Description',
-                                style: {
-                                  "body": Style(
-                                      fontSize: FontSize(16.0),
-                                      listStyleType: ListStyleType.none),
-                                },
+                              Text(
+                                job.offeredSalary ?? 'No Salary',
+                                style: TextStyle(color: Colors.green),
                               ),
+                              // Html(
+                              //   data: job.description ?? 'No Description',
+                              //   style: {
+                              //     "body": Style(
+                              //         fontSize: FontSize(16.0),
+                              //         listStyleType: ListStyleType.none),
+                              //   },
+                              // ),
                             ],
                           ),
                           isThreeLine: true,
@@ -170,40 +240,66 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
     );
   }
 
-  Widget _buildInfoRow(String title, String value,
-      {bool isLink = false, bool isHtml = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 1,
-            child: Text(
-              '$title:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: isLink
-                ? InkWell(
-                    onTap: () => _launchURL(value),
-                    child: Text(
-                      value,
-                      style: TextStyle(color: Colors.blue, fontSize: 16),
-                    ),
-                  )
-                : isHtml
-                    ? Html(
-                        data: value,
-                      )
-                    : Text(
+  Widget _buildInfoCard(String title, String value,
+      {bool isLink = false,
+      bool isHtml = false,
+      IconData? icon,
+      Color? iconColor}) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 12.0),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (icon != null)
+              Icon(
+                icon,
+                color: iconColor ?? Colors.black,
+                size: 20,
+              ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: isLink
+                  ? InkWell(
+                      onTap: () => _launchURL(value),
+                      child: Text(
                         value,
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(color: Colors.blue, fontSize: 16),
+                        overflow: TextOverflow
+                            .ellipsis, // Ensure text doesn't overflow
                       ),
-          ),
-        ],
+                    )
+                  : isHtml
+                      ? Html(
+                          data: value,
+                          style: {
+                            "body": Style(
+                              fontSize: FontSize(16.0),
+                              listStyleType: ListStyleType.none,
+                              padding: HtmlPaddings.all(0), // Updated padding
+                              lineHeight: LineHeight(0),
+                            ),
+                          },
+                          onLinkTap: (url, context, element) {
+                            if (url != null) {
+                              _launchURL(url);
+                            }
+                          },
+                        )
+                      : Text(
+                          value,
+                          style: TextStyle(fontSize: 16),
+                          overflow: TextOverflow
+                              .ellipsis, // Ensure text doesn't overflow
+                        ),
+            ),
+          ],
+        ),
       ),
     );
   }

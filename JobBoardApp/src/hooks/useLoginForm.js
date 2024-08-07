@@ -30,7 +30,7 @@ export const useLoginForm = () => {
         if (res.meta.requestStatus === "fulfilled") {
           const fullName = res.payload.firstName + " " + res.payload.lastName;
 
-          navigate(-1, { replace: true });
+          navigate("/");
           dispatch(resetSignInSuccess());
           showToast("You're back, " + fullName, "success");
         }

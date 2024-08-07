@@ -112,18 +112,6 @@ class _CompanyListScreenState extends State<CompanyListScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Html(
-              data: company.description.isNotEmpty
-                  ? company.description
-                  : 'No Description',
-              style: {
-                "body": Style(
-                    fontSize: FontSize(16.0),
-                    listStyleType: ListStyleType.none),
-              },
-            ),
-
             // Text(
             //   company.description,
             //   style: const TextStyle(fontSize: 14),

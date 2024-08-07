@@ -29,10 +29,11 @@ class Comment {
         : [];
 
     return Comment(
-      id: json['id'].toString(), // Ensure id is treated as a String
+      id: json['id']?.toString() ??
+          '', // Ensure id is treated as a String and provide a default value
       blog: BlogDTO.fromJson(json['blog']),
       children: children,
-      content: json['content'],
+      content: json['content'] ?? '', // Provide a default value for content
       user: User.fromJson(json['user']),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),

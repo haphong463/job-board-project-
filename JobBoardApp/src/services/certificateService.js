@@ -25,3 +25,12 @@ export const updateCertificate = async (id, certificateDTO) =>
 
 export const deleteCertificate = async (id) =>
     await axiosRequest.delete(`/certificates/${id}`);
+
+export const getCertificateAsync = async (filename) => {
+    return await axiosRequest.get(`/certificates/certificate/${filename}`, {
+      responseType: 'blob',
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    });
+  };

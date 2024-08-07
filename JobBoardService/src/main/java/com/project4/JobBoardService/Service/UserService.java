@@ -33,4 +33,5 @@ public interface UserService {
     User updatePassword(Long userId, String newPassword);
 
     List<Permission> getAllPermission();
+
 }

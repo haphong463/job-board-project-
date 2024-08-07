@@ -14,7 +14,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Đăng ký một endpoint cho client (SockJS được sử dụng ở đây để hỗ trợ các trình duyệt không hỗ trợ WebSocket)
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000") // Cho phép tất cả các origin (để demo, bạn có thể cấu hình an toàn hơn)
+                .setAllowedOrigins("http://localhost:3000", "http://localhost:3001") // Cho phép tất cả các origin (để demo, bạn có thể cấu hình an toàn hơn)
                 .withSockJS(); // Sử dụng SockJS
     }
 

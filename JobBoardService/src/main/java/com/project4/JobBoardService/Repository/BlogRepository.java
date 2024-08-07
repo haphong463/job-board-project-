@@ -17,9 +17,25 @@ import java.util.List;
 
 public interface BlogRepository extends JpaRepository<Blog, Long> {
     long countByUserAndCreatedAtBetween(User user, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT b.user.username, MONTH(b.createdAt), COUNT(b) " +
+            "FROM Blog b " +
+            "JOIN b.user u " +
+            "LEFT JOIN u.roles r " +
+            "LEFT JOIN u.permissions p " +
+            "WHERE YEAR(b.createdAt) = :year " +
+            "AND (r.name = 'ROLE_ADMIN' " +
+            "     OR (r.name = 'ROLE_MODERATOR' AND p.name = 'MANAGE_BLOG')) " +
+            "GROUP BY b.user.username, MONTH(b.createdAt)")
+    List<Object[]> countBlogsByUserAndMonth(@Param("year") int year);
+
+
     int countByCategories(BlogCategory blogCategory);
+
     Blog findBySlug(@Param("slug") String slug);
+
     int countByComments(Comment comment);
+
     Blog findByTitle(String title);
 
     @Query("SELECT DISTINCT b FROM Blog b " +
@@ -30,11 +46,14 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
             "OR LOWER(b.content) LIKE %:query% " +
             "OR LOWER(c.name) LIKE %:query% " +
             "OR LOWER(h.name) LIKE %:query%) " +
-            "AND (:visibility IS NULL OR b.visibility = :visibility)")
+            "AND (:visibility IS NULL OR b.visibility = :visibility) " +
+            "AND (:archive IS NULL OR b.isArchive = :archive)")
     Page<Blog> searchByQuery(@Param("type") String type,
                              @Param("query") String query,
                              @Param("visibility") Boolean visibility,
+                             @Param("archive") Boolean archive,
                              Pageable pageable);
+
 
     @Modifying
     @Transactional

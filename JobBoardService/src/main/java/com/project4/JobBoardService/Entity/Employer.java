@@ -46,17 +46,20 @@ public class Employer {
     private String companyAddress;
 
     @Size(max = 100)
-    private String companyWebsite;
+    private String websiteLink;
+
 
     private String verificationCode;
     private boolean isVerified;
 
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-
     private boolean approved;
 
-    // Getters and Setters
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "company_id", referencedColumnName = "companyId")
+    private Company company;
+
 }

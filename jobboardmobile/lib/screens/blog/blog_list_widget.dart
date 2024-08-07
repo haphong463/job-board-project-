@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/models/blog_model.dart';
+import 'package:jobboardmobile/models/content_model.dart';
 import 'package:jobboardmobile/models/user_model.dart';
 import 'package:jobboardmobile/screens/blog-details/blog_detail_screen_widget.dart';
+import 'package:moment_dart/moment_dart.dart';
 
 class BlogList extends StatelessWidget {
-  final List<BlogPost> blogs;
+  final List<ContentModel> blogs;
 
   const BlogList({super.key, required this.blogs});
 
@@ -20,15 +22,20 @@ class BlogList extends StatelessWidget {
             .replaceAll('http://localhost:8080', Endpoint.imageUrl);
 
         return BlogCard(
-          blog: BlogPost(
-              id: blogs[index].id,
-              description: blogs[index].description,
-              imageUrl: modifiedImageUrl,
-              title: blogs[index].title,
-              citation: blogs[index].citation,
-              createdAt: blogs[index].createdAt,
-              user: blogs[index].user,
-              slug: blogs[index].slug),
+          blog: ContentModel(
+            id: blogs[index].id,
+            content: blogs[index].content,
+            imageUrl: modifiedImageUrl,
+            title: blogs[index].title,
+            citation: blogs[index].citation,
+            createdAt: blogs[index].createdAt,
+            user: blogs[index].user,
+            slug: blogs[index].slug,
+            categories: blogs[index].categories,
+            hashtags: blogs[index].hashtags,
+            thumbnailUrl: blogs[index].thumbnailUrl,
+            updatedAt: blogs[index].updatedAt,
+          ),
         );
       },
     );
@@ -36,7 +43,13 @@ class BlogList extends StatelessWidget {
 }
 
 class BlogCard extends StatelessWidget {
-  final BlogPost blog;
+  final ContentModel blog;
+  String _calculateReadingTime(String content) {
+    const int wordsPerMinute = 200; // Average reading speed
+    final int words = content.split(' ').length;
+    final int minutes = (words / wordsPerMinute).ceil();
+    return '$minutes min read';
+  }
 
   const BlogCard({super.key, required this.blog});
 
@@ -73,8 +86,22 @@ class BlogCard extends StatelessWidget {
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 10),
+              // Display category chips
+              Wrap(
+                spacing: 6.0,
+                runSpacing: 6.0,
+                children: blog.categories.map((category) {
+                  return Chip(
+                    label: Text(
+                        category.name), // Adjust based on your category model
+                    backgroundColor: Colors.blue.shade100,
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 10),
               Text(
-                DateFormat.yMMMd().format(blog.createdAt),
+                '${Moment(blog.createdAt).format("YYYY-MM-DD")} · ${_calculateReadingTime(blog.content)}',
                 style: const TextStyle(color: Colors.grey),
               ),
             ],
@@ -83,25 +110,4 @@ class BlogCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class BlogPost {
-  final int id;
-  final String imageUrl;
-  final String title;
-  final String citation;
-  final DateTime createdAt;
-  final User user;
-  final String slug;
-  final String description;
-
-  BlogPost(
-      {required this.imageUrl,
-      required this.id,
-      required this.title,
-      required this.description,
-      required this.citation,
-      required this.createdAt,
-      required this.user,
-      required this.slug});
 }

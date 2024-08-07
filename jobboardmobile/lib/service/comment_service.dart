@@ -15,6 +15,7 @@ class CommentService {
         List<dynamic> jsonList = jsonDecode(response.body);
         List<Comment> comments =
             jsonList.map((json) => Comment.fromJson(json)).toList();
+
         return comments;
       } else {
         throw Exception('Failed to load comments');

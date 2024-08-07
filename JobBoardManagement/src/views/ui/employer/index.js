@@ -102,17 +102,6 @@ const EmployerList = () => {
       width: "250px",
     },
     {
-      name: "Company Website",
-      selector: (row) => row.companyWebsite,
-      sortable: true,
-      cell: (row) => (
-        <a href={row.companyWebsite} target="_blank" rel="noopener noreferrer">
-          {row.companyWebsite}
-        </a>
-      ),
-      width: "250px",
-    },
-    {
       name: "Status",
       selector: (row) => row.approved,
       sortable: true,

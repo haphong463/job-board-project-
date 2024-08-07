@@ -66,7 +66,7 @@ class Job {
       slot: json['slot'] ?? '',
       profileApproved: json['profileApproved'] ?? '',
       isSuperHot: json['isSuperHot'] ?? '',
-      categoryId: List<int>.from(json['categoryId'] ?? 0),
+      categoryId: List<int>.from(json['categoryId'] ?? []),
       companyId: json['companyId'] ?? 0,
       expire: json['expire'] ?? '',
     );

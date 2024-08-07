@@ -16,7 +16,6 @@ import { Gallery } from "../../page/gallery/Gallery";
 import { ResetPassword } from "../../page/login/ResetPassword";
 import { JobSingle } from "../../page/job-listing/JobSingle";
 import { JobSingle1 } from "../../page/job-single/JobSingle";
-import  {JobListing}  from "../../page/job-listing/JobListing";
 import EmployerSignUp from "../../page/signup/EmployerSignUp";
 import ListTemplate from "../../page/list-template/ListTemplate";
 import ReviewTemplate from "../../page/user-cv/ReviewTemplate";
@@ -35,6 +34,7 @@ import { ReviewPage } from "../../page/job-listing/company_review_write";
 import { SavedJobs } from "../../page/job-listing/saved_job";
 import UpdateCv from "../../page/user-cv/UpdateCv";
 import ManagementProfile from "../../page/myprofile/UserProfileManagement";
+import PDFViewerPage from "../../page/myprofile/PDFViewerPage";
 import React from "react";
 
 export const routes = [
@@ -49,7 +49,6 @@ export const routes = [
   // { path: "/jobSkillList/:id", component: <JobList /> },
   { path: "/jobList/:id", component: <JobList /> },
   { path: "/jobDetail/:id/:companyId", component: <JobSingle /> },
-  { path: "/jobListing", component: <JobListing /> },
   { path: "/viewAllJobs/:searchTerm?", component: <JobList /> },
   { path: "/viewAllJobs", component: <JobList /> },
   { path: "/viewAllSkill", component: <ViewAllSkill /> },
@@ -75,4 +74,5 @@ export const routes = [
   { path: "/savedJob", component: <SavedJobs /> },
   { path: "/myprofile", component: <MyProfile /> },
   { path: "/managementprofile", component: <ManagementProfile /> },
+  {path:"/view-pdf/:filename", component:<PDFViewerPage/>},
 ];

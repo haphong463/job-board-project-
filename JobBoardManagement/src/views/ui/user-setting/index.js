@@ -31,6 +31,7 @@ import { updatePasswordAsync } from "../../../services/user_service";
 import showToast from "../../../utils/functions/showToast";
 import moment from "moment/moment";
 import "./style.css";
+import { formatPermissionName } from "../../../utils/functions/formatPermission";
 
 const profileSchema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
@@ -41,6 +42,7 @@ const profileSchema = yup.object().shape({
     .oneOf(["MALE", "FEMALE", "OTHER"])
     .required("Gender is required"),
   imageFile: yup.mixed().test("fileSize", "File is too large", (value) => {
+    console.log("value: ", value);
     return !value || (value && value.size <= 2000000); // 2MB
   }),
 });
@@ -128,7 +130,7 @@ const User = () => {
         const reqStatus = res.meta.requestStatus;
         const payload = res.payload;
         if (reqStatus === "fulfilled") {
-          setValue("bio", payload.bio);
+          setValue("bio", payload.bio ? payload.bio : "");
           setValue("firstName", payload.firstName);
           setValue("lastName", payload.lastName);
           setValue("gender", payload.gender);
@@ -179,9 +181,23 @@ const User = () => {
               </CardText>
             </CardBody>
           </Card>
+          {user.role
+            .map((item) => item.authority)
+            .includes("ROLE_MODERATOR") && (
+            <Card className="mt-4">
+              <CardHeader>Permissions</CardHeader>
+              <CardBody>
+                <ul>
+                  {user.permission.map((item) => (
+                    <li key={item.id}>{formatPermissionName(item.name)}</li>
+                  ))}
+                </ul>
+              </CardBody>
+            </Card>
+          )}
         </Col>
         <Col lg={8} md={6} sm={12}>
-          <Card className="p-4">
+          <Card>
             <Nav tabs>
               <NavItem>
                 <NavLink
@@ -200,7 +216,7 @@ const User = () => {
                 </NavLink>
               </NavItem>
             </Nav>
-            <TabContent activeTab={activeTab}>
+            <TabContent className="p-2" activeTab={activeTab}>
               <TabPane tabId="profile">
                 {!editMode ? (
                   <Table>
@@ -235,186 +251,208 @@ const User = () => {
                   </Table>
                 ) : (
                   <Form onSubmit={handleSubmit(onSubmit)}>
-                    <FormGroup>
-                      <Label for="firstName">First Name</Label>
-                      <Controller
-                        name="firstName"
-                        control={control}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            id="firstName"
-                            placeholder="Enter your first name"
-                          />
-                        )}
-                      />
-                      {errors.firstName && <p>{errors.firstName.message}</p>}
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="lastName">Last Name</Label>
-                      <Controller
-                        name="lastName"
-                        control={control}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            id="lastName"
-                            placeholder="Enter your last name"
-                          />
-                        )}
-                      />
-                      {errors.lastName && <p>{errors.lastName.message}</p>}
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="bio">Bio</Label>
-                      <Controller
-                        name="bio"
-                        control={control}
-                        render={({ field }) => (
-                          <Input
-                            {...field}
-                            id="bio"
-                            type="textarea"
-                            rows={10}
-                            placeholder="Enter your bio"
-                          />
-                        )}
-                      />
-                      {errors.bio && <p>{errors.bio.message}</p>}
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="gender">Gender</Label>
-                      <Controller
-                        name="gender"
-                        control={control}
-                        render={({ field }) => (
-                          <Input {...field} id="gender" type="select">
-                            <option value="" disabled>
-                              Select your gender
-                            </option>
-                            <option value="MALE">Male</option>
-                            <option value="FEMALE">Female</option>
-                            <option value="OTHER">Other</option>
-                          </Input>
-                        )}
-                      />
-                      {errors.gender && <p>{errors.gender.message}</p>}
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="file">Avatar</Label>
-                      <Controller
-                        name="imageFile"
-                        control={control}
-                        render={({ field }) => (
-                          <Input
-                            id="file"
-                            type="file"
-                            onChange={(e) =>
-                              setValue("imageFile", e.target.files[0], {
-                                shouldDirty: true,
-                              })
-                            }
-                          />
-                        )}
-                      />
-                      {errors.imageFile && <p>{errors.imageFile.message}</p>}
-                    </FormGroup>
-                    <Button
-                      type="submit"
-                      color="primary"
-                      disabled={!isDirty}
-                      className="mr-2"
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setEditMode(false)}
-                      className="mr-2"
-                    >
-                      Cancel
-                    </Button>
+                    <Table>
+                      <tbody>
+                        <tr>
+                          <th style={{ width: "150px" }}>First Name</th>
+                          <td>
+                            <Controller
+                              name="firstName"
+                              control={control}
+                              render={({ field }) => (
+                                <Input
+                                  {...field}
+                                  placeholder="Enter your first name"
+                                />
+                              )}
+                            />
+                            {errors.firstName && (
+                              <p>{errors.firstName.message}</p>
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Last Name</th>
+                          <td>
+                            <Controller
+                              name="lastName"
+                              control={control}
+                              render={({ field }) => (
+                                <Input
+                                  {...field}
+                                  placeholder="Enter your last name"
+                                />
+                              )}
+                            />
+                            {errors.lastName && (
+                              <p>{errors.lastName.message}</p>
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Bio</th>
+                          <td>
+                            <Controller
+                              name="bio"
+                              control={control}
+                              render={({ field }) => (
+                                <Input
+                                  {...field}
+                                  type="textarea"
+                                  rows={3}
+                                  placeholder="Enter your bio"
+                                />
+                              )}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Gender</th>
+                          <td>
+                            <Controller
+                              name="gender"
+                              control={control}
+                              render={({ field }) => (
+                                <Input type="select" {...field}>
+                                  <option value="MALE">Male</option>
+                                  <option value="FEMALE">Female</option>
+                                  <option value="OTHER">Other</option>
+                                </Input>
+                              )}
+                            />
+                            {errors.gender && <p>{errors.gender.message}</p>}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th>Profile Picture</th>
+                          <td>
+                            <Controller
+                              name="imageFile"
+                              control={control}
+                              render={({ field }) => (
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    setValue("imageFile", e.target.files[0], {
+                                      shouldDirty: true,
+                                    });
+                                  }}
+                                />
+                              )}
+                            />
+                            {errors.imageFile && (
+                              <p>{errors.imageFile.message}</p>
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
+                    <div className="text-center">
+                      <Button color="primary" type="submit" disabled={!isDirty}>
+                        Save
+                      </Button>
+                      <Button
+                        color="secondary"
+                        type="button"
+                        onClick={() => setEditMode(false)}
+                        className="ml-3"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </Form>
                 )}
                 {!editMode && (
-                  <Button
-                    color="primary"
-                    onClick={() => setEditMode(true)}
-                    className="mt-3"
-                  >
-                    Edit Profile
-                  </Button>
+                  <div className="text-center mt-3">
+                    <Button
+                      color="primary"
+                      type="button"
+                      onClick={() => setEditMode(true)}
+                    >
+                      Edit Profile
+                    </Button>
+                  </div>
                 )}
               </TabPane>
               <TabPane tabId="password">
-                <Form onSubmit={handlePasswordSubmit(handleChangePassword)}>
-                  <FormGroup>
-                    <Label for="currentPassword">Current Password</Label>
-                    <Controller
-                      name="currentPassword"
-                      control={controlPassword}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          id="currentPassword"
-                          type="password"
-                          placeholder="Enter your current password"
-                          invalid={!!passwordErrors.currentPassword}
+                <Table>
+                  <tbody>
+                    <tr>
+                      <th>Current Password</th>
+                      <td>
+                        <Controller
+                          name="currentPassword"
+                          control={controlPassword}
+                          render={({ field }) => (
+                            <Input
+                              type="password"
+                              placeholder="Enter current password"
+                              invalid={!!passwordErrors.currentPassword}
+                              {...field}
+                            />
+                          )}
                         />
-                      )}
-                    />
-                    {passwordErrors.currentPassword && (
-                      <FormFeedback>
-                        {passwordErrors.currentPassword.message}
-                      </FormFeedback>
-                    )}
-                  </FormGroup>
-                  <FormGroup>
-                    <Label for="newPassword">New Password</Label>
-                    <Controller
-                      name="newPassword"
-                      control={controlPassword}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          id="newPassword"
-                          type="password"
-                          placeholder="Enter your new password"
-                          invalid={!!passwordErrors.newPassword}
+                        {passwordErrors.currentPassword && (
+                          <FormFeedback>
+                            {passwordErrors.currentPassword.message}
+                          </FormFeedback>
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>New Password</th>
+                      <td>
+                        <Controller
+                          name="newPassword"
+                          control={controlPassword}
+                          render={({ field }) => (
+                            <Input
+                              type="password"
+                              placeholder="Enter new password"
+                              invalid={!!passwordErrors.newPassword}
+                              {...field}
+                            />
+                          )}
                         />
-                      )}
-                    />
-                    {passwordErrors.newPassword && (
-                      <FormFeedback>
-                        {passwordErrors.newPassword.message}
-                      </FormFeedback>
-                    )}
-                  </FormGroup>
-                  <FormGroup>
-                    <Label for="confirmNewPassword">Confirm New Password</Label>
-                    <Controller
-                      name="confirmNewPassword"
-                      control={controlPassword}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          id="confirmNewPassword"
-                          type="password"
-                          placeholder="Confirm your new password"
-                          invalid={!!passwordErrors.confirmNewPassword}
+                        {passwordErrors.newPassword && (
+                          <FormFeedback>
+                            {passwordErrors.newPassword.message}
+                          </FormFeedback>
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Confirm New Password</th>
+                      <td>
+                        <Controller
+                          name="confirmNewPassword"
+                          control={controlPassword}
+                          render={({ field }) => (
+                            <Input
+                              type="password"
+                              placeholder="Confirm new password"
+                              invalid={!!passwordErrors.confirmNewPassword}
+                              {...field}
+                            />
+                          )}
                         />
-                      )}
-                    />
-                    {passwordErrors.confirmNewPassword && (
-                      <FormFeedback>
-                        {passwordErrors.confirmNewPassword.message}
-                      </FormFeedback>
-                    )}
-                  </FormGroup>
-                  <Button type="submit" color="primary">
-                    Change Password
-                  </Button>
-                </Form>
+                        {passwordErrors.confirmNewPassword && (
+                          <FormFeedback>
+                            {passwordErrors.confirmNewPassword.message}
+                          </FormFeedback>
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+                <Button
+                  color="primary"
+                  type="submit"
+                  onClick={handlePasswordSubmit(handleChangePassword)}
+                >
+                  Change Password
+                </Button>
               </TabPane>
             </TabContent>
           </Card>

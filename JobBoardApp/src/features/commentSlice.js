@@ -216,8 +216,6 @@ const commentSlice = createSlice({
             children: [],
           });
         }
-
-        console.log(state.comments);
       })
 
       .addCase(deleteComment.rejected, (state, action) => {

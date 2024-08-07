@@ -10,20 +10,7 @@ export const getAllReviews = async (companyId) =>
 // Add a new review
 export const addReview = async (companyId, review) =>
 {
-    const { data } = await axiosRequest.post(`/companies/${companyId}/reviews`, review);
-    return data;
-};
-
-// Get a specific review by ID
-export const getReview = async (companyId, reviewId) =>
-{
-    const { data } = await axiosRequest.get(`/companies/${companyId}/reviews/${reviewId}`);
-    return data;
-};
-
-export const updateReview = async (companyId, reviewId, review) =>
-{
-    const { data } = await axiosRequest.put(`/companies/${companyId}/reviews/${reviewId}`, review);
+    const data = await axiosRequest.post(`/companies/${companyId}/reviews`, review);
     return data;
 };
 

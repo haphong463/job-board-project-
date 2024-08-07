@@ -23,8 +23,8 @@ export const createReviewThunk = createAsyncThunk(
     {
         try
         {
-            const response = await addReview(companyId, review);
-            return response;
+            const data = await addReview(companyId, review);
+            return data;
         } catch (error)
         {
             return rejectWithValue(error.message);
@@ -32,35 +32,35 @@ export const createReviewThunk = createAsyncThunk(
     }
 );
 
-export const fetchReviewThunk = createAsyncThunk(
-    "reviews/fetchOne",
-    async ({ companyId, reviewId }, { rejectWithValue }) =>
-    {
-        try
-        {
-            const review = await getReview(companyId, reviewId);
-            return review;
-        } catch (error)
-        {
-            return rejectWithValue(error.message);
-        }
-    }
-);
+// export const fetchReviewThunk = createAsyncThunk(
+//     "reviews/fetchOne",
+//     async ({ companyId, reviewId }, { rejectWithValue }) =>
+//     {
+//         try
+//         {
+//             const data = await getReview(companyId, reviewId);
+//             return data;
+//         } catch (error)
+//         {
+//             return rejectWithValue(error.message);
+//         }
+//     }
+// );
 
-export const updateReviewThunk = createAsyncThunk(
-    "reviews/update",
-    async ({ companyId, reviewId, review }, { rejectWithValue }) =>
-    {
-        try
-        {
-            const response = await updateReview(companyId, reviewId, review);
-            return response;
-        } catch (error)
-        {
-            return rejectWithValue(error.message);
-        }
-    }
-);
+// export const updateReviewThunk = createAsyncThunk(
+//     "reviews/update",
+//     async ({ companyId, reviewId, review }, { rejectWithValue }) =>
+//     {
+//         try
+//         {
+//             const response = await updateReview(companyId, reviewId, review);
+//             return response;
+//         } catch (error)
+//         {
+//             return rejectWithValue(error.message);
+//         }
+//     }
+// );
 
 export const checkUserReviewThunk = createAsyncThunk(
     "reviews/check",
@@ -112,18 +112,6 @@ const reviewSlice = createSlice({
             .addCase(createReviewThunk.fulfilled, (state, action) =>
             {
                 state.reviews.push(action.payload);
-            })
-            .addCase(fetchReviewThunk.fulfilled, (state, action) =>
-            {
-                state.review = action.payload;
-            })
-            .addCase(updateReviewThunk.fulfilled, (state, action) =>
-            {
-                const index = state.reviews.findIndex(review => review.id === action.payload.id);
-                if (index !== -1)
-                {
-                    state.reviews[index] = action.payload;
-                }
             })
             .addCase(checkUserReviewThunk.fulfilled, (state, action) =>
             {

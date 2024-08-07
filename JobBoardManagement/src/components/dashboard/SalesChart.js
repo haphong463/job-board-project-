@@ -14,11 +14,11 @@ import axiosRequest from "../../configs/axiosConfig";
 
 const SalesChart = () => {
   const [year, setYear] = useState(new Date().getFullYear());
-  const [chartData, setChartData] = useState({
+  const [userChartData, setUserChartData] = useState({
     series: [
       {
         name: "User Registrations",
-        data: [], // This will hold the registration counts
+        data: [], // Registration counts
       },
     ],
     options: {
@@ -26,32 +26,93 @@ const SalesChart = () => {
         type: "bar",
       },
       xaxis: {
-        categories: [], // This will hold the months
+        categories: [], // Months
+      },
+      title: {
+        text: `User Registrations for ${year}`,
+      },
+    },
+  });
+  const [blogChartData, setBlogChartData] = useState({
+    series: [],
+    options: {
+      chart: {
+        type: "line",
+      },
+      xaxis: {
+        categories: [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ],
+      },
+      title: {
+        text: `Blog Posts per Month by User in ${year}`,
       },
     },
   });
 
   const fetchData = async () => {
     try {
-      const data = await axiosRequest.get("/user/registration-count/year", {
-        params: { year },
-      });
+      // Fetch user registration data
+      const userRegistrationData = await axiosRequest.get(
+        "/user/registration-count/year",
+        {
+          params: { year },
+        }
+      );
 
-      // Assuming the data returned is in the form of an array of { month: 'JANUARY', count: number }
-      const categories = data.map((item) => item.month);
-      const seriesData = data.map((item) => item.count);
+      const userCategories = userRegistrationData.map((item) => item.month);
+      const userSeriesData = userRegistrationData.map((item) => item.count);
 
-      setChartData({
+      setUserChartData({
         series: [
           {
             name: "User Registrations",
-            data: seriesData,
+            data: userSeriesData,
           },
         ],
         options: {
-          ...chartData.options,
+          ...userChartData.options,
           xaxis: {
-            categories: categories,
+            categories: userCategories,
+          },
+        },
+      });
+
+      // Fetch blog posts data
+      const blogPostsData = await axiosRequest.get(
+        `/blogs/count-by-user-and-month?year=${year}`
+      );
+      const users = Array.from(new Set(blogPostsData.map((bc) => bc.username)));
+
+      const blogSeries = users.map((user) => {
+        return {
+          name: user,
+          data: Array.from({ length: 12 }, (_, i) => {
+            const countData = blogPostsData.find(
+              (bc) => bc.username === user && bc.month === i + 1
+            );
+            return countData ? countData.count : 0;
+          }),
+        };
+      });
+
+      setBlogChartData({
+        series: blogSeries,
+        options: {
+          ...blogChartData.options,
+          title: {
+            text: `Blog Posts per Month by User in ${year}`,
           },
         },
       });
@@ -60,18 +121,29 @@ const SalesChart = () => {
     }
   };
 
+  useEffect(() => {
+    fetchData(); // Initial data fetch on component mount
+  }, []);
+
   const handleYearChange = (event) => {
     setYear(event.target.value);
   };
+
+  const handleFetchData = () => {
+    fetchData(); // Fetch data when the button is clicked
+  };
+
   return (
     <Card>
       <CardBody>
-        <CardTitle tag="h5">User Registration Summary</CardTitle>
-        <CardSubtitle className="text-muted" tag="h6">
-          Monthly user registrations for {year}
-        </CardSubtitle>
-        <div className="d-flex align-items-center">
-          <FormGroup>
+        <div className="mb-4">
+          <CardTitle tag="h5">Data Overview</CardTitle>
+          <CardSubtitle className="text-muted" tag="h6">
+            Select a year to view charts for user registrations and blog posts.
+          </CardSubtitle>
+        </div>
+        <div className="d-flex align-items-center mb-4">
+          <FormGroup className="mr-3">
             <Label for="yearInput">Select Year:</Label>
             <Input
               id="yearInput"
@@ -83,14 +155,24 @@ const SalesChart = () => {
               placeholder="Enter year"
             />
           </FormGroup>
-          <Button color="primary" onClick={fetchData} className="mt-3">
+          <Button color="primary" onClick={handleFetchData} className="mt-3">
             Fetch Data
           </Button>
         </div>
         <div className="mt-4">
+          <CardTitle tag="h5">User Registration Summary</CardTitle>
           <Chart
-            options={chartData.options}
-            series={chartData.series}
+            options={userChartData.options}
+            series={userChartData.series}
+            type="area"
+            height="350"
+          />
+        </div>
+        <div className="mt-4">
+          <CardTitle tag="h5">Blog Posts Summary</CardTitle>
+          <Chart
+            options={blogChartData.options}
+            series={blogChartData.series}
             type="area"
             height="350"
           />
