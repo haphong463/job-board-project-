@@ -63,7 +63,7 @@ public class User  extends  AbstractEntity {
     private Gender gender;
     @OneToMany(mappedBy = "id")
     private Set<Blog> blogs = new HashSet<>();
-    @OneToMany(mappedBy = "id")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quiz> quizzes = new ArrayList<>();
@@ -73,6 +73,15 @@ public class User  extends  AbstractEntity {
     private Employer employer;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Subscription> subscriptions;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RefreshToken> refreshTokens;
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Notification> sentNotifications;
+
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Notification> receivedNotifications;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
