@@ -47,17 +47,13 @@ class FavoriteJobService {
       final List<dynamic> jsonResponse = json.decode(response.body);
       print(jsonResponse); // Debugging line
 
-      if (jsonResponse is List) {
-        return jsonResponse.map((job) {
-          if (job is Map<String, dynamic>) {
-            return FavoriteJob.fromJson(job);
-          } else {
-            throw Exception('Invalid job data format');
-          }
-        }).toList();
-      } else {
-        throw Exception('Expected a list of favorite jobs');
-      }
+      return jsonResponse.map((job) {
+        if (job is Map<String, dynamic>) {
+          return FavoriteJob.fromJson(job);
+        } else {
+          throw Exception('Invalid job data format');
+        }
+      }).toList();
     } else {
       print('Error response body: ${response.body}');
       throw Exception('Failed to load favorite jobs');

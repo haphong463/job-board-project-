@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axiosRequest from "../../configs/axiosConfig";
-import CreateCv from './CreateCv';
-import CvList from './CvList';
-import ListPdf from '../pdf-management/ListPdf';
-import JobManagement from './JobManagement';
-import { useSelector } from 'react-redux';
-import './css/main.css';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import CreateCv from "./CreateCv";
+import CvList from "./CvList";
+import ListPdf from "../pdf-management/ListPdf";
+import JobManagement from "./JobManagement";
+import { useSelector } from "react-redux";
+import "./css/main.css";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function MainCv() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [currentAction, setCurrentAction] = useState(location.state?.action || 'default');
-  const user = useSelector(state => state.auth.user);
+  const [currentAction, setCurrentAction] = useState(
+    location.state?.action || "default"
+  );
+  const user = useSelector((state) => state.auth.user);
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ function MainCv() {
               return <ListPdf />;
             case "cvDetails":
               return <CvList />;
-            case 'jobMnt':
+            case "jobMnt":
               return <JobManagement />;
             default:
               return (
@@ -92,49 +94,59 @@ function MainCv() {
       <div className="main-cv-container">
         <div className="actions-container">
           <h2>Local Actions</h2>
-          <div 
-            className={`action-item ${currentAction === 'create' ? 'active' : ''}`} 
+          <div
+            className={`action-item ${
+              currentAction === "create" ? "active" : ""
+            }`}
             onClick={() => {
-              setCurrentAction('create');
-              navigate('/cv-management', { state: { action: 'create' } });
+              setCurrentAction("create");
+              navigate("/cv-management", { state: { action: "create" } });
             }}
           >
             <i className="fas fa-plus mr-2"></i> Create CV
           </div>
-          <div 
-            className={`action-item ${currentAction === 'cvDetails' ? 'active' : ''}`} 
+          <div
+            className={`action-item ${
+              currentAction === "cvDetails" ? "active" : ""
+            }`}
             onClick={() => {
-              setCurrentAction('cvDetails');
-              navigate('/cv-management', { state: { action: 'cvDetails' } });
+              setCurrentAction("cvDetails");
+              navigate("/cv-management", { state: { action: "cvDetails" } });
             }}
           >
             <i className="fas fa-info-circle mr-2"></i> CV Details
           </div>
-          <div 
-            className={`action-item ${currentAction === 'cvHis' ? 'active' : ''}`} 
+          <div
+            className={`action-item ${
+              currentAction === "cvHis" ? "active" : ""
+            }`}
             onClick={() => {
-              setCurrentAction('cvHis');
-              navigate('/cv-management', { state: { action: 'cvHis' } });
+              setCurrentAction("cvHis");
+              navigate("/cv-management", { state: { action: "cvHis" } });
             }}
           >
             <i className="fas fa-history mr-2"></i> CV History
           </div>
-          <div 
-            className={`action-item ${currentAction === 'jobMnt' ? 'active' : ''}`} 
+          <div
+            className={`action-item ${
+              currentAction === "jobMnt" ? "active" : ""
+            }`}
             onClick={() => {
-              setCurrentAction('jobMnt');
-              navigate('/cv-management', { state: { action: 'jobMnt' } });
+              setCurrentAction("jobMnt");
+              navigate("/cv-management", { state: { action: "jobMnt" } });
             }}
           >
             <i className="fas fa-box mr-2"></i> Applied Jobs
           </div>
 
-          <hr style={{
-            backgroundColor: 'white',
-            width: '100%',
-          }} />
-          <h2 className='mt-3'>Global Actions</h2>
-          <Link to="/list-template" >
+          <hr
+            style={{
+              backgroundColor: "white",
+              width: "100%",
+            }}
+          />
+          <h2 className="mt-3">Global Actions</h2>
+          <Link to="/list-template">
             <div className="global-action-item">
               <i className="fas fa-list mr-2"></i> List Template
             </div>
@@ -144,12 +156,12 @@ function MainCv() {
               <i className="fas fa-question-circle mr-2"></i> To Quiz
             </div>
           </Link>
-          <Link to="/blog">
+          <Link to="/blogs">
             <div className="global-action-item">
               <i className="fas fa-blog mr-2"></i> To Blog
             </div>
           </Link>
-          <Link to="/viewAllJobs" >
+          <Link to="/viewAllJobs">
             <div className="global-action-item">
               <i className="fas fa-list-ul mr-2"></i> To Job List
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   CButton,
   CCard,
@@ -9,21 +9,21 @@ import {
   CForm,
   CFormLabel,
   CRow,
-  CFormSelect
-} from '@coreui/react';
-import { useDispatch, useSelector } from 'react-redux';
-import { addJob } from '../../features/JobSlice';
-import { jwtDecode } from 'jwt-decode';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import { useNavigate } from 'react-router-dom';
-import { fetchCategoryThunk } from '../../features/categorySlice';
-import Select from 'react-select';
+  CFormSelect,
+} from '@coreui/react'
+import { useDispatch, useSelector } from 'react-redux'
+import { addJob } from '../../features/JobSlice'
+import { jwtDecode } from 'jwt-decode'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+import { useNavigate } from 'react-router-dom'
+import { fetchCategoryThunk } from '../../features/categorySlice'
+import Select from 'react-select'
 
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css'; // Import CSS for DatePicker
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css' // Import CSS for DatePicker
 
-import { format, parse } from 'date-fns';
+import { format, parse } from 'date-fns'
 
 const PostJob = () => {
   const [formData, setFormData] = useState({
@@ -42,165 +42,166 @@ const PostJob = () => {
     benefit: '',
     companyId: '',
     expire: '',
-  });
+  })
 
-  const [errors, setErrors] = useState({});
-  const [provinces, setProvinces] = useState([]);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const [errors, setErrors] = useState({})
+  const [provinces, setProvinces] = useState([])
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-  const { categories, state: categoryState } = useSelector(state => state.categories);
+  const { categories, state: categoryState } = useSelector((state) => state.categories)
 
   useEffect(() => {
-    dispatch(fetchCategoryThunk());
-  }, [dispatch]);
+    dispatch(fetchCategoryThunk())
+  }, [dispatch])
 
   useEffect(() => {
     if (categoryState === 'succeeded') {
-      setFormData(prevData => ({
+      setFormData((prevData) => ({
         ...prevData,
         categoryId: categories.length > 0 ? categories[0].id : '',
-      }));
+      }))
     }
-  }, [categories, categoryState]);
+  }, [categories, categoryState])
 
-
-  console.log(categories);
+  console.log(categories)
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken')
     if (token) {
       try {
-        const decodedToken = jwtDecode(token);
-        setFormData(prevData => ({
+        const decodedToken = jwtDecode(token)
+        setFormData((prevData) => ({
           ...prevData,
-          companyId: decodedToken.company // Set companyId from token
-        }));
+          companyId: decodedToken.company, // Set companyId from token
+        }))
       } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error('Error decoding token:', error)
       }
     }
-  }, []);
-
-
+  }, [])
 
   const fetchProvinces = async () => {
     try {
-      const response = await fetch('https://open.oapi.vn/location/provinces');
+      const response = await fetch('https://open.oapi.vn/location/provinces')
       if (!response.ok) {
-        throw new Error('Failed to fetch provinces');
+        throw new Error('Failed to fetch provinces')
       }
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.code === 'success') {
-        setProvinces(data.data);
+        setProvinces(data.data)
       } else {
-        throw new Error('Invalid data format from API');
+        throw new Error('Invalid data format from API')
       }
     } catch (error) {
-      console.error('Error fetching provinces:', error);
+      console.error('Error fetching provinces:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchProvinces();
-  }, []);
+    fetchProvinces()
+  }, [])
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
+    const { id, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
-    }));
-  };
+    }))
+  }
 
   const handleQuillChange = (field, value) => {
     setFormData((prevData) => ({
       ...prevData,
       [field]: value,
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     if (validateForm()) {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('accessToken')
       if (token) {
         try {
-          const decodedToken = jwtDecode(token);
-          const userId = decodedToken.id;
-          const result = await dispatch(addJob({ userId, data: formData }));
+          const decodedToken = jwtDecode(token)
+          const userId = decodedToken.id
+          const result = await dispatch(addJob({ userId, data: formData }))
           if (addJob.fulfilled.match(result)) {
-            navigate('/job?success=true');
+            navigate('/job?success=true')
           } else {
-            console.log('Failed to add job:', result.payload);
+            console.log('Failed to add job:', result.payload)
           }
         } catch (error) {
-          console.error('Error:', error);
+          console.error('Error:', error)
         }
       }
     }
-  };
+  }
   const handleDateChange = (date) => {
     if (date) {
-      const formattedDate = format(date, 'dd/MM/yyyy'); // Định dạng ngày
-      setFormData(prevData => ({
+      const formattedDate = format(date, 'dd/MM/yyyy') // Định dạng ngày
+      setFormData((prevData) => ({
         ...prevData,
         expire: formattedDate,
-      }));
+      }))
     }
-  };
+  }
   const validateForm = () => {
-    let tempErrors = {};
+    let tempErrors = {}
 
-    const currentDate = new Date();
-    const expireDate = formData.expire ? parse(formData.expire, 'dd/MM/yyyy', new Date()) : null;
-    const tenDaysLater = new Date();
-    tenDaysLater.setDate(currentDate.getDate() + 10);
+    const currentDate = new Date()
+    const expireDate = formData.expire ? parse(formData.expire, 'dd/MM/yyyy', new Date()) : null
+    const tenDaysLater = new Date()
+    tenDaysLater.setDate(currentDate.getDate() + 10)
 
-    if (!formData.expire) tempErrors.expire = "Expire date is required";
-    else if (expireDate < tenDaysLater) tempErrors.expire = "Expire date must be at least 10 days from today";
+    if (!formData.expire) tempErrors.expire = 'Expire date is required'
+    else if (expireDate < tenDaysLater)
+      tempErrors.expire = 'Expire date must be at least 10 days from today'
 
-    if (!formData.title) tempErrors.title = "Title is required";
-    else if (formData.title.length > 200) tempErrors.title = "Title must be less than 200 characters";
+    if (!formData.title) tempErrors.title = 'Title is required'
+    else if (formData.title.length > 200)
+      tempErrors.title = 'Title must be less than 200 characters'
 
-    if (!formData.offeredSalary) tempErrors.offeredSalary = "Offered Salary is required";
-    else if (formData.offeredSalary <= 100) tempErrors.offeredSalary = "Offered Salary must be greater than 100";
-    else if (formData.offeredSalary < 0) tempErrors.offeredSalary = "Offered Salary cannot be negative";
+    if (!formData.offeredSalary) tempErrors.offeredSalary = 'Offered Salary is required'
+    else if (formData.offeredSalary <= 100)
+      tempErrors.offeredSalary = 'Offered Salary must be greater than 100'
+    else if (formData.offeredSalary < 0)
+      tempErrors.offeredSalary = 'Offered Salary cannot be negative'
 
-    if (!formData.description) tempErrors.description = "Description is required";
-    if (!formData.workSchedule) tempErrors.workSchedule = "Work Schedule is required";
-    if (!formData.city) tempErrors.city = "City is required";
-    if (!formData.responsibilities) tempErrors.responsibilities = "Responsibilities are required";
-    if (!formData.requiredSkills) tempErrors.requiredSkills = "Required Skills are required";
-    if (!formData.position) tempErrors.position = "Position is required";
-    if (!formData.experience) tempErrors.experience = "Experience is required";
-    if (!formData.qualification) tempErrors.qualification = "Qualification is required";
-    if (!formData.benefit) tempErrors.benefit = "Benefit is required";
-    if (!formData.categoryId.length) tempErrors.categoryId = "Category is required";
-    if (!formData.slot) tempErrors.slot = "Quantity is required";
-    else if (formData.slot < 0) tempErrors.slot = "Quantity cannot be negative";
+    if (!formData.description) tempErrors.description = 'Description is required'
+    if (!formData.workSchedule) tempErrors.workSchedule = 'Work Schedule is required'
+    if (!formData.city) tempErrors.city = 'City is required'
+    if (!formData.responsibilities) tempErrors.responsibilities = 'Responsibilities are required'
+    if (!formData.requiredSkills) tempErrors.requiredSkills = 'Required Skills are required'
+    if (!formData.position) tempErrors.position = 'Position is required'
+    if (!formData.experience) tempErrors.experience = 'Experience is required'
+    if (!formData.qualification) tempErrors.qualification = 'Qualification is required'
+    if (!formData.benefit) tempErrors.benefit = 'Benefit is required'
+    if (!formData.categoryId.length) tempErrors.categoryId = 'Category is required'
+    if (!formData.slot) tempErrors.slot = 'Quantity is required'
+    else if (formData.slot < 0) tempErrors.slot = 'Quantity cannot be negative'
 
-    console.log(tempErrors);
-    setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
-  };
+    console.log(tempErrors)
+    setErrors(tempErrors)
+    return Object.keys(tempErrors).length === 0
+  }
   const handleSelectChange = (selectedOptions, actionMeta) => {
     if (actionMeta.name === 'categoryId') {
-      setFormData(prevData => ({
+      setFormData((prevData) => ({
         ...prevData,
-        categoryId: selectedOptions ? selectedOptions.map(option => option.value) : []
-      }));
+        categoryId: selectedOptions ? selectedOptions.map((option) => option.value) : [],
+      }))
     } else {
-      setFormData(prevData => ({
+      setFormData((prevData) => ({
         ...prevData,
-        keySkills: selectedOptions ? selectedOptions.map(option => option.value) : []
-      }));
+        keySkills: selectedOptions ? selectedOptions.map((option) => option.value) : [],
+      }))
     }
-  };
+  }
   const jobOptions = [
     // Your options list here
-  ];
+  ]
 
   return (
     <>
@@ -231,7 +232,9 @@ const PostJob = () => {
                     <CRow>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="title" className="form-label">Job Title</CFormLabel>
+                          <CFormLabel htmlFor="title" className="form-label">
+                            Job Title
+                          </CFormLabel>
                           <CFormInput
                             type="text"
                             id="title"
@@ -245,7 +248,9 @@ const PostJob = () => {
                       </CCol>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="offeredSalary" className="form-label">Offered Salary</CFormLabel>
+                          <CFormLabel htmlFor="offeredSalary" className="form-label">
+                            Offered Salary
+                          </CFormLabel>
                           <CFormInput
                             type="number"
                             id="offeredSalary"
@@ -254,14 +259,18 @@ const PostJob = () => {
                             onChange={handleChange}
                             invalid={!!errors.offeredSalary}
                           />
-                          {errors.offeredSalary && <div className="invalid-feedback">{errors.offeredSalary}</div>}
+                          {errors.offeredSalary && (
+                            <div className="invalid-feedback">{errors.offeredSalary}</div>
+                          )}
                         </div>
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="workSchedule" className="form-label">workSchedule</CFormLabel>
+                          <CFormLabel htmlFor="workSchedule" className="form-label">
+                            workSchedule
+                          </CFormLabel>
                           <CFormInput
                             type="text"
                             id="workSchedule"
@@ -270,12 +279,16 @@ const PostJob = () => {
                             onChange={handleChange}
                             invalid={!!errors.workSchedule}
                           />
-                          {errors.workSchedule && <div className="invalid-feedback">{errors.workSchedule}</div>}
+                          {errors.workSchedule && (
+                            <div className="invalid-feedback">{errors.workSchedule}</div>
+                          )}
                         </div>
                       </CCol>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="slot" className="form-label">Quantity</CFormLabel>
+                          <CFormLabel htmlFor="slot" className="form-label">
+                            Quantity
+                          </CFormLabel>
                           <CFormInput
                             type="number"
                             id="slot"
@@ -291,23 +304,36 @@ const PostJob = () => {
                     <CRow>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="categoryId" className="form-label">Category</CFormLabel>
+                          <CFormLabel htmlFor="categoryId" className="form-label">
+                            Category
+                          </CFormLabel>
                           <Select
                             isMulti
                             name="categoryId"
-                            options={categories.map(cat => ({ value: cat.categoryId, label: cat.categoryName }))}
+                            options={categories.map((cat) => ({
+                              value: cat.categoryId,
+                              label: cat.categoryName,
+                            }))}
                             onChange={handleSelectChange}
-                            value={formData.categoryId.map(id => {
-                              const category = categories.find(cat => cat.categoryId === id);
-                              return category ? { value: category.categoryId, label: category.categoryName } : null;
-                            }).filter(Boolean)}
+                            value={formData.categoryId
+                              .map((id) => {
+                                const category = categories.find((cat) => cat.categoryId === id)
+                                return category
+                                  ? { value: category.categoryId, label: category.categoryName }
+                                  : null
+                              })
+                              .filter(Boolean)}
                           />
-                          {errors.categoryId && <div className="invalid-feedback">{errors.categoryId}</div>}
+                          {errors.categoryId && (
+                            <div className="invalid-feedback">{errors.categoryId}</div>
+                          )}
                         </div>
                       </CCol>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="position" className="form-label">Position</CFormLabel>
+                          <CFormLabel htmlFor="position" className="form-label">
+                            Position
+                          </CFormLabel>
                           <CFormSelect
                             id="position"
                             value={formData.position}
@@ -323,14 +349,18 @@ const PostJob = () => {
                             <option value="LEADER">Leader</option>
                             <option value="MANAGER">Manager</option>
                           </CFormSelect>
-                          {errors.position && <div className="invalid-feedback">{errors.position}</div>}
+                          {errors.position && (
+                            <div className="invalid-feedback">{errors.position}</div>
+                          )}
                         </div>
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="experience" className="form-label">Experience</CFormLabel>
+                          <CFormLabel htmlFor="experience" className="form-label">
+                            Experience
+                          </CFormLabel>
                           <CFormInput
                             type="text"
                             id="experience"
@@ -339,29 +369,38 @@ const PostJob = () => {
                             onChange={handleChange}
                             invalid={!!errors.experience}
                           />
-                          {errors.experience && <div className="invalid-feedback">{errors.experience}</div>}
+                          {errors.experience && (
+                            <div className="invalid-feedback">{errors.experience}</div>
+                          )}
                         </div>
                       </CCol>
 
                       <CRow>
                         <CCol md={6}>
                           <div className="mb-3">
-                            <CFormLabel htmlFor="expire" className="form-label">Expire Date</CFormLabel>
+                            <CFormLabel htmlFor="expire" className="form-label">
+                              Expire Date
+                            </CFormLabel>
                             <DatePicker
                               id="expire"
-                              selected={formData.expire ? parse(formData.expire, 'dd/MM/yyyy', new Date()) : null}
+                              selected={
+                                formData.expire
+                                  ? parse(formData.expire, 'dd/MM/yyyy', new Date())
+                                  : null
+                              }
                               onChange={handleDateChange}
                               dateFormat="dd/MM/yyyy"
                               placeholderText="Select expiration date"
                               className="form-control"
                             />
-
                           </div>
                         </CCol>
                       </CRow>
                       <CCol md={6}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="qualification" className="form-label">Qualification</CFormLabel>
+                          <CFormLabel htmlFor="qualification" className="form-label">
+                            Qualification
+                          </CFormLabel>
                           <CFormInput
                             type="text"
                             id="qualification"
@@ -370,77 +409,101 @@ const PostJob = () => {
                             onChange={handleChange}
                             invalid={!!errors.qualification}
                           />
-                          {errors.qualification && <div className="invalid-feedback">{errors.qualification}</div>}
+                          {errors.qualification && (
+                            <div className="invalid-feedback">{errors.qualification}</div>
+                          )}
                         </div>
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={12}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="description" className="form-label">Job Description</CFormLabel>
+                          <CFormLabel htmlFor="description" className="form-label">
+                            Job Description
+                          </CFormLabel>
                           <ReactQuill
                             value={formData.description}
                             onChange={(value) => handleQuillChange('description', value)}
                           />
-                          {errors.description && <div className="invalid-feedback">{errors.description}</div>}
+                          {errors.description && (
+                            <div className="invalid-feedback">{errors.description}</div>
+                          )}
                         </div>
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={12}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="responsibilities" className="form-label">Job Responsibilities</CFormLabel>
+                          <CFormLabel htmlFor="responsibilities" className="form-label">
+                            Job Responsibilities
+                          </CFormLabel>
                           <ReactQuill
                             value={formData.responsibilities}
                             onChange={(value) => handleQuillChange('responsibilities', value)}
                           />
-                          {errors.responsibilities && <div className="invalid-feedback">{errors.responsibilities}</div>}
+                          {errors.responsibilities && (
+                            <div className="invalid-feedback">{errors.responsibilities}</div>
+                          )}
                         </div>
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={12}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="requiredSkills" className="form-label">Key Skills</CFormLabel>
+                          <CFormLabel htmlFor="requiredSkills" className="form-label">
+                            Required Skills
+                          </CFormLabel>
                           <ReactQuill
                             value={formData.requiredSkills}
                             onChange={(value) => handleQuillChange('requiredSkills', value)}
                           />
-                          {errors.requiredSkills && <div className="invalid-feedback">{errors.requiredSkills}</div>}
+                          {errors.requiredSkills && (
+                            <div className="invalid-feedback">{errors.requiredSkills}</div>
+                          )}
                         </div>
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={12}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="benefit" className="form-label">Benefit</CFormLabel>
+                          <CFormLabel htmlFor="benefit" className="form-label">
+                            Benefit
+                          </CFormLabel>
                           <ReactQuill
                             value={formData.benefit}
                             onChange={(value) => handleQuillChange('benefit', value)}
                           />
-                          {errors.benefit && <div className="invalid-feedback">{errors.benefit}</div>}
+                          {errors.benefit && (
+                            <div className="invalid-feedback">{errors.benefit}</div>
+                          )}
                         </div>
                       </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={12}>
                         <div className="mb-3">
-                          <CFormLabel htmlFor="city" className="form-label">City</CFormLabel>
+                          <CFormLabel htmlFor="city" className="form-label">
+                            City
+                          </CFormLabel>
                           <select
                             className="form-select"
                             id="city"
                             value={formData.city}
                             onChange={handleChange}
                           >
-                            {provinces.map(province => (
-                              <option key={province.id} value={province.id}>{province.name}</option>
+                            {provinces.map((province) => (
+                              <option key={province.id} value={province.id}>
+                                {province.name}
+                              </option>
                             ))}
                           </select>
                           {errors.city && <div className="invalid-feedback">{errors.city}</div>}
                         </div>
                       </CCol>
                     </CRow>
-                    <CButton type="submit" color="primary">Submit</CButton>
+                    <CButton type="submit" color="primary">
+                      Submit
+                    </CButton>
                   </CForm>
                 </CCardBody>
               </CCard>
@@ -449,13 +512,12 @@ const PostJob = () => {
         </CContainer>
       </section>
     </>
-  );
-};
+  )
+}
 
-export default PostJob;
+export default PostJob
 
-
-const style = document.createElement('style');
+const style = document.createElement('style')
 style.textContent = `
 
 .invalid-feedback {
@@ -464,5 +526,5 @@ style.textContent = `
 }
 
 
-`;
-document.head.appendChild(style);
+`
+document.head.appendChild(style)

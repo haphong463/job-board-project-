@@ -28,18 +28,12 @@ class AuthService {
       await storage.write(key: 'firstName', value: decodedToken['firstName']);
       await storage.write(key: 'lastName', value: decodedToken['lastName']);
       await storage.write(key: 'email', value: jsonResponse['email']);
-      await storage.write(
-          key: 'username', value: jsonResponse['username']); // Save username
+      await storage.write(key: 'username', value: jsonResponse['username']);
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      await storage.write(key: 'role', value: jsonEncode(decodedToken['role']));
       saveUserId(jsonResponse['id'].toString());
-    } else if (response.statusCode == 401 || response.statusCode == 403) {
-      // Handle invalid credentials
-      var errorResponse = jsonDecode(response.body);
-      String errorMessage = errorResponse['message'];
-      print(errorMessage);
-      throw Exception(errorMessage);
     } else {
-      throw Exception('The username and password you entered are incorrect.');
+      throw Exception('Failed to login');
     }
 
     return response;
@@ -325,6 +319,27 @@ class AuthService {
 
   Future<void> saveLastName(String lastName) async {
     await storage.write(key: 'lastName', value: lastName);
+  }
+
+  Future<List<Map<String, dynamic>>> getRoles() async {
+    String? roleJson = await storage.read(key: 'role');
+    if (roleJson != null) {
+      print('Role JSON: $roleJson'); // Debugging line
+
+      // Decode the JSON string into a List<dynamic>
+      List<dynamic> roleList = jsonDecode(roleJson);
+
+      // Ensure each item is a Map<String, dynamic>
+      return roleList.map((role) {
+        if (role is Map<String, dynamic>) {
+          return role;
+        } else {
+          throw Exception('Unexpected role format: $role');
+        }
+      }).toList();
+    } else {
+      return [];
+    }
   }
 
   Future<void> saveImageUrl(String imageUrl) async {

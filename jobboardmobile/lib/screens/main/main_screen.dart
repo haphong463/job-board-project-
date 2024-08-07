@@ -36,6 +36,7 @@ class _MainScreenState extends State<MainScreen> {
   String? firstName;
   String? lastName;
   String? email;
+  String? role;
   String? imageUrl;
   List<Company> _companies = [];
   List<Job> _jobs = [];
@@ -54,6 +55,33 @@ class _MainScreenState extends State<MainScreen> {
     lastName = await _authService.getLastName();
     email = await _authService.getEmail();
     imageUrl = await _authService.getImageUrl();
+
+    try {
+      List<Map<String, dynamic>> roles = await _authService.getRoles();
+
+      // Extract the 'authority' values from each role
+      List<String> authorities =
+          roles.map((role) => role['authority'] as String).toList();
+
+      print('Authorities: $authorities');
+
+      if (authorities.contains('ROLE_EMPLOYER')) {
+        role = 'ROLE_EMPLOYER';
+        print('User role assigned: $role');
+      } else {
+        role = null; // Or assign a default value if needed
+        print('User does not have ROLE_EMPLOYER, role is set to null');
+      }
+    } catch (e) {
+      print('Error fetching user details or roles: $e');
+    }
+
+    print('First Name: $firstName');
+    print('Last Name: $lastName');
+    print('Email: $email');
+    print('Image URL: $imageUrl');
+    print('Role: $role');
+
     setState(() {});
   }
 
@@ -176,6 +204,15 @@ class _MainScreenState extends State<MainScreen> {
               ),
             );
           }),
+          if (role == 'ROLE_EMPLOYER') ...[
+            _buildDrawerItem(Icons.visibility, 'Employer Dashboard', () {
+              Navigator.pushNamed(context, '/chart');
+            }),
+            _buildDrawerItem(Icons.work, 'Employer Job', () {
+              Navigator.pushNamed(context, '/joblist');
+            }),
+            const Divider(),
+          ],
           _buildDrawerItem(Icons.note_add, 'Saved jobs', () {
             Navigator.pushNamed(context, '/save_jobs');
           }),
@@ -264,7 +301,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
         const SizedBox(height: 5),
-        Container(
+        SizedBox(
           height: 230,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -291,7 +328,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
         const SizedBox(height: 5),
-        Container(
+        SizedBox(
           height: 230,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
@@ -399,10 +436,10 @@ class RecentlyAddedCard extends StatelessWidget {
   final Company company;
 
   const RecentlyAddedCard({
-    Key? key,
+    super.key,
     required this.job,
     required this.company,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

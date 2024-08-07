@@ -244,7 +244,7 @@ public class AuthController {
                                 user.getFirstName(),
                                 user.getLastName(),
                                 rolesSignIn,
-                                user.getCompany().getCompanyId()
+                                user.getCompany() != null ? user.getCompany().getCompanyId() : null // Check for null company
 
                         ));
                     }

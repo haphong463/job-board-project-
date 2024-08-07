@@ -14,8 +14,7 @@ import '../../dto/LikeStorage.dart';
 class CompanyReviewScreen extends StatefulWidget {
   final int companyId;
 
-  const CompanyReviewScreen({Key? key, required this.companyId})
-      : super(key: key);
+  const CompanyReviewScreen({super.key, required this.companyId});
 
   @override
   _CompanyReviewScreenState createState() => _CompanyReviewScreenState();
@@ -64,7 +63,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       List<Review> updatedReviews = [];
       for (var review in reviews) {
         bool isLiked = _username != null
-            ? await LikeStorage.getLikeStatus(review.id!, _username!)
+            ? await LikeStorage.getLikeStatus(review.id, _username!)
             : false;
         updatedReviews.add(review.copyWith(likedByCurrentUser: isLiked));
       }
@@ -96,7 +95,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   Future<void> _addReview() async {
     if (_titleController.text.isEmpty || _descriptionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Title and description cannot be empty'),
           backgroundColor: Colors.red,
         ),
@@ -106,7 +105,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
 
     if (_username == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('User not logged in'),
           backgroundColor: Colors.red,
         ),
@@ -140,7 +139,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Review added successfully'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 2),
@@ -164,10 +163,10 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
 
     try {
       LikeResponse response =
-          await _reviewService.likeReview(widget.companyId, review.id!);
+          await _reviewService.likeReview(widget.companyId, review.id);
       if (response.success) {
         if (_username != null) {
-          await LikeStorage.saveLikeStatus(review.id!, _username!, true);
+          await LikeStorage.saveLikeStatus(review.id, _username!, true);
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -206,10 +205,10 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
 
     try {
       final response =
-          await _reviewService.unlikeReview(widget.companyId, review.id!);
+          await _reviewService.unlikeReview(widget.companyId, review.id);
       if (response.success) {
         if (_username != null) {
-          await LikeStorage.saveLikeStatus(review.id!, _username!, false);
+          await LikeStorage.saveLikeStatus(review.id, _username!, false);
         }
       } else {
         setState(() {
@@ -227,7 +226,8 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
         review.likedByCurrentUser = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error unliking review. Please try again.')),
+        const SnackBar(
+            content: Text('Error unliking review. Please try again.')),
       );
     }
   }
@@ -237,8 +237,8 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title:
-              Text('Add Review', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text('Add Review',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -246,24 +246,24 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
               children: [
                 TextField(
                   controller: _titleController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Title',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.title),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Description',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.description),
                   ),
                   maxLines: 3,
                 ),
-                SizedBox(height: 16),
-                Text('Rating:',
+                const SizedBox(height: 16),
+                const Text('Rating:',
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 RatingBar.builder(
@@ -272,8 +272,8 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                   direction: Axis.horizontal,
                   allowHalfRating: true,
                   itemCount: 5,
-                  itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                  itemBuilder: (context, _) => Icon(
+                  itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  itemBuilder: (context, _) => const Icon(
                     Icons.star,
                     color: Colors.amber,
                   ),
@@ -289,18 +289,18 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _addReview();
               },
-              child: Text('Submit'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.blue,
               ),
+              child: const Text('Submit'),
             ),
           ],
         );
@@ -312,7 +312,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Company Reviews'),
+        title: const Text('Company Reviews'),
         backgroundColor: Colors.blue,
         elevation: 0,
       ),
@@ -322,14 +322,14 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Reviews',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: _reviews.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Text(
                         'No reviews available',
                         style: TextStyle(fontSize: 18, color: Colors.grey),
@@ -344,8 +344,8 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
           ? null
           : FloatingActionButton.extended(
               onPressed: _showReviewDialog,
-              icon: Icon(Icons.rate_review),
-              label: Text('Add Review'),
+              icon: const Icon(Icons.rate_review),
+              label: const Text('Add Review'),
               backgroundColor: Colors.blue,
             ),
     );
@@ -354,7 +354,7 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
   Widget _buildReviewsList() {
     return ListView.separated(
       itemCount: _reviews.length,
-      separatorBuilder: (context, index) => Divider(),
+      separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final review = _reviews[index];
         return _buildReviewCard(review);
@@ -369,9 +369,9 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
 
     return Card(
       elevation: 2,
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -381,14 +381,14 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                   backgroundImage: NetworkImage(modifiedImageUrl),
                   radius: 24,
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         review.username,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: Color.fromARGB(205, 98, 98, 98)),
@@ -398,12 +398,12 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               review.title,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             // Sử dụng widget Html để render nội dung HTML
             Html(
               data: review.description,
@@ -415,13 +415,13 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                 ),
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 RatingBarIndicator(
                   rating: review.rating,
-                  itemBuilder: (context, index) => Icon(
+                  itemBuilder: (context, index) => const Icon(
                     Icons.star,
                     color: Colors.amber,
                   ),
@@ -433,10 +433,10 @@ class _CompanyReviewScreenState extends State<CompanyReviewScreen> {
                   children: [
                     Text(
                       review.likeCount.toString(),
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     IconButton(
                       icon: Icon(
                         review.likedByCurrentUser

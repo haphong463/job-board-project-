@@ -71,7 +71,10 @@ public class JobController {
         }
         return ResponseEntity.ok(jobs);
     }
-
+    @GetMapping("/super-hot")
+    public List<JobDTO> getSuperHotJobs() {
+        return jobService.getSuperHotJobs();
+    }
 
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN') or hasRole('EMPLOYER')")
     @PostMapping("/users/{userId}")
@@ -119,5 +122,8 @@ public class JobController {
         jobService.hideJob(jobId);
         return ResponseEntity.ok().build();
     }
-
+    @GetMapping
+    public List<JobDTO> getAllJobs() {
+        return jobService.getAllJobs();
+    }
 }

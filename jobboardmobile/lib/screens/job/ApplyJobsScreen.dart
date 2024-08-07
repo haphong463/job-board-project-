@@ -2,10 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart'; // Adjust the import based on your project structure
 import '../../dto/application_dto.dart';
-import '../../service/jobApplication_service.dart';  // Ensure you have this import
+import '../../service/jobApplication_service.dart'; // Ensure you have this import
 import '../../constant/endpoint.dart';
 
 class ApplyJobsScreen extends StatefulWidget {
+  const ApplyJobsScreen({super.key});
+
   @override
   _ApplyJobsScreenState createState() => _ApplyJobsScreenState();
 }
@@ -33,126 +35,129 @@ class _ApplyJobsScreenState extends State<ApplyJobsScreen> {
       print('User ID not found in storage');
     }
   }
-  Widget applicationCard(ApplicationDTO application) {
-  String imageUrl = application.companyDTO.logo.replaceAll('http://localhost:8080', Endpoint.imageUrl);
-  bool isApproved = application.approved;
-  print(isApproved);
 
-  return Card(
-    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    elevation: 2,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                application.jobDTO.title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isApproved ? Colors.green : Colors.red,
-                  borderRadius: BorderRadius.circular(12),
+  Widget applicationCard(ApplicationDTO application) {
+    String imageUrl = application.companyDTO.logo
+        .replaceAll('http://localhost:8080', Endpoint.imageUrl);
+    bool isApproved = application.approved;
+    print(isApproved);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  application.jobDTO.title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18),
                 ),
-                child: Text(
-                  isApproved ? 'Viewed' : 'Not Viewed',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(8),
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(imageUrl),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isApproved ? Colors.green : Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    isApproved ? 'Viewed' : 'Not Viewed',
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ),
-              SizedBox(width: 12),
-              Text(
-                application.companyDTO.companyName,
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-          SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(Icons.attach_money, color: Colors.grey[600], size: 20),
-              SizedBox(width: 4),
-              Text(
-                'Offered salary: ${application.jobDTO.offeredSalary}',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.business_center, color: Colors.grey[600], size: 20),
-              SizedBox(width: 4),
-              Text(
-                application.jobDTO.jobType ?? 'N/A',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.location_on, color: Colors.grey[600], size: 20),
-              SizedBox(width: 4),
-              Text(
-                application.companyDTO.location ?? 'N/A',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-          SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              Chip(label: Text(application.jobDTO.keySkills)),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(8),
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(imageUrl),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  application.companyDTO.companyName,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.attach_money, color: Colors.grey[600], size: 20),
+                const SizedBox(width: 4),
+                Text(
+                  'Offered salary: ${application.jobDTO.offeredSalary}',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.business_center, color: Colors.grey[600], size: 20),
+                const SizedBox(width: 4),
+                Text(
+                  application.jobDTO.jobType ?? 'N/A',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.location_on, color: Colors.grey[600], size: 20),
+                const SizedBox(width: 4),
+                Text(
+                  application.companyDTO.location ?? 'N/A',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Chip(label: Text(application.jobDTO.keySkills)),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
-
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text('My Applications', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Color(0xFF89BA16),
+        title: const Text('My Applications',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF89BA16),
         elevation: 0,
       ),
       body: FutureBuilder<List<ApplicationDTO>>(
         future: _futureAppliedJobs,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF89BA16)),
               ),
@@ -162,14 +167,15 @@ class _ApplyJobsScreenState extends State<ApplyJobsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  SizedBox(height: 16),
-                  Text('Error: ${snapshot.error}', style: TextStyle(fontSize: 16)),
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Error: ${snapshot.error}',
+                      style: const TextStyle(fontSize: 16)),
                 ],
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

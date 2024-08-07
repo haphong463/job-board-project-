@@ -19,57 +19,60 @@ class Job {
   final bool isSuperHot;
   final List<int> categoryId;
   final int companyId;
-
+  final bool isHidden;
   final String expire;
 
-  Job({
-    required this.id,
-    required this.title,
-    required this.offeredSalary,
-    required this.description,
-    required this.responsibilities,
-    required this.requiredSkills,
-    required this.workSchedule,
-    required this.keySkills,
-    required this.position,
-    required this.experience,
-    required this.qualification,
-    required this.jobType,
-    required this.contractType,
-    required this.benefit,
-    required this.createdAt,
-    required this.slot,
-    required this.profileApproved,
-    required this.isSuperHot,
-    required this.categoryId,
-    required this.companyId,
-    required this.expire,
-  });
+  Job(
+      {required this.id,
+      required this.title,
+      required this.offeredSalary,
+      required this.description,
+      required this.responsibilities,
+      required this.requiredSkills,
+      required this.workSchedule,
+      required this.keySkills,
+      required this.position,
+      required this.experience,
+      required this.qualification,
+      required this.jobType,
+      required this.contractType,
+      required this.benefit,
+      required this.createdAt,
+      required this.slot,
+      required this.profileApproved,
+      required this.isSuperHot,
+      required this.categoryId,
+      required this.companyId,
+      required this.expire,
+      required this.isHidden});
 
   factory Job.fromJson(Map<String, dynamic> json) {
     return Job(
-      id: json['id'] ?? 0,
-      title: json['title'] ?? '',
-      offeredSalary: json['offeredSalary'] ?? '',
-      description: json['description'] ?? '',
-      responsibilities: json['responsibilities'] ?? '',
-      requiredSkills: json['requiredSkills'] ?? '',
-      workSchedule: json['workSchedule'] ?? '',
-      keySkills: json['keySkills'] ?? '',
-      position: json['position'] ?? '',
-      experience: json['experience'] ?? '',
-      qualification: json['qualification'] ?? '',
-      jobType: json['jobType'] ?? '',
-      contractType: json['contractType'] ?? '',
-      benefit: json['benefit'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? ''),
-      slot: json['slot'] ?? '',
-      profileApproved: json['profileApproved'] ?? '',
-      isSuperHot: json['isSuperHot'] ?? '',
-      categoryId: List<int>.from(json['categoryId'] ?? []),
-      companyId: json['companyId'] ?? 0,
-      expire: json['expire'] ?? '',
-    );
+        id: json['id'] ?? 0,
+        title: json['title'] ?? '',
+        offeredSalary: json['offeredSalary'] ?? '',
+        description: json['description'] ?? '',
+        responsibilities: json['responsibilities'] ?? '',
+        requiredSkills: json['requiredSkills'] ?? '',
+        workSchedule: json['workSchedule'] ?? '',
+        keySkills: json['keySkills'] ?? '',
+        position: json['position'] ?? '',
+        experience: json['experience'] ?? '',
+        qualification: json['qualification'] ?? '',
+        jobType: json['jobType'] ?? '',
+        contractType: json['contractType'] ?? '',
+        benefit: json['benefit'] ?? '',
+        createdAt: DateTime.parse(json['createdAt'] ?? ''),
+        slot: json['slot'] ?? '',
+        profileApproved: json['profileApproved'] ?? '',
+        isSuperHot: json['isSuperHot'] ?? '',
+        categoryId: List<int>.from(json['categoryId'] ?? []),
+        companyId: json['companyId'] ?? 0,
+        expire: json['expire'] ?? '',
+        isHidden: json['isHidden'] as bool? ??
+            false // Thêm giá trị mặc định cho isHidden
+
+        );
   }
 
   Map<String, dynamic> toJson() {
@@ -95,6 +98,7 @@ class Job {
       'categoryId': categoryId,
       'companyId': companyId,
       'expire': expire,
+      'isHidden': isHidden,
     };
   }
 }

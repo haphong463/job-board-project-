@@ -64,6 +64,7 @@ dependencies:
   image_picker: ^1.1.2
   profanity_filter: ^2.0.0
   moment_dart: ^2.2.1+beta.0
+  fl_chart: ^0.68.0
 
 dev_dependencies:
   flutter_test:

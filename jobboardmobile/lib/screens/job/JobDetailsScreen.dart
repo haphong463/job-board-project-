@@ -53,11 +53,11 @@ class JobDetailsScreen extends StatefulWidget {
   final bool isHtml;
 
   const JobDetailsScreen({
-    Key? key,
+    super.key,
     required this.job,
     required this.company,
     required this.isHtml,
-  }) : super(key: key);
+  });
 
   @override
   _JobDetailsScreenState createState() => _JobDetailsScreenState();
@@ -245,18 +245,18 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             const SizedBox(height: 16),
             Text(
               widget.job.title,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             FutureBuilder<Map<int, String>>(
               future: _categoryFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Text('Error loading categories: ${snapshot.error}');
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('No categories available');
+                  return const Text('No categories available');
                 } else {
                   final categoryMap = snapshot.data!;
                   return _buildCategoriesRow(categoryMap);
@@ -295,9 +295,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                     future: _checkIfFavorite(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
+                        return const CircularProgressIndicator();
                       } else if (snapshot.hasError) {
-                        return Text('Error loading favorite status');
+                        return const Text('Error loading favorite status');
                       } else if (snapshot.hasData) {
                         final isFavorite = snapshot.data!;
                         return IconButton(
@@ -309,7 +309,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                           onPressed: _toggleFavorite,
                         );
                       } else {
-                        return Text('No data');
+                        return const Text('No data');
                       }
                     },
                   ),
@@ -333,11 +333,11 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                               ),
                             );
                           },
-                    child: Text(_hasApplied ? 'Applied' : 'Send Application'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorUtil.primaryColor,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     ),
+                    child: Text(_hasApplied ? 'Applied' : 'Send Application'),
                   ),
                 ],
               ),
@@ -354,7 +354,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             '',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
@@ -387,14 +387,15 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ],
           ),
           const SizedBox(height: 8),
           isHtml
               ? Html(data: value)
-              : Text(value, style: TextStyle(fontSize: 16)),
+              : Text(value, style: const TextStyle(fontSize: 16)),
         ],
       ),
     );

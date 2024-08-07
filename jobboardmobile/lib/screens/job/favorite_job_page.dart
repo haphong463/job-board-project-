@@ -47,6 +47,8 @@ Future<Map<int, String>> fetchCategories() async {
 }
 
 class FavoriteJobsScreen extends StatefulWidget {
+  const FavoriteJobsScreen({super.key});
+
   @override
   _FavoriteJobsScreenState createState() => _FavoriteJobsScreenState();
 }
@@ -85,18 +87,18 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Favorite Jobs'),
+        title: const Text('Favorite Jobs'),
         backgroundColor: Colors.blue,
       ),
       body: FutureBuilder<List<FavoriteJob>>(
         future: _favoriteJobsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No favorite jobs found.'));
+            return const Center(child: Text('No favorite jobs found.'));
           } else {
             final favoriteJobs = snapshot.data!;
 
@@ -119,7 +121,7 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
                               height: 50,
                               fit: BoxFit.cover,
                             )
-                          : SizedBox(
+                          : const SizedBox(
                               width: 50,
                               height: 50, // Placeholder if no logo
                             ),
@@ -128,18 +130,18 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(favoriteJob.position),
-                          SizedBox(height: 4, width: 0.4),
+                          const SizedBox(height: 4, width: 0.4),
                           FutureBuilder<Map<int, String>>(
                             future: _categoryFuture,
                             builder: (context, categorySnapshot) {
                               if (categorySnapshot.connectionState ==
                                   ConnectionState.waiting) {
-                                return CircularProgressIndicator();
+                                return const CircularProgressIndicator();
                               } else if (categorySnapshot.hasError) {
-                                return Text('Error loading categories');
+                                return const Text('Error loading categories');
                               } else if (!categorySnapshot.hasData ||
                                   categorySnapshot.data!.isEmpty) {
-                                return Text('No categories available');
+                                return const Text('No categories available');
                               } else {
                                 final categoryMap = categorySnapshot.data!;
                                 return _SkillsWidget(
@@ -229,7 +231,7 @@ class _FavoriteJobsScreenState extends State<FavoriteJobsScreen> {
                         );
                       },
                       trailing: IconButton(
-                        icon: Icon(Icons.favorite_border),
+                        icon: const Icon(Icons.favorite_border),
                         onPressed: () async {
                           await _favoriteJobService
                               .deleteFavoriteJob(favoriteJob.id);
@@ -291,7 +293,7 @@ class _SkillsWidget extends StatelessWidget {
                 ),
               );
             },
-            child: Text('View more'),
+            child: const Text('View more'),
           ),
       ],
     );
@@ -302,6 +304,7 @@ class MoreCategoriesScreen extends StatelessWidget {
   final List<String> categories;
 
   const MoreCategoriesScreen({
+    super.key,
     required this.categories,
   });
 
@@ -309,7 +312,7 @@ class MoreCategoriesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Skill job'),
+        title: const Text('Skill job'),
       ),
       body: ListView.builder(
         itemCount: categories.length,

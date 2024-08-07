@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jobboardmobile/screens/employer/chartscreen.dart';
+import 'package:jobboardmobile/screens/employer/jobscreen.dart';
 import 'package:jobboardmobile/screens/job/ApplyJobsScreen.dart';
 import 'package:jobboardmobile/screens/notification/notification_screen.dart';
 import 'package:kommunicate_flutter/kommunicate_flutter.dart';
@@ -41,6 +43,8 @@ class MyApp extends StatelessWidget {
         '/forgot_password': (context) => ForgotPasswordScreen(),
         '/main': (context) => const MainScreen(),
         '/reset_password': (context) => ResetPasswordScreen(),
+        '/chart': (context) => const ChartScreen(),
+        '/joblist': (context) => const JobListScreen(),
         '/search': (context) => SearchPage(),
         '/application': (context) => const MainScreen(),
         '/job': (context) => JobInfoPage(),
@@ -61,7 +65,7 @@ class MyApp extends StatelessWidget {
               ModalRoute.of(context)?.settings.arguments as Map<String, int>?;
           return DocumentViewScreen(documentId: args?['documentId'] ?? 0);
         },
-        '/applied_jobs': (context) => ApplyJobsScreen(),
+        '/applied_jobs': (context) => const ApplyJobsScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name!.startsWith('/quiz/')) {
