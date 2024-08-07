@@ -7,11 +7,9 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.project4.JobBoardService.Config.TokenRefreshException;
 import com.project4.JobBoardService.DTO.UserDTO;
-import com.project4.JobBoardService.Entity.Employer;
-import com.project4.JobBoardService.Entity.RefreshToken;
-import com.project4.JobBoardService.Entity.Role;
-import com.project4.JobBoardService.Entity.User;
+import com.project4.JobBoardService.Entity.*;
 import com.project4.JobBoardService.Enum.ERole;
+import com.project4.JobBoardService.Repository.CompanyRepository;
 import com.project4.JobBoardService.Service.UserService;
 import com.project4.JobBoardService.payload.*;
 import com.project4.JobBoardService.Repository.EmployerRepository;
@@ -44,6 +42,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -80,8 +79,9 @@ public class AuthController {
     private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
+    CompanyRepository companyRepository;
+    @Autowired
     private UserService userService;
-
     @Value("${app.googleClientID}")
     private String CLIENT_ID; // Replace with your actual client ID
 
@@ -417,6 +417,8 @@ public class AuthController {
         user.setIsEnabled(true);
         String verificationCode = generateVerificationCode();
         user.setVerificationCode(verificationCode);
+        user.setVerificationCodeExpiry(LocalDateTime.now().plusDays(2));
+//        user.setVerificationCodeExpiry(LocalDateTime.now().plusSeconds(30));
 
         userRepository.save(user);
         emailService.sendVerificationEmail(user.getEmail(), user.getUsername(), user.getFirstName(), verificationCode, user.getEmail());
@@ -470,7 +472,6 @@ public class AuthController {
         return ResponseEntity.ok(modelMapper.map(userService.updateUserPermissions(userCreated.getId(), permissions), UserDTO.class));
     }
 
-
     //Employer
     @PostMapping("/registerEmployer")
     public ResponseEntity<?> registerEmployer(@Valid @RequestBody EmployerSignupRequest signUpRequest) {
@@ -480,6 +481,11 @@ public class AuthController {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
+        Company company = new Company();
+        company.setCompanyName(signUpRequest.getCompanyName());
+        company.setWebsiteLink(signUpRequest.getCompanyWebsite());
+        Company savedCompany = companyRepository.save(company);
+
         Employer employer = new Employer();
         employer.setName(signUpRequest.getName());
         employer.setTitle(signUpRequest.getTitle());
@@ -487,16 +493,14 @@ public class AuthController {
         employer.setPhoneNumber(signUpRequest.getPhoneNumber());
         employer.setCompanyName(signUpRequest.getCompanyName());
         employer.setCompanyAddress(signUpRequest.getCompanyAddress());
-        employer.setCompanyWebsite(signUpRequest.getCompanyWebsite());
+        employer.setWebsiteLink(signUpRequest.getCompanyWebsite());
+        employer.setCompany(savedCompany);
 
         String verificationCode = UUID.randomUUID().toString();
         employer.setVerificationCode(verificationCode);
         employer.setVerified(false);
-        employer.setApproved(false); // Employer chưa được phê duyệt
-
+        employer.setApproved(false);
         employerRepository.save(employer);
-
-
         return ResponseEntity.ok(new MessageResponse("Employer registered successfully! Please check your email for verification instructions."));
     }
 
@@ -588,6 +592,14 @@ public class AuthController {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             String latestVerificationCode = user.getVerificationCode();
+            LocalDateTime verificationCodeExpiry = user.getVerificationCodeExpiry();
+
+            if (verificationCodeExpiry != null && LocalDateTime.now().isAfter(verificationCodeExpiry)) {
+                userRepository.delete(user);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Verification code has expired. Please register again.");
+                return;
+            }
+
             if (latestVerificationCode != null && latestVerificationCode.equals(code)) {
                 user.setVerified(true);
                 userRepository.save(user);
@@ -653,6 +665,7 @@ public class AuthController {
         user.setLastName(employer.getTitle());
         user.setPassword(encoder.encode(passwordSetupRequest.getPassword()));
         user.setIsEnabled(true);
+        user.setCompany(employer.getCompany());  // Set the company reference
 
         Set<Role> roles = new HashSet<>();
         Role employerRole = roleRepository.findByName(ERole.ROLE_EMPLOYER)
