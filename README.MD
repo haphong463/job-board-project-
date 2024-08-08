@@ -22,7 +22,7 @@ The **Job Board Management Project** is a dynamic and comprehensive web and mobi
 - **Mobile Frontend (jobboardmobile)**: Flutter.
 
 ## 📥 Installation and Setup
-To get started with the Job Board Management Project, ensure you have the following prerequisites installed: JDK 11 or later, Maven, MySQL, Node.js and npm (or Yarn), and Flutter SDK.
+To get started with the Job Board Management Project, ensure you have the following prerequisites installed: JDK 20 or later, Gradle, MySQL, Node.js and npm (or Yarn), and Flutter SDK.
 
 ### Backend Setup (JobBoardService)
 1. **Clone the Repository**:
@@ -37,7 +37,8 @@ To get started with the Job Board Management Project, ensure you have the follow
     ```
 3. **Build and Run the Application**:
     ```bash
-    mvn clean install && mvn spring-boot:run
+    ./gradlew build
+    ./gradlew bootRun
     ```
 
 ### Web Frontend Setup (JobBoardApp, JobBoardEmployer, JobBoardManagement)
