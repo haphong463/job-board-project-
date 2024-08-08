@@ -49,7 +49,7 @@ public class Blog extends AbstractEntity {
     @Column(name = "slug", unique = true, nullable = false)
     private String slug;
 
-    @Column(name = "is_archive", nullable=false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    @Column(name = "is_archive", nullable=false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean isArchive;
 
     @ManyToOne(fetch = FetchType.LAZY)

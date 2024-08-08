@@ -43,7 +43,7 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public Blog createBlog(Blog blog, MultipartFile imageFile, List<String> hashtagNames) {
         handleImageFile(blog, imageFile, "create");
-
+        blog.setIsArchive(false);
         List<HashTag> hashTags = new ArrayList<>();
         for (String tagName : hashtagNames) {
             HashTag hashTag = hashTagRepository.findByName(tagName)

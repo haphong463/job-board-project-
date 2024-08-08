@@ -41,6 +41,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Company> _companies = [];
   List<Job> _jobs = [];
   Map<int, Company> _companyMap = <int, Company>{};
+  List<Map<String, String>> authorities = [];
 
   @override
   void initState() {
@@ -55,23 +56,10 @@ class _MainScreenState extends State<MainScreen> {
     lastName = await _authService.getLastName();
     email = await _authService.getEmail();
     imageUrl = await _authService.getImageUrl();
+    authorities = (await _authService.getRoles()).cast<Map<String, String>>();
 
     try {
-      List<Map<String, dynamic>> roles = await _authService.getRoles();
-
-      // Extract the 'authority' values from each role
-      List<String> authorities =
-          roles.map((role) => role['authority'] as String).toList();
-
       print('Authorities: $authorities');
-
-      if (authorities.contains('ROLE_EMPLOYER')) {
-        role = 'ROLE_EMPLOYER';
-        print('User role assigned: $role');
-      } else {
-        role = null; // Or assign a default value if needed
-        print('User does not have ROLE_EMPLOYER, role is set to null');
-      }
     } catch (e) {
       print('Error fetching user details or roles: $e');
     }
@@ -204,7 +192,8 @@ class _MainScreenState extends State<MainScreen> {
               ),
             );
           }),
-          if (role == 'ROLE_EMPLOYER') ...[
+          if (authorities
+              .any((item) => item['authority'] == 'ROLE_EMPLOYER')) ...[
             _buildDrawerItem(Icons.visibility, 'Employer Dashboard', () {
               Navigator.pushNamed(context, '/chart');
             }),

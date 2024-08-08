@@ -20,6 +20,10 @@ export const signUpSchema = yup.object().shape({
   username: yup
     .string()
     .max(50, "Username cannot exceed 50 characters")
+    .matches(
+      /^[a-zA-Z0-9_]*$/,
+      "Username can only contain letters, numbers, and underscores"
+    )
     .test(
       "forbidden-words",
       "Username contains forbidden words",

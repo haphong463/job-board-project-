@@ -59,6 +59,7 @@ class AuthService {
       await storage.write(key: 'email', value: jsonResponse['email']);
       await storage.write(key: 'username', value: jsonResponse['username']);
       await storage.write(key: 'imageUrl', value: decodedToken['imageUrl']);
+      await storage.write(key: 'role', value: jsonEncode(decodedToken['role']));
       saveUserId(jsonResponse['id'].toString());
     } else {
       throw Exception('Failed to login');
@@ -321,7 +322,7 @@ class AuthService {
     await storage.write(key: 'lastName', value: lastName);
   }
 
-  Future<List<Map<String, dynamic>>> getRoles() async {
+  Future<List<Map<String, String>>> getRoles() async {
     String? roleJson = await storage.read(key: 'role');
     if (roleJson != null) {
       print('Role JSON: $roleJson'); // Debugging line
@@ -331,7 +332,7 @@ class AuthService {
 
       // Ensure each item is a Map<String, dynamic>
       return roleList.map((role) {
-        if (role is Map<String, dynamic>) {
+        if (role is Map<String, String>) {
           return role;
         } else {
           throw Exception('Unexpected role format: $role');

@@ -196,106 +196,86 @@ public class AuthController {
     @PostMapping("/google-mobile")
     public ResponseEntity<?> authenticateUserWithGoogleAndroid(@RequestBody TokenRequest tokenRequest) {
         try {
-            String token = tokenRequest.getToken();
-            String url = "https://www.googleapis.com/oauth2/v3/userinfo";
+            Map<String, Object> payload = getGoogleUserInfo(tokenRequest.getToken());
 
-            // Create headers and add the token
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            // Make the request to Google's userinfo endpoint
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {
-            });
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                Map<String, Object> payload = response.getBody();
-
-                if (payload != null) {
-                    // Extract user information from payload
-                    String userId = (String) payload.get("sub");
-                    String email = (String) payload.get("email");
-                    boolean emailVerified = (Boolean) payload.get("email_verified");
-                    String name = (String) payload.get("name");
-                    String pictureUrl = (String) payload.get("picture");
-                    String locale = (String) payload.get("locale");
-                    String familyName = (String) payload.get("family_name");
-                    String givenName = (String) payload.get("given_name");
-
-                    // Use or store profile information
-                    User user = userRepository.findByEmail(email).orElse(null);
-                    if (user != null) {
-                        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-                        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                        String jwt = jwtUtils.generateJwtToken(authentication);
-
-                        List<String> rolesSignIn = userDetails.getAuthorities().stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList());
-                        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-                        return ResponseEntity.ok(new JwtResponse(jwt,
-                                refreshToken.getToken(),
-                                user.getId(),
-                                user.getUsername(),
-                                user.getEmail(),
-                                user.getFirstName(),
-                                user.getLastName(),
-                                rolesSignIn,
-                                user.getCompany() != null ? user.getCompany().getCompanyId() : null // Check for null company
-
-                        ));
-                    }
-
-                    // Create new user
-                    user = new User();
-                    user.setEmail(email);
-                    user.setUsername(email); // or some other unique identifier
-                    user.setFirstName(givenName);
-                    user.setLastName(familyName);
-                    user.setVerified(emailVerified);
-                    user.setPassword(encoder.encode("google-password"));
-                    user.setImageUrl(pictureUrl);
-                    user.setIsEnabled(true);
-                    Set<Role> roles = new HashSet<>();
-                    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(userRole);
-                    user.setRoles(roles);
-                    user = userRepository.save(user);
-
-                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    String jwt = jwtUtils.generateJwtToken(authentication);
-
-                    List<String> rolesSignIn = userDetails.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList());
-                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-                    return ResponseEntity.ok(new JwtResponse(jwt,
-                            refreshToken.getToken(),
-                            user.getId(),
-                            user.getUsername(),
-                            user.getEmail(),
-                            user.getFirstName(),
-                            user.getLastName(),
-                            rolesSignIn,
-                            user.getCompany() != null ? user.getCompany().getCompanyId() : null // Check for null company
-
-                    ));
-                } else {
-                    return ResponseEntity.badRequest().body("Invalid token payload!");
-                }
-            } else {
-                return ResponseEntity.badRequest().body("Invalid token!");
+            if (payload == null) {
+                return ResponseEntity.badRequest().body("Invalid token payload!");
             }
+
+            User user = processUser(payload);
+            return createAuthenticationResponse(user);
+
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+    private Map<String, Object> getGoogleUserInfo(String token) {
+        String url = "https://www.googleapis.com/oauth2/v3/userinfo";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<Map<String, Object>>() {});
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody();
+        } else {
+            throw new RuntimeException("Invalid token!");
+        }
+    }
+
+    private User processUser(Map<String, Object> payload) {
+        String email = (String) payload.get("email");
+        boolean emailVerified = (Boolean) payload.get("email_verified");
+        String givenName = (String) payload.get("given_name");
+        String familyName = (String) payload.get("family_name");
+        String pictureUrl = (String) payload.get("picture");
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user != null) {
+            return user;
+        }
+
+        user = new User();
+        user.setEmail(email);
+        user.setUsername(email); // or some other unique identifier
+        user.setFirstName(givenName);
+        user.setLastName(familyName);
+        user.setVerified(emailVerified);
+        user.setPassword(encoder.encode("google-password"));
+        user.setImageUrl(pictureUrl);
+        user.setIsEnabled(true);
+        Set<Role> roles = new HashSet<>();
+        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        roles.add(userRole);
+        user.setRoles(roles);
+        return userRepository.save(user);
+    }
+
+    private ResponseEntity<?> createAuthenticationResponse(User user) {
+        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        List<String> rolesSignIn = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                refreshToken.getToken(),
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                rolesSignIn,
+                user.getCompany() != null ? user.getCompany().getCompanyId() : null // Check for null company
+        ));
+    }
+
 
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
