@@ -31,7 +31,7 @@ To get started with the Job Board Management Project, ensure you have the follow
     ```
 2. **Configure MySQL Database**: Update the `application.properties` file with your MySQL database credentials:
     ```properties
-    spring.datasource.url=jdbc:mysql://localhost:3306/job_board_db
+    spring.datasource.url=jdbc:mysql://localhost:3306/jobboard
     spring.datasource.username=root
     spring.datasource.password=yourpassword
     ```
