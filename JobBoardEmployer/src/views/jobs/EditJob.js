@@ -41,6 +41,8 @@ const EditJob = () => {
     qualification: '',
     categoryIds: [], // Update categoryId to categoryIds
     workingDays: '',
+    contractType: '',
+    jobType: '',
   });
 
 
@@ -107,6 +109,8 @@ const EditJob = () => {
         qualification: jobDetails.qualification || '',
         categoryIds: jobDetails.categoryIds || [], // Update categoryId to categoryIds
         workingDays: jobDetails.workingDays || '',
+        contractType: jobDetails.contractType || '',
+        jobType: jobDetails.jobType || '',
       });
     }
   }, [jobDetails]);
@@ -312,19 +316,64 @@ const EditJob = () => {
                         </div>
                       </CCol>
                       <CCol md={6}>
-                        <div className="mb-3">
-                          <CFormLabel htmlFor="position" className="form-label">Position</CFormLabel>
-                          <CFormInput
-                            type="text"
-                            id="position"
-                            placeholder="Enter position"
-                            value={formData.position}
-                            onChange={handleChange}
-                            invalid={!!errors.position}
-                          />
-                          {errors.position && <div className="invalid-feedback">{errors.position}</div>}
-                        </div>
-                      </CCol>
+    <div className="mb-3">
+      <CFormLabel htmlFor="position" className="form-label">Position</CFormLabel>
+      <select
+        className="form-select"
+        id="position"
+        value={formData.position}
+        onChange={handleChange}
+      >
+        <option value="">Select position</option>
+        <option value="INTERN">Intern</option>
+        <option value="FRESHER">Fresher</option>
+        <option value="JUNIOR">Junior</option>
+        <option value="MIDDLE">Middle</option>
+        <option value="SENIOR">Senior</option>
+        <option value="LEADER">Leader</option>
+        <option value="MANAGER">Manager</option>
+      </select>
+      {errors.position && <div className="invalid-feedback">{errors.position}</div>}
+    </div>
+  </CCol>
+
+
+  <CCol md={6}>
+    <div className="mb-3">
+      <CFormLabel htmlFor="jobType" className="form-label">Job Type</CFormLabel>
+      <select
+        className="form-select"
+        id="jobType"
+        value={formData.jobType}
+        onChange={handleChange}
+      >
+        <option value="">Select job type</option>
+        <option value="IN_OFFICE">In Office</option>
+        <option value="HYBRID">Hybrid</option>
+        <option value="REMOTE">Remote</option>
+        <option value="OVERSEA">Oversea</option>
+      </select>
+      {errors.jobType && <div className="invalid-feedback">{errors.jobType}</div>}
+    </div>
+  </CCol>
+
+  <CCol md={6}>
+    <div className="mb-3">
+      <CFormLabel htmlFor="contractType" className="form-label">Contract Type</CFormLabel>
+      <select
+        className="form-select"
+        id="contractType"
+        value={formData.contractType}
+        onChange={handleChange}
+      >
+        <option value="">Select contract type</option>
+        <option value="FREELANCE">Freelance</option>
+        <option value="FULLTIME">Fulltime</option>
+        <option value="PART_TIME">Part-time</option>
+      </select>
+      {errors.contractType && <div className="invalid-feedback">{errors.contractType}</div>}
+    </div>
+  </CCol>
                     </CRow>
                     <CRow>
                       <CCol md={6}>

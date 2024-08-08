@@ -42,6 +42,9 @@ const PostJob = () => {
     benefit: '',
     companyId: '',
     expire: '',
+    contractType: '',
+    jobType: '',
+
   })
 
   const [errors, setErrors] = useState({})
@@ -176,6 +179,8 @@ const PostJob = () => {
     if (!formData.requiredSkills) tempErrors.requiredSkills = 'Required Skills are required'
     if (!formData.position) tempErrors.position = 'Position is required'
     if (!formData.experience) tempErrors.experience = 'Experience is required'
+      if (!formData.contractType) tempErrors.contractType = 'Contract Type is required'
+  if (!formData.jobType) tempErrors.jobType = 'Job Type is required'
     if (!formData.qualification) tempErrors.qualification = 'Qualification is required'
     if (!formData.benefit) tempErrors.benefit = 'Benefit is required'
     if (!formData.categoryId.length) tempErrors.categoryId = 'Category is required'
@@ -354,6 +359,53 @@ const PostJob = () => {
                           )}
                         </div>
                       </CCol>
+                      
+                                          <CCol md={6}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="contractType" className="form-label">
+                            Contract Type
+                          </CFormLabel>
+                          <CFormSelect
+                            id="contractType"
+                            value={formData.contractType}
+                            onChange={handleChange}
+                            invalid={!!errors.contractType}
+                          >
+                            <option value="">Select contract type</option>
+                            <option value="FREELANCE">Freelance</option>
+                            <option value="FULLTIME">Fulltime</option>
+                            <option value="PART_TIME">Part-time</option>
+                          </CFormSelect>
+                          {errors.contractType && (
+                            <div className="invalid-feedback">{errors.contractType}</div>
+                          )}
+                        </div>
+                      </CCol>
+
+                      <CCol md={6}>
+                        <div className="mb-3">
+                          <CFormLabel htmlFor="jobType" className="form-label">
+                            Job Type
+                          </CFormLabel>
+                          <CFormSelect
+                            id="jobType"
+                            value={formData.jobType}
+                            onChange={handleChange}
+                            invalid={!!errors.jobType}
+                          >
+                            <option value="">Select job type</option>
+                            <option value="IN_OFFICE">In Office</option>
+                            <option value="HYBRID">Hybrid</option>
+                            <option value="REMOTE">Remote</option>
+                            <option value="OVERSEA">Oversea</option>
+                          </CFormSelect>
+                          {errors.jobType && (
+                            <div className="invalid-feedback">{errors.jobType}</div>
+                          )}
+                        </div>
+                      </CCol>
+
+                      
                     </CRow>
                     <CRow>
                       <CCol md={6}>

@@ -4,6 +4,8 @@ import com.project4.JobBoardService.Config.ResourceNotFoundException;
 import com.project4.JobBoardService.DTO.CategoryDTO;
 import com.project4.JobBoardService.DTO.JobDTO;
 import com.project4.JobBoardService.Entity.*;
+import com.project4.JobBoardService.Enum.ContractType;
+import com.project4.JobBoardService.Enum.JobType;
 import com.project4.JobBoardService.Enum.Position;
 import com.project4.JobBoardService.Enum.WorkSchedule;
 import com.project4.JobBoardService.Repository.*;
@@ -172,9 +174,15 @@ public class JobServiceImpl   implements JobService {
             existingJob.setPosition(Position.LEADER);
             existingJob.setPosition(Position.SENIOR);
             existingJob.setPosition(Position.MANAGER);
+            existingJob.setJobType(JobType.IN_OFFICE);
+            existingJob.setJobType(JobType.OVERSEA);
+            existingJob.setJobType(JobType.REMOTE);
+            existingJob.setJobType(JobType.HYBRID);
+            existingJob.setContractType(ContractType.FULLTIME);
+            existingJob.setContractType(ContractType.FREELANCE);
+            existingJob.setContractType(ContractType.PART_TIME);
             existingJob.setExperience(jobDTO.getExperience());
             existingJob.setSlot(jobDTO.getSlot());
-            existingJob.setIsHidden(jobDTO.getIsHidden());
             existingJob.setExpire(jobDTO.getExpire());
 
             existingJob.setBenefit(jobDTO.getBenefit());
@@ -210,6 +218,13 @@ public class JobServiceImpl   implements JobService {
         job.setPosition(Position.MIDDLE);
         job.setPosition(Position.MANAGER);
         job.setPosition(Position.SENIOR);
+        job.setJobType(JobType.IN_OFFICE);
+        job.setJobType(JobType.HYBRID);
+        job.setJobType(JobType.OVERSEA);
+        job.setJobType(JobType.REMOTE);
+        job.setContractType(ContractType.PART_TIME);
+        job.setContractType(ContractType.FULLTIME);
+        job.setContractType(ContractType.FREELANCE);
         job.setExperience(jobDTO.getExperience());
         if (jobDTO.getCompanyId() != null) {
             Company company = new Company();
@@ -321,6 +336,15 @@ public class JobServiceImpl   implements JobService {
         dto.setPosition(String.valueOf(Position.MIDDLE));
         dto.setPosition(String.valueOf(Position.MANAGER));
         dto.setPosition(String.valueOf(Position.SENIOR));
+        dto.setJobType(String.valueOf(JobType.HYBRID));
+        dto.setJobType(String.valueOf(JobType.OVERSEA));
+        dto.setJobType(String.valueOf(JobType.IN_OFFICE));
+
+        dto.setJobType(String.valueOf(JobType.REMOTE));
+        dto.setContractType(String.valueOf(ContractType.FULLTIME));
+        dto.setContractType(String.valueOf(ContractType.PART_TIME));
+        dto.setContractType(String.valueOf(ContractType.FREELANCE));
+
         dto.setExperience(job.getExperience());
         dto.setSlot(job.getSlot());
         dto.setIsHidden(job.getIsHidden());
