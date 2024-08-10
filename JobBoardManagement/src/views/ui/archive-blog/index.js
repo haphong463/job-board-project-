@@ -30,7 +30,13 @@ import {
   updateIsArchiveStatusThunk,
 } from "../../../features/blogSlice";
 import debounce from "lodash.debounce";
-import { FaFileExcel } from "react-icons/fa";
+import {
+  FaEdit,
+  FaFileExcel,
+  FaRemoveFormat,
+  FaTrash,
+  FaTrashRestore,
+} from "react-icons/fa";
 import "../blog/style.css";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import Swal from "sweetalert2";
@@ -156,7 +162,7 @@ export function Blog(props) {
     if (selectedIds.length === 0) {
       Swal.fire(
         "Warning",
-        "Please select at least one blog to archive.",
+        "Please select at least one blog to restore.",
         "warning"
       );
       return;
@@ -164,12 +170,12 @@ export function Blog(props) {
 
     Swal.fire({
       title: "Are you sure?",
-      text: "You are about to archive the selected blogs.",
+      text: "You are about to restore the selected blogs.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, archive it!",
+      confirmButtonText: "Yes, restore it!",
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(
@@ -180,8 +186,8 @@ export function Blog(props) {
         ).then((res) => {
           if (res.meta.requestStatus === "fulfilled") {
             Swal.fire(
-              "Archived!",
-              "The selected blogs have been archived.",
+              "Restored!",
+              "The selected blogs have been restored.",
               "success"
             );
             setSelectedRows([]); // Clear selected rows
@@ -253,20 +259,20 @@ export function Blog(props) {
     {
       name: "Actions",
       cell: (row) => (
-        <Dropdown
-          isOpen={dropdownOpen[row.id]}
-          toggle={() => toggleDropdown(row.id)}
-        >
-          <DropdownToggle caret color="info">
-            Actions
-          </DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem onClick={() => handleEdit(row.id)}>Edit</DropdownItem>
-            <DropdownItem onClick={() => handleDelete(row.id)}>
-              Delete
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+        <>
+          <Button
+            color="success"
+            onClick={() => handleEdit(row.id)}
+            style={{
+              marginRight: 3,
+            }}
+          >
+            <FaEdit />
+          </Button>
+          <Button color="danger" onClick={() => handleDelete(row.id)}>
+            <FaTrash />
+          </Button>
+        </>
       ),
     },
   ];
@@ -293,15 +299,35 @@ export function Blog(props) {
   return (
     <Card>
       <div className="d-flex justify-content-between align-items-center p-3 gap-3">
-        <h4>Blog List</h4>
+        <h4>Archive</h4>
         <div className="d-flex  p-3 gap-3">
           <Form isEdit={isEdit} setIsEdit={setIsEdit} />
-          <Button color="success" onClick={getExcelData}>
-            <FaFileExcel />
+          <Button
+            color="success"
+            onClick={getExcelData}
+            className="d-flex align-items-center"
+            style={{
+              backgroundColor: "green",
+            }}
+          >
+            <FaFileExcel
+              style={{
+                marginRight: 5,
+              }}
+            />
             Export CSV
           </Button>
-          <Button color="warning" onClick={handleArchiveSelected}>
-            Restore Selected
+          <Button
+            color="warning"
+            onClick={handleArchiveSelected}
+            className="d-flex align-items-center"
+          >
+            <FaTrashRestore
+              style={{
+                marginRight: 5,
+              }}
+            />
+            Restore
           </Button>
         </div>
       </div>

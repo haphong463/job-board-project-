@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jobboardmobile/constant/endpoint.dart';
 import 'package:jobboardmobile/screens/job/JobListScreen.dart';
 import 'package:jobboardmobile/service/quiz_service.dart';
+import 'package:kommunicate_flutter/kommunicate_flutter.dart';
 
 import '../../core/utils/color_util.dart';
 import '../../models/company_model.dart';
@@ -41,7 +42,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Company> _companies = [];
   List<Job> _jobs = [];
   Map<int, Company> _companyMap = <int, Company>{};
-  List<Map<String, String>> authorities = [];
+  List<String> authorities = [];
 
   @override
   void initState() {
@@ -56,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
     lastName = await _authService.getLastName();
     email = await _authService.getEmail();
     imageUrl = await _authService.getImageUrl();
-    authorities = (await _authService.getRoles()).cast<Map<String, String>>();
+    authorities = await _authService.getRoles();
 
     try {
       print('Authorities: $authorities');
@@ -128,6 +129,23 @@ class _MainScreenState extends State<MainScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          dynamic conversationObject = {
+            'appId':
+                '12b89b2bd944255d48649585ef9106922', // Replace with your Kommunicate App ID
+          };
+
+          KommunicateFlutterPlugin.buildConversation(conversationObject)
+              .then((clientConversationId) {
+            print("Conversation builder success : $clientConversationId");
+          }).catchError((error) {
+            print("Conversation builder error : $error");
+          });
+        },
+        tooltip: 'Action',
+        child: const Icon(Icons.message),
+      ),
     );
   }
 
@@ -192,8 +210,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             );
           }),
-          if (authorities
-              .any((item) => item['authority'] == 'ROLE_EMPLOYER')) ...[
+          if (authorities.any((item) => item == 'ROLE_EMPLOYER')) ...[
             _buildDrawerItem(Icons.visibility, 'Employer Dashboard', () {
               Navigator.pushNamed(context, '/chart');
             }),

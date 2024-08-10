@@ -172,7 +172,7 @@ public class EmailServiceImpl implements EmailService {
                         ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
                         ".header { background-color: #4CAF50; color: white; text-align: center; padding: 20px; }" +
                         ".content { background-color: #f9f9f9; border: 1px solid #ddd; padding: 20px; }" +
-                        "h2 { color: #89ba16ae; }" +
+                        "h2 { color: #f8f9fa; }" +
                         "strong { color: #3498DB; }" +
                         ".footer { text-align: center; margin-top: 20px; font-size: 0.8em; color: #777; }" +
                         "</style>" +

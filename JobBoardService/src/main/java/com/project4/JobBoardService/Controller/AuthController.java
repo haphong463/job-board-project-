@@ -351,7 +351,7 @@ public class AuthController {
                 userDetails.getFirstName(),
                 userDetails.getLastName(),
                 roles,
-                userDetails.getCompanyId()
+                user.getCompany() != null ? user.getCompany().getCompanyId() : null // Check for null company
         );
         return ResponseEntity.ok(jwtResponse);
     }
@@ -487,7 +487,7 @@ public class AuthController {
         employer.setApproved(false);
 
         // Tạo mã xác thực
-        String verificationCode = UUID.randomUUID().toString();
+        String verificationCode = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
         employer.setVerificationCode(verificationCode);
 
         // Lưu nhà tuyển dụng chưa có công ty

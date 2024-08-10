@@ -14,8 +14,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux'
 import { addJob } from '../../features/JobSlice'
 import { jwtDecode } from 'jwt-decode'
-import ReactQuill from 'react-quill'
-import 'react-quill/dist/quill.snow.css'
+import { Editor } from '@tinymce/tinymce-react'
 import { useNavigate } from 'react-router-dom'
 import { fetchCategoryThunk } from '../../features/categorySlice'
 import Select from 'react-select'
@@ -24,6 +23,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css' // Import CSS for DatePicker
 
 import { format, parse } from 'date-fns'
+import { auto } from '@popperjs/core'
 
 const PostJob = () => {
   const [formData, setFormData] = useState({
@@ -44,7 +44,6 @@ const PostJob = () => {
     expire: '',
     contractType: '',
     jobType: '',
-
   })
 
   const [errors, setErrors] = useState({})
@@ -113,6 +112,12 @@ const PostJob = () => {
       [id]: value,
     }))
   }
+  const handleEditorChange = (field, content) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: content,
+    }))
+  }
 
   const handleQuillChange = (field, value) => {
     setFormData((prevData) => ({
@@ -179,8 +184,8 @@ const PostJob = () => {
     if (!formData.requiredSkills) tempErrors.requiredSkills = 'Required Skills are required'
     if (!formData.position) tempErrors.position = 'Position is required'
     if (!formData.experience) tempErrors.experience = 'Experience is required'
-      if (!formData.contractType) tempErrors.contractType = 'Contract Type is required'
-  if (!formData.jobType) tempErrors.jobType = 'Job Type is required'
+    if (!formData.contractType) tempErrors.contractType = 'Contract Type is required'
+    if (!formData.jobType) tempErrors.jobType = 'Job Type is required'
     if (!formData.qualification) tempErrors.qualification = 'Qualification is required'
     if (!formData.benefit) tempErrors.benefit = 'Benefit is required'
     if (!formData.categoryId.length) tempErrors.categoryId = 'Category is required'
@@ -274,15 +279,24 @@ const PostJob = () => {
                       <CCol md={6}>
                         <div className="mb-3">
                           <CFormLabel htmlFor="workSchedule" className="form-label">
-                            workSchedule
+                            WorkSchedule
                           </CFormLabel>
-                          <CFormInput
-                            type="text"
-                            id="workSchedule"
-                            placeholder="Enter workSchedule"
+                          <Editor
+                            apiKey="6cb07sce109376hijr18r8vibbm3h5qjhh4qa8gc9pw8rvn0"
                             value={formData.workSchedule}
-                            onChange={handleChange}
-                            invalid={!!errors.workSchedule}
+                            init={{
+                              height: 200,
+                              menubar: false,
+                              plugins:
+                                'advlist autolink lists link image charmap preview anchor textcolor',
+                              toolbar:
+                                'undo redo | formatselect | bold italic backcolor | \
+                              alignleft aligncenter alignright alignjustify | \
+                              bullist numlist outdent indent | removeformat | help',
+                            }}
+                            onEditorChange={(content) =>
+                              handleEditorChange('workSchedule', content)
+                            }
                           />
                           {errors.workSchedule && (
                             <div className="invalid-feedback">{errors.workSchedule}</div>
@@ -341,7 +355,7 @@ const PostJob = () => {
                           </CFormLabel>
                           <CFormSelect
                             id="position"
-                            value={formData.position}
+                            value={formData.position === 'SENIOR' ? 'SENIOR' : formData.position}
                             onChange={handleChange}
                             invalid={!!errors.position}
                           >
@@ -359,8 +373,8 @@ const PostJob = () => {
                           )}
                         </div>
                       </CCol>
-                      
-                                          <CCol md={6}>
+
+                      <CCol md={6}>
                         <div className="mb-3">
                           <CFormLabel htmlFor="contractType" className="form-label">
                             Contract Type
@@ -404,8 +418,6 @@ const PostJob = () => {
                           )}
                         </div>
                       </CCol>
-
-                      
                     </CRow>
                     <CRow>
                       <CCol md={6}>
@@ -453,13 +465,21 @@ const PostJob = () => {
                           <CFormLabel htmlFor="qualification" className="form-label">
                             Qualification
                           </CFormLabel>
-                          <CFormInput
-                            type="text"
-                            id="qualification"
-                            placeholder="Enter qualification"
+                          <Editor
+                            apiKey="6cb07sce109376hijr18r8vibbm3h5qjhh4qa8gc9pw8rvn0"
                             value={formData.qualification}
-                            onChange={handleChange}
-                            invalid={!!errors.qualification}
+                            init={{
+                              height: 100,
+                              width: 200,
+                              menubar: false,
+                              plugins:
+                                'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
+                              toolbar:
+                                'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                            }}
+                            onEditorChange={(content) =>
+                              handleEditorChange('qualification', content)
+                            }
                           />
                           {errors.qualification && (
                             <div className="invalid-feedback">{errors.qualification}</div>
@@ -473,9 +493,20 @@ const PostJob = () => {
                           <CFormLabel htmlFor="description" className="form-label">
                             Job Description
                           </CFormLabel>
-                          <ReactQuill
+                          <Editor
+                            apiKey="6cb07sce109376hijr18r8vibbm3h5qjhh4qa8gc9pw8rvn0"
                             value={formData.description}
-                            onChange={(value) => handleQuillChange('description', value)}
+                            init={{
+                              height: 200,
+                              menubar: false,
+                              plugins:
+                                'advlist autolink lists link image charmap preview anchor textcolor',
+                              toolbar:
+                                'undo redo | formatselect | bold italic backcolor | \
+                              alignleft aligncenter alignright alignjustify | \
+                              bullist numlist outdent indent | removeformat | help',
+                            }}
+                            onEditorChange={(content) => handleEditorChange('description', content)}
                           />
                           {errors.description && (
                             <div className="invalid-feedback">{errors.description}</div>
@@ -487,11 +518,24 @@ const PostJob = () => {
                       <CCol md={12}>
                         <div className="mb-3">
                           <CFormLabel htmlFor="responsibilities" className="form-label">
-                            Job Responsibilities
+                            Responsibilities
                           </CFormLabel>
-                          <ReactQuill
+                          <Editor
+                            apiKey="6cb07sce109376hijr18r8vibbm3h5qjhh4qa8gc9pw8rvn0"
                             value={formData.responsibilities}
-                            onChange={(value) => handleQuillChange('responsibilities', value)}
+                            init={{
+                              height: 200,
+                              menubar: false,
+                              plugins:
+                                'advlist autolink lists link image charmap preview anchor textcolor',
+                              toolbar:
+                                'undo redo | formatselect | bold italic backcolor | \
+                              alignleft aligncenter alignright alignjustify | \
+                              bullist numlist outdent indent | removeformat | help',
+                            }}
+                            onEditorChange={(content) =>
+                              handleEditorChange('responsibilities', content)
+                            }
                           />
                           {errors.responsibilities && (
                             <div className="invalid-feedback">{errors.responsibilities}</div>
@@ -505,9 +549,22 @@ const PostJob = () => {
                           <CFormLabel htmlFor="requiredSkills" className="form-label">
                             Required Skills
                           </CFormLabel>
-                          <ReactQuill
+                          <Editor
+                            apiKey="6cb07sce109376hijr18r8vibbm3h5qjhh4qa8gc9pw8rvn0"
                             value={formData.requiredSkills}
-                            onChange={(value) => handleQuillChange('requiredSkills', value)}
+                            init={{
+                              height: 200,
+                              menubar: false,
+                              plugins:
+                                'advlist autolink lists link image charmap preview anchor textcolor',
+                              toolbar:
+                                'undo redo | formatselect | bold italic backcolor | \
+                              alignleft aligncenter alignright alignjustify | \
+                              bullist numlist outdent indent | removeformat | help',
+                            }}
+                            onEditorChange={(content) =>
+                              handleEditorChange('requiredSkills', content)
+                            }
                           />
                           {errors.requiredSkills && (
                             <div className="invalid-feedback">{errors.requiredSkills}</div>
@@ -521,9 +578,20 @@ const PostJob = () => {
                           <CFormLabel htmlFor="benefit" className="form-label">
                             Benefit
                           </CFormLabel>
-                          <ReactQuill
+                          <Editor
+                            apiKey="6cb07sce109376hijr18r8vibbm3h5qjhh4qa8gc9pw8rvn0"
                             value={formData.benefit}
-                            onChange={(value) => handleQuillChange('benefit', value)}
+                            init={{
+                              height: 200,
+                              menubar: false,
+                              plugins:
+                                'advlist autolink lists link image charmap preview anchor textcolor',
+                              toolbar:
+                                'undo redo | formatselect | bold italic backcolor | \
+                              alignleft aligncenter alignright alignjustify | \
+                              bullist numlist outdent indent | removeformat | help',
+                            }}
+                            onEditorChange={(content) => handleEditorChange('benefit', content)}
                           />
                           {errors.benefit && (
                             <div className="invalid-feedback">{errors.benefit}</div>
@@ -579,4 +647,3 @@ style.textContent = `
 
 
 `
-document.head.appendChild(style)

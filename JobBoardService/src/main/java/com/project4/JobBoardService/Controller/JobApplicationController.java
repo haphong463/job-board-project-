@@ -21,9 +21,9 @@ public class JobApplicationController {
 
 
 
-    @GetMapping("/company/{companyId}")
-    public List<JobApplicationDTO> getApplicationsByCompanyId(@PathVariable Long companyId) {
-        return jobApplicationService.getApplicationsByCompanyId(companyId);
+    @GetMapping("/company/{companyId}/{userIdFromJwt}")
+    public List<JobApplicationDTO> getApplicationsByCompanyId(@PathVariable Long companyId,@PathVariable Long userIdFromJwt ) {
+        return jobApplicationService.getApplicationsByCompanyId(companyId,userIdFromJwt);
     }
 
     @PutMapping("/approve/{id}")
@@ -65,9 +65,9 @@ public class JobApplicationController {
 
 
 
-    @GetMapping("/company/{companyId}/new")
-    public ResponseEntity<List<JobApplicationDTO>> getNewApplicationsByCompanyId(@PathVariable Long companyId) {
-        List<JobApplicationDTO> newApplications = jobApplicationService.getNewApplicationsByCompanyId(companyId);
+    @GetMapping("/company/{companyId}/new/{userIdFromJwt}")
+    public ResponseEntity<List<JobApplicationDTO>> getNewApplicationsByCompanyId(@PathVariable Long companyId,@PathVariable Long userIdFromJwt) {
+        List<JobApplicationDTO> newApplications = jobApplicationService.getNewApplicationsByCompanyId(companyId,userIdFromJwt);
         return ResponseEntity.ok(newApplications);
     }
 

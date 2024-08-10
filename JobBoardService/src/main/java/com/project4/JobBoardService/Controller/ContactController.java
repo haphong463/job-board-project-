@@ -26,9 +26,23 @@ public class ContactController {
     @Autowired
     private ContactService contactService;
 
-    @PostMapping
+@   PostMapping
     public ResponseEntity<ContactDTO> createContact(@RequestBody Contact contact) {
         ContactDTO createdContact = contactService.createContact(contact);
+        String thankYouMessage = "<div style=\"font-family: Arial, sans-serif; padding: 20px; color: #333;\">"
+                + "<h2 style=\"color: #2C3E50;\">Thank You, " + contact.getFirstName() + "!</h2>"
+                + "<p>We appreciate you reaching out to us. We have received your message:</p>"
+                + "<blockquote style=\"background-color: #f9f9f9; border-left: 5px solid #2C3E50; margin: 10px 0; padding: 10px 20px; font-style: italic;\">"
+                + contact.getMessage() + "</blockquote>"
+                + "<p>Our team will review your message and get back to you shortly.</p>"
+                + "<p style=\"margin-top: 20px;\">Best regards,<br/>The Support Team</p>"
+                + "</div>";
+        try {
+            emailService.sendEmail(contact.getEmail(), "Thank You for Your Message", thankYouMessage);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
         return ResponseEntity.ok(createdContact);
     }
 
@@ -61,8 +75,14 @@ public class ContactController {
 
     @PostMapping("/send")
     public ResponseEntity<String> sendEmail(@RequestBody EmailRequest emailRequest) {
+        String styledMessage = "<div style=\"font-family: Arial, sans-serif; padding: 20px; color: #333;\">"
+                + "<h2 style=\"color: #2C3E50;\">" + emailRequest.getSubject() + "</h2>"
+                + "<p>" + emailRequest.getMessage() + "</p>"
+                + "<p style=\"margin-top: 20px;\">Best regards,<br/>The Support Team</p>"
+                + "</div>";
+
         try {
-            emailService.sendEmail(emailRequest.getEmail(), emailRequest.getSubject(), emailRequest.getMessage());
+            emailService.sendEmail(emailRequest.getEmail(), emailRequest.getSubject(), styledMessage);
             return ResponseEntity.ok("Email sent successfully!");
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email: " + ex.getMessage());

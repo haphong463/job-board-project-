@@ -9,16 +9,16 @@ class JobListScreen extends StatelessWidget {
   final List<Job> jobs;
   final List<Company> companies;
 
-  JobListScreen({required this.jobs, required this.companies});
+  const JobListScreen({super.key, required this.jobs, required this.companies});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Danh Sách Công Việc'),
+        title: const Text('Job List'),
       ),
       body: jobs.isEmpty
-          ? Center(child: Text('Không có công việc nào để hiển thị.'))
+          ? const Center(child: Text('No job data!'))
           : ListView.builder(
               itemCount: jobs.length,
               itemBuilder: (context, index) {
@@ -36,7 +36,7 @@ class JobListScreen extends StatelessWidget {
                           width: 50,
                           fit: BoxFit.cover,
                         )
-                      : Icon(Icons.business),
+                      : const Icon(Icons.business),
                   title: Text(job.title),
                   subtitle: Text(job.position),
                   trailing: Text(company.companyName),

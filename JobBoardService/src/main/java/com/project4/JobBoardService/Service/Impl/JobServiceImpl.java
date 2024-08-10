@@ -212,19 +212,12 @@ public class JobServiceImpl   implements JobService {
         job.setWorkSchedule(jobDTO.getWorkSchedule());
         job.setBenefit(jobDTO.getBenefit());
         job.setSlot(jobDTO.getSlot());
-        job.setPosition(Position.INTERN);
-        job.setPosition(Position.FRESHER);
-        job.setPosition(Position.JUNIOR);
-        job.setPosition(Position.MIDDLE);
-        job.setPosition(Position.MANAGER);
-        job.setPosition(Position.SENIOR);
-        job.setJobType(JobType.IN_OFFICE);
-        job.setJobType(JobType.HYBRID);
-        job.setJobType(JobType.OVERSEA);
-        job.setJobType(JobType.REMOTE);
-        job.setContractType(ContractType.PART_TIME);
-        job.setContractType(ContractType.FULLTIME);
-        job.setContractType(ContractType.FREELANCE);
+        job.setPosition(Position.fromString(jobDTO.getPosition()));
+
+        job.setJobType(JobType.fromString(jobDTO.getJobType()));
+
+        job.setContractType(ContractType.fromString(jobDTO.getContractType()));
+
         job.setExperience(jobDTO.getExperience());
         if (jobDTO.getCompanyId() != null) {
             Company company = new Company();
@@ -329,21 +322,10 @@ public class JobServiceImpl   implements JobService {
         dto.setRequiredSkills(job.getRequiredSkills());
         dto.setWorkSchedule(job.getWorkSchedule());
         dto.setBenefit(job.getBenefit());
-        dto.setPosition(String.valueOf(Position.INTERN));
-        dto.setPosition(String.valueOf(Position.FRESHER));
-        dto.setPosition(String.valueOf(Position.JUNIOR));
-        dto.setPosition(String.valueOf(Position.LEADER));
-        dto.setPosition(String.valueOf(Position.MIDDLE));
-        dto.setPosition(String.valueOf(Position.MANAGER));
-        dto.setPosition(String.valueOf(Position.SENIOR));
-        dto.setJobType(String.valueOf(JobType.HYBRID));
-        dto.setJobType(String.valueOf(JobType.OVERSEA));
-        dto.setJobType(String.valueOf(JobType.IN_OFFICE));
+        dto.setPosition(job.getPosition().getValue());
+        dto.setJobType(job.getJobType().getValue());
+        dto.setContractType(job.getContractType().getValue());
 
-        dto.setJobType(String.valueOf(JobType.REMOTE));
-        dto.setContractType(String.valueOf(ContractType.FULLTIME));
-        dto.setContractType(String.valueOf(ContractType.PART_TIME));
-        dto.setContractType(String.valueOf(ContractType.FREELANCE));
 
         dto.setExperience(job.getExperience());
         dto.setSlot(job.getSlot());
@@ -384,13 +366,22 @@ public class JobServiceImpl   implements JobService {
         job.setPosition(Position.SENIOR);
         job.setPosition(Position.MIDDLE);
         job.setPosition(Position.MANAGER);
+        job.setJobType(JobType.HYBRID);
+        job.setJobType(JobType.OVERSEA);
+
+        job.setJobType(JobType.IN_OFFICE);
+        job.setJobType(JobType.REMOTE);
+        job.setContractType(ContractType.FREELANCE);
+        job.setContractType(ContractType.FULLTIME);
+        job.setContractType(ContractType.PART_TIME);
+
+
         job.setSlot(jobDTO.getSlot());
         job.setExperience(jobDTO.getExperience());
         job.setQualification(jobDTO.getQualification());
         job.setCreatedAt(jobDTO.getCreatedAt());
         job.setExpired(jobDTO.getExpired());
         job.setExpire(jobDTO.getExpire());
-
         // Set other fields as needed
         return job;
     }

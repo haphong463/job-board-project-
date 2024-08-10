@@ -32,7 +32,7 @@ import showToast from "../../../utils/functions/showToast";
 import { LeftSideBlogForm } from "./LeftSideBlogForm";
 import { RightSideBlogForm } from "./RightSideBlogForm";
 
-const FormBlog = ({ isEdit, setIsEdit }) => {
+const FormBlog = ({ isEdit, setIsEdit, isArchive = true }) => {
   const dispatch = useDispatch();
   const categoryList = useSelector((state) => state.blogCategory.blogCategory);
   const blogs = useSelector((state) => state.blogs.blogs);
@@ -70,6 +70,7 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
   const toggle = () => {
     setModal(!modal);
     setIsEdit(null);
+    setTags([]);
     reset();
   };
 
@@ -174,10 +175,12 @@ const FormBlog = ({ isEdit, setIsEdit }) => {
   return (
     <>
       <div>
-        <Button color="success" onClick={toggle}>
-          <IoMdAdd className="me-2" />
-          New blog
-        </Button>
+        {!isArchive && (
+          <Button color="success" onClick={toggle}>
+            <IoMdAdd className="me-2" />
+            New blog
+          </Button>
+        )}
       </div>
       <Modal isOpen={modal} toggle={toggle} size="xl">
         <Form onSubmit={handleSubmit(onSubmit)}>

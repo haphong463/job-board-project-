@@ -16,9 +16,10 @@ public enum JobType {
         return value;
     }
 
+
     public static JobType fromString(String text) {
         for (JobType jt : JobType.values()) {
-            if (jt.value.equalsIgnoreCase(text)) {
+            if (jt.name().equalsIgnoreCase(text)) { // Match using `name()`
                 return jt;
             }
         }

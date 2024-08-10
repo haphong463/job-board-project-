@@ -112,7 +112,7 @@ const SalesChart = () => {
         options: {
           ...blogChartData.options,
           title: {
-            text: `Blog Posts per Month by User in ${year}`,
+            text: `Blog Posts per Month by Moderator in ${year}`,
           },
         },
       });
@@ -160,7 +160,6 @@ const SalesChart = () => {
           </Button>
         </div>
         <div className="mt-4">
-          <CardTitle tag="h5">User Registration Summary</CardTitle>
           <Chart
             options={userChartData.options}
             series={userChartData.series}
@@ -169,7 +168,6 @@ const SalesChart = () => {
           />
         </div>
         <div className="mt-4">
-          <CardTitle tag="h5">Blog Posts Summary</CardTitle>
           <Chart
             options={blogChartData.options}
             series={blogChartData.series}

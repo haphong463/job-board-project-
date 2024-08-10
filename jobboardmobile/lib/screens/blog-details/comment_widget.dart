@@ -229,11 +229,15 @@ class _CommentWidgetState extends State<CommentWidget> {
                                     value: 'Edit',
                                     child: Text('Edit'),
                                   ),
+                                ],
+                                if (username == widget.blog.user.username ||
+                                    username ==
+                                        widget.comment.user.username) ...[
                                   const PopupMenuItem<String>(
                                     value: 'Delete',
                                     child: Text('Delete'),
                                   ),
-                                ]
+                                ],
                               ],
                             ).then((value) {
                               if (value == 'Reply') {

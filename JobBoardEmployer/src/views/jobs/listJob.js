@@ -1,164 +1,158 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchJobById } from "../../features/JobSlice";
-import DataTable from "react-data-table-component";
-import { jwtDecode } from "jwt-decode";
-import { Link, useNavigate } from "react-router-dom";
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchJobById } from '../../features/JobSlice'
+import DataTable from 'react-data-table-component'
+import { jwtDecode } from 'jwt-decode'
+import { Link, useNavigate } from 'react-router-dom'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
+import { useLocation } from 'react-router-dom'
 
-import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCol,
-  CContainer,
-  CRow,
-  CFormInput
-} from '@coreui/react';
-import { cilAppsSettings } from "@coreui/icons";
+import { CButton, CCard, CCardBody, CCol, CContainer, CRow, CFormInput } from '@coreui/react'
+import { cilAppsSettings } from '@coreui/icons'
 
 const ListJob = () => {
-  const dispatch = useDispatch();
-  const jobData = useSelector((state) => state.jobs.job);
-  const jobStatus = useSelector((state) => state.jobs.status);
-  const error = useSelector((state) => state.jobs.error);
-  const navigate = useNavigate();
-  const [searchText, setSearchText] = useState("");
-  const [filteredJobs, setFilteredJobs] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
-  const [refreshFlag, setRefreshFlag] = useState(false); // Thêm trạng thái refreshFlag
+  const dispatch = useDispatch()
+  const jobData = useSelector((state) => state.jobs.job)
+  const jobStatus = useSelector((state) => state.jobs.status)
+  const error = useSelector((state) => state.jobs.error)
+  const navigate = useNavigate()
+  const [searchText, setSearchText] = useState('')
+  const [filteredJobs, setFilteredJobs] = useState([])
+  const [suggestions, setSuggestions] = useState([])
+  const [refreshFlag, setRefreshFlag] = useState(false) // Thêm trạng thái refreshFlag
 
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const success = query.get('success');
+  const location = useLocation()
+  const query = new URLSearchParams(location.search)
+  const success = query.get('success')
 
   useEffect(() => {
     if (success === 'true') {
-      alert('Job created successfully!');
+      alert('Job created successfully!')
     } else if (success === 'false') {
-      alert('Failed to create job.');
+      alert('Failed to create job.')
     }
-  }, [success]);
+  }, [success])
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken')
     if (token) {
-      const decodedToken = jwtDecode(token);
-      const userId = decodedToken.id;
-      dispatch(fetchJobById(userId));
+      const decodedToken = jwtDecode(token)
+      const userId = decodedToken.id
+      dispatch(fetchJobById(userId))
     }
-  }, [dispatch, refreshFlag]);
+  }, [dispatch, refreshFlag])
 
   useEffect(() => {
-    setFilteredJobs(jobData);
+    setFilteredJobs(jobData)
 
-    console.log("Job Data:", jobData); // Log data here
-  }, [jobData]);
+    console.log('Job Data:', jobData) // Log data here
+  }, [jobData])
 
   const handleHide = (id) => {
-    if (window.confirm("Are you sure you want to toggle the visibility of this job?")) {
-      const token = localStorage.getItem('accessToken');
+    if (window.confirm('Are you sure you want to toggle the visibility of this job?')) {
+      const token = localStorage.getItem('accessToken')
       fetch(`http://localhost:8080/api/jobs/${id}/hide`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .then(response => {
-        if (response.ok) {
-          setRefreshFlag(prevFlag => !prevFlag);
-        } else {
-          throw new Error('Failed to toggle job visibility');
-        }
-      })
-      .catch(error => {
-        console.error("Failed to toggle job visibility:", error);
-      });
+        .then((response) => {
+          if (response.ok) {
+            setRefreshFlag((prevFlag) => !prevFlag)
+          } else {
+            throw new Error('Failed to toggle job visibility')
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to toggle job visibility:', error)
+        })
     }
-  };
-
+  }
 
   const handleEdit = (id) => {
-    navigate(`/job/edit/${id}`);
-  };
+    navigate(`/job/edit/${id}`)
+  }
 
   const handleExport = () => {
-    const ws = XLSX.utils.json_to_sheet(filteredJobs || []);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Jobs");
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(data, "jobs.xlsx");
-  };
+    const ws = XLSX.utils.json_to_sheet(filteredJobs || [])
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Jobs')
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
+    const data = new Blob([excelBuffer], { type: 'application/octet-stream' })
+    saveAs(data, 'jobs.xlsx')
+  }
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchText(value);
-    if (value === "") {
-      setFilteredJobs(jobData);
-      setSuggestions([]);
+    const value = e.target.value
+    setSearchText(value)
+    if (value === '') {
+      setFilteredJobs(jobData)
+      setSuggestions([])
     } else {
       const filtered = jobData.filter((job) =>
-        job.title.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredJobs(filtered);
+        job.title.toLowerCase().includes(value.toLowerCase()),
+      )
+      setFilteredJobs(filtered)
       const newSuggestions = jobData
         .filter((job) => job.title.toLowerCase().includes(value.toLowerCase()))
-        .map((job) => job.title);
-      setSuggestions(newSuggestions);
+        .map((job) => job.title)
+      setSuggestions(newSuggestions)
     }
-  };
+  }
 
   const handleSuggestionClick = (suggestion) => {
-    setSearchText(suggestion);
+    setSearchText(suggestion)
     const filtered = jobData.filter((job) =>
-      job.title.toLowerCase().includes(suggestion.toLowerCase())
-    );
-    setFilteredJobs(filtered);
-    setSuggestions([]);
-  };
-
-
+      job.title.toLowerCase().includes(suggestion.toLowerCase()),
+    )
+    setFilteredJobs(filtered)
+    setSuggestions([])
+  }
 
   const columns = [
     {
-      name: "Title",
-      selector: (row) => (
-        <Link to={`/job/detail/${row.id}`}>
-          {row.title}
-        </Link>
-      ),
+      name: 'Title',
+      selector: (row) => <Link to={`/job/detail/${row.id}`}>{row.title}</Link>,
       sortable: true,
     },
-    { name: "Offered Salary", selector: (row) => row.offeredSalary, sortable: true },
-    { name: "Work Schedule", selector: (row) => row.workSchedule, sortable: true },
-    { name: "Position", selector: (row) => row.position, sortable: true },
-    { name: "Experience", selector: (row) => row.experience, sortable: true },
-    { name: "Expired", selector: (row) => row.expired, sortable: true },
+    { name: 'Offered Salary', selector: (row) => row.offeredSalary, sortable: true },
     {
-      name: "Actions",
+      name: 'Work Schedule',
+      selector: (row) => <div dangerouslySetInnerHTML={{ __html: row.workSchedule }} />,
+      sortable: true,
+    },
+    { name: 'Position', selector: (row) => row.position, sortable: true },
+    { name: 'Experience', selector: (row) => row.experience, sortable: true },
+    { name: 'Expired', selector: (row) => row.expired, sortable: true },
+    {
+      name: 'Actions',
       cell: (row) => (
         <div className="job-actions">
-          <CButton onClick={() => handleEdit(row.id)} color="info">Edit</CButton>
+          <CButton onClick={() => handleEdit(row.id)} color="info">
+            Edit
+          </CButton>
           {row.isHidden ? (
-            <CButton onClick={() => handleHide(row.id)} className="btn hidden" color="danger">Show</CButton>
+            <CButton onClick={() => handleHide(row.id)} className="btn hidden" color="danger">
+              Show
+            </CButton>
           ) : (
-            <CButton onClick={() => handleHide(row.id)} color="danger">Hide</CButton>
+            <CButton onClick={() => handleHide(row.id)} color="danger">
+              Hide
+            </CButton>
           )}
         </div>
       ),
     },
-  ];
-
+  ]
 
   const customStyles = {
     rows: {
       style: {
         fontSize: '1rem',
-      }
+      },
     },
     headCells: {
       style: {
@@ -166,14 +160,14 @@ const ListJob = () => {
         fontWeight: 'bold',
       },
     },
-  };
-
-  if (jobStatus === "loading") {
-    return <div>Loading...</div>;
   }
 
-  if (jobStatus === "failed") {
-    return <div>Error: {error}</div>;
+  if (jobStatus === 'loading') {
+    return <div>Loading...</div>
+  }
+
+  if (jobStatus === 'failed') {
+    return <div>Error: {error}</div>
   }
 
   return (
@@ -204,9 +198,13 @@ const ListJob = () => {
               </div>
             )}
             <Link to="/job/create">
-              <CButton color="primary" className="ms-2">Create Job</CButton>
+              <CButton color="primary" className="ms-2">
+                Create Job
+              </CButton>
             </Link>
-            <CButton color="success" className="ms-2" onClick={handleExport}>Export to Excel</CButton>
+            <CButton color="success" className="ms-2" onClick={handleExport}>
+              Export to Excel
+            </CButton>
           </div>
         </CCol>
       </CRow>
@@ -214,22 +212,18 @@ const ListJob = () => {
         <CCol lg="12">
           <CCard className="data-table">
             <CCardBody>
-              <DataTable
-                columns={columns}
-                data={filteredJobs || []}
-                customStyles={customStyles}
-              />
+              <DataTable columns={columns} data={filteredJobs || []} customStyles={customStyles} />
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
     </CContainer>
-  );
-};
+  )
+}
 
-export default ListJob;
+export default ListJob
 
-const style = document.createElement('style');
+const style = document.createElement('style')
 style.textContent = `
 /* CSS for the job actions buttons */
 /* CSS for the job actions buttons */
@@ -353,5 +347,5 @@ style.textContent = `
   background-color: #f8f9fa;
 }
 
-`;
-document.head.appendChild(style);
+`
+document.head.appendChild(style)

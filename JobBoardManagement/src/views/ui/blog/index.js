@@ -30,13 +30,14 @@ import {
   updateIsArchiveStatusThunk,
 } from "../../../features/blogSlice";
 import debounce from "lodash.debounce";
-import { FaFileExcel } from "react-icons/fa";
+import { FaEdit, FaFileExcel, FaTrash } from "react-icons/fa";
 import "./style.css";
 import { fetchBlogCategory } from "../../../features/blogCategorySlice";
 import Swal from "sweetalert2";
 import { Navigate, useNavigate } from "react-router-dom";
 import { getExcelData } from "../../../services/blog_service";
 import { hasPermission } from "../../../utils/functions/hasPermission";
+import moment from "moment/moment";
 const isArchive = 0;
 
 export function Blog(props) {
@@ -209,26 +210,7 @@ export function Blog(props) {
         </div>
       ),
     },
-    {
-      name: "Category",
-      selector: (row) => row.categories.length,
-      sortable: true,
-      cell: (row) => {
-        return (
-          <div>
-            {row.categories.map((item) => (
-              <Badge
-                color="primary"
-                key={item.id}
-                style={{ margin: "0 5px 5px 0" }}
-              >
-                {item.name}
-              </Badge>
-            ))}
-          </div>
-        );
-      },
-    },
+
     {
       name: "Visibility",
       selector: (row) => row.visibility,
@@ -243,7 +225,7 @@ export function Blog(props) {
     },
     {
       name: "Posted By",
-      width: "300px",
+      width: "200px",
       cell: (row) => (
         <div>
           {row.user.firstName} {row.user.lastName}
@@ -251,22 +233,20 @@ export function Blog(props) {
       ),
     },
     {
+      name: "View",
+      cell: (row) => <div>{row.view}</div>,
+    },
+    {
+      name: "Updated at",
+      width: "200px",
+      cell: (row) => moment(row.updatedAt).format("LLL"),
+    },
+    {
       name: "Actions",
       cell: (row) => (
-        <Dropdown
-          isOpen={dropdownOpen[row.id]}
-          toggle={() => toggleDropdown(row.id)}
-        >
-          <DropdownToggle caret color="info">
-            Actions
-          </DropdownToggle>
-          <DropdownMenu>
-            <DropdownItem onClick={() => handleEdit(row.id)}>Edit</DropdownItem>
-            <DropdownItem onClick={() => handleDelete(row.id)}>
-              Delete
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+        <Button color="success" onClick={() => handleEdit(row.id)}>
+          <FaEdit />
+        </Button>
       ),
     },
   ];
@@ -295,13 +275,32 @@ export function Blog(props) {
       <div className="d-flex justify-content-between align-items-center p-3 gap-3">
         <h4>Blog List</h4>
         <div className="d-flex  p-3 gap-3">
-          <Form isEdit={isEdit} setIsEdit={setIsEdit} />
-          <Button color="success" onClick={getExcelData}>
-            <FaFileExcel />
+          <Form isEdit={isEdit} setIsEdit={setIsEdit} isArchive={false} />
+          <Button
+            style={{
+              background: "green",
+            }}
+            onClick={getExcelData}
+            className="d-flex align-items-center"
+          >
+            <FaFileExcel
+              style={{
+                marginRight: 5,
+              }}
+            />
             Export CSV
           </Button>
-          <Button color="warning" onClick={handleArchiveSelected}>
-            Archive Selected
+          <Button
+            color="warning"
+            onClick={handleArchiveSelected}
+            className="d-flex align-items-center"
+          >
+            <FaTrash
+              style={{
+                marginRight: 5,
+              }}
+            />
+            Move to archive
           </Button>
         </div>
       </div>

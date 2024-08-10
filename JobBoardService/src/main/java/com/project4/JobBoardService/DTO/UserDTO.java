@@ -29,4 +29,5 @@ public class UserDTO {
     private Set<Role> roles;
     private Set<Permission> permissions;
     private Date updatedAt;
+    private Boolean verified;
 }

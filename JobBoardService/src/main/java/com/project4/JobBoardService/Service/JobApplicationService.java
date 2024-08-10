@@ -30,19 +30,20 @@ public class JobApplicationService {
     @Autowired
     private JobRepository jobRepository; //
 
-    public List<JobApplicationDTO> getApplicationsByCompanyId(Long companyId) {
+    public List<JobApplicationDTO> getApplicationsByCompanyId(Long companyId, Long userIdFromJwt) {
         List<JobApplication> jobApplications = jobApplicationRepository.findApplicationsByCompanyId(companyId);
 
         return jobApplications.stream()
-                .sorted((ja1, ja2) -> ja2.getCreatedAt().compareTo(ja1.getCreatedAt())) // Sắp xếp theo thời gian từ mới nhất đến cũ nhất
-                .map(this::convertToDTO)
+                .sorted((ja1, ja2) -> ja2.getCreatedAt().compareTo(ja1.getCreatedAt())) // Sort by createdAt in descending order
+                .map(jobApplication -> convertToDTO(jobApplication, userIdFromJwt)) // Pass the userId to convertToDTO
                 .collect(Collectors.toList());
     }
+
 
     public long getApplicationCountByCompany(Long companyId) {
         return jobApplicationRepository.countApplicationsByCompanyId(companyId);
     }
-    private JobApplicationDTO convertToDTO(JobApplication jobApplication) {
+    private JobApplicationDTO convertToDTO(JobApplication jobApplication, Long userIdFromJwt) {
         JobApplicationDTO dto = new JobApplicationDTO();
         dto.setId(jobApplication.getId());
         dto.setEmployeeName(jobApplication.getEmployeeName());
@@ -52,33 +53,31 @@ public class JobApplicationService {
         dto.setCvFile(jobApplication.getCvFile());
         dto.setCoverLetter(jobApplication.getCoverLetter());
         dto.setApproved(jobApplication.isApproved());
-        dto.setNew(jobApplication.isNew()); // Thêm dòng này
+        dto.setNew(jobApplication.isNew());
 
         if (jobApplication.getJob() != null) {
             dto.setTitle(jobApplication.getJob().getTitle());
             dto.setDescription(jobApplication.getJob().getDescription());
         }
 
-
-        // Kiểm tra và thêm thông tin người dùng nếu dịch vụ là CVFULL
-        if (jobApplication.getUser() != null) {
-            Long userId = jobApplication.getUser().getId();
-            List<String> services = transactionRepository.findServicesByUserId(userId);
+        // Kiểm tra và thêm thông tin người dùng nếu dịch vụ là CVFULL và userId khớp với userId từ JWT
+            List<String> services = transactionRepository.findServicesByUserId(userIdFromJwt);
             if (!services.isEmpty() && services.contains("CVFULL")) {
                 dto.setEmail(jobApplication.getUser().getEmail());
                 dto.setName(jobApplication.getUser().getLastName());
             }
-        }
+
 
         return dto;
     }
 
-    public List<JobApplicationDTO> getNewApplicationsByCompanyId(Long companyId) {
+    public List<JobApplicationDTO> getNewApplicationsByCompanyId(Long companyId, Long userIdFromJwt) {
         List<JobApplication> jobApplications = jobApplicationRepository.findNewApplicationsByCompanyId(companyId);
         return jobApplications.stream()
-                .map(this::convertToDTO)
+                .map(jobApplication -> convertToDTO(jobApplication, userIdFromJwt)) // Pass the userId to convertToDTO
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public void markApplicationAsRead(Long applicationId) {
@@ -119,7 +118,7 @@ public class JobApplicationService {
 
     public void approveJobApplication(Long jobApplicationId) {
         Optional<JobApplication> jobApplicationOpt = jobApplicationRepository.findById(jobApplicationId);
-        if (!jobApplicationOpt.isPresent()) {
+        if (jobApplicationOpt.isEmpty()) {
             throw new IllegalArgumentException("Job application not found");
         }
 

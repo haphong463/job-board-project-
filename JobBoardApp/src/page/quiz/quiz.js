@@ -182,8 +182,8 @@ export const Quiz = () => {
         }
       )
       .then((response) => {
-        fetchCategoriesAndQuizzes(); 
-        fetchCompletedQuizzes(); 
+        fetchCategoriesAndQuizzes();
+        fetchCompletedQuizzes();
       })
       .catch((error) => {
         console.error("There was an error completing the quiz!", error);
@@ -209,30 +209,31 @@ export const Quiz = () => {
 
   const applyFilters = () => {
     let filtered = categories;
-  
+
     if (filterCategory !== "all") {
       filtered = filtered.filter(
         (category) => category.name === filterCategory
       );
     }
-  
+
     filtered = filtered.map((category) => {
       const filteredQuizzes = category.quizzes.filter((quiz) => {
-        const matchesSearchTerm = searchTerm === "" || 
+        const matchesSearchTerm =
+          searchTerm === "" ||
           quiz.title.toLowerCase().includes(searchTerm.toLowerCase());
-  
+
         const matchesStatus =
           selectedStatus === "all" ||
           (selectedStatus === "completed" &&
             completedQuizzes.includes(quiz.id)) ||
           (selectedStatus === "incomplete" &&
             !completedQuizzes.includes(quiz.id));
-  
+
         return matchesSearchTerm && matchesStatus;
       });
       return { ...category, quizzes: filteredQuizzes };
     });
-  
+
     setFilteredCategories(filtered);
   };
 
@@ -253,7 +254,7 @@ export const Quiz = () => {
           <div className="container">
             <div className="row">
               <div className="col-md-7">
-                <h1 className="text-white font-weight-bold">JobBoard Skills</h1>
+                <h1 className="text-white font-weight-bold">ITGrove Skills</h1>
                 <div className="custom-breadcrumbs">
                   <a href="/">Home</a> <span className="mx-2 slash">/</span>
                   <span className="text-white">
@@ -419,6 +420,10 @@ export const Quiz = () => {
                         seconds
                       </p>
                     )}
+                    <p style={{ color: "red" }}>
+                      Warning: Do not close the website while taking the quiz,
+                      or you will lose all your answers.
+                    </p>
                   </div>
                 </DialogContentText>
               </>

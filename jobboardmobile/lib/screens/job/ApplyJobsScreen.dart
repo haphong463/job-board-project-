@@ -54,10 +54,14 @@ class _ApplyJobsScreenState extends State<ApplyJobsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  application.jobDTO.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18),
+                Expanded(
+                  child: Text(
+                    application.jobDTO.title,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18),
+                    maxLines: 2, // Limit the title to 2 lines
+                    overflow: TextOverflow.ellipsis, // Add ellipsis if overflow
+                  ),
                 ),
                 Container(
                   padding:
@@ -90,9 +94,13 @@ class _ApplyJobsScreenState extends State<ApplyJobsScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  application.companyDTO.companyName,
-                  style: const TextStyle(fontSize: 16),
+                Expanded(
+                  child: Text(
+                    application.companyDTO.companyName,
+                    style: const TextStyle(fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -101,9 +109,13 @@ class _ApplyJobsScreenState extends State<ApplyJobsScreen> {
               children: [
                 Icon(Icons.attach_money, color: Colors.grey[600], size: 20),
                 const SizedBox(width: 4),
-                Text(
-                  'Offered salary: ${application.jobDTO.offeredSalary}',
-                  style: TextStyle(color: Colors.grey[600]),
+                Expanded(
+                  child: Text(
+                    'Offered salary: ${application.jobDTO.offeredSalary}',
+                    style: TextStyle(color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -112,9 +124,13 @@ class _ApplyJobsScreenState extends State<ApplyJobsScreen> {
               children: [
                 Icon(Icons.business_center, color: Colors.grey[600], size: 20),
                 const SizedBox(width: 4),
-                Text(
-                  application.jobDTO.jobType ?? 'N/A',
-                  style: TextStyle(color: Colors.grey[600]),
+                Expanded(
+                  child: Text(
+                    application.jobDTO.jobType ?? 'N/A',
+                    style: TextStyle(color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -123,20 +139,17 @@ class _ApplyJobsScreenState extends State<ApplyJobsScreen> {
               children: [
                 Icon(Icons.location_on, color: Colors.grey[600], size: 20),
                 const SizedBox(width: 4),
-                Text(
-                  application.companyDTO.location ?? 'N/A',
-                  style: TextStyle(color: Colors.grey[600]),
+                Expanded(
+                  child: Text(
+                    application.companyDTO.location ?? 'N/A',
+                    style: TextStyle(color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Chip(label: Text(application.jobDTO.keySkills)),
-              ],
-            ),
           ],
         ),
       ),

@@ -42,10 +42,13 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
+      print(response.statusCode);
+
       if (response.statusCode == 200) {
         Navigator.pushReplacementNamed(context, '/main');
       } else {
         if (response.statusCode == 401 || response.statusCode == 403) {
+          print("vao day");
           setState(() {
             _errorMessage = jsonDecode(response.body)['message'];
           });

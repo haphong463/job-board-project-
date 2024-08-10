@@ -35,6 +35,7 @@ import moment from "moment/moment";
 import { formatPermissionName } from "../../../utils/functions/formatPermission";
 
 const ExpandableRow = ({ data }) => {
+  console.log(">>>data: ", data);
   const isModerator = data.roles.some((role) => role.name === "ROLE_MODERATOR");
 
   return (

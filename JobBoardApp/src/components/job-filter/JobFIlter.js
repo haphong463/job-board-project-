@@ -2,42 +2,35 @@ import { Button, TextField } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export const JobFilter = () =>
-{
+export const JobFilter = () => {
   const [searchTerms, setSearchTerms] = useState("");
   const navigate = useNavigate();
-  const handleKeyDown = (event) =>
-  {
-    if (event.key === 'Enter')
-    {
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
       event.preventDefault(); // Ngăn chặn hành vi mặc định của Enter
       handleSearch(); // Thực hiện tìm kiếm
       // setOpen(false); // Đóng dropdown sau khi nhấn Enter
     }
   };
 
-  const handleSearch = () =>
-  {
+  const handleSearch = () => {
     const trimmedSearchTerms = searchTerms.trim();
-    if (trimmedSearchTerms)
-    {
+    if (trimmedSearchTerms) {
       // Nếu có từ khóa tìm kiếm, điều hướng đến URL với từ khóa tìm kiếm
       navigate(`/viewAllJobs/${encodeURIComponent(trimmedSearchTerms)}`);
-    } else
-    {
+    } else {
       // Nếu không có từ khóa tìm kiếm, điều hướng đến URL không có từ khóa
       navigate(`/viewAllJobs`);
     }
   };
 
   const trendingKeywords = [
-    { categoryId: 1, categoryName: 'Java' },
-    { categoryId: 3, categoryName: 'Python' },
-    { categoryId: 9, categoryName: 'ReactJS' },
+    { categoryId: 9, categoryName: "Java" },
+    { categoryId: 22, categoryName: "Python" },
+    { categoryId: 13, categoryName: "ReactJS" },
   ];
 
-  const handleKeywordClick = (categoryId) =>
-  {
+  const handleKeywordClick = (categoryId) => {
     // Điều hướng đến URL với categoryId
     navigate(`/jobList/${categoryId}`);
   };
@@ -87,8 +80,7 @@ export const JobFilter = () =>
                     <li key={keyword.categoryId}>
                       <a
                         href="#"
-                        onClick={(e) =>
-                        {
+                        onClick={(e) => {
                           e.preventDefault(); // Ngăn chặn hành vi mặc định của liên kết
                           handleKeywordClick(keyword.categoryId); // Gọi hàm để điều hướng
                         }}
